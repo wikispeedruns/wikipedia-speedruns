@@ -1,6 +1,6 @@
-var goalPage;
+var goalPage = "";
 var start = 1;
-var startTime;
+var startTime = 0;
 var totalTime = 0;
 
 function handleWikipediaLink(e) 
@@ -25,6 +25,15 @@ function handleWikipediaLink(e)
 }
 
 async function loadPage(page) {
+    
+    console.log(page)
+    console.log(goalPage)
+
+    if (page === goalPage) {
+        totalTime = (Date.now() - startTime)/1000;
+        showFinish();
+    }
+
     const resp = await fetch(
         `https://en.wikipedia.org/w/api.php?format=json&origin=*&action=parse&page=${page}`,
         {
@@ -38,18 +47,33 @@ async function loadPage(page) {
         el.onclick = handleWikipediaLink;
     });
 
+    hideStart();
+
     if (start === 1) {
         start = 0;
-        const startTime = Date.now();
+        startTime = Date.now();
+        console.log(startTime)
     }
 }
 
+function hideStart() {
+    document.getElementById("starting").style.display = "none"
+    document.getElementById("guide").style.display = "block"
+}
 
-function loadArticle() {
+function showFinish() {
+    var cols = document.getElementsByClassName("finish");
+    for(i=0; i<cols.length; i++) {
+      cols[i].style.display = "block";
+    }
+    document.getElementById("finishStats").innerHTML = "Final Time: " + totalTime;
+}
+
+function loadStart() {
     const article = document.getElementById("start-article").value
-    const goalPage = document.getElementById("goal-article").value
-    document.getElementById("guide").innerHTML = "Starting: " + article + " --> " + "Goal: " + goalPage
+    goalPage = document.getElementById("goal-article").value
     loadPage(article)
+    document.getElementById("guide").innerHTML = "Starting: " + article + " --> " + "Goal: " + goalPage
 }
 
 window.onload = function() {

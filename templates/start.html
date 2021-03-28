@@ -2,15 +2,28 @@
     <head>
         <script type=text/javascript src="{{url_for('static', filename='js/home.js') }}"></script>
         <script type=text/javascript src="{{url_for('static', filename='js/wikipedia.js') }}"></script>
+        <script type=text/javascript src="{{url_for('static', filename='js/start.js') }}"></script>
         <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/home.css')}}">
         <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
     </head>
 
     <body>
-        
+        <!--
         <input id="article-input"/>
         <button id="submit" onclick="loadArticle()">Load Article</button>
 
+        <div id="wikipedia-frame"></div>
+        -->
+        <div id="starting" class="start">
+            <p>Starting Page: </p>
+            <input id="start-article"/>
+            <p>Goal Page: </p>
+            <input id="goal-article"/>
+            <button id="submit" onclick="loadStart()">START!</button>
+        </div>
+        <div id="finish" class="finish">You Found It!</div>
+        <div id="guide" class="guide"></div>
+        <div id="finishStats" class="finish"></div>
         <div id="wikipedia-frame"></div>
     </body>
 

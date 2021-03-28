@@ -2,3 +2,21 @@
     width: 100%;
     height: 100%;
 }
+
+.guide {
+    margin: auto;
+    font-size: 25px;
+    margin: 20px;
+    text-align: center;
+}
+
+.start {
+    margin: auto;
+    font-size: 25px;
+}
+
+.finish {
+    display: none;
+    text-align: center;
+    font-size: 30px;
+}
