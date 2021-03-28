@@ -4,17 +4,17 @@
 We recommend creating a [Python virtual environment](https://docs.python.org/3/tutorial/venv.html)
 for running the server. 
 ```
-python -m venv hophacks-env
+python -m venv env
 ```
 
 For Windows:
 ```
-.\hophacks-env\scripts\activate.bat
+.\env\scripts\activate.bat
 ```
 
 For Linux
 ```
-source hophacks-env/bin/activate
+source env/bin/activate
 ```
 
 #### 2. Install Requirements
@@ -26,6 +26,5 @@ pip install -r requirements.txt
 #### 3. Running
 Running Dev:
 ```
-cd src
 flask run
 ```
