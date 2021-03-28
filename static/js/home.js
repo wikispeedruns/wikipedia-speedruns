@@ -5,6 +5,9 @@ function handleWikipediaLink(e)
     e.preventDefault();
     const linkEl = e.currentTarget;
     
+    // Ignore external links
+    if (linkEl.getAttribute("href").substring(0, 6) !== "/wiki/") return;
+
     // Disable the other links, otherwise we might load multiple links
     document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
         el.onclick = (e) => {
@@ -13,8 +16,6 @@ function handleWikipediaLink(e)
         };
     });
 
-    // Ignore external links
-    if (linkEl.getAttribute("rel") === "nofollow") return;
 
     // Remove "/wiki/" from string
     loadPage(linkEl.getAttribute("href").substring(6))
