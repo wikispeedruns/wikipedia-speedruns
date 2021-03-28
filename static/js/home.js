@@ -14,9 +14,10 @@ function handleWikipediaLink(e)
     });
 
     // Ignore external links
-    if (linkEl.getAttribute("rel") !== "mw:WikiLink") return;
+    if (linkEl.getAttribute("rel") === "nofollow") return;
 
-    loadPage(linkEl.getAttribute("href"))
+    // Remove "/wiki/" from string
+    loadPage(linkEl.getAttribute("href").substring(6))
 }
 
 async function loadPage(page) {
@@ -28,6 +29,10 @@ async function loadPage(page) {
     )
     const body = await resp.json()
     document.getElementById("wikipedia-frame").innerHTML = body["parse"]["text"]["*"]
+    
+    document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
+        el.onclick = handleWikipediaLink;
+    });
 }
 
 
