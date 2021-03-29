@@ -35,7 +35,7 @@ async function loadPage(page) {
     }
 
     const resp = await fetch(
-        `https://en.wikipedia.org/w/api.php?format=json&origin=*&action=parse&page=${page}`,
+        `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${page}`,
         {
             mode: "cors"
         }
