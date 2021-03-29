@@ -29,14 +29,37 @@ body {
 
 .tleft {
     float: left;
-    margin: 10px 10px;
+    margin: 15px 15px;
     overflow: auto;
     clear: left;
 }
 
 .tright {
     float: right;
-    margin: 10px 10px;
+    margin: 15px 15px;
     overflow: auto;
     clear: right;
+}
+
+.thumb {
+    font-size: 80%;
+    text-align: center;
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
+}
+
+.thumbcaption {
+    margin: 5px 5px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.path {
+    font-size: 15px !important;
+    text-align: left;
+    width: 50%;
+    margin: auto;
 }

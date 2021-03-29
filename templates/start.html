@@ -1,9 +1,8 @@
 <html>
     <head>
-        <script type=text/javascript src="{{url_for('static', filename='js/home.js') }}"></script>
         <script type=text/javascript src="{{url_for('static', filename='js/wikipedia.js') }}"></script>
         <script type=text/javascript src="{{url_for('static', filename='js/start.js') }}"></script>
-        <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/home.css')}}">
+        <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/start.css')}}">
         <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
     </head>
     
@@ -15,9 +14,10 @@
             <input id="goal-article"/>
             <button id="submit" onclick="loadStart()">START!</button>
         </div>
-        <div id="finish" class="finish">You Found It!</div>
-        <div id="guide" class="guide"></div>
         <div id="finishStats" class="finish"></div>
+        <div id="guide" class="guide"></div>
+        <div id="path" class="finish path"></div>
+        <div id="title"></div>
         <div id="wikipedia-frame"></div>
     </body>
 </html>
