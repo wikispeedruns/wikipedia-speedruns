@@ -1,7 +1,6 @@
 var goalPage = "";
 var start = 1;
 var startTime = 0;
-var totalTime = 0;
 
 function handleWikipediaLink(e) 
 {
@@ -32,6 +31,7 @@ async function loadPage(page) {
     if (page === goalPage) {
         totalTime = (Date.now() - startTime)/1000;
         showFinish();
+        document.getElementById("finishStats").innerHTML = "Final Time: " + totalTime;
     }
 
     const resp = await fetch(
@@ -41,18 +41,37 @@ async function loadPage(page) {
         }
     )
     const body = await resp.json()
+
+    // TODO add Article Title ("firstHeading")
+
     document.getElementById("wikipedia-frame").innerHTML = body["parse"]["text"]["*"]
     
     document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
         el.onclick = handleWikipediaLink;
     });
 
+    hideElements();
     hideStart();
 
     if (start === 1) {
         start = 0;
         startTime = Date.now();
         console.log(startTime)
+    }
+}
+
+function getTitle() {
+    
+}
+
+function hideElements() {
+    var hide = ["reference","mw-editsection","reflist","portal","refbegin"]
+    for(i=0; i<hide.length; i++) {
+        var elements = document.getElementsByClassName(hide[i])
+        console.log("found: " + hide[i] + elements.length)
+        for(j=0; j<elements.length; j++) {
+            elements[j].style.display = "none";
+        }
     }
 }
 
@@ -66,7 +85,7 @@ function showFinish() {
     for(i=0; i<cols.length; i++) {
       cols[i].style.display = "block";
     }
-    document.getElementById("finishStats").innerHTML = "Final Time: " + totalTime;
+    
 }
 
 function loadStart() {

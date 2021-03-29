@@ -1,4 +1,9 @@
-#wikipedia-iframe {
+/*
+body {
+    font-family: Arial, sans-serif;
+}
+*/
+#wikipedia-frame {
     width: 100%;
     height: 100%;
 }
@@ -6,7 +11,7 @@
 .guide {
     margin: auto;
     font-size: 25px;
-    margin: 20px;
+    margin: 10px;
     text-align: center;
 }
 
@@ -19,4 +24,19 @@
     display: none;
     text-align: center;
     font-size: 30px;
+    margin: 10px;
+}
+
+.tleft {
+    float: left;
+    margin: 10px 10px;
+    overflow: auto;
+    clear: left;
+}
+
+.tright {
+    float: right;
+    margin: 10px 10px;
+    overflow: auto;
+    clear: right;
 }
