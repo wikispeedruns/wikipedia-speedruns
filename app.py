@@ -41,7 +41,7 @@ def get_prompt_page(id):
     run_id = request.args.get('run_id', '')
     
     if len(run_id) != 0:
-        return render_template('prompt.html', prompt_id=id, run_id=id)
+        return render_template('prompt.html', prompt_id=id, run_id=run_id)
     else:
         return render_template('prompt.html', prompt_id=id)
 

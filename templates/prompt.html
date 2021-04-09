@@ -2,6 +2,7 @@
     <head>
         <script>
             const prompt_id='{{prompt_id}}';
+            const run_id='{{run_id}}';
         </script>
         <script type=text/javascript src="{{url_for('static', filename='js/prompt.js') }}"></script>
         <link rel= "stylesheet" type="text/css" href="{{url_for('static', filename='stylesheets/prompt.css')}}">
@@ -14,6 +15,7 @@
 
         <table id="leaderboard" style="width:85%; margin: auto; margin-top: 50px">
             <tr>
+                <th>Rank</th>
                 <th>Time</th>
                 <th>Path</th>
             </tr>

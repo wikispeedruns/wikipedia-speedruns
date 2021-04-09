@@ -8,7 +8,8 @@ prompt_api = Blueprint('prompts', __name__, url_prefix='/api/prompts')
 
 @prompt_api.route('/create', methods=['POST'])
 def create_prompt():
-    query = "INSERT INTO `prompts` (`start`, `end`) VALUES (%s, %s)"
+    # TODO is this the best way to do this?
+    query = "INSERT INTO `prompts` (`start`, `end`) VALUES (%s, %s);"
 
     start = request.json['start']
     end = request.json['end']
@@ -17,7 +18,6 @@ def create_prompt():
     with db.cursor() as cursor:
         result = cursor.execute(query, (start, end))
         db.commit()
-
         return "Prompt added!"
 
     return "Error adding prompt"
@@ -52,7 +52,7 @@ def get_prompt_runs(id):
     # TODO this could probably return details as well
     query = (
     """
-    SELECT `attempt_id`, `path`, TIMESTAMPDIFF(MICROSECOND, `start_time`, `end_time`) AS `run_time` 
+    SELECT `run_id`, `path`, TIMESTAMPDIFF(MICROSECOND, `start_time`, `end_time`) AS `run_time` 
     FROM `runs` WHERE `prompt_id`=%s
     ORDER BY `run_time` 
     """)

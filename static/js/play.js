@@ -98,7 +98,12 @@ async function finish() {
             body: JSON.stringify(reqBody)
         })
 
-        console.log(response);
+        const run_id = await response.json();
+
+        // Move to prompt page after 3 seconds
+        setTimeout(() => {
+            window.location.href = "/prompt/" + prompt_id + "?run_id=" + run_id;
+        }, 3000)
     } catch(e) {
         console.log(e);
     }

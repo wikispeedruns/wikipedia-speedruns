@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `prompts` (
 TABLES['runs']=(
 '''
 CREATE TABLE IF NOT EXISTS `runs` (
-    `attempt_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `run_id` INT(11) NOT NULL AUTO_INCREMENT,
     `start_time` TIMESTAMP(3) NOT NULL,
     `end_time` TIMESTAMP(3) NOT NULL,
     `path` TEXT NOT NULL,

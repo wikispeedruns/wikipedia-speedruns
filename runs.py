@@ -12,6 +12,7 @@ run_api = Blueprint('attempt', __name__, url_prefix='/api/runs')
 @run_api.route('/create', methods=['POST'])
 def create_run():
     query = "INSERT INTO `runs` (`start_time`, `end_time`, `path`, `prompt_id`) VALUES (%s, %s, %s, %s)"
+    sel_query = "SELECT LAST_INSERT_ID()"
 
     # datetime wants timestamp in seconds since epoch
     start_time = datetime.fromtimestamp(request.json['start_time']/1000)
@@ -24,9 +25,12 @@ def create_run():
     with db.cursor() as cursor:
         print(cursor.mogrify(query, (start_time, end_time, path, prompt_id)))
         result = cursor.execute(query, (start_time, end_time, path, prompt_id))
+        
+        cursor.execute(sel_query)
+        id = cursor.fetchone()[0]
         db.commit()
 
-        return "Run Submitted!"
+        return jsonify(id)
 
     return "Error submitting prompt"
 
