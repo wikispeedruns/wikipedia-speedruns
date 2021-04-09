@@ -142,6 +142,3 @@ function formatPath(pathArr) {
 function formatStr(string) {
     return string.replace("_", " ").toLowerCase()
 }
-
-window.onload = function() {
-}
