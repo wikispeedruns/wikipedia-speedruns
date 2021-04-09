@@ -25,6 +25,7 @@ def create_prompt():
 
 @prompt_api.route('/get', methods=['GET'])
 def get_all_prompts():
+    # TODO this should probably be paginated, and return just ids
     query = "SELECT * FROM `prompts`"
 
     db = get_db()
@@ -33,3 +34,15 @@ def get_all_prompts():
         results = cursor.fetchall()
         return jsonify(results)
 
+
+
+@prompt_api.route('/get/<id>', methods=['GET'])
+def get_prompt(id):
+    # TODO this could probably return details as well
+    query = "SELECT * FROM `prompts` WHERE `prompt_id`=%s"
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (id,))
+        results = cursor.fetchone()
+        return jsonify(results)

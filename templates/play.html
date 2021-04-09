@@ -1,21 +1,21 @@
 <html>
     <head>
+        <script>
+            const prompt_id='{{prompt_id}}';
+        </script>
+
         <script type=text/javascript src="{{url_for('static', filename='js/play.js') }}"></script>
         <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/start.css')}}">
         <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
     </head>
     
     <body style="width:85%; margin: auto; margin-top: 50px !important;">
-        <div id="starting" class="start">
-            <p>Starting Page: </p>
-            <input id="start-article"/>
-            <p>Goal Page: </p>
-            <input id="goal-article"/>
-            <button id="submit" onclick="loadStart()">START!</button>
-        </div>
         <div id="finishStats" class="finish"></div>
         <div id="guide" class="guide"></div>
         <div id="path" class="finish path"></div>
+
+        <div><p id = timer></p></div>
+
         <div id="title"></div>
         <div id="wikipedia-frame"></div>
     </body>

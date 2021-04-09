@@ -1,6 +1,5 @@
 var goalPage = "";
-var start = 1;
-var finished = 0;
+var timerInterval = null;
 var startTime = 0;
 var path = [];
 
@@ -41,24 +40,25 @@ async function loadPage(page) {
         }
     )
     const body = await resp.json()
-    
-    if (start === 1) {
-        start = 0;
-        startTime = Date.now();
-    }
 
     const title = body["parse"]["title"]
 
     document.getElementById("wikipedia-frame").innerHTML = body["parse"]["text"]["*"]
     document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
 
-    if (finished === 0) {
-        path.push(title)
+    // Start timer if we are at the start
+    if (path.length() == 0) {
+        startTime = Date.now()
+        timerInterval = setInterval(displayTimer, 20);    
     }
+
+    path.push(title)
 
     if (formatStr(title) === formatStr(goalPage)) {
         totalTime = (Date.now() - startTime)/1000;
         showFinish();
+        clearInterval(timerInterval);
+        document.getElementById("timer").innerHTML="";
         document.getElementById("finishStats").innerHTML = "<p>You Found It! Final Time: " + totalTime + "</p>";
         document.getElementById("path").innerHTML = "<p>" + formatPath(path) + "</p>";
         finished = 1;
@@ -69,9 +69,7 @@ async function loadPage(page) {
     });
 
     hideElements();
-    hideStart();
     window.scrollTo(0, 0)
-
 }
 
 function hideElements() {
@@ -107,26 +105,12 @@ function hideElements() {
     
 }
 
-function hideStart() {
-    document.getElementById("starting").style.display = "none"
-    document.getElementById("guide").style.display = "block"
-}
-
 function showFinish() {
     var cols = document.getElementsByClassName("finish");
     for(i=0; i<cols.length; i++) {
       cols[i].style.display = "block";
     }
     
-}
-
-function loadStart() {
-    const article = document.getElementById("start-article").value
-    goalPage = document.getElementById("goal-article").value
-    
-    loadPage(article)
-
-    document.getElementById("guide").innerHTML = "Starting: " + article + " --> " + "Goal: " + goalPage
 }
 
 function formatPath(pathArr) {
@@ -141,4 +125,20 @@ function formatPath(pathArr) {
 
 function formatStr(string) {
     return string.replace("_", " ").toLowerCase()
+}
+
+function displayTimer() {
+    seconds = (Date.now() - startTime) / 1000;
+    document.getElementById("timer").innerHTML = seconds + "s";
+}
+
+window.onload = async function() {
+    const response = await fetch("/api/prompts/get/" + prompt_id);
+    const prompt = await response.json();
+
+    const article = prompt["start"];
+
+    goalPage = prompt["end"];
+    document.getElementById("guide").innerHTML = "Starting: " + article + " --> " + "Goal: " + goalPage
+    loadPage(article)
 }

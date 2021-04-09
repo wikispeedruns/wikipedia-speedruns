@@ -23,6 +23,20 @@ async function submitPrompt(event)
     getPrompts();
 }
 
+function createPromptItem(prompt)
+{
+    var item = document.createElement("li");
+    var link = document.createElement('a');
+
+    link.appendChild(document.createTextNode(`#${prompt['prompt_id'].toString()}`));
+    link.href="/prompt/" + prompt['prompt_id'];
+    
+    item.appendChild(document.createTextNode(`Prompt `));
+    item.append(link);
+
+    return item;
+}
+
 async function getPrompts()
 {
     var list = document.getElementById("prompts");
@@ -37,10 +51,8 @@ async function getPrompts()
         }
 
         // Add new prompt
-        prompts.forEach( (el) => {
-            const item = document.createElement("li");
-            item.appendChild(document.createTextNode(`Prompt #${el["prompt_id"]}: ${el["start"]} -> ${el["end"]}`));
-            list.appendChild(item);
+        prompts.forEach( (p) => {
+            list.appendChild(createPromptItem(p));
         }); 
 
     } catch(e) {
