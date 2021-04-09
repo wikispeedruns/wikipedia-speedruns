@@ -17,6 +17,14 @@ app.register_blueprint(run_api)
 def get_home_page():
     return render_template('home.html')
 
+@app.route('/random', methods=['GET'])
+def get_random_prompt():
+    return render_template('home.html')
+
+@app.route('/manage', methods=['GET'])
+def get_manage_page():
+    return render_template('manage.html')
+
 @app.route('/prompt/<id>', methods=['GET'])
 def get_prompt_page(id):
     run_id = request.args.get('run_id', '')
