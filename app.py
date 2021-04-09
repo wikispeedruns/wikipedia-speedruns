@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 import db
 
 app = Flask(__name__)
@@ -19,7 +19,18 @@ def get_home_page():
 
 @app.route('/random', methods=['GET'])
 def get_random_prompt():
-    return render_template('home.html')
+    # TODO this is insanely inefficient, it needs to sort the whole table!
+    query = ("""
+    SELECT prompt_id FROM prompts
+    ORDER BY RAND()
+    LIMIT 1;
+    """)
+
+    with db.get_db().cursor() as cursor:
+        cursor.execute(query)
+        results = cursor.fetchone()
+        print(results)
+        return redirect("/play/" + str(results[0]), code=302)
 
 @app.route('/manage', methods=['GET'])
 def get_manage_page():
