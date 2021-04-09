@@ -13,11 +13,11 @@ app.register_blueprint(prompt_api)
 # Front end pages
 @app.route('/', methods=['GET'])
 def get_start_page():
-    return render_template('start.html')
+    return render_template('home.html')
 
 # Front end pages
-@app.route('/prompts', methods=['GET'])
+@app.route('/play', methods=['GET'])
 def get_prompts_page():
-    return render_template('prompts.html')
+    return render_template('play.html')
 
 
