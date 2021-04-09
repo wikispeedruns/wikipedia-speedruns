@@ -47,7 +47,7 @@ async function loadPage(page) {
     document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
 
     // Start timer if we are at the start
-    if (path.length() == 0) {
+    if (path.length == 0) {
         startTime = Date.now()
         timerInterval = setInterval(displayTimer, 20);    
     }
@@ -55,13 +55,7 @@ async function loadPage(page) {
     path.push(title)
 
     if (formatStr(title) === formatStr(goalPage)) {
-        totalTime = (Date.now() - startTime)/1000;
-        showFinish();
-        clearInterval(timerInterval);
-        document.getElementById("timer").innerHTML="";
-        document.getElementById("finishStats").innerHTML = "<p>You Found It! Final Time: " + totalTime + "</p>";
-        document.getElementById("path").innerHTML = "<p>" + formatPath(path) + "</p>";
-        finished = 1;
+        finish(); // No need to await this
     }
 
     document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
@@ -71,6 +65,47 @@ async function loadPage(page) {
     hideElements();
     window.scrollTo(0, 0)
 }
+
+async function finish() {
+
+    // Stop timer
+    const endTime = Date.now();
+    clearInterval(timerInterval);
+    document.getElementById("timer").innerHTML="";
+
+
+    // Display finish stats and path
+    Array.from(document.getElementsByClassName("finish")).forEach((el) => {
+        el.style.display = "block";
+    });
+    document.getElementById("finishStats").innerHTML = "<p>You Found It! Final Time: " + (endTime - startTime)/1000 + "</p>";
+    document.getElementById("path").innerHTML = "<p>" + formatPath(path) + "</p>";
+
+    const reqBody = {
+        "start_time": startTime,
+        "end_time": endTime,
+        "prompt_id": prompt_id,
+        "path": path
+    }
+
+    // Send results to API
+    try {
+        const response = await fetch("/api/runs/create", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(reqBody)
+        })
+
+        console.log(response);
+    } catch(e) {
+        console.log(e);
+    }
+
+
+}
+
 
 function hideElements() {
     var hide = ["reference","mw-editsection","reflist","portal","refbegin", "sidebar"]
@@ -105,14 +140,6 @@ function hideElements() {
     
 }
 
-function showFinish() {
-    var cols = document.getElementsByClassName("finish");
-    for(i=0; i<cols.length; i++) {
-      cols[i].style.display = "block";
-    }
-    
-}
-
 function formatPath(pathArr) {
     output = "";
     for(i=0; i<pathArr.length - 1;i++) {
@@ -131,6 +158,7 @@ function displayTimer() {
     seconds = (Date.now() - startTime) / 1000;
     document.getElementById("timer").innerHTML = seconds + "s";
 }
+
 
 window.onload = async function() {
     const response = await fetch("/api/prompts/get/" + prompt_id);

@@ -14,11 +14,13 @@ CREATE TABLE IF NOT EXISTS `prompts` (
 );
 ''')
 
-TABLES['attempts']=(
+TABLES['runs']=(
 '''
-CREATE TABLE IF NOT EXISTS `attempts` (
+CREATE TABLE IF NOT EXISTS `runs` (
     `attempt_id` INT(11) NOT NULL AUTO_INCREMENT,
-    `start` VARCHAR(255) NOT NULL,
+    `start_time` TIMESTAMP(3) NOT NULL,
+    `end_time` TIMESTAMP(3) NOT NULL,
+    `path` TEXT NOT NULL,
     `prompt_id` INT(11) NOT NULL,
     PRIMARY KEY (`attempt_id`),
     FOREIGN KEY (`prompt_id`) REFERENCES `prompts`(`prompt_id`)

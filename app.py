@@ -8,7 +8,9 @@ db.init_app(app)
 app.config["DATABASE"] = "wikipedia_speedruns"
 
 from prompts import prompt_api
+from runs import run_api
 app.register_blueprint(prompt_api)
+app.register_blueprint(run_api)
 
 # Front end pages
 @app.route('/', methods=['GET'])

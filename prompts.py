@@ -35,11 +35,27 @@ def get_all_prompts():
         return jsonify(results)
 
 
-
 @prompt_api.route('/get/<id>', methods=['GET'])
 def get_prompt(id):
     # TODO this could probably return details as well
     query = "SELECT * FROM `prompts` WHERE `prompt_id`=%s"
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (id,))
+        results = cursor.fetchone()
+        return jsonify(results)
+
+
+@prompt_api.route('/get/<id>/runs', methods=['GET'])
+def get_prompt_runs(id):
+    # TODO this could probably return details as well
+    query = (
+    """
+    SELECT `attempt_id`, `path`, TIMESTAMPDIFF(MICROSECOND, `start_time`, `end_time`) AS `run_time` 
+    FROM `runs` WHERE `prompt_id`=%s
+    ORDER BY `run_time` 
+    """
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
