@@ -4,15 +4,21 @@
             const prompt_id='{{prompt_id}}';
         </script>
         <script type=text/javascript src="{{url_for('static', filename='js/prompt.js') }}"></script>
+        <link rel= "stylesheet" type="text/css" href="{{url_for('static', filename='stylesheets/prompt.css')}}">
+
     </head>
     
     <body>
         <h3>Prompt #{{prompt_id}}</h3>
-        <p>____ => ____</p>
-        <button type="button" href="/play/{{prompt_id}}">Play!</button>
-        <button type="button">Show Prompt</button>
+        <p id="prompt"></p>
 
-        <!-- Leaderboard TODO -->
+        <table id="leaderboard" style="width:85%; margin: auto; margin-top: 50px">
+            <tr>
+                <th>Time</th>
+                <th>Path</th>
+            </tr>
+            
+        </table>
     </body>
 
 

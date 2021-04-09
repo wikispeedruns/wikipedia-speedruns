@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import db
 
 app = Flask(__name__)
@@ -19,7 +19,12 @@ def get_home_page():
 
 @app.route('/prompt/<id>', methods=['GET'])
 def get_prompt_page(id):
-    return render_template('prompt.html', prompt_id=id)
+    run_id = request.args.get('run_id', '')
+    
+    if len(run_id) != 0:
+        return render_template('prompt.html', prompt_id=id, run_id=id)
+    else:
+        return render_template('prompt.html', prompt_id=id)
 
 
 @app.route('/play/<id>', methods=['GET'])

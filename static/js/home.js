@@ -29,7 +29,7 @@ function createPromptItem(prompt)
     var link = document.createElement('a');
 
     link.appendChild(document.createTextNode(`#${prompt['prompt_id'].toString()}`));
-    link.href="/prompt/" + prompt['prompt_id'];
+    link.href="/play/" + prompt['prompt_id'];
     
     item.appendChild(document.createTextNode(`Prompt `));
     item.append(link);

@@ -55,10 +55,10 @@ def get_prompt_runs(id):
     SELECT `attempt_id`, `path`, TIMESTAMPDIFF(MICROSECOND, `start_time`, `end_time`) AS `run_time` 
     FROM `runs` WHERE `prompt_id`=%s
     ORDER BY `run_time` 
-    """
+    """)
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (id,))
-        results = cursor.fetchone()
+        results = cursor.fetchall()
         return jsonify(results)
