@@ -1,5 +1,7 @@
 # Competitive Wikipedia Speedrunning
 
+## Flask Setup
+
 #### 1. Setup Virtual Environment
 We recommend creating a [Python virtual environment](https://docs.python.org/3/tutorial/venv.html)
 for running the server. 
