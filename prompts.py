@@ -52,7 +52,7 @@ def get_prompt_runs(id):
     # TODO this could probably return details as well
     query = (
     """
-    SELECT `run_id`, `path`, TIMESTAMPDIFF(MICROSECOND, `start_time`, `end_time`) AS `run_time` 
+    SELECT `run_id`, `path`, TIMESTAMPDIFF(MICROSECOND, `start_time`, `end_time`) AS `run_time`, `name` 
     FROM `runs` WHERE `prompt_id`=%s
     ORDER BY `run_time` 
     """)

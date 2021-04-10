@@ -2,6 +2,40 @@ var goalPage = "";
 var timerInterval = null;
 var startTime = 0;
 var path = [];
+var endTime = 0;
+
+async function submitName(event)
+{
+    event.preventDefault();
+
+    const reqBody = {
+        "start_time": startTime,
+        "end_time": endTime,
+        "prompt_id": prompt_id,
+        "path": path,
+        "name": document.getElementById("name").value
+    }
+
+    // Send results to API
+    try {
+        const response = await fetch("/api/runs/create", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(reqBody)
+        })
+
+        const run_id = await response.json();
+
+        // Move to prompt page after 3 seconds
+        window.location.href = "/prompt/" + prompt_id + "?run_id=" + run_id;
+
+    } catch(e) {
+        console.log(e);
+    }
+
+}
 
 function handleWikipediaLink(e) 
 {
@@ -69,7 +103,7 @@ async function loadPage(page) {
 async function finish() {
 
     // Stop timer
-    const endTime = Date.now();
+    endTime = Date.now();
     clearInterval(timerInterval);
     document.getElementById("timer").innerHTML="";
 
@@ -81,32 +115,9 @@ async function finish() {
     document.getElementById("finishStats").innerHTML = "<p>You Found It! Final Time: " + (endTime - startTime)/1000 + "</p>";
     document.getElementById("path").innerHTML = "<p>" + formatPath(path) + "</p>";
 
-    const reqBody = {
-        "start_time": startTime,
-        "end_time": endTime,
-        "prompt_id": prompt_id,
-        "path": path
-    }
+    document.getElementById("submitName").addEventListener("submit", submitName);
 
-    // Send results to API
-    try {
-        const response = await fetch("/api/runs/create", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(reqBody)
-        })
 
-        const run_id = await response.json();
-
-        // Move to prompt page after 3 seconds
-        setTimeout(() => {
-            window.location.href = "/prompt/" + prompt_id + "?run_id=" + run_id;
-        }, 3000)
-    } catch(e) {
-        console.log(e);
-    }
 
 
 }

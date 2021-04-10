@@ -6,7 +6,7 @@ function generate_prompt(prompt)
 function generate_leaderboard(runs)
 {
     var table = document.getElementById("leaderboard");
-    // TODO probably add calss and stuff
+    // TODO probably add class and stuff
     for (var i = 0; i < runs.length; i++) {
         var item = document.createElement("tr");
         
@@ -19,13 +19,18 @@ function generate_leaderboard(runs)
         var path = document.createElement("td");
         path.appendChild(document.createTextNode(runs[i]["path"]));
 
+        var name = document.createElement("td");
+        name.appendChild(document.createTextNode(runs[i]["name"]));
+
         if (runs[i]["run_id"] === Number(run_id)) {
             item.style.fontWeight = "bold";
         }
 
         item.appendChild(rank);
+        item.appendChild(name);
         item.appendChild(time);
         item.appendChild(path);
+        
 
         table.appendChild(item);
     }
