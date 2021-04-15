@@ -32,6 +32,17 @@ def get_random_prompt():
         print(results)
         return redirect("/play/" + str(results[0]), code=302)
 
+@app.route('/latest', methods=['GET'])
+def get_latest_prompt():
+    # TODO its a little messy to do this here
+    query = ("SELECT MAX(prompt_id) FROM prompts;")
+
+    with db.get_db().cursor() as cursor:
+        cursor.execute(query)
+        results = cursor.fetchone()
+        return redirect("/play/" + str(results[0]), code=302)
+
+
 @app.route('/manage', methods=['GET'])
 def get_manage_page():
     return render_template('manage.html')
