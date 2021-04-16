@@ -116,10 +116,6 @@ async function finish() {
     document.getElementById("path").innerHTML = "<p>" + formatPath(path) + "</p>";
 
     document.getElementById("submitName").addEventListener("submit", submitName);
-
-
-
-
 }
 
 
@@ -183,6 +179,15 @@ window.onload = async function() {
     const article = prompt["start"];
 
     goalPage = prompt["end"];
-    document.getElementById("guide").innerHTML = "Starting: " + article + " --> " + "Goal: " + goalPage
-    loadPage(article)
+    document.getElementById("guide").innerHTML = "<strong>Starting article: </strong>" + article + "    -->    <strong>Goal article: </strong>" + goalPage
+
+    document.getElementById("main").style.display = "none";
+    document.getElementById("countdown").innerHTML = "Prompt will begin in " + "5" + " seconds";
+
+    setTimeout(() => {
+        document.getElementById("main").style.display = "block";
+        document.getElementById("countdown").style.display = "none";
+        document.getElementById("guide").innerHTML = article + " --> " + goalPage
+        loadPage(article)
+    }, 5000);
 }
