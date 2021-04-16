@@ -120,7 +120,8 @@ async function finish() {
 
 
 function hideElements() {
-    var hide = ["reference","mw-editsection","reflist","portal","refbegin", "sidebar"]
+    
+    var hide = ["reference","mw-editsection","reflist","portal","refbegin", "sidebar", "authority-control", "external", "sistersitebox"]
     for(i=0; i<hide.length; i++) {
         var elements = document.getElementsByClassName(hide[i])
         //console.log("found: " + hide[i] + elements.length)
@@ -129,9 +130,9 @@ function hideElements() {
         }
     }
     
-    var id = ["See_also", "Notes_and_references", "Further_reading", "External_links", "References", "Notes", ];
-    for(i=0; i<id.length; i++) {
-        var e = document.getElementById(id[i]);
+    var idS = ["See_also", "Notes_and_references", "Further_reading", "External_links", "References", "Notes", "Citations", "Explanatory_notes"];
+    for(i=0; i<idS.length; i++) {
+        var e = document.getElementById(idS[i]);
         if (e !== null) {
             e.style.display = "none";
         }
@@ -148,7 +149,30 @@ function hideElements() {
         }
         //mw-disambig
     }
-    
+
+    //var all = document.getElementsByClassName("mw-parser-output")[0].querySelectorAll("h2", "div", "ul", "p");
+    var all = document.getElementById("wikipedia-frame").querySelectorAll("h2, div, ul, p, h3");
+    var flip = false
+    for (i = 0; i < all.length; i++) {
+        if (!flip) {
+            if (all[i].tagName == "H2") {
+                //console.log("checking h2");
+                var check = all[i].getElementsByClassName("mw-headline")
+                if (check.length !== 0) {
+                    //console.log(check[0].id)
+                    for (j = 0; j < idS.length; j++) {
+                        if (check[0].id == idS[j]) {
+                            //console.log("found see also at: " + i);
+                            all[i].style.display = "none";
+                            flip = true;
+                        }
+                    }
+                }
+            }
+        } else {
+            all[i].style.display = "none";
+        }
+    }
     
 }
 
