@@ -8,7 +8,7 @@ function createPromptItemHome(prompt)
     
     item.appendChild(document.createTextNode(`Prompt `));
     item.append(link);
-    //item.append(document.createTextNode(`: ${prompt["start"]}/${prompt["end"]}`))
+    item.append(document.createTextNode(`Starting Article: ${prompt["start"]}`))
 
     return item;
 }
