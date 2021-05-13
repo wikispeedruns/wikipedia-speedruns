@@ -4,7 +4,6 @@ from flask import current_app, g
 def init_app(app):
     app.teardown_appcontext(close_db)
 
-
 def get_db():
     if 'db' not in g:
         g.db = pymysql.connect(

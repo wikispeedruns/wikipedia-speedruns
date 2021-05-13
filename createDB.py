@@ -39,6 +39,6 @@ conn = pymysql.connect(user='user', host='127.0.0.1',
 
 with conn.cursor() as cursor:
     create_tables(cursor)
-    conn.commit
+    conn.commit()
     conn.close()
 
