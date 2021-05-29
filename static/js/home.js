@@ -5,16 +5,26 @@ function createPromptItemHome(prompt)
     link.appendChild(document.createTextNode(`#${prompt['prompt_id'].toString()}`));
     link.href="/play/" + prompt['prompt_id'];
     var startArticle = (`${prompt["start"]}`);
+    
     var item = document.createElement("tr");
     
     var prompt = document.createElement("td");
-    var start = document.createElement("td");
     prompt.style.width = "25%";
-    start.style.width = "auto";
     prompt.appendChild(document.createTextNode("Prompt "));
     prompt.append(link);
-    start.appendChild(document.createTextNode(`Starting Article: ` + startArticle));
     item.appendChild(prompt);
+    
+
+    var start = document.createElement("td");
+    start.style.width = "auto";
+    var bolded = document.createElement("strong");
+    bolded.appendChild(document.createTextNode(startArticle));
+
+    var line = document.createElement("span");
+    line.appendChild(document.createTextNode(`Starting Article: `));
+    line.appendChild(bolded);
+    start.appendChild(line);
+    
     item.appendChild(start);
 
     return item;
