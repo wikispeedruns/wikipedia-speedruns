@@ -29,9 +29,9 @@ jQuery.fn.springy = function(params) {
 	var graph = this.graph = params.graph || new Springy.Graph();
 	var nodeFont = "12px Verdana, sans-serif";
 	var edgeFont = "10px Verdana, sans-serif";
-	var stiffness = params.stiffness || 300.0;
+	var stiffness = params.stiffness || 600.0;
 	var repulsion = params.repulsion || 500.0;
-	var damping = params.damping || 0.5;
+	var damping = params.damping || 0.4;
 	var minEnergyThreshold = params.minEnergyThreshold || 0.00001;
 	var nodeSelected = params.nodeSelected || null;
 	var nodeImages = {};
@@ -168,7 +168,7 @@ jQuery.fn.springy = function(params) {
 					height = getTextHeight(this);
 				}
 			} else {
-				height = 12/2 + 6;
+				height = 15/2 + 6;
 			}
 			
 			
@@ -188,7 +188,7 @@ jQuery.fn.springy = function(params) {
 			if (this.data.type !== 0 || text === 1) {
 				width = getTextWidth(this);
 			} else {
-				width = 12/2 + 6;
+				width = 15/2 + 6;
 			}
 		} else {
 			if (this.data.image.src in nodeImages && nodeImages[this.data.image.src].loaded) {

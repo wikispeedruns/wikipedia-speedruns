@@ -65,18 +65,18 @@ function populateGraph(runs) {
                 var type;
                 if (j === 0) {
                     color = "#008000";
-                    font= "bold 18px Verdana, sans-serif";
+                    font= "bold 15px Verdana, sans-serif";
                     textheight = 18;
                     type = 1;
                 } else if (j === pathNodes.length - 1) {
                     color = "#FF5733";
-                    font= "bold 18px Verdana, sans-serif";
+                    font= "bold 15px Verdana, sans-serif";
                     textheight = 18;
                     type = 2;
                 } else {
                     color = "#000000";
-                    font= "12px Verdana, sans-serif";
-                    textheight = 12;
+                    font= "10px Verdana, sans-serif";
+                    textheight = 10;
                     type = 0;
                 }
                 nodes.push(graph.newNode({label: pathNodes[j], color: color, font: font, textheight: textheight, type: type}));
