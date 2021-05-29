@@ -59,17 +59,32 @@ function populateGraph(runs) {
         var pathNodes = parsePath(runs[i]["path"].substring(1, runs[i]["path"].length - 1));
         for (var j = 0; j < pathNodes.length; j++) {
             if (!nodeLabels.includes(pathNodes[j])) {
+                var color;
+                var font;
+                var textheight;
+                var type;
                 if (j === 0) {
-                    nodes.push(graph.newNode({label: pathNodes[j], color: "#008000", font: "bold 18px Verdana, sans-serif", textheight: 16}));
+                    color = "#008000";
+                    font= "bold 18px Verdana, sans-serif";
+                    textheight = 18;
+                    type = 1;
                 } else if (j === pathNodes.length - 1) {
-                    nodes.push(graph.newNode({label: pathNodes[j], color: "#FF5733", font: "bold 18px Verdana, sans-serif", textheight: 16}));
+                    color = "#FF5733";
+                    font= "bold 18px Verdana, sans-serif";
+                    textheight = 18;
+                    type = 2;
                 } else {
-                    nodes.push(graph.newNode({label: pathNodes[j]}));
+                    color = "#000000";
+                    font= "12px Verdana, sans-serif";
+                    textheight = 12;
+                    type = 0;
                 }
-                
+                nodes.push(graph.newNode({label: pathNodes[j], color: color, font: font, textheight: textheight, type: type}));
                 nodeLabels.push(pathNodes[j]);
             }
         }
+
+        
         for (var j = 0; j < pathNodes.length - 1; j++) {
             let edge = {src: pathNodes[j], dest: pathNodes[j + 1], count: 1};
             if (edges.length === 0) {
@@ -101,8 +116,18 @@ function populateGraph(runs) {
     for (var i = 0; i < edges.length; i++) {
         var srcIndex = nodeLabels.indexOf(edges[i].src);
         var destIndex = nodeLabels.indexOf(edges[i].dest);
-        var colorScale = parseInt(255 - (255 / (max - 1)) * (edges[i].count - 1), 10);
-        var weightScale = 1.5 / (max - 1) * (edges[i].count - 1) + 1.5; //map from 1.5 to 3
+        var colorScale;
+        var weightScale;
+        if (max === 1) {
+            colorScale = 255;
+            weightScale = 2.25;
+        } else {
+            colorScale = parseInt(255 - (255 / (max - 1)) * (edges[i].count - 1), 10);
+            weightScale = 1.5 / (max - 1) * (edges[i].count - 1) + 1.5; //map from 1.5 to 3
+        }
+        //console.log(edges[i].src);
+        //console.log(nodes[srcIndex]);
+        //console.log(nodes[destIndex]);
         graph.newEdge(nodes[srcIndex], nodes[destIndex], {color: rgbToHex(255 - colorScale, 0, colorScale), label: edges[i].count, weight: weightScale});
     }
 

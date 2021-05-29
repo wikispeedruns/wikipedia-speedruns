@@ -156,31 +156,46 @@ jQuery.fn.springy = function(params) {
 		return height;
 	}
 
-	Springy.Node.prototype.getHeight = function() {
+	Springy.Node.prototype.getHeight = function(text = 0) {
 		var height;
-		if (this.data.image == undefined) {
-			if (this.data.textheight !== undefined) {
-				height = this.data.textheight;
+
+		
+		if (this.data.image === undefined) {
+			if (this.data.type !== 0 || text === 1) {
+				if (this.data.textheight !== undefined) {
+					height = this.data.textheight;
+				} else {
+					height = getTextHeight(this);
+				}
 			} else {
-				height = getTextHeight(this);
+				height = 12/2 + 6;
 			}
+			
+			
 		} else {
 			if (this.data.image.src in nodeImages && nodeImages[this.data.image.src].loaded) {
 				height = getImageHeight(this);
 			} else {height = 10;}
 		}
+		//return 15/2 + 6;
 		return height;
+		
 	}
 
-	Springy.Node.prototype.getWidth = function() {
+	Springy.Node.prototype.getWidth = function(text = 0) {
 		var width;
-		if (this.data.image == undefined) {
-			width = getTextWidth(this);
+		if (this.data.image === undefined) {
+			if (this.data.type !== 0 || text === 1) {
+				width = getTextWidth(this);
+			} else {
+				width = 12/2 + 6;
+			}
 		} else {
 			if (this.data.image.src in nodeImages && nodeImages[this.data.image.src].loaded) {
 				width = getImageWidth(this);
 			} else {width = 10;}
 		}
+		//return 15/2 + 6;
 		return width;
 	}
 
@@ -217,7 +232,7 @@ jQuery.fn.springy = function(params) {
 			var offset = normal.multiply(-((total - 1) * spacing)/2.0 + (n * spacing));
 
 			var paddingX = 6;
-			var paddingY = 6;
+			var paddingY = 10;
 
 			var s1 = toScreen(p1).add(offset);
 			var s2 = toScreen(p2).add(offset);
@@ -301,56 +316,118 @@ jQuery.fn.springy = function(params) {
 
 			ctx.save();
 
-			// Pulled out the padding aspect sso that the size functions could be used in multiple places
-			// These should probably be settable by the user (and scoped higher) but this suffices for now
 			var paddingX = 6;
 			var paddingY = 6;
 
-			var contentWidth = node.getWidth();
-			var contentHeight = node.getHeight();
+			var contentWidth = node.getWidth(text= 1);
+			var contentHeight = node.getHeight(text= 1);
 			var boxWidth = contentWidth + paddingX;
 			var boxHeight = contentHeight + paddingY;
 
-			// clear background
-			ctx.clearRect(s.x - boxWidth/2, s.y - boxHeight/2, boxWidth, boxHeight);
+			if (node.data.type === 0) {
 
-			// fill background
-			if (selected !== null && selected.node !== null && selected.node.id === node.id) {
-				ctx.fillStyle = "#FFFFE0";
-			} else if (nearest !== null && nearest.node !== null && nearest.node.id === node.id) {
-				ctx.fillStyle = "#EEEEEE";
-			} else {
-				ctx.fillStyle = "#FFFFFF";
-			}
-			ctx.fillRect(s.x - boxWidth/2, s.y - boxHeight/2, boxWidth, boxHeight);
+				var defaultDiameter = 12;
+				var padding = 6;
+				//ctx.clearRect(s.x - boxWidth/2, s.y - boxHeight/2, boxWidth, boxHeight);
 
-			if (node.data.image == undefined) {
-				ctx.textAlign = "left";
-				ctx.textBaseline = "top";
-				ctx.font = (node.data.font !== undefined) ? node.data.font : nodeFont;
-				ctx.fillStyle = (node.data.color !== undefined) ? node.data.color : "#000000";
-				
-				var text = (node.data.label !== undefined) ? node.data.label : node.id;
-				ctx.fillText(text, (s.x - contentWidth/2), s.y - contentHeight/2);
-			} else {
-				// Currently we just ignore any labels if the image object is set. One might want to extend this logic to allow for both, or other composite nodes.
-				var src = node.data.image.src;  // There should probably be a sanity check here too, but un-src-ed images aren't exaclty a disaster.
-				if (src in nodeImages) {
-					if (nodeImages[src].loaded) {
-						// Our image is loaded, so it's safe to draw
-						ctx.drawImage(nodeImages[src].object, s.x - contentWidth/2, s.y - contentHeight/2, contentWidth, contentHeight);
+				var fillCircle = function(x, y, radius)
+				{
+					ctx.beginPath();
+					ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+					ctx.fill();
+				};
+
+				var drawCircles = function(background) {
+					ctx.fillStyle = background;
+					fillCircle(s.x, s.y, defaultDiameter / 2 + padding);
+					
+					ctx.fillStyle = "#000000";
+					fillCircle(s.x, s.y, defaultDiameter / 2);
+				}			
+
+				var addCaption = function() {
+					ctx.textAlign = "left";
+					ctx.textBaseline = "top";
+					ctx.font = (node.data.font !== undefined) ? node.data.font : nodeFont;
+					ctx.fillStyle = (node.data.color !== undefined) ? node.data.color : "#000000";
+					var text = (node.data.label !== undefined) ? node.data.label : node.id;
+
+					var xStart = s.x + (defaultDiameter + padding)/2;
+					var yStart = s.y + (defaultDiameter + padding)/2;
+
+
+					if (xStart + boxWidth > canvas.width) {
+						xStart = s.x - (defaultDiameter + padding)/2 - boxWidth;
+					} else if (yStart + boxHeight > canvas.height) {
+						yStart = s.y - (defaultDiameter + padding)/2 - boxHeight;
 					}
-				}else{
-					// First time seeing an image with this src address, so add it to our set of image objects
-					// Note: we index images by their src to avoid making too many duplicates
-					nodeImages[src] = {};
-					var img = new Image();
-					nodeImages[src].object = img;
-					img.addEventListener("load", function () {
-						// HTMLImageElement objects are very finicky about being used before they are loaded, so we set a flag when it is done
-						nodeImages[src].loaded = true;
-					});
-					img.src = src;
+
+					var textXStart = xStart + paddingX/2;
+					var textYStart = yStart + paddingY/2;
+
+					ctx.clearRect(xStart, yStart, boxWidth, boxHeight);
+					
+					ctx.fillText(text, textXStart, textYStart);
+				}
+
+				if (selected !== null && selected.node !== null && selected.node.id === node.id) {
+					drawCircles("#FFFFE0");
+					addCaption();
+				} else if (nearest !== null && nearest.node !== null && nearest.node.id === node.id) {
+					drawCircles("#EEEEEE");
+					addCaption();
+				} else {
+					drawCircles("#FFFFFF");
+				}
+
+			} else {
+				
+				// Pulled out the padding aspect sso that the size functions could be used in multiple places
+				// These should probably be settable by the user (and scoped higher) but this suffices for now
+				
+
+				// clear background
+				ctx.clearRect(s.x - boxWidth/2, s.y - boxHeight/2, boxWidth, boxHeight);
+
+				// fill background
+				if (selected !== null && selected.node !== null && selected.node.id === node.id) {
+					ctx.fillStyle = "#FFFFE0";
+				} else if (nearest !== null && nearest.node !== null && nearest.node.id === node.id) {
+					ctx.fillStyle = "#EEEEEE";
+				} else {
+					ctx.fillStyle = "#FFFFFF";
+				}
+				ctx.fillRect(s.x - boxWidth/2, s.y - boxHeight/2, boxWidth, boxHeight);
+
+				if (node.data.image == undefined) {
+					ctx.textAlign = "left";
+					ctx.textBaseline = "top";
+					ctx.font = (node.data.font !== undefined) ? node.data.font : nodeFont;
+					ctx.fillStyle = (node.data.color !== undefined) ? node.data.color : "#000000";
+					
+					var text = (node.data.label !== undefined) ? node.data.label : node.id;
+					//ctx.wrapText(text, (s.x - contentWidth/2), s.y - contentHeight/2, 150, 16);
+					ctx.fillText(text, (s.x - contentWidth/2), s.y - contentHeight/2);
+				} else {
+					// Currently we just ignore any labels if the image object is set. One might want to extend this logic to allow for both, or other composite nodes.
+					var src = node.data.image.src;  // There should probably be a sanity check here too, but un-src-ed images aren't exaclty a disaster.
+					if (src in nodeImages) {
+						if (nodeImages[src].loaded) {
+							// Our image is loaded, so it's safe to draw
+							ctx.drawImage(nodeImages[src].object, s.x - contentWidth/2, s.y - contentHeight/2, contentWidth, contentHeight);
+						}
+					}else{
+						// First time seeing an image with this src address, so add it to our set of image objects
+						// Note: we index images by their src to avoid making too many duplicates
+						nodeImages[src] = {};
+						var img = new Image();
+						nodeImages[src].object = img;
+						img.addEventListener("load", function () {
+							// HTMLImageElement objects are very finicky about being used before they are loaded, so we set a flag when it is done
+							nodeImages[src].loaded = true;
+						});
+						img.src = src;
+					}
 				}
 			}
 			ctx.restore();
@@ -397,3 +474,5 @@ jQuery.fn.springy = function(params) {
 }
 
 })();
+
+
