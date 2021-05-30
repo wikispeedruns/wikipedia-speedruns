@@ -74,11 +74,13 @@ function populateGraph(runs) {
                     textheight = 18;
                     type = 2;
                 } else {
-                    color = "#000000";
+            
+                    color = (runs[i]["run_id"] === Number(run_id)) ? "#ff9700" : "#000000";
                     font= "10px Verdana, sans-serif";
                     textheight = 10;
                     type = 0;
                 }
+
                 nodes.push(graph.newNode({label: pathNodes[j], color: color, font: font, textheight: textheight, type: type}));
                 nodeLabels.push(pathNodes[j]);
             }
@@ -86,7 +88,11 @@ function populateGraph(runs) {
 
         
         for (var j = 0; j < pathNodes.length - 1; j++) {
-            let edge = {src: pathNodes[j], dest: pathNodes[j + 1], count: 1};
+
+            var curId = (runs[i]["run_id"] === Number(run_id)) ? true : false;
+
+
+            let edge = {src: pathNodes[j], dest: pathNodes[j + 1], count: 1, highlight: curId};
             if (edges.length === 0) {
                 edges.push(edge);
             } else {
@@ -128,7 +134,9 @@ function populateGraph(runs) {
         //console.log(edges[i].src);
         //console.log(nodes[srcIndex]);
         //console.log(nodes[destIndex]);
-        graph.newEdge(nodes[srcIndex], nodes[destIndex], {color: rgbToHex(255 - colorScale, 0, colorScale), label: edges[i].count, weight: weightScale});
+        var color = edges[i].highlight ? "#ff9700" : rgbToHex(255 - colorScale, 0, colorScale);
+
+        graph.newEdge(nodes[srcIndex], nodes[destIndex], {color: color, label: edges[i].count, weight: weightScale});
     }
 
     

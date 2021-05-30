@@ -22,6 +22,7 @@ function createPromptItemHome(prompt)
 
     var line = document.createElement("span");
     line.appendChild(document.createTextNode(`Starting Article: `));
+    
     line.appendChild(bolded);
     start.appendChild(line);
     

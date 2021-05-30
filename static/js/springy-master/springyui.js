@@ -341,7 +341,7 @@ jQuery.fn.springy = function(params) {
 					ctx.fillStyle = background;
 					fillCircle(s.x, s.y, defaultDiameter / 2 + padding);
 					
-					ctx.fillStyle = "#000000";
+					ctx.fillStyle = (node.data.color !== undefined) ? node.data.color : "#000000";
 					fillCircle(s.x, s.y, defaultDiameter / 2);
 				}			
 
@@ -349,7 +349,7 @@ jQuery.fn.springy = function(params) {
 					ctx.textAlign = "left";
 					ctx.textBaseline = "top";
 					ctx.font = (node.data.font !== undefined) ? node.data.font : nodeFont;
-					ctx.fillStyle = (node.data.color !== undefined) ? node.data.color : "#000000";
+					ctx.fillStyle = "#000000";
 					var text = (node.data.label !== undefined) ? node.data.label : node.id;
 
 					var xStart = s.x + (defaultDiameter + padding)/2;
