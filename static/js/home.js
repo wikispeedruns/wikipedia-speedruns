@@ -68,6 +68,6 @@ async function getPromptsHome()
 }
 
 
-window.onload = function() {
+window.addEventListener("onload", function() {
     getPromptsHome()
-}
+});

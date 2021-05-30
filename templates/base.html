@@ -1,6 +1,7 @@
 <html>
     <head>
         <title>Wikipedia Speedruns!</title>
+        <script src="{{url_for('static', filename='js/base.js')}}" defer></script>
         <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/main.css')}}">
   
         {% block head %}{% endblock %}
@@ -11,11 +12,11 @@
             <h1>Wikipedia Speedruns! (PUT LOGO HERE) </h1>
             <ul>
                 {% if username %}
-                    <li><span>{{ usernaem }}</span> 
-                    <li><a href="/logout">Log Out</a>
+                    <li><span>{{ username }}</span> 
+                    <li><button onclick="handleLogout()">Logout</button>
                 {% else %}
                     <li><a href="/register">Register</a>
-                    <li><a href="/login">Log In</a>
+                    <li><a href="/login">Login</a>
                 {% endif %}
             </ul>
         </nav>

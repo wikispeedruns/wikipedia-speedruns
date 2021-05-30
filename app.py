@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 import db
 
 app = Flask(__name__)
@@ -16,10 +16,17 @@ app.register_blueprint(prompt_api)
 app.register_blueprint(run_api)
 app.register_blueprint(user_api)
 
+# Passes session args to function if needed
+def render_with_user(template, **kwargs):
+    if ("user_id" in session):
+        return render_template(template, user_id=session["user_id"], username=session["username"], **kwargs)
+    else:
+        return render_template(template, **kwargs)
+
 # Front end pages
 @app.route('/', methods=['GET'])
 def get_home_page():
-    return render_template('home.html')
+    return render_with_user('home.html')
 
 @app.route('/random', methods=['GET'])
 def get_random_prompt():
@@ -46,6 +53,13 @@ def get_latest_prompt():
         results = cursor.fetchone()
         return redirect("/play/" + str(results[0]), code=302)
 
+@app.route('/register', methods=['GET'])
+def get_register_page():
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET'])
+def get_login_page():
+    return render_template('login.html')
 
 @app.route('/manage', methods=['GET'])
 def get_manage_page():

@@ -196,7 +196,7 @@ function displayTimer() {
 }
 
 
-window.onload = async function() {
+window.addEventListener("onload", async function() {
     const response = await fetch("/api/prompts/get/" + prompt_id);
     const prompt = await response.json();
 
@@ -214,4 +214,4 @@ window.onload = async function() {
         document.getElementById("guide").innerHTML = article + " --> " + goalPage
         loadPage(article)
     }, 5000);
-}
+});

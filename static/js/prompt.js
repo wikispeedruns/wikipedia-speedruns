@@ -169,8 +169,7 @@ function parsePath(path) {
     return out;
 }
 
-window.onload = async function() {
-
+window.addEventListener("onload", async function() {
     var response = await fetch("/api/prompts/get/" + prompt_id);
     const prompt = await response.json();
 
@@ -181,4 +180,4 @@ window.onload = async function() {
     generate_leaderboard(runs);
     var graph1 = populateGraph(runs);
     $('#springydemo').springy({ graph: graph1 });
-}
+});

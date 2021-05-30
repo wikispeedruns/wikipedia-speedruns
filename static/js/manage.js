@@ -81,7 +81,7 @@ async function getPrompts()
 }
 
 
-window.onload = function() {
+window.addEventListener("onload", function() {
     document.getElementById("newPrompt").addEventListener("submit", submitPrompt);
     getPrompts()
-}
+});

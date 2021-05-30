@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script>
+// Should we make this a separate file?
+async function handleRegister(event)    
+{
+    console.log("ASDFADSF");
+    event.preventDefault();
+
+    const username = document.getElementById("username").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    
+    // TODO validation
+    // 
+    const reqBody = {
+        "username": username,
+        "email": email,
+        "password": password,
+    }
+
+    const response = await fetch("/api/users/create", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(reqBody)
+    });
+
+    if (response.ok) {
+        document.getElementById("registerForm").reset();
+        document.getElementById("message").innerText = "Successfully Registered!"
+        setTimeout(() => {
+            window.location.href = "/login"; 
+        }, 2000);       
+    } else if (response.status == 409) {
+        document.getElementById("message").innerText = "User already exists";
+    } else {
+        document.getElementById("message").innerText = "Error in registering";
+    }
+
+
+}
+
+window.onload = function() {
+    var form = document.getElementById('registerForm');
+    form.addEventListener("submit", handleRegister);
+}
+</script>
+
+
+
+{% endblock %}
+
+{% block content %}
+    <form id="registerForm">
+        <label for="username">Username</label>
+        <input name="username" id="username" required>
+        <label for="email">Email</label>
+        <input name="email" id="email" required>
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required>
+        <input type="submit" value="Register">
+    </form>
+    <p id="message"></p>
+{% endblock %}

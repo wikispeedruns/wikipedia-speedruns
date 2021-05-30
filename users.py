@@ -37,11 +37,11 @@ def create_user():
         result = cursor.execute(query, (username, hash, email, False))
 
         if (result == 0):
-            return ("User {} already exists".format(username), 200)
+            return ("User {} already exists".format(username), 409)
 
         db.commit()
 
-    return ("User {} added".format(username), 200)
+    return ("User {} added".format(username), 201)
 
 
 
@@ -84,7 +84,7 @@ def login():
         result = cursor.execute(query, (login, ))
 
         if (result == 0):
-            return ("User not found", 404)
+            return "Bad username or password", 401
 
         user = cursor.fetchone()
         hash = user["hash"].encode()
