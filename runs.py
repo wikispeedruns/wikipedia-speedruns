@@ -6,7 +6,7 @@ from pymysql.cursors import DictCursor
 from datetime import datetime
 
 
-run_api = Blueprint('attempt', __name__, url_prefix='/api/runs')
+run_api = Blueprint('runs', __name__, url_prefix='/api/runs')
 
 
 @run_api.route('/create', methods=['POST'])
@@ -24,7 +24,6 @@ def create_run():
 
     db = get_db()
     with db.cursor() as cursor:
-        print(cursor.mogrify(query, (start_time, end_time, path, prompt_id, name)))
         result = cursor.execute(query, (start_time, end_time, path, prompt_id, name))
         
         cursor.execute(sel_query)

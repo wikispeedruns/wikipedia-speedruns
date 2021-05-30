@@ -4,13 +4,17 @@ import db
 app = Flask(__name__)
 db.init_app(app)
 
-# TODO fix this
+# TODO do proper config
 app.config["DATABASE"] = "wikipedia_speedruns"
+app.config["SECRET_KEY"] = "aodughodufhgg"
+
 
 from prompts import prompt_api
 from runs import run_api
+from users import user_api
 app.register_blueprint(prompt_api)
 app.register_blueprint(run_api)
+app.register_blueprint(user_api)
 
 # Front end pages
 @app.route('/', methods=['GET'])
