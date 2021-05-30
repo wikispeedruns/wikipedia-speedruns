@@ -169,7 +169,7 @@ function parsePath(path) {
     return out;
 }
 
-window.addEventListener("onload", async function() {
+window.addEventListener("load", async function() {
     var response = await fetch("/api/prompts/get/" + prompt_id);
     const prompt = await response.json();
 

@@ -13,7 +13,7 @@
             <ul>
                 {% if username %}
                     <li><span>{{ username }}</span> 
-                    <li><button onclick="handleLogout()">Logout</button>
+                    <li><button id="logout">Logout</button>
                 {% else %}
                     <li><a href="/register">Register</a>
                     <li><a href="/login">Login</a>

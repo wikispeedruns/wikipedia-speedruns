@@ -196,7 +196,7 @@ function displayTimer() {
 }
 
 
-window.addEventListener("onload", async function() {
+window.addEventListener("load", async function() {
     const response = await fetch("/api/prompts/get/" + prompt_id);
     const prompt = await response.json();
 
