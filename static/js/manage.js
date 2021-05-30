@@ -2,9 +2,28 @@ async function submitPrompt(event)
 {
     event.preventDefault();
 
-    reqBody = {}
-    reqBody["start"] = document.getElementById("start").value;
-    reqBody["end"] = document.getElementById("end").value;
+    reqBody = {};
+
+    const resp = await fetch(
+        `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("start").value}`,
+        {
+            mode: "cors"
+        }
+    )
+    const body = await resp.json()
+
+    reqBody["start"] = body["parse"]["title"];
+
+
+    const resp1 = await fetch(
+        `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("end").value}`,
+        {
+            mode: "cors"
+        }
+    )
+    const body1 = await resp1.json()
+
+    reqBody["end"] = body1["parse"]["title"];
 
     try {
         const response = await fetch("/api/prompts/create", {
