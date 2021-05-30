@@ -9,14 +9,12 @@
     
     <body>
         <nav>
-            <h1>Wikipedia Speedruns! (PUT LOGO HERE) </h1>
-            <ul>
                 {% if username %}
-                    <li><span>{{ username }}</span> 
-                    <li><button id="logout">Logout</button>
+                    <span>{{ username }}</span> 
+                    <button id="logout">Logout</button>
                 {% else %}
-                    <li><a href="/register">Register</a>
-                    <li><a href="/login">Login</a>
+                    <a href="/register"><button>Register</button></a>
+                    <a href="/login"><button>Login</button></a>
                 {% endif %}
             </ul>
         </nav>

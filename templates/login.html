@@ -39,7 +39,7 @@ async function handleLogin(event)
         document.getElementById("message").innerText = "Successfully logged in!";
         window.location.href = "/";
 
-    } else if (reponse.status == 401) {
+    } else if (response.status == 401) {
         document.getElementById("message").innerText = "Invalid username or password";
     } else {
         document.getElementById("message").innerText = "Error logging in";
