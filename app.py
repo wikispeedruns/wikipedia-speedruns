@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, session
+from util.decorators import check_admin
+from flask import Flask, render_template, request, redirect, session, sessions
 import db
 
 app = Flask(__name__)
@@ -62,8 +63,8 @@ def get_login_page():
     return render_with_user('login.html')
 
 @app.route('/manage', methods=['GET'])
+@check_admin
 def get_manage_page():
-    # TODO check admin
     return render_with_user('manage.html')
 
 @app.route('/prompt/<id>', methods=['GET'])
