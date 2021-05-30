@@ -1,31 +1,30 @@
-<html>
-    <head>
-        <script>
-            const prompt_id='{{prompt_id}}';
-        </script>
+{% extends 'base.html' %}
 
-        <script type=text/javascript src="{{url_for('static', filename='js/play.js') }}"></script>
-        <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/main.css')}}">
-        <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
-    </head>
-    
-    <body style="width:85%; margin: auto; margin-top: 50px !important;">
-        <div id="finishStats" class="finish"></div>
-        <div id="guide" class="guide"></div>
-        <div id="path" class="finish path"></div>
-        <div class="finish">
-            <form id="submitName">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name">
-                <input type="submit" value="Submit your time">
-            </form>
-        </div>
-        <div><p id = timer></p></div>
+{% block head %}
+<script>
+    const prompt_id='{{prompt_id}}';
+</script>
 
-        <div id="countdown" class="countdown"></div>
-        <div id="main">
-            <div id="title"></div>
-            <div id="wikipedia-frame"></div>
-        </div>
-    </body>
-</html>
+<script type=text/javascript src="{{url_for('static', filename='js/play.js') }}"></script>
+<link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
+{% endblock %}
+
+{% block content %}
+<div id="finishStats" class="finish"></div>
+<div id="guide" class="guide"></div>
+<div id="path" class="finish path"></div>
+<div class="finish">
+    <form id="submitName">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name">
+        <input type="submit" value="Submit your time">
+    </form>
+</div>
+<div><p id = timer></p></div>
+
+<div id="countdown" class="countdown"></div>
+<div id="main">
+    <div id="title"></div>
+    <div id="wikipedia-frame"></div>
+</div>
+{% endblock %}

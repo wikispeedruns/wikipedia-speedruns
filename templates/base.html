@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <title>Wikipedia Speedruns!</title>
+        <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/main.css')}}">
+  
+        {% block head %}{% endblock %}
+    </head>
+    
+    <body>
+        <nav>
+            <h1>Wikipedia Speedruns! (PUT LOGO HERE) </h1>
+            <ul>
+                {% if username %}
+                    <li><span>{{ usernaem }}</span> 
+                    <li><a href="/logout">Log Out</a>
+                {% else %}
+                    <li><a href="/register">Register</a>
+                    <li><a href="/login">Log In</a>
+                {% endif %}
+            </ul>
+        </nav>
+
+        {% block content %}{% endblock %}
+    </body>
+
+
+</html>
