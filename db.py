@@ -7,8 +7,9 @@ def init_app(app):
 def get_db():
     if 'db' not in g:
         g.db = pymysql.connect(
-            user='user', 
-            host='127.0.0.1', 
+            user=current_app.config["MYSQL_USER"], 
+            host=current_app.config["MYSQL_HOST"],
+            password=current_app.config["MYSQL_PASSWORD"], 
             database=current_app.config['DATABASE']
         )
 

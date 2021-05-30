@@ -1,14 +1,21 @@
-from util.decorators import check_admin
-from flask import Flask, render_template, request, redirect, session, sessions
+from flask import Flask, render_template, request, redirect, session
+
 import db
+from util.decorators import check_admin
+
+import json
+
 
 app = Flask(__name__)
+
+app.config.from_file('config/default.json', json.load)
+# load prod settings if they exist
+try:
+    app.config.from_file('config/prod.json', json.load)
+except FileNotFoundError:
+    pass
+
 db.init_app(app)
-
-# TODO do proper config
-app.config["DATABASE"] = "wikipedia_speedruns"
-app.config["SECRET_KEY"] = "aodughodufhgg"
-
 
 from prompts import prompt_api
 from runs import run_api

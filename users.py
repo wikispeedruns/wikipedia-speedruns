@@ -29,8 +29,6 @@ def create_user():
     # Use SHA256 to allow for arbitrary length passwords
     hash = bcrypt.hashpw(hashlib.sha256(password).digest(), bcrypt.gensalt())
     query = "INSERT INTO `users` (`username`, `hash`, `email`, `email_confirmed`) VALUES (%s, %s, %s, %s)"
-    print(hash)
-
 
     db = get_db()
     with get_db().cursor() as cursor:
