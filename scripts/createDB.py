@@ -38,9 +38,9 @@ CREATE TABLE IF NOT EXISTS `users` (
     `username` VARCHAR(20) NOT NULL UNIQUE,
     `hash` CHAR(60) NOT NULL,
     `email` VARCHAR(255) NOT NULL UNIQUE,
-    `email_confirmed` BOOLEAN NOT NULL,
+    `email_confirmed` BOOLEAN NOT NULL DEFAULT 0,
+    `admin` BOOLEAN NOT NULL DEFAULT 0,
     PRIMARY KEY (`user_id`)
-
 );
 ''')
 

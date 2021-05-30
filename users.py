@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, Blueprint
+from flask import session, request, Blueprint
 
 from db import get_db
 from pymysql.cursors import DictCursor
@@ -6,9 +6,9 @@ from pymysql.cursors import DictCursor
 import bcrypt
 import hashlib
 
-user_api = Blueprint('users', __name__, url_prefix='/api/users')
+user_api = Blueprint("users", __name__, url_prefix="/api/users")
 
-@user_api.route('/create', methods=['POST'])
+@user_api.route("/create", methods=["POST"])
 def create_user():
     """
     Example json input
@@ -46,7 +46,7 @@ def create_user():
 
 
 
-@user_api.route('/login', methods=['POST'])
+@user_api.route("/login", methods=["POST"])
 def login():
     """
     Example json input
@@ -63,7 +63,7 @@ def login():
     }
     """
 
-
+    # Validate request and pull fields
     if ("email" in request.json):
         query = "SELECT * FROM `users` WHERE `email`= %s"
         login = request.json["email"]
@@ -71,7 +71,7 @@ def login():
         query = "SELECT * FROM `users` WHERE `username`= %s"
         login = request.json["username"]
     else:
-        return ("Username not in request", 400)
+        return ("Username/email not in request", 400)
 
     if ("password" not in request.json):
         return ("Password not in request", 400)
@@ -80,19 +80,30 @@ def login():
 
     db = get_db()
     with db.cursor(DictCursor) as cursor:
-        print(cursor.mogrify(query, (login, )))
+        # Query for user and check password
         result = cursor.execute(query, (login, ))
 
         if (result == 0):
             return ("User not found", 404)
 
-        hash = cursor.fetchone()["hash"].encode()
-        print(hash)
+        user = cursor.fetchone()
+        hash = user["hash"].encode()
 
         if not bcrypt.checkpw(hashlib.sha256(password).digest(), hash):
             return "Bad username or password", 401
+
+    # Add session
+    session["user_id"] = user["user_id"]
+    session["username"] = user["username"]
+    session["admin"] = user["admin"] != 0
 
     return "Logged in", 200
 
 
 
+@user_api.route("/logout", methods=["POST"])
+def logout():
+    session.pop("user_id", None)
+    session.pop("username", None)
+    session.pop("admin", None)
+    return "Logged out", 200
