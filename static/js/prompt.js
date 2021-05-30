@@ -21,9 +21,9 @@ function generate_leaderboard(runs)
         path.appendChild(document.createTextNode(runs[i]["path"]));
 
         var name = document.createElement("td");
-        name.appendChild(document.createTextNode(runs[i]["name"]));
+        name.appendChild(document.createTextNode(runs[i]["username"]));
 
-        if (runs[i]["run_id"] === Number(run_id)) {
+        if (runs[i]["user_id"] === Number(user_id)) {
             item.style.fontWeight = "bold";
         }
 
@@ -75,7 +75,7 @@ function populateGraph(runs) {
                     type = 2;
                 } else {
             
-                    color = (runs[i]["run_id"] === Number(run_id)) ? "#ff9700" : "#000000";
+                    color = (runs[i]["user_id"] === Number(user_id)) ? "#ff9700" : "#000000";
                     font= "10px Verdana, sans-serif";
                     textheight = 10;
                     type = 0;
@@ -89,7 +89,7 @@ function populateGraph(runs) {
         
         for (var j = 0; j < pathNodes.length - 1; j++) {
 
-            var curId = (runs[i]["run_id"] === Number(run_id)) ? true : false;
+            var curId = (runs[i]["user_id"] === Number(user_id)) ? true : false;
 
 
             let edge = {src: pathNodes[j], dest: pathNodes[j + 1], count: 1, highlight: curId};

@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, Blueprint
+from flask import jsonify, request, Blueprint, session
 
 from db import get_db
 from pymysql.cursors import DictCursor
@@ -11,7 +11,7 @@ run_api = Blueprint('runs', __name__, url_prefix='/api/runs')
 
 @run_api.route('/create', methods=['POST'])
 def create_run():
-    query = "INSERT INTO `runs` (`start_time`, `end_time`, `path`, `prompt_id`, `name`) VALUES (%s, %s, %s, %s, %s)"
+    query = "INSERT INTO `runs` (`start_time`, `end_time`, `path`, `prompt_id`, `user_id`) VALUES (%s, %s, %s, %s, %s)"
     sel_query = "SELECT LAST_INSERT_ID()"
 
     # datetime wants timestamp in seconds since epoch
@@ -19,12 +19,14 @@ def create_run():
     end_time = datetime.fromtimestamp(request.json['end_time']/1000)
     path = str(request.json['path']) # TODO Format path
     prompt_id = request.json['prompt_id']
-    name = request.json['name']
 
+    print(session)
+    user_id = session['user_id']
+    # TODO validate
 
     db = get_db()
     with db.cursor() as cursor:
-        result = cursor.execute(query, (start_time, end_time, path, prompt_id, name))
+        result = cursor.execute(query, (start_time, end_time, path, prompt_id, user_id))
         
         cursor.execute(sel_query)
         id = cursor.fetchone()[0]

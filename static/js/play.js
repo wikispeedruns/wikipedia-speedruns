@@ -4,39 +4,6 @@ var startTime = 0;
 var path = [];
 var endTime = 0;
 
-async function submitName(event)
-{
-    event.preventDefault();
-
-    const reqBody = {
-        "start_time": startTime,
-        "end_time": endTime,
-        "prompt_id": prompt_id,
-        "path": path,
-        "name": document.getElementById("name").value
-    }
-
-    // Send results to API
-    try {
-        const response = await fetch("/api/runs/create", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(reqBody)
-        })
-
-        const run_id = await response.json();
-
-        // Move to prompt page after 3 seconds
-        window.location.href = "/prompt/" + prompt_id + "?run_id=" + run_id;
-
-    } catch(e) {
-        console.log(e);
-    }
-
-}
-
 function handleWikipediaLink(e) 
 {
     e.preventDefault();
@@ -89,7 +56,7 @@ async function loadPage(page) {
     path.push(title)
 
     if (formatStr(title) === formatStr(goalPage)) {
-        finish(); // No need to await this
+        await finish();
     }
 
     document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
@@ -101,21 +68,35 @@ async function loadPage(page) {
 }
 
 async function finish() {
-
     // Stop timer
     endTime = Date.now();
     clearInterval(timerInterval);
     document.getElementById("timer").innerHTML="";
 
+    const reqBody = {
+        "start_time": startTime,
+        "end_time": endTime,
+        "prompt_id": prompt_id,
+        "path": path,
+    }
 
-    // Display finish stats and path
-    Array.from(document.getElementsByClassName("finish")).forEach((el) => {
-        el.style.display = "block";
-    });
-    document.getElementById("finishStats").innerHTML = "<p>You Found It! Final Time: " + (endTime - startTime)/1000 + "</p>";
-    document.getElementById("path").innerHTML = "<p>" + formatPath(path) + "</p>";
+    // Send results to API
+    try {
+        const response = await fetch("/api/runs/create", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(reqBody)
+        })
 
-    document.getElementById("submitName").addEventListener("submit", submitName);
+        const run_id = await response.json();
+
+        window.location.href = "/prompt/" + prompt_id;
+
+    } catch(e) {
+        console.log(e);
+    }
 }
 
 

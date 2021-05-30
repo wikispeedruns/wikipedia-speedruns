@@ -9,7 +9,7 @@ prompt_api = Blueprint('prompts', __name__, url_prefix='/api/prompts')
 @prompt_api.route('/create', methods=['POST'])
 def create_prompt():
     # TODO is this the best way to do this?
-    query = "INSERT INTO `prompts` (`start`, `end`) VALUES (%s, %s);"
+    query = "INSERT INTO prompts (start, end) VALUES (%s, %s);"
 
     start = request.json['start']
     end = request.json['end']
@@ -26,7 +26,7 @@ def create_prompt():
 @prompt_api.route('/get', methods=['GET'])
 def get_all_prompts():
     # TODO this should probably be paginated, and return just ids
-    query = "SELECT * FROM `prompts`"
+    query = "SELECT * FROM prompts"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
@@ -38,7 +38,7 @@ def get_all_prompts():
 @prompt_api.route('/get/<id>', methods=['GET'])
 def get_prompt(id):
     # TODO this could probably return details as well
-    query = "SELECT * FROM `prompts` WHERE `prompt_id`=%s"
+    query = "SELECT * FROM prompts WHERE prompt_id=%s"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
@@ -50,11 +50,13 @@ def get_prompt(id):
 @prompt_api.route('/get/<id>/runs', methods=['GET'])
 def get_prompt_runs(id):
     # TODO this could probably return details as well
-    query = (
-    """
-    SELECT `run_id`, `path`, TIMESTAMPDIFF(MICROSECOND, `start_time`, `end_time`) AS `run_time`, `name` 
-    FROM `runs` WHERE `prompt_id`=%s
-    ORDER BY `run_time` 
+    query = ("""
+    SELECT runs.run_id, runs.path, users.user_id, users.username,
+            TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
+    FROM runs 
+    INNER JOIN users ON runs.user_id=users.user_id 
+    WHERE prompt_id=%s
+    ORDER BY run_time 
     """)
 
     db = get_db()
