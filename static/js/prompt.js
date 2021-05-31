@@ -46,10 +46,6 @@ function populateGraph(runs) {
     label: 'Dennis',
     ondoubleclick: function() { console.log("Hello!"); }
     });
-    var michael = graph.newNode({label: 'Michael'});
-
-    graph.newEdge(dennis, michael, {color: '#00A0B0'});
-    graph.newEdge(michael, dennis, {color: '#6A4A3C'});
     */
     
     var nodes = [];
@@ -111,7 +107,51 @@ function populateGraph(runs) {
         }
     }
 
+<<<<<<< Updated upstream
     var max = 0;
+=======
+    var edgeCountMax = 0;
+    var nodeCountMax = 0;
+    var nodeObj = [];
+    var nodeLabels = [];
+
+    nodes.forEach(function(node) {
+        if (node.count > nodeCountMax) {
+            nodeCountMax = node.count;
+        }
+    })
+    nodes.forEach(function(node) {
+        var color;
+        var font;
+        var textheight;
+
+        if (node.type === 1) {
+            color = "#008000";
+            font= "bold 15px Verdana, sans-serif";
+            textheight = 18;
+        } else if (node.type === 2) {
+            color = "#FF5733";
+            font= "bold 15px Verdana, sans-serif";
+            textheight = 18;
+        } else {
+            color = "#000000";
+            font= "10px Verdana, sans-serif";
+            textheight = 10;
+        }
+
+        var color = (node.current && node.type !== 1 && node.type !== 2) ? "#ff9700" : color;
+
+        var weightScale;
+        if (nodeCountMax === 1) {
+            weightScale = 12;
+        } else {
+            weightScale = 12 / (nodeCountMax - 1) * (node.count - 1) + 6; //map from 6 to 18
+        }
+
+        var n = graph.newNode({label: node.label, color: color, font: font, textheight: textheight, type: node.type, weightScale: weightScale, count: node.count});
+        nodeObj.push(n);
+        nodeLabels.push(node.label);
+>>>>>>> Stashed changes
 
     for (var i = 0; i < edges.length; i++) {
         if (edges[i].count > max) {
