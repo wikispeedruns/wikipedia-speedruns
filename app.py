@@ -62,3 +62,7 @@ def get_play_page(id):
     return render_template('play.html', prompt_id=id)
 
 
+@app.route('/test', methods=['GET'])
+def get_test_page():
+    return render_template('test.html')
+
