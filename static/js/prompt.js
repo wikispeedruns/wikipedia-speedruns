@@ -149,8 +149,14 @@ function populateGraph(runs) {
         }
 
         var color = (node.current && node.type !== 1 && node.type !== 2) ? "#ff9700" : color;
+        var weightScale;
+        if (nodeCountMax === 1) {
+            weightScale = 12;
+        } else {
+            weightScale = 12 / (nodeCountMax - 1) * (node.count - 1) + 6; //map from 6 to 18
+        }
 
-        var n = graph.newNode({label: node.label, color: color, font: font, textheight: textheight, type: node.type});
+        var n = graph.newNode({label: node.label, color: color, font: font, textheight: textheight, type: node.type, weightScale: weightScale});
         nodeObj.push(n);
         nodeLabels.push(node.label);
 
