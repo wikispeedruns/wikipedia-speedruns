@@ -156,7 +156,7 @@ function populateGraph(runs) {
             weightScale = 12 / (nodeCountMax - 1) * (node.count - 1) + 6; //map from 6 to 18
         }
 
-        var n = graph.newNode({label: node.label, color: color, font: font, textheight: textheight, type: node.type, weightScale: weightScale});
+        var n = graph.newNode({label: node.label, color: color, font: font, textheight: textheight, type: node.type, weightScale: weightScale, count: node.count});
         nodeObj.push(n);
         nodeLabels.push(node.label);
 
