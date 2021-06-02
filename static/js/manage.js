@@ -26,7 +26,7 @@ async function submitPrompt(event)
     reqBody["end"] = body1["parse"]["title"];
 
     try {
-        const response = await fetch("/api/prompts/create", {
+        const response = await fetch("/api/prompts/", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -54,6 +54,8 @@ function createPromptItem(prompt)
     item.append(link);
     item.append(document.createTextNode(`: ${prompt["start"]}/${prompt["end"]}`))
 
+    item.append(prompt["public"] ? " public" : " ranked" );
+
     return item;
 }
 
@@ -62,7 +64,7 @@ async function getPrompts()
     var list = document.getElementById("prompts");
   
     try {
-        const response = await fetch("/api/prompts/get");
+        const response = await fetch("/api/prompts");
         const prompts = await response.json();
 
         // Remove old list

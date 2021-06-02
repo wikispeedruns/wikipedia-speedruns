@@ -82,7 +82,7 @@ async function finish() {
 
     // Send results to API
     try {
-        const response = await fetch("/api/runs/create", {
+        const response = await fetch("/api/runs", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -178,7 +178,7 @@ function displayTimer() {
 
 
 window.addEventListener("load", async function() {
-    const response = await fetch("/api/prompts/get/" + prompt_id);
+    const response = await fetch("/api/prompts/" + prompt_id);
     const prompt = await response.json();
 
     const article = prompt["start"];

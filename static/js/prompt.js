@@ -220,10 +220,10 @@ function parsePath(path) {
 }
 
 window.addEventListener("load", async function() {
-    var response = await fetch("/api/prompts/get/" + prompt_id);
+    var response = await fetch("/api/prompts/" + prompt_id);
     const prompt = await response.json();
 
-    response = await fetch("/api/prompts/get/" + prompt_id + "/runs");
+    response = await fetch("/api/prompts/" + prompt_id + "/runs");
     const runs = await response.json(); 
 
     generate_prompt(prompt);

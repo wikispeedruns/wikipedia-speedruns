@@ -9,6 +9,10 @@
         <script defer>
             const user_id='{{user_id}}';
         </script>
+        {% else %}
+        <script defer>
+            const user_id = null;
+        </script>
         {% endif %}
         
 

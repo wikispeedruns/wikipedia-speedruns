@@ -7,7 +7,7 @@ from pymysql.cursors import DictCursor
 prompt_api = Blueprint('prompts', __name__, url_prefix='/api/prompts')
 
 
-@prompt_api.post('/')
+@prompt_api.post('')
 @check_admin
 def create_prompt():
     # TODO is this the best way to do this?
@@ -25,7 +25,7 @@ def create_prompt():
     return "Error adding prompt"
 
 
-@prompt_api.get('/')
+@prompt_api.get('')
 def get_all_prompts():
     # TODO this should probably be paginated, and return just ids
     query = "SELECT * FROM prompts"
