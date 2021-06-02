@@ -1,3 +1,4 @@
+from util.decorators import check_admin
 from flask import Flask, jsonify, request, Blueprint
 
 from db import get_db
@@ -7,6 +8,7 @@ prompt_api = Blueprint('prompts', __name__, url_prefix='/api/prompts')
 
 
 @prompt_api.route('/create', methods=['POST'])
+@check_admin
 def create_prompt():
     # TODO is this the best way to do this?
     query = "INSERT INTO prompts (start, end) VALUES (%s, %s);"
