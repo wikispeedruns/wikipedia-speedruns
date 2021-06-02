@@ -38,9 +38,10 @@ def get_home_page():
 
 @app.route('/random', methods=['GET'])
 def get_random_prompt():
-    # TODO this is insanely inefficient, it needs to sort the whole table!
+    # TODO this is insanely inefficient, it needs to sort the whole set of public prompts!
     query = ("""
     SELECT prompt_id FROM prompts
+    WHERE public=TRUE
     ORDER BY RAND()
     LIMIT 1;
     """)

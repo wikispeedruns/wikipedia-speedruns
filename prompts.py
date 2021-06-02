@@ -1,5 +1,5 @@
 from util.decorators import check_admin
-from flask import Flask, jsonify, request, Blueprint
+from flask import Flask, jsonify, request, Blueprint, session
 
 from db import get_db
 from pymysql.cursors import DictCursor
@@ -25,7 +25,7 @@ def create_prompt():
     return "Error adding prompt"
 
 
-@prompt_api.route('/', methods=['GET'])
+@prompt_api.get('/')
 def get_all_prompts():
     # TODO this should probably be paginated, and return just ids
     query = "SELECT * FROM prompts"
@@ -47,7 +47,7 @@ def get_all_prompts():
         return jsonify(results)
 
 
-@prompt_api.route('/<id>', methods=['GET'])
+@prompt_api.get('/<id>')
 def get_prompt(id):
     # TODO this could probably return details as well
     query = "SELECT * FROM prompts WHERE prompt_id=%s"
@@ -59,7 +59,32 @@ def get_prompt(id):
         return jsonify(results)
 
 
-@prompt_api.route('/<id>/runs', methods=['GET'])
+@prompt_api.patch('/<id>/changepublic')
+def set_prompt_publicity(id):
+    '''
+    Change wheter a prompt is public
+
+    Example json
+    {
+        "public": true
+    }
+    '''
+    query = "UPDATE prompts SET `public`=%s WHERE `prompt_id`=%s"
+
+    if ("public" not in request.json):
+        return "invalid request", 400
+
+    public = request.json["public"]
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        res = cursor.execute(query, (public, id))
+
+        if (res == 0): return "prompt not found", 404
+        return "Changed prompt to {}".format("public" if public else "ranked"), 200
+
+
+@prompt_api.get('/<id>/runs')
 def get_prompt_runs(id):
     # TODO this could probably return details as well
     query = ("""

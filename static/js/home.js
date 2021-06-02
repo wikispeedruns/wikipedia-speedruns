@@ -37,11 +37,14 @@ async function getPromptsHome()
     var list = document.getElementById("prompts");
 
     try {
-
-        const response = await fetch("/api/prompts/get");
+        queryString = "";
        
         // Defined in base.html based on template
-        if (username)
+        if (!username) {
+            queryString = "?public=true"
+        }
+
+        const response = await fetch("/api/prompts/get" + queryString);
 
         const prompts = await response.json();
 
