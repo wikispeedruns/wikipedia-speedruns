@@ -12,3 +12,14 @@ def check_admin(endpoint_func):
     wrapper.__name__ = endpoint_func.__name__
     wrapper.__doc__ = endpoint_func.__doc__
     return wrapper
+
+def check_user(endpoint_func):
+    def wrapper(*args, **kwargs):
+        if ('user_id' not in session):
+            return 'User account required', 401
+
+        return endpoint_func(*args, **kwargs)
+    wrapper.__name__ = endpoint_func.__name__
+    wrapper.__doc__ = endpoint_func.__doc__
+    return wrapper
+

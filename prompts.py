@@ -7,7 +7,7 @@ from pymysql.cursors import DictCursor
 prompt_api = Blueprint('prompts', __name__, url_prefix='/api/prompts')
 
 
-@prompt_api.route('/create', methods=['POST'])
+@prompt_api.post('/')
 @check_admin
 def create_prompt():
     # TODO is this the best way to do this?
@@ -25,10 +25,20 @@ def create_prompt():
     return "Error adding prompt"
 
 
-@prompt_api.route('/get/public', methods=['GET'])
-def get_ranked_prompts():
+@prompt_api.route('/', methods=['GET'])
+def get_all_prompts():
     # TODO this should probably be paginated, and return just ids
     query = "SELECT * FROM prompts"
+
+    if (request.args.get("public") == "true"):
+        query += " WHERE public=TRUE"
+    else:
+        # user needs to be logged in to see ranked prompts
+        if ("user_id" not in session):
+            return "User account required to see this", 401
+
+        if (request.args.get("public") == "false"):
+            query += " WHERE public=FALSE"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
@@ -37,20 +47,7 @@ def get_ranked_prompts():
         return jsonify(results)
 
 
-@prompt_api.route('/get/ranked', methods=['GET'])
-def get_public_prompts():
-    # TODO this should probably be paginated, and return just ids
-    query = "SELECT * FROM prompts"
-
-    db = get_db()
-    with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query)
-        results = cursor.fetchall()
-        return jsonify(results)
-
-
-
-@prompt_api.route('/get/<id>', methods=['GET'])
+@prompt_api.route('/<id>', methods=['GET'])
 def get_prompt(id):
     # TODO this could probably return details as well
     query = "SELECT * FROM prompts WHERE prompt_id=%s"
@@ -62,7 +59,7 @@ def get_prompt(id):
         return jsonify(results)
 
 
-@prompt_api.route('/get/<id>/runs', methods=['GET'])
+@prompt_api.route('/<id>/runs', methods=['GET'])
 def get_prompt_runs(id):
     # TODO this could probably return details as well
     query = ("""

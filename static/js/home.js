@@ -39,6 +39,10 @@ async function getPromptsHome()
     try {
 
         const response = await fetch("/api/prompts/get");
+       
+        // Defined in base.html based on template
+        if (username)
+
         const prompts = await response.json();
 
         // Remove old list

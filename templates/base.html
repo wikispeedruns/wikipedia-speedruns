@@ -4,6 +4,14 @@
         <script src="{{url_for('static', filename='js/base.js')}}" defer></script>
         <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/main.css')}}">
   
+
+        {% if username %}
+        <script defer>
+            const user_id='{{user_id}}';
+        </script>
+        {% endif %}
+        
+
         {% block head %}{% endblock %}
     </head>
     

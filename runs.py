@@ -9,7 +9,7 @@ from datetime import datetime
 run_api = Blueprint('runs', __name__, url_prefix='/api/runs')
 
 
-@run_api.route('/create', methods=['POST'])
+@run_api.route('/', methods=['POST'])
 def create_run():
     query = "INSERT INTO `runs` (`start_time`, `end_time`, `path`, `prompt_id`, `user_id`) VALUES (%s, %s, %s, %s, %s)"
     sel_query = "SELECT LAST_INSERT_ID()"
@@ -37,7 +37,7 @@ def create_run():
     return "Error submitting prompt"
 
 
-@run_api.route('/get', methods=['GET'])
+@run_api.route('/', methods=['GET'])
 def get_all_runs():
     # TODO this should probably be paginated, and return just ids
     query = "SELECT * FROM `runs`"
