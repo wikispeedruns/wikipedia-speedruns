@@ -55,7 +55,7 @@ def get_random_prompt():
 @app.route('/latest', methods=['GET'])
 def get_latest_prompt():
     # TODO its a little messy to do this here
-    query = ("SELECT MAX(prompt_id) FROM prompts;")
+    query = ("SELECT MAX(prompt_id) FROM prompts WHERE public=TRUE;")
 
     with db.get_db().cursor() as cursor:
         cursor.execute(query)

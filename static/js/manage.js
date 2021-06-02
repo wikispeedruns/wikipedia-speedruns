@@ -54,7 +54,26 @@ function createPromptItem(prompt)
     item.append(link);
     item.append(document.createTextNode(`: ${prompt["start"]}/${prompt["end"]}`))
 
-    item.append(prompt["public"] ? " public" : " ranked" );
+    var public = document.createElement('button');
+    public.append(document.createTextNode(prompt["public"] ? " public" : " ranked"));
+
+    public.onclick = (e) => {
+        e.preventDefault();
+        
+        fetch('/api/prompts/' + prompt["prompt_id"] + "/changepublic", {
+            method: "PATCH",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "public": !prompt["public"]
+            })
+        })
+
+        getPrompts();
+    }
+
+    item.append(public)
 
     return item;
 }

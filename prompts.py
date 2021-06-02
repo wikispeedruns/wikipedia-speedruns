@@ -81,6 +81,8 @@ def set_prompt_publicity(id):
         res = cursor.execute(query, (public, id))
 
         if (res == 0): return "prompt not found", 404
+
+        db.commit()
         return "Changed prompt to {}".format("public" if public else "ranked"), 200
 
 

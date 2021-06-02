@@ -20,19 +20,20 @@
     <p>Click <a href="/latest">here</a> to try the latest prompt, starts immediately after click!</p>
     <p>Click <a href="/random">here</a> to try a random prompt, starts immediately after click!</p>
     
-    <p>Here are links to all available prompts:</p>
-    <table id="prompts">
+    <p>Here are links to all available public prompts:</p>
+    <table id="publicPrompts">
     </table>
 
-    {% if username %}
     <p>
-
+        {% if username %}
+        Here is the listed of rated prompts.
+        {% else %}
+        Login to see rated prompts.
+        {% endif %}
     </p>
-    {% else %}
-    <p>
 
-    </p>
-    {% endif %}
-    
+    <table id="ratedPrompts">
+
+    </table>
     <p>Created by <a href="https://danqian.net">Daniel Qian</a> and <a href="https://mliu59.github.io/">Miles Liu</a></p>
 {% endblock %}
