@@ -4,6 +4,9 @@ import pymysql
 
 DB_NAME='wikipedia_speedruns'
 
+CREATE_DB_QUERY = 'CREATE DATABASE IF NOT EXISTS {}'.format(DB_NAME)
+USE_DB_QUERY = 'USE {}'.format(DB_NAME)
+
 TABLES={}
 
 TABLES['prompts']=(
@@ -34,11 +37,13 @@ def create_tables(cursor):
     for table in TABLES:
         cursor.execute(TABLES[table])
 
-conn = pymysql.connect(user='user', host='127.0.0.1',
-                            database=DB_NAME)
+conn = pymysql.connect(user='user', host='127.0.0.1')
 
 with conn.cursor() as cursor:
+    cursor.execute(CREATE_DB_QUERY)
+    cursor.execute(USE_DB_QUERY)
     create_tables(cursor)
+    
     conn.commit()
     conn.close()
 
