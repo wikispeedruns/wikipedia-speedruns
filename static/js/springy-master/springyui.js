@@ -321,12 +321,12 @@ jQuery.fn.springy = function(params) {
 
 			var contentWidth = node.getWidth(text= 1);
 			var contentHeight = node.getHeight(text= 1);
-			var boxWidth = contentWidth + paddingX;
+			var boxWidth = contentWidth + paddingX + 20;
 			var boxHeight = contentHeight + paddingY;
 
 			if (node.data.type === 0) {
 
-				var defaultDiameter = 12;
+				var defaultDiameter = (node.data.weightScale !== undefined) ? node.data.weightScale : 12;
 				var padding = 6;
 				//ctx.clearRect(s.x - boxWidth/2, s.y - boxHeight/2, boxWidth, boxHeight);
 
@@ -367,7 +367,7 @@ jQuery.fn.springy = function(params) {
 
 					ctx.clearRect(xStart, yStart, boxWidth, boxHeight);
 					
-					ctx.fillText(text, textXStart, textYStart);
+					ctx.fillText(text + ": " + node.data.count, textXStart, textYStart);
 				}
 
 				if (selected !== null && selected.node !== null && selected.node.id === node.id) {

@@ -53,91 +53,141 @@ function populateGraph(runs) {
     */
     
     var nodes = [];
-    var nodeLabels = [];
     var edges = [];
+
+    var checkIncludeLabels = function(label, array) {
+        for (var i = 0; i < array.length; i++) {
+            if (array[i].label === label) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    var checkIncludeEdgeLabels = function(src, dest, array) {
+        for (var i = 0; i < array.length; i++) {
+            if (array[i].src === src && array[i].dest === dest) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    
+
     for (var i = 0; i < runs.length; i++) {
         var pathNodes = parsePath(runs[i]["path"].substring(1, runs[i]["path"].length - 1));
-        for (var j = 0; j < pathNodes.length; j++) {
-            if (!nodeLabels.includes(pathNodes[j])) {
-                var color;
-                var font;
-                var textheight;
-                var type;
-                if (j === 0) {
-                    color = "#008000";
-                    font= "bold 15px Verdana, sans-serif";
-                    textheight = 18;
-                    type = 1;
-                } else if (j === pathNodes.length - 1) {
-                    color = "#FF5733";
-                    font= "bold 15px Verdana, sans-serif";
-                    textheight = 18;
-                    type = 2;
-                } else {
-            
-                    color = (runs[i]["user_id"] === Number(user_id)) ? "#ff9700" : "#000000";
-                    font= "10px Verdana, sans-serif";
-                    textheight = 10;
-                    type = 0;
-                }
+        var cur = (runs[i]["user_id"] === Number(user_id)) ? true : false;
 
-                nodes.push(graph.newNode({label: pathNodes[j], color: color, font: font, textheight: textheight, type: type}));
-                nodeLabels.push(pathNodes[j]);
+        if (cur) {
+            console.log(runs[i]["path"]);
+        }
+
+        for (var j = 0; j < pathNodes.length; j++) {
+            var index = checkIncludeLabels(pathNodes[j], nodes);
+            if (index === -1) {
+                var type;
+                if (j === 0) { type = 1;} 
+                else if (j === pathNodes.length - 1) { type = 2;} 
+                else { type = 0;}
+                
+                let node = {type: type, label: pathNodes[j], count: 1, current: cur};
+                nodes.push(node);
+                
+            } else {
+                if (cur) {
+                    nodes[index].current = cur;
+                }
+                nodes[index].count = nodes[index].count + 1;
             }
         }
 
         
         for (var j = 0; j < pathNodes.length - 1; j++) {
 
-            var curId = (runs[i]["user_id"] === Number(user_id)) ? true : false;
 
+            var index = checkIncludeEdgeLabels(pathNodes[j], pathNodes[j + 1], edges);
 
-            let edge = {src: pathNodes[j], dest: pathNodes[j + 1], count: 1, highlight: curId};
-            if (edges.length === 0) {
+            if (index === -1) {
+                let edge = {src: pathNodes[j], dest: pathNodes[j + 1], count: 1, current: cur};
                 edges.push(edge);
             } else {
-                var found = false;
-                for (var k = 0; k < edges.length; k++) {
-                    if (edge.src === edges[k].src && edge.dest === edges[k].dest) {
-                        edges[k].count = edges[k].count + 1;
-                        found = true;
-                        break;
-                    }
+                if (cur) {
+                    edges[index].current = cur;
                 }
-                if (!found) {
-                    edges.push(edge);
-                }
-            }   
+                edges[index].count = edges[index].count + 1;
+            }
         }
     }
 
-    var max = 0;
+    var edgeCountMax = 0;
+    var nodeCountMax = 0;
+    var nodeObj = [];
+    var nodeLabels = [];
 
-    for (var i = 0; i < edges.length; i++) {
-        if (edges[i].count > max) {
-            max = edges[i].count;
+    nodes.forEach(function(node) {
+        if (node.count > nodeCountMax) {
+            nodeCountMax = node.count;
         }
-    }
+    })
+    nodes.forEach(function(node) {
+        var color;
+        var font;
+        var textheight;
 
-    for (var i = 0; i < edges.length; i++) {
-        var srcIndex = nodeLabels.indexOf(edges[i].src);
-        var destIndex = nodeLabels.indexOf(edges[i].dest);
+        if (node.type === 1) {
+            color = "#008000";
+            font= "bold 15px Verdana, sans-serif";
+            textheight = 18;
+        } else if (node.type === 2) {
+            color = "#FF5733";
+            font= "bold 15px Verdana, sans-serif";
+            textheight = 18;
+        } else {
+            color = "#000000";
+            font= "10px Verdana, sans-serif";
+            textheight = 10;
+        }
+
+        var color = (node.current && node.type !== 1 && node.type !== 2) ? "#ff9700" : color;
+        var weightScale;
+        if (nodeCountMax === 1) {
+            weightScale = 12;
+        } else {
+            weightScale = 12 / (nodeCountMax - 1) * (node.count - 1) + 6; //map from 6 to 18
+        }
+
+        var n = graph.newNode({label: node.label, color: color, font: font, textheight: textheight, type: node.type, weightScale: weightScale, count: node.count});
+        nodeObj.push(n);
+        nodeLabels.push(node.label);
+
+    })
+
+    edges.forEach(function(edge) {
+        if (edge.count > edgeCountMax) {
+            edgeCountMax = edge.count;
+        }
+    })
+
+    edges.forEach(function(edge) {
+        var srcIndex = nodeLabels.indexOf(edge.src);
+        var destIndex = nodeLabels.indexOf(edge.dest);
         var colorScale;
         var weightScale;
-        if (max === 1) {
+
+        if (edgeCountMax === 1) {
             colorScale = 255;
             weightScale = 2.25;
         } else {
-            colorScale = parseInt(255 - (255 / (max - 1)) * (edges[i].count - 1), 10);
-            weightScale = 1.5 / (max - 1) * (edges[i].count - 1) + 1.5; //map from 1.5 to 3
+            colorScale = parseInt(255 - (255 / (edgeCountMax - 1)) * (edge.count - 1), 10);
+            weightScale = 1.5 / (edgeCountMax - 1) * (edge.count - 1) + 1.5; //map from 1.5 to 3
         }
-        //console.log(edges[i].src);
-        //console.log(nodes[srcIndex]);
-        //console.log(nodes[destIndex]);
-        var color = edges[i].highlight ? "#ff9700" : rgbToHex(255 - colorScale, 0, colorScale);
 
-        graph.newEdge(nodes[srcIndex], nodes[destIndex], {color: color, label: edges[i].count, weight: weightScale});
-    }
+        var color = edge.current ? "#ff9700" : rgbToHex(255 - colorScale, 0, colorScale);
+        graph.newEdge(nodeObj[srcIndex], nodeObj[destIndex], {color: color, label: edge.count, weight: weightScale});
+
+
+    })
 
     
     return graph;
