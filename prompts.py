@@ -25,8 +25,8 @@ def create_prompt():
     return "Error adding prompt"
 
 
-@prompt_api.route('/get', methods=['GET'])
-def get_all_prompts():
+@prompt_api.route('/get/public', methods=['GET'])
+def get_ranked_prompts():
     # TODO this should probably be paginated, and return just ids
     query = "SELECT * FROM prompts"
 
@@ -35,6 +35,19 @@ def get_all_prompts():
         cursor.execute(query)
         results = cursor.fetchall()
         return jsonify(results)
+
+
+@prompt_api.route('/get/ranked', methods=['GET'])
+def get_public_prompts():
+    # TODO this should probably be paginated, and return just ids
+    query = "SELECT * FROM prompts"
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query)
+        results = cursor.fetchall()
+        return jsonify(results)
+
 
 
 @prompt_api.route('/get/<id>', methods=['GET'])

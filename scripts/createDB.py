@@ -19,6 +19,16 @@ CREATE TABLE IF NOT EXISTS `prompts` (
 );
 ''')
 
+TABLES['public_prompts']=(
+'''
+CREATE TABLE IF NOT EXISTS `public_prompts` (
+    `prompt_id` INT NOT NULL,
+    PRIMARY KEY (`prompt_id`),
+    FOREIGN KEY (`prompt_id`) REFERENCES `prompts`(`prompt_id`)
+);
+'''
+)
+
 TABLES['users']=(
 '''
 CREATE TABLE IF NOT EXISTS `users` (
