@@ -56,10 +56,16 @@ def get_prompt(id):
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (id,))
         results = cursor.fetchone()
+
+        if (not results["public"] and "user_id" not in session):
+            return "User account required to see this", 401
+
+
         return jsonify(results)
 
 
 @prompt_api.patch('/<id>/changepublic')
+@check_admin
 def set_prompt_publicity(id):
     '''
     Change wheter a prompt is public
