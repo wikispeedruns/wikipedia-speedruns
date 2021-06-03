@@ -27,7 +27,7 @@ def create_prompt():
 
 @prompt_api.get('')
 def get_all_prompts():
-    # TODO this should probably be paginated, and return just ids
+    # TODO this should probably be paginated
     query = "SELECT * FROM prompts"
 
     if (request.args.get("public") == "true"):

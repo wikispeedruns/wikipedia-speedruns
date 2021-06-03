@@ -8,7 +8,7 @@ import hashlib
 
 user_api = Blueprint("users", __name__, url_prefix="/api/users")
 
-@user_api.route("/create", methods=["POST"])
+@user_api.post("/create")
 def create_user():
     """
     Example json input
@@ -44,7 +44,7 @@ def create_user():
 
 
 
-@user_api.route("/login", methods=["POST"])
+@user_api.post("/login")
 def login():
     """
     Example json input
@@ -99,7 +99,7 @@ def login():
 
 
 
-@user_api.route("/logout", methods=["POST"])
+@user_api.post("/logout")
 def logout():
     session.pop("user_id", None)
     session.pop("username", None)
