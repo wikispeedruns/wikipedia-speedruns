@@ -77,7 +77,12 @@ def get_manage_page():
 
 @app.route('/prompt/<id>', methods=['GET'])
 def get_prompt_page(id):
-    return render_with_user('prompt.html', prompt_id=id)
+    run_id = request.args.get('run_id', '')
+    
+    if len(run_id) != 0:
+        return render_template('prompt.html', prompt_id=id, run_id=run_id)
+    else:
+        return render_template('prompt.html', prompt_id=id)
 
 
 @app.route('/play/<id>', methods=['GET'])

@@ -8,5 +8,7 @@ async function handleLogout(event)
 }
 
 window.addEventListener("load", function() {
-    document.getElementById("logout").onclick = handleLogout;
+    if (user_id) {
+        document.getElementById("logout").onclick = handleLogout;
+    }
 });

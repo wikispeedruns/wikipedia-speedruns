@@ -8,6 +8,8 @@ function generate_leaderboard(runs)
     var table = document.getElementById("leaderboard");
     // TODO probably add class and stuff
     for (var i = 0; i < runs.length; i++) {
+        // Ignore all runs without user_ids
+        if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
 
         var item = document.createElement("tr");
         
@@ -21,9 +23,14 @@ function generate_leaderboard(runs)
         path.appendChild(document.createTextNode(runs[i]["path"]));
 
         var name = document.createElement("td");
-        name.appendChild(document.createTextNode(runs[i]["username"]));
 
-        if (runs[i]["user_id"] === Number(user_id)) {
+        if (runs[i]["username"]) {
+            name.appendChild(document.createTextNode( runs[i]["username"]));
+        } else {
+            name.appendChild(document.createTextNode("You"));
+        }
+
+        if (runs[i]["run_id"] === Number(run_id)) {
             item.style.fontWeight = "bold";
         }
 
@@ -76,8 +83,11 @@ function populateGraph(runs) {
     
 
     for (var i = 0; i < runs.length; i++) {
+        if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
+
+
         var pathNodes = parsePath(runs[i]["path"].substring(1, runs[i]["path"].length - 1));
-        var cur = (runs[i]["user_id"] === Number(user_id)) ? true : false;
+        var cur = (runs[i]["run_id"] === Number(run_id)) ? true : false;
 
         if (cur) {
             console.log(runs[i]["path"]);

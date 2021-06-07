@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `runs` (
     `end_time` TIMESTAMP(3) NOT NULL,
     `path` TEXT NOT NULL,
     `prompt_id` INT NOT NULL,
-    `user_id` INT NOT NULL,
+    `user_id` INT,
     PRIMARY KEY (`run_id`),
     FOREIGN KEY (`prompt_id`) REFERENCES `prompts`(`prompt_id`),
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)

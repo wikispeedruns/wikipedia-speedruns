@@ -92,7 +92,7 @@ async function finish() {
 
         const run_id = await response.json();
 
-        window.location.href = "/prompt/" + prompt_id;
+        window.location.href = "/prompt/" + prompt_id + "?run_id=" + run_id;
 
     } catch(e) {
         console.log(e);

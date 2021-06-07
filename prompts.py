@@ -99,7 +99,7 @@ def get_prompt_runs(id):
     SELECT runs.run_id, runs.path, users.user_id, users.username,
             TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
     FROM runs 
-    INNER JOIN users ON runs.user_id=users.user_id 
+    LEFT JOIN users ON runs.user_id=users.user_id 
     WHERE prompt_id=%s
     ORDER BY run_time 
     """)

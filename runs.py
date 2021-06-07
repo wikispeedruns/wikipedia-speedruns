@@ -20,12 +20,16 @@ def create_run():
     path = str(request.json['path']) # TODO Format path
     prompt_id = request.json['prompt_id']
 
-    print(session)
-    user_id = session['user_id']
+    if ('user_id' in session):
+        user_id = session['user_id']
+    else:
+        user_id = None
+
     # TODO validate
 
     db = get_db()
     with db.cursor() as cursor:
+        print(cursor.mogrify(query, (start_time, end_time, path, prompt_id, user_id)))
         result = cursor.execute(query, (start_time, end_time, path, prompt_id, user_id))
         
         cursor.execute(sel_query)
