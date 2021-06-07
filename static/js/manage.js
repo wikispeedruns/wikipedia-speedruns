@@ -26,7 +26,7 @@ async function submitPrompt(event)
     reqBody["end"] = body1["parse"]["title"];
 
     try {
-        const response = await fetch("/api/prompts/create", {
+        const response = await fetch("/api/prompts/", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -54,6 +54,27 @@ function createPromptItem(prompt)
     item.append(link);
     item.append(document.createTextNode(`: ${prompt["start"]}/${prompt["end"]}`))
 
+    var public = document.createElement('button');
+    public.append(document.createTextNode(prompt["public"] ? " public" : " ranked"));
+
+    public.onclick = (e) => {
+        e.preventDefault();
+        
+        fetch('/api/prompts/' + prompt["prompt_id"] + "/changepublic", {
+            method: "PATCH",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "public": !prompt["public"]
+            })
+        })
+
+        getPrompts();
+    }
+
+    item.append(public)
+
     return item;
 }
 
@@ -62,7 +83,7 @@ async function getPrompts()
     var list = document.getElementById("prompts");
   
     try {
-        const response = await fetch("/api/prompts/get");
+        const response = await fetch("/api/prompts");
         const prompts = await response.json();
 
         // Remove old list
@@ -81,7 +102,7 @@ async function getPrompts()
 }
 
 
-window.onload = function() {
+window.addEventListener("load", function() {
     document.getElementById("newPrompt").addEventListener("submit", submitPrompt);
     getPrompts()
-}
+});

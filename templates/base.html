@@ -1,0 +1,38 @@
+<html>
+    <head>
+        <title>Wikipedia Speedruns!</title>
+        <script src="{{url_for('static', filename='js/base.js')}}" defer></script>
+        <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/main.css')}}">
+  
+
+        {% if username %}
+        <script defer>
+            const user_id='{{user_id}}';
+        </script>
+        {% else %}
+        <script defer>
+            const user_id = null;
+        </script>
+        {% endif %}
+        
+
+        {% block head %}{% endblock %}
+    </head>
+    
+    <body>
+        <nav>
+                {% if username %}
+                    <span>{{ username }}</span> 
+                    <button id="logout">Logout</button>
+                {% else %}
+                    <a href="/register"><button>Register</button></a>
+                    <a href="/login"><button>Login</button></a>
+                {% endif %}
+            </ul>
+        </nav>
+
+        {% block content %}{% endblock %}
+    </body>
+
+
+</html>

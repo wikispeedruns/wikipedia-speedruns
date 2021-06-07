@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script>
+// Should we make this a separate file?
+async function handleLogin(event)    
+{
+    event.preventDefault();
+    var re = /\S+@\S+\.\S+/;
+
+    const login = document.getElementById("login").value;
+    const password = document.getElementById("password").value;
+    
+    var reqBody;
+
+    // TODO what if username looks like an email? We should prevent that somehow
+    if (re.test(login)) {
+        reqBody = {
+            "email" : login,
+            "password": password,
+        };
+    } else {
+        reqBody = {
+            "username" : login,
+            "password": password,
+        };
+    }
+
+    const response = await fetch("/api/users/login", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(reqBody)
+    });
+
+    if (response.ok) {
+        document.getElementById("loginForm").reset();
+        document.getElementById("message").innerText = "Successfully logged in!";
+        window.location.href = "/";
+
+    } else if (response.status == 401) {
+        document.getElementById("message").innerText = "Invalid username or password";
+    } else {
+        document.getElementById("message").innerText = "Error logging in";
+    }
+    
+}
+
+window.onload = function() {
+    var form = document.getElementById('loginForm');
+    form.addEventListener("submit", handleLogin);
+}
+</script>
+{% endblock %}
+
+
+{% block content %}
+<br>
+<form id="loginForm" onsubmit="handleLogin">
+    <label for="login">Login</label>
+    <input name="login" id="login" required>
+    <br>
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password" required>
+    <br>
+    <input type="submit" value="Log In">
+</form>
+<p id="message"></p>
+{% endblock %}

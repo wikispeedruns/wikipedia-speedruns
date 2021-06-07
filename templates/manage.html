@@ -1,25 +1,19 @@
-<html>
-    <head>
-        <script type=text/javascript src="{{url_for('static', filename='js/manage.js') }}"></script>
-        <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/main.css')}}">
+{% extends 'base.html' %}
 
-    </head>
+{% block head %}
+<script type=text/javascript src="{{url_for('static', filename='js/manage.js') }}"></script>
+{% endblock %}
     
-    <body>
-        <form id="newPrompt">
-            <label for="start">Start Article:</label>
-            <input type="text" id="start" name="start">
-            <label for="end">End Article:</label>
-            <input type="text" id="end" name="end">
+{% block content %}
+    <form id="newPrompt">
+        <label for="start">Start Article:</label>
+        <input type="text" id="start" name="start">
+        <label for="end">End Article:</label>
+        <input type="text" id="end" name="end">
 
-            <input type="submit" value="Submit">
-        </form>
+        <input type="submit" value="Submit">
+    </form>
+
+    <ul id="prompts"></ul>
     
-        <ul id="prompts">
-            
-        </ul>
-    
-    </body>
-
-
-</html>
+{% endblock %}

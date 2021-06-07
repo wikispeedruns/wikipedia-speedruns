@@ -34,16 +34,27 @@ function createPromptItemHome(prompt)
 
 async function getPromptsHome()
 {
-    var list = document.getElementById("prompts");
+    var publicList = document.getElementById("publicPrompts");
+    var ratedList = document.getElementById("ratedPrompts");
 
     try {
+        queryString = "";
+       
+        // Defined in base.html based on template
+        if (!user_id) {
+            queryString = "?public=true"
+        }
 
-        const response = await fetch("/api/prompts/get");
+        const response = await fetch("/api/prompts" + queryString);
+
         const prompts = await response.json();
 
-        // Remove old list
-        while (list.firstChild) {
-            list.removeChild(list.firstChild);
+        // Remove old list(s)
+        while (publicList.firstChild) {
+            publicList.removeChild(publicList.firstChild);
+        }
+        while (ratedList.firstChild) {
+            ratedList.removeChild(ratedList.firstChild);
         }
 
         var item = document.createElement("tr");
@@ -55,11 +66,20 @@ async function getPromptsHome()
         header2.appendChild(document.createTextNode("Starting Article"));
         item.appendChild(header1);
         item.appendChild(header2);
-        list.appendChild(item);
+
+        publicList.appendChild(item);
+        ratedList.appendChild(item.cloneNode(true))
+        
+        if (!user_id) {
+            ratedList.style="display: none"
+        }
 
         // Add new prompt
         prompts.forEach( (p) => {
-            list.appendChild(createPromptItemHome(p));
+            if (p["public"])
+                publicList.appendChild(createPromptItemHome(p));
+            else
+                ratedList.appendChild(createPromptItemHome(p));
         }); 
 
     } catch(e) {
@@ -68,6 +88,6 @@ async function getPromptsHome()
 }
 
 
-window.onload = function() {
+window.addEventListener("load", function() {
     getPromptsHome()
-}
+});
