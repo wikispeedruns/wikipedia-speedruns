@@ -54,13 +54,17 @@ window.onload = function() {
 {% endblock %}
 
 {% block content %}
+    <br>
     <form id="registerForm">
         <label for="username">Username</label>
         <input name="username" id="username" required>
+        <br>
         <label for="email">Email</label>
         <input name="email" id="email" required>
+        <br>
         <label for="password">Password</label>
         <input type="password" name="password" id="password" required>
+        <br>
         <input type="submit" value="Register">
     </form>
     <p id="message"></p>

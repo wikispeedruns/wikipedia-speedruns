@@ -56,12 +56,15 @@ window.onload = function() {
 
 
 {% block content %}
-  <form id="loginForm" onsubmit="handleLogin">
+<br>
+<form id="loginForm" onsubmit="handleLogin">
     <label for="login">Login</label>
     <input name="login" id="login" required>
+    <br>
     <label for="password">Password</label>
     <input type="password" name="password" id="password" required>
+    <br>
     <input type="submit" value="Log In">
-  </form>
-  <p id="message"></p>
+</form>
+<p id="message"></p>
 {% endblock %}
