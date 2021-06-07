@@ -14,8 +14,8 @@ import pymysql
 def create_prod_conf():
     config = {}
     config["SECRET_KEY"] = str(secrets.token_urlsafe(20))
-    config["GOOGLE_CLIENT_ID"] = input("Google Client ID for Oauth: ")
-    config["GOOGLE_CLIENT_SECRET"] = input("Google Secret for Oath: ")
+    config["GOOGLE_OAUTH_CLIENT_ID"] = input("Google Client ID for Oauth: ")
+    config["GOOGLE_OAUTH_CLIENT_SECRET"] = input("Google Secret for Oath: ")
     # TODO more here
 
     json.dump(config, open('../config/prod.json', 'w'), indent=4)

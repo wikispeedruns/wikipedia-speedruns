@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, url_for
 
 import db
 from util.decorators import check_admin
@@ -24,6 +24,8 @@ app.register_blueprint(prompt_api)
 app.register_blueprint(run_api)
 app.register_blueprint(user_api)
 
+
+
 # Passes session args to function if needed
 def render_with_user(template, **kwargs):
     if ("user_id" in session):
@@ -33,7 +35,7 @@ def render_with_user(template, **kwargs):
 
 # Front end pages
 @app.route('/', methods=['GET'])
-def get_home_page():
+def get_home_page():    
     return render_with_user('home.html')
 
 @app.route('/random', methods=['GET'])
