@@ -7,14 +7,18 @@ function generate_leaderboard(runs)
 {
     var table = document.getElementById("leaderboard");
     // TODO probably add class and stuff
+
+    var rank = 1;
+
     for (var i = 0; i < runs.length; i++) {
         // Ignore all runs without user_ids
         if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
 
         var item = document.createElement("tr");
         
-        var rank = document.createElement("td");
-        rank.appendChild(document.createTextNode(i + 1));
+        var rankEl = document.createElement("td");
+        rankEl.appendChild(document.createTextNode(rank));
+        rank++;
 
         var time = document.createElement("td");
         time.appendChild(document.createTextNode((runs[i]["run_time"]/1000000).toFixed(2) + " s"));
@@ -26,7 +30,7 @@ function generate_leaderboard(runs)
 
         if (runs[i]["username"]) {
             name.appendChild(document.createTextNode( runs[i]["username"]));
-        } else {
+        } else  {
             name.appendChild(document.createTextNode("You"));
         }
 
@@ -34,7 +38,7 @@ function generate_leaderboard(runs)
             item.style.fontWeight = "bold";
         }
 
-        item.appendChild(rank);
+        item.appendChild(rankEl);
         item.appendChild(name);
         item.appendChild(time);
         item.appendChild(path);
