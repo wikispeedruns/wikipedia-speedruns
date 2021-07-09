@@ -9,12 +9,28 @@ async function submitPrompt(event)
 
     startPage = await getTitle(document.getElementById("start").value);
     goalPage = await getTitle(document.getElementById("end").value);
-    console.log(startPage + " , " + goalPage);
+    //console.log(startPage + " , " + goalPage);
 
     var startTime = Date.now();
 
-    var found = await crawler();
+    var titles = await getTitles(startPage);
 
+    var endTime = Date.now();
+
+    console.log((endTime - startTime) + "ms");
+
+    //var displayBlock = document.getElementById("testDisp");
+    
+    //for (let index = 0; index < titles.length; index++) {
+    //    var a = document.createElement("p");
+    //    a.appendChild(document.createTextNode(titles[index]));
+    //    displayBlock.appendChild(a);
+    //}
+
+
+    //var found = await crawler();
+
+    /*
     if (!found) {
         var endTime = Date.now();
         document.getElementById("output").innerHTML = "Did not find path for: " + startPage + ", " + goalPage + " in under 15 pages\n" + startTime + " , " + endTime;
@@ -24,6 +40,7 @@ async function submitPrompt(event)
         //document.getElementById("output").innerHTML = formatPathObj(path.length - 1 + ": " + path + "\n" + startTime + " , " + endTime)
         document.getElementById("output").innerHTML = pathLength;
     }
+    */
 }
 
 async function crawler() {
@@ -81,10 +98,79 @@ function findLink(visited, link) {
     return -1;
 }
 
+async function getTitles(page) {
+    var links = await getLinks(page);
+    console.log(links.length + " links");
+
+
+    
+    let titleBuffer = [];
+    let titles = [];
+
+    let batchSize = 100;
+    let loaded = 2;
+
+    while (loaded < links.length) {
+
+        var startTime = Date.now();
+        for (let j = 0; j < batchSize && loaded < links.length; j++) {
+            titleBuffer.push(getTitle(links[loaded]))
+            loaded++
+        }
+
+        await Promise.all(titleBuffer).then(temp => {
+            titles.push(...temp)
+        })
+
+        var endTime = Date.now();
+
+        console.log(endTime - startTime);
+
+        titleBuffer.splice(0, titleBuffer.length)
+    }
+
+
+    /*
+    while (loaded < links.length) {
+        var target = (loaded + batchSize < links.length) ? loaded + batchSize : links.length;
+
+        while (loaded < target) {
+            titles.push(await getTitle(links[loaded]));
+            loaded++;
+        }
+        Promise.all(titles).then(results => {
+            results.forEach(element => {
+            var a = document.createElement("p");
+            a.appendChild(document.createTextNode(element));
+            displayBlock.appendChild(a);
+            });
+            console.log("loaded until " + loaded);
+        });
+    }
+
+    Promise.all(titles).then({});
+    */
+
+    
+    renderTitles(titles);
+    console.log(titles);
+    return titles;
+    
+}
+
+
+function renderTitles(arr) {
+    var displayBlock = document.getElementById("testDisp");
+    arr.forEach(element => {
+        var a = document.createElement("p");
+        a.appendChild(document.createTextNode(element));
+        displayBlock.appendChild(a);
+    });
+}
 
 async function getLinks(page) {
-    console.log(page);
-    var pre = Date.now();
+    console.log("getting links for: " + page);
+    //var pre = Date.now();
     const resp = await fetch(
         `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${page}`,
         {
@@ -92,7 +178,7 @@ async function getLinks(page) {
         }
     )
     const body = await resp.json();
-    var start = Date.now();
+    //var start = Date.now();
     var links = [];
     links.push(body["parse"]["title"]);
     links.push(body["parse"]["pageid"]);
@@ -117,7 +203,7 @@ async function getLinks(page) {
             var childNodes = cur.childNodes;
             if (cur.tagName === "A") {
                 var link = handleWikipediaLink(cur);
-                if (link !== "***null***") {
+                if (link !== null) {
                     //console.log(link);
                     links.push(link);
                 }
@@ -132,8 +218,8 @@ async function getLinks(page) {
             }
         }
     }
-    console.log(Date.now() - start)
-    console.log(Date.now() - pre)
+    //console.log(Date.now() - start)
+    //console.log(Date.now() - pre)
     //console.log("links for " + page + ": " + links.length);
     return links;
 }
@@ -143,13 +229,13 @@ function handleWikipediaLink(el)
 
     linkURL = el.getAttribute("href");
 
-    if (linkURL === null) return "***null***";
+    if (linkURL === null) return null;
     // ignore target scrolls
-    if (linkURL.substring(0, 1) === "#") return "***null***";
+    if (linkURL.substring(0, 1) === "#") return null;
     // Ignore external links
-    if (linkURL.substring(0, 6) !== "/wiki/") return "***null***";
+    if (linkURL.substring(0, 6) !== "/wiki/") return null;
 
-    if (linkURL.substring(0, 11) === "/wiki/File:") return "***null***";
+    if (linkURL.substring(0, 11) === "/wiki/File:") return null;
     //if (linkURL.substring())
 
     return linkURL.substring(6);
@@ -157,7 +243,9 @@ function handleWikipediaLink(el)
 
 
 async function getTitle(page) {
-    var start = Date.now();
+
+    /*
+    //var start = Date.now();
     const resp = await fetch(
         `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&prop=&page=${page}`,
         {
@@ -165,9 +253,18 @@ async function getTitle(page) {
         }
     )
     const body = await resp.json()
-    console.log(Date.now() - start)
+    //console.log(body);
+    //console.log(Date.now() - start)
     return await body["parse"]["title"]
-    
+    */
+
+    return new Promise((resolve, reject) => {
+        fetch(`https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&prop=&page=${page}`)
+            .then((resp) => resp.json())
+            .then((body) => {
+                resolve(body["parse"]["title"])
+            })
+    })
 }
 
 function checkNode(el) {
