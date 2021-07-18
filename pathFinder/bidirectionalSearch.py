@@ -221,8 +221,8 @@ cur = db.cursor(pymysql.cursors.DictCursor)
 
 maxLength = 5   
 
-startTitle = "Tom Allon"
-endTitle = "Les Avants"
+startTitle = "Lady of Tikal"
+endTitle = "Austrosetia"
 
 start_time = time.time()
 
@@ -242,4 +242,4 @@ print("Forward articles: " + str(articleCount))
 print("Reverse articles: " + str(reverseArticleCount))
 print("Total checked articles: " + str(articleCount + reverseArticleCount))
     
-print("Elapsed time:" + str(time.time() - start_time) + '\n')
+print("Elapsed time:" + str(time.time() - start_time) + ' seconds\n')
