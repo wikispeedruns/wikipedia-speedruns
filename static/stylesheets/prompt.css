@@ -1,3 +1,8 @@
 th {
     text-align: left;
 }
+
+tr {
+    padding-top:5px;
+    padding-bottom:5px;
+}
