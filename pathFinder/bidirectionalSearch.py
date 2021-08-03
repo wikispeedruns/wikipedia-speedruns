@@ -1,8 +1,12 @@
 import pymysql
 import time
+from dbsearch import getLinks
 
 articleCount = 0
 reverseArticleCount = 0
+
+db = pymysql.connect(host="localhost", user="root", password="9EEB00@@", database="testDB")
+cur = db.cursor(pymysql.cursors.DictCursor)
 
 def bidirectionalSearcher(start, end):
     forwardVisited = {start : (None, 0, 0)}
@@ -63,7 +67,7 @@ def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
         c += 1
     
     try:
-        links = getLinks(pages, direction = "forward")
+        links = getLinks(pages, cur, direction = "forward")
     except:
         return None
     
@@ -119,7 +123,7 @@ def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
         c += 1
     
     try:
-        links = getLinks(pages, direction = "reverse")
+        links = getLinks(pages, cur, direction = "reverse")
     except:
         return None
     
@@ -176,46 +180,6 @@ def tracePath(visited, page, start):
 def Reverse(lst):
     return [ele for ele in reversed(lst)]      
 
-def batchQuery(queryString, arr):
-    format_strings = ','.join(['%s'] * len(arr))
-    cur.execute(queryString % format_strings,tuple(arr))
-    return cur.fetchall()
-
-def getLinks(pages, direction = "forward"):
-
-    queryString = ""
-    output = {}
-    
-    if direction == "forward":
-        queryString = "SELECT * FROM edges WHERE src IN (%s)"
-        queryResults = batchQuery(queryString, list(pages.keys()))
-        
-        for queryEntry in queryResults:
-            title = queryEntry['src']
-            if title in pages:
-                
-                if title not in output:
-                    output[title] = [(queryEntry['dest'], queryEntry['edgeID'])]
-                else:
-                    output[title].append((queryEntry['dest'], queryEntry['edgeID']))
-                    
-    else:
-        queryString = "SELECT * FROM edges WHERE dest IN (%s)"
-        queryResults = batchQuery(queryString, list(pages.keys()))
-        
-        for queryEntry in queryResults:
-            title = queryEntry['dest']
-            if title in pages:
-                
-                if title not in output:
-                    output[title] = [(queryEntry['src'], queryEntry['edgeID'])]
-                else:
-                    output[title].append((queryEntry['src'], queryEntry['edgeID']))
-        
-    return output
-
-db = pymysql.connect(host="localhost", user="root", password="9EEB00@@", database="testDB")
-cur = db.cursor(pymysql.cursors.DictCursor)
 
 
 

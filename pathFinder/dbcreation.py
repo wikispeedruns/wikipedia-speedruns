@@ -10,6 +10,8 @@ import os
 import pymysql
 
 
+start_time = time.time()
+
 # http://www.ibm.com/developerworks/xml/library/x-hiperfparse/
 
 PATH_WIKI_XML = 'C:\\Downloads'
@@ -92,7 +94,7 @@ def filterSections(text):
     
     return text
 
-def linkExtractor(text, id):
+def linkExtractor(text):
     
     text = filterSections(text)
     initTime = time.time()
@@ -134,21 +136,6 @@ def checkLink(link):
     
     return output[0].upper() + output[1:]
 
-
-def linksToString(links):
-    output = ""
-    count = 0
-    
-    
-    if len(links) > 0:
-        output = output + links[0]
-        count += 1
-    while count < len(links):
-        output = output + "||" + links[count]
-        count += 1
-    
-    return output
-
 def checkTitle(title):
     if title == "":
         raise ValueError("Empty Title")
@@ -158,158 +145,213 @@ def checkTitle(title):
         if title.find(prefix) == 0:
             raise ValueError("Filtered Namespace")
 
+def checkRedirects(arr, redirects):
+    for i in range(len(arr)):
+        if arr[i] in redirects:
+            arr[i] = redirects[arr[i]]
+    return arr
 
-db = pymysql.connect(host="localhost", user="root", password="9EEB00@@", database="testDB")
-cur = db.cursor()
+def log(msg):
+    print(hms_string(start_time - time.time()) + ": " + msg)
 
-cur.execute(
-    '''
-    DROP TABLE `pages`
-    '''
-)
-db.commit()
-
-cur.execute(
-    '''
-    CREATE TABLE IF NOT EXISTS `pages` (
-        `id` INT NOT NULL,
-        `title` VARCHAR(255) NOT NULL,
-        `redirect` VARCHAR(255) NOT NULL,
-        `links` TEXT(65535) NOT NULL,
-        PRIMARY KEY (`id`)
-    );
-    '''
-)
-db.commit()
-
-
-pathWikiXML = os.path.join(PATH_WIKI_XML, FILENAME_WIKI)
-
-totalCount = 0
-articleCount = 0
-redirectCount = 0
-templateCount = 0
-errorPagesCount = 0
-skippedPagesCount = 0
-errorPages = []
-title = None
-start_time = time.time()
-
-pageQuery = "INSERT INTO `pages` (`id`, `title`, `redirect`, `links`) VALUES (%s, %s, %s, %s);"
-
-
-error = False
-skip = False
-
-for event, elem in etree.iterparse(pathWikiXML, events=('start', 'end')):
-    tname = strip_tag_name(elem.tag)
+def main():
     
-    
+    db = pymysql.connect(host="localhost", user="root", password="9EEB00@@", database="testDB")
+    cur = db.cursor()
 
-    if event == 'start':
-        if tname == 'page':
-            title = ''
-            id = -1
-            redirect = ''
-            inrevision = False
-            articleText = ''
-        elif tname == 'revision':
-            # Do not pick up on revision id's
-            inrevision = True
-            
-            
-    else:
-        if tname == 'title':
-            title = elem.text
-            
-            try:
-                checkTitle(title)
-            except ValueError as err:
-                skip = True
-                skippedPagesCount += 1
-                print("Skipping article: "+title)
-            else:
-                skip = False
-                
-        elif not error and not skip:        
-            
-            if tname == 'id' and not inrevision:
-                id = int(elem.text)
-            elif tname == 'redirect':
-                redirect = elem.attrib['title']
-            elif tname == 'text':
-                #print(title + ",ID:"+str(id))
+    start_time = time.time()
+    
+    log("Creating DB table")
+
+    cur.execute(
+    '''
+    DROP TABLE `edges`
+    '''
+    )
+    db.commit()
+
+    cur.execute(
+        '''
+        CREATE TABLE IF NOT EXISTS `edges` (
+            `edgeID` INT NOT NULL AUTO_INCREMENT,
+            `src` VARCHAR(255) NOT NULL,
+            `dest` VARCHAR(255) NOT NULL,
+            PRIMARY KEY (`edgeID`)
+        );
+        '''
+    )
+    db.commit()
+    
+    log("Finished creating DB table")
+    
+    pathWikiXML = os.path.join(PATH_WIKI_XML, FILENAME_WIKI)
+
+    articleCount = 0
+    redirectCount = 0
+    linksCount = 0
+    errorPagesCount = 0
+    skippedPagesCount = 0
+    errorPages = []
+    title = None
+    
+    log("Creating redirect dictionary")
+
+    redirects = {}
+
+    error = False
+    skip = False
+
+    for event, elem in etree.iterparse(pathWikiXML, events=('start', 'end')):
+        tname = strip_tag_name(elem.tag)
+
+        if event == 'start':
+            if tname == 'page':
+                title = ''
+                redirect = ''
+                   
+        else:
+            if tname == 'title':
+                title = elem.text
                 
                 try:
-                    articleText = linksToString(list(linkExtractor(elem.text, id)))
-                except TimeoutError as err:
-                    print(err)
-                
-                except:
-                    errorPagesCount += 1
-                    errorPages.append(title)
-                    print("Parser Error at: " + title)
-                    error = True
+                    checkTitle(title)
+                except ValueError as err:
+                    skip = True
+                    skippedPagesCount += 1
+                    log("Skipping article: "+title)
                 else:
-                    error = False
+                    skip = False
                     
-            elif tname == 'page':
-                totalCount += 1
+            elif not error and not skip:        
                 
+                if tname == 'redirect':
+                    redirect = elem.attrib['title']
+
+                elif tname == 'page':
+                        
+                    if len(redirect) > 0:
+                        redirectCount += 1
+                        
+                        try:
+                            redirects[title] = redirect
+                        except:
+                            errorPagesCount += 1
+                            errorPages.append(title)
+                            log("Redirect error at: " + title)
+                        
+            elem.clear()
+            
+    log("Finished creating redirect dictionary")
+    log("Starting article parsing & adding links to DB")
+    
+    error = False
+    skip = False        
+            
+    insertQuery = "INSERT INTO `edges` (`src`, `dest`) VALUES (%s, %s);"        
+            
+    for event, elem in etree.iterparse(pathWikiXML, events=('start', 'end')):
+        tname = strip_tag_name(elem.tag)
+
+        if event == 'start':
+            if tname == 'page':
+                title = ''
+                redirect = False
+                linksOutput = []
+                
+                
+        else:
+            if tname == 'title':
+                title = elem.text
+                
+                try:
+                    checkTitle(title)
+                except ValueError as err:
+                    skip = True
+                    skippedPagesCount += 1
+                    log("Skipping article: "+title)
+                else:
+                    skip = False
                     
-                if len(redirect) > 0:
-                    redirectCount += 1
+            elif not error and not skip:        
+                
+                if tname == 'redirect':
+                    if len(elem.attrib['title']) > 0:
+                        redirect = True
+                elif tname == 'text':
                     
                     try:
-                        cur.execute(pageQuery, (str(id), title, redirect, ""))
+                        linksOutput = checkRedirects(list(linkExtractor(elem.text, id)), redirects)
+                    
                     except:
                         errorPagesCount += 1
                         errorPages.append(title)
-                        print("SQL Error at: " + title)
-                    
-                else:
-                    articleCount += 1
-                    
-                    try:
-                        cur.execute(pageQuery, (str(id), title, "", articleText))
-                    except:
-                        errorPagesCount += 1
-                        errorPages.append(title)
-                        print("SQL Error at: " + title)
+                        log("Parser Error at: " + title)
+                        error = True
+                    else:
+                        error = False
+                        
+                elif tname == 'page':
+                        
+                    if redirect == False:
+                        articleCount += 1
+                        
+                        #need edit
+                        
+                        batchOutput = []
+                        
+                        for link in linksOutput:
+                            if len(link) > 255:
+                                log(str((title, link)))
+                                continue
+                            
+                            batchOutput.append(title, link)
+                            linksCount += 1
+                        
+                        try:
+                            cur.executemany(insertQuery, batchOutput)
+                            db.commit()
+                        except:
+                            errorPagesCount += 1
+                            errorPages.append(title)
+                            print("SQL Error at: " + title)
+                            
+                        if articleCount % 10000 == 0:
+                            log(str(articleCount) + " articles, " + str(linksCount) + " links")
+                        
+                    #end edit
+
+            elem.clear()
             
-                if totalCount > 1 and (totalCount % 10000) == 0:
-                    print("{:,}".format(totalCount))
-                    print("Commiting to storage")
-                    db.commit()
-            
-            
-            if totalCount > 2000000:
-                break
-            
-            
+    log("Finished populating DB")
 
-        elem.clear()
+    log("Creating sorted indices for src")
 
-print("creating sorted index")
+    cur.execute(
+        '''
+            create index srcIndex on edges (src)
+        '''
+    )
+    db.commit()
 
-cur.execute(
-    '''
-        create index titleIndex on pages (title)
-    '''
-)
-db.commit()
+    log("Creating sorted indices for dest")
 
-elapsed_time = time.time() - start_time
+    cur.execute(
+        '''
+            create index destIndex on edges (dest)
+        '''
+    )
+    db.commit()
+    
+    db.close()
+    
+    log("Finished creating sorting index")
 
-print("Total pages: {:,}".format(totalCount))
-print("Template pages: {:,}".format(templateCount))
-print("Article pages: {:,}".format(articleCount))
-print("Redirect pages: {:,}".format(redirectCount))
-print("Skipped pages: {:,}".format(skippedPagesCount))
-print("Error pages: {:,}".format(errorPagesCount))
-#print(errorPages)
-print("Elapsed time: {}".format(hms_string(elapsed_time)))
+    elapsed_time = time.time() - start_time
 
-
-db.commit()
-db.close()
+    print("Total links: {:,}".format(linksCount))
+    print("Article pages: {:,}".format(articleCount))
+    print("Redirect pages: {:,}".format(redirectCount))
+    print("Skipped pages: {:,}".format(skippedPagesCount))
+    print("Error pages: {:,}".format(errorPagesCount))
+    #print(errorPages)
+    print("Total Elapsed time: {}".format(hms_string(elapsed_time)))
