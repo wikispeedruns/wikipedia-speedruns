@@ -174,9 +174,22 @@ def login():
 
 @user_api.post("/logout")
 def logout():
+    # Logout from oauth if there is oauth
+    if (google_bp.token):
+        token = google_bp.token["access_token"]
+        resp = oauth_google.google.post(
+            "https://accounts.google.com/o/oauth2/revoke",
+            params={"token": token},
+            headers={"Content-Type": "application/x-www-form-urlencoded"}
+        )
+        assert resp.ok, resp.text
+        del google_bp.token  # Delete OAuth token from storage
+
+
     session.pop("user_id", None)
     session.pop("username", None)
     session.pop("admin", None)
+
     return "Logged out", 200
 
 
