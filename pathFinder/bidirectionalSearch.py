@@ -1,6 +1,7 @@
 import pymysql
 import time
 from dbsearch import getLinks
+from dbcreation import log
 
 articleCount = 0
 reverseArticleCount = 0
@@ -31,10 +32,10 @@ def bidirectionalSearcher(start, end):
                     b = None
                 
             if a:
-                print("\nFound intersection!: \"" + a + '\"\n')
+                log("Found intersection!: \"" + a + '\"\n')
                 return [traceBidirectionalPath(a, start, end, forwardVisited, reverseVisited)]
             else:
-                print("\nFound intersection!: \"" + b + '\"\n')
+                log("Found intersection!: \"" + b + '\"\n')
                 return [traceBidirectionalPath(b, start, end, forwardVisited, reverseVisited)]
             
             
@@ -58,7 +59,7 @@ def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
         pageTitle = queue.pop(0)
         if c == 0:
             startingDepth = forwardVisited[pageTitle][1]
-            print("Forward depth reached: " + str(forwardVisited[pageTitle][1] + 1))
+            log("Forward depth reached: " + str(forwardVisited[pageTitle][1] + 1))
         elif forwardVisited[pageTitle][1] != startingDepth:
             queue.insert(0, pageTitle)
             break
@@ -67,7 +68,7 @@ def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
         c += 1
     
     try:
-        links = getLinks(pages, cur, direction = "forward")
+        links = getLinks(pages, cur, forward = True)
     except:
         return None
     
@@ -90,7 +91,7 @@ def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
                 articleCount += 1
                 
                 if articleCount % 10000 == 0:
-                    print("Forward: " + str(tracePath(forwardVisited, link, start)) + ", " + str(articleCount))
+                    log("Forward: " + str(tracePath(forwardVisited, link, start)) + ", " + str(articleCount))
                     
     return None  
 
@@ -114,7 +115,7 @@ def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
         pageTitle = queue.pop(0)
         if c == 0:
             startingDepth = reverseVisited[pageTitle][1]
-            print("Reverse depth reached: " + str(reverseVisited[pageTitle][1] + 1))
+            log("Reverse depth reached: " + str(reverseVisited[pageTitle][1] + 1))
         elif reverseVisited[pageTitle][1] != startingDepth:
             queue.insert(0, pageTitle)
             break
@@ -123,7 +124,7 @@ def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
         c += 1
     
     try:
-        links = getLinks(pages, cur, direction = "reverse")
+        links = getLinks(pages, cur, forward = False)
     except:
         return None
     
@@ -146,7 +147,7 @@ def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
                 reverseArticleCount += 1
                 
                 if reverseArticleCount % 10000 == 0:
-                    print("Reverse: " + str(tracePath(reverseVisited, link, end)) + ", " + str(reverseArticleCount))
+                    log("Reverse: " + str(tracePath(reverseVisited, link, end)) + ", " + str(reverseArticleCount))
                     
     return None      
         

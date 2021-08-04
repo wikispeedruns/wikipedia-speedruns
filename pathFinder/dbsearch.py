@@ -5,12 +5,11 @@ def batchQuery(queryString, arr, cur):
     cur.execute(queryString % format_strings,tuple(arr))
     return cur.fetchall()
 
-def getLinks(pages, cur, direction = "forward"):
+def getLinks(pages, cur, forward = True):
 
-    queryString = ""
     output = {}
     
-    if direction == "forward":
+    if forward:
         queryString = "SELECT * FROM edges WHERE src IN (%s)"
         queryResults = batchQuery(queryString, list(pages.keys()), cur)
         
@@ -37,3 +36,13 @@ def getLinks(pages, cur, direction = "forward"):
                     output[title].append((queryEntry['src'], queryEntry['edgeID']))
         
     return output
+
+
+
+def getSrc(edgeID, cur):
+    queryString = "SELECT src FROM edges WHERE edgeID=%s"
+    cur.execute(queryString, str(edgeID))
+    output = cur.fetchall()
+    
+    if len(output)>0:
+        return output[0]['src']

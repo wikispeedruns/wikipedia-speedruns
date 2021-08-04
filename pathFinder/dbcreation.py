@@ -152,7 +152,7 @@ def checkRedirects(arr, redirects):
     return arr
 
 def log(msg):
-    print(hms_string(start_time - time.time()) + ": " + msg)
+    print(hms_string(time.time() - start_time) + ": " + msg)
 
 def main():
     
@@ -355,3 +355,8 @@ def main():
     print("Error pages: {:,}".format(errorPagesCount))
     #print(errorPages)
     print("Total Elapsed time: {}".format(hms_string(elapsed_time)))
+    
+    
+    
+if __name__ == "__main__":
+    main()
