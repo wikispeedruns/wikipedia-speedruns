@@ -37,7 +37,7 @@ async function handleLogin(event)
     if (response.ok) {
         document.getElementById("loginForm").reset();
         document.getElementById("message").innerText = "Successfully logged in!";
-        window.location.href = "/";
+        window.location.href = "/profile";
 
     } else if (response.status == 401) {
         document.getElementById("message").innerText = "Invalid username or password";
@@ -67,4 +67,8 @@ window.onload = function() {
     <input type="submit" value="Log In">
 </form>
 <p id="message"></p>
+
+<br>
+
+<a href="{{url_for('users.google.login')}}">Login with Google</a>
 {% endblock %}

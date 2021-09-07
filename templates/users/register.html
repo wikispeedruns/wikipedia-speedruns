@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<script>
+<script defer>
 // Should we make this a separate file?
 async function handleRegister(event)    
 {
-    console.log("ASDFADSF");
     event.preventDefault();
 
     const username = document.getElementById("username").value;
