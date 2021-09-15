@@ -1,6 +1,7 @@
 import pymysql
-# Probably want to do this at some point
+# TODO Probably want to do this at some point
 # http://jan.kneschke.de/projects/mysql/order-by-rand/
+# TODO add indexes
 
 DB_NAME='wikipedia_speedruns'
 

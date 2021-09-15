@@ -21,6 +21,31 @@ google_bp = oauth_google.make_google_blueprint(redirect_url="/api/users/auth/goo
 # Note, url_prefix overrides the entire user_api prefix, not sure if this will get changed
 user_api.register_blueprint(google_bp, url_prefix="/api/users/auth")
 
+
+def login_session(user):
+    session.clear()
+    session["user_id"] = user["user_id"]
+    session["username"] = user["username"]
+    session["admin"] = user["admin"] != 0
+
+def logout_session(user):
+    # Logout from oauth if there is oauth
+    if (google_bp.token):
+        token = google_bp.token["access_token"]
+        resp = oauth_google.google.post(
+            "https://accounts.google.com/o/oauth2/revoke",
+            params={"token": token},
+            headers={"Content-Type": "application/x-www-form-urlencoded"}
+        )
+        assert resp.ok, resp.text
+        del google_bp.token  # Delete OAuth token from storage
+
+
+    session.pop("user_id", None)
+    session.pop("username", None)
+    session.pop("admin", None)
+
+
 @user_api.get("/auth/google/check")
 def check_google_auth():
     resp = oauth_google.google.get("/oauth2/v1/userinfo")
@@ -39,13 +64,9 @@ def check_google_auth():
             session["pending_oauth_creation"] = email
         else:
             user = cursor.fetchone()
-            session["user_id"] = user["user_id"]
-            session["username"] = user["username"]
-            session["admin"] = user["admin"] != 0
+            login_session(user)
 
-
-
-    return redirect("/profile")
+    return "Logged in", 200
 
     
 
@@ -81,7 +102,7 @@ def create_user_oauth():
     return ("User {} added".format(username), 201)
 
 
-@user_api.post("/create")
+@user_api.post("/create/email")
 def create_user():
     """
     Example json input
@@ -166,30 +187,13 @@ def login():
             return "Bad username or password", 401
 
     # Add session
-    session["user_id"] = user["user_id"]
-    session["username"] = user["username"]
-    session["admin"] = user["admin"] != 0
+    login_session(user)
 
     return "Logged in", 200
 
 @user_api.post("/logout")
 def logout():
-    # Logout from oauth if there is oauth
-    if (google_bp.token):
-        token = google_bp.token["access_token"]
-        resp = oauth_google.google.post(
-            "https://accounts.google.com/o/oauth2/revoke",
-            params={"token": token},
-            headers={"Content-Type": "application/x-www-form-urlencoded"}
-        )
-        assert resp.ok, resp.text
-        del google_bp.token  # Delete OAuth token from storage
-
-
-    session.pop("user_id", None)
-    session.pop("username", None)
-    session.pop("admin", None)
-
+    logout_session()
     return "Logged out", 200
 
 
