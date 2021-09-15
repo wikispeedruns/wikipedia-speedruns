@@ -1,7 +1,9 @@
 from flask import session, request, redirect, Blueprint, current_app
 import flask_dance.contrib.google as oauth_google
+from flask_mail import Message
 
 from db import get_db
+from mail import get_mail
 
 from pymysql.cursors import DictCursor
 

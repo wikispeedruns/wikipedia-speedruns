@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 
 import db
+import mail
 from util.decorators import check_admin
 
 import json
@@ -16,6 +17,7 @@ except FileNotFoundError:
     pass
 
 db.init_app(app)
+mail.init_app(app)
 
 from prompts import prompt_api
 from runs import run_api
