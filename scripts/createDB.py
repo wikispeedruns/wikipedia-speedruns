@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `prompts` (
     `start` VARCHAR(255) NOT NULL,
     `end` VARCHAR(255) NOT NULL,
     `public` BOOLEAN NOT NULL DEFAULT 0,
-    PRIMARY KEY (`prompt_id`) 
+    PRIMARY KEY (`prompt_id`)
 );
 ''')
 

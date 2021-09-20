@@ -19,7 +19,7 @@ async function handleRegister(event)
         "password": password,
     }
 
-    const response = await fetch("/api/users/create", {
+    const response = await fetch("/api/users/create/email", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
