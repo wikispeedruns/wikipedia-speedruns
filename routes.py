@@ -77,4 +77,4 @@ def get_prompt_page(id):
 @app.route('/play/<id>', methods=['GET'])
 def get_play_page(id):
     return render_with_user('play.html', prompt_id=id)
-
+    

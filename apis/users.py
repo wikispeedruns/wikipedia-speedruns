@@ -1,3 +1,7 @@
+import email
+from flask.helpers import url_for
+from werkzeug.utils import redirect
+from util.decorators import check_user
 from flask import session, request, render_template, Blueprint, current_app
 import flask_dance.contrib.google as oauth_google
 from flask_mail import Message
@@ -16,7 +20,6 @@ from pymysql.cursors import DictCursor
 
 import bcrypt
 import hashlib
-import datetime
 
 user_api = Blueprint("users", __name__, url_prefix="/api/users")
 
@@ -32,35 +35,31 @@ google_bp = oauth_google.make_google_blueprint(redirect_url="/api/users/auth/goo
 user_api.register_blueprint(google_bp, url_prefix="/api/users/auth")
 
 
-# Sends confirmation email with JWT-Token in URL for verification, returns secret key used
-# Note this secret key is based of the current user's hashed password, this way when the Password
-# is changed the link becomes invalid!
-def create_reset_email(id, email, hashed, base_url):
+
+def send_reset_email(id, email, hashed, url_root):
     token = create_reset_token(id, hashed)
-    link = base_url + "/" + token.decode('utf-8')
+    link = url_root + "reset/" + token.decode('utf-8')
 
     msg = Message("Reset Your Password - wikispeedruns.com",
       recipients=[email])
 
-    msg.body = 'Hello,\nYou or someone else has requested that a new password'\
+    msg.body = 'Hello,\n\nYou or someone else has requested that a new password'\
                'be generated for your account. If you made this request, then '\
                'please follow this link: ' + link
-    msg.html = render_template('email_reset.html', link=link)
+    # msg.html = render_template('email_reset.html', link=link) #TODO
+    mail.send(msg)
 
 
-
-# Sends confirmation email with JWT-Token in URL for verification, returns the secret key used
-def create_confirmation_email(email, base_url):
-    confirm_secret = current_app["SECRET"]  + "-"  + datetime.datetime.utcnow()
-    token = create_confirm_token(email, confirm_secret)
-    link = base_url + "/" + token.decode('utf-8')
+def send_confirmation_email(id, email, url_root):
+    token = create_confirm_token(id)
+    link = url_root + "api/users/confirm_email/" + token
 
     msg = Message("Confirm your Email - Wikispeedruns.com", recipients=[email])
 
-    msg.body = 'Hello,\nClick the following link to confirm your email ' + link
-    msg.html = render_template('email_confirmation.html', link=link)
+    msg.body = 'Hello,\n\nClick the following link to confirm your email ' + link
+    # msg.html = render_template('email_confirmation.html', link=link) #TODO
 
-    return confirm_secret
+    mail.send(msg)
 
 
 def valid_username(username):
@@ -161,9 +160,10 @@ def create_user():
 
         cursor.execute(get_id_query)
         (id,) = cursor.fetchone()
-        db.commit()
+        
+        send_confirmation_email(id, email, request.url_root)
 
-    
+        db.commit()
 
     return ("User {} ({}) added".format(username, id), 201)
 
@@ -242,12 +242,61 @@ def login():
 
     return "Logged in", 200
 
+
 @user_api.post("/logout")
 def logout():
     logout_session()
     return "Logged out", 200
 
 
-@user_api.post("/reset_password_request")
+@user_api.post("/change_password")
+@check_user
+def change_password():
+    pass
+
+
+@user_api.post("/confirm_email_req")
+@check_user
+def confirm_email_request():
+    id = session["user_id"]
+    query = "SELECT `email` FROM `users` WHERE `user_id`=%s"
+    
+    db = get_db()
+    with db.cursor() as cursor:
+        result = cursor.execute(query, (login, ))
+        (email,) = cursor.fetchone()
+        # TODO throw error?
+
+    send_confirmation_email(id, email, request.url_root)
+
+    return "New confirmation email sent", 200
+
+@user_api.get("/confirm_email/<token>")
+def confirm_email(token):
+    id = verify_confirm_token(token)
+    print(id)
+    
+    if (id is None):
+        return ("Invalid email confirmation link, could be outdated", 400)
+   
+    query = "UPDATE `users` SET `email_confirmed` = 1 WHERE `user_id`=%s"
+
+    db = get_db()
+    with db.cursor() as cursor:
+        result = cursor.execute(query, (id, ))
+        db.commit()
+
+        # TODO throw error?
+
+    return redirect("/profile")
+
+@user_api.post("/reset_password/_request")
 def reset_password_request():
+    email = request.json['username']
+
+
+
+
+@user_api.post("/reset_password")
+def reset_password():
     pass
