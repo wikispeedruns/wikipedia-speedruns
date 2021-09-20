@@ -2,6 +2,7 @@ from flask import Flask
 
 import db
 import mail
+import tokens
 from util.decorators import check_admin
 
 import json
@@ -18,6 +19,7 @@ except FileNotFoundError:
 
 db.init_app(app)
 mail.init_app(app)
+tokens.init_app(app)
 
 from apis.prompts import prompt_api
 from apis.runs import run_api

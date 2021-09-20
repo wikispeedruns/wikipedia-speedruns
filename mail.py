@@ -1,11 +1,7 @@
 from flask_mail import Mail
 
-mail = None
+mail = Mail()
 
 def init_app(app):
-    global mail
-    mail = Mail(app)
-
-def get_mail():
-    return mail
+    mail.init_app(app)
 
