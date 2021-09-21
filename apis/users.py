@@ -252,18 +252,51 @@ def logout():
 @user_api.post("/change_password")
 @check_user
 def change_password():
-    pass
+    '''
+    Given the old password and a new one, change the password
+    '''
+    get_query = "SELECT hash FROM `users` WHERE `user_id`=%s"
+    update_query = "UPDATE `users` SET `hash`=%s WHERE `user_id`=%s"
+
+    if ("old_password" not in request.json or "new_password" not in request):
+        return ("Password(s) not in request", 400)
+    
+    id = session["user_id"]
+    old_password = request.json["old_password"].encode()
+    new_password = request.json["new_password"].encode()
+
+    db = get_db()
+    with db.cursor() as cursor:
+        # Query for user and check password
+        result = cursor.execute(get_query, (id, ))
+
+        # TODO , should be found
+
+        old_hash = cursor.fetchone()
+
+        if not bcrypt.checkpw(hashlib.sha256(old_password).digest(), hash):
+            return "Incorrect password", 401
+
+        new_hash = bcrypt.hashpw(hashlib.sha256(new_password).digest(), bcrypt.gensalt())
+
+        cursor.execute(update_query, (new_hash, id))
+
+    return "Password Changed", 200
+
 
 
 @user_api.post("/confirm_email_req")
 @check_user
 def confirm_email_request():
+    '''
+        Request another email token be sent in as a logged in user, i.e. from profile page
+    '''
     id = session["user_id"]
     query = "SELECT `email` FROM `users` WHERE `user_id`=%s"
     
     db = get_db()
     with db.cursor() as cursor:
-        result = cursor.execute(query, (login, ))
+        result = cursor.execute(query, (id, ))
         (email,) = cursor.fetchone()
         # TODO throw error?
 
@@ -274,7 +307,6 @@ def confirm_email_request():
 @user_api.get("/confirm_email/<token>")
 def confirm_email(token):
     id = verify_confirm_token(token)
-    print(id)
     
     if (id is None):
         return ("Invalid email confirmation link, could be outdated", 400)
@@ -286,17 +318,61 @@ def confirm_email(token):
         result = cursor.execute(query, (id, ))
         db.commit()
 
-        # TODO throw error?
+        # TODO throw error if not right?
 
     return redirect("/profile")
 
-@user_api.post("/reset_password/_request")
+@user_api.post("/reset_password_request")
 def reset_password_request():
-    email = request.json['username']
+    '''
+    Request a password reset for a particular email. Will always return 200 as to not give away
+    the existence of certain emails on the website
+    '''
 
+    email = request.json['email']
+
+    query = "SELECT `user_id, hash` FROM `users` WHERE `email`=%s"
+
+    db = get_db()
+    with db.cursor() as cursor:
+        res = cursor.execute(query, (email, ))
+        (id, hash) = cursor.fetchone()
+
+        if (res != 0):
+            send_reset_email(id, email, hash, request.url_root)
+
+    return f"If the account for {email} exists, an email has been sent with a reset link", 200
 
 
 
 @user_api.post("/reset_password")
 def reset_password():
-    pass
+    '''
+    Given the user id, reset token and a new password, change the password
+    '''
+    get_query = "SELECT hash FROM `users` WHERE `user_id`=%s"
+    update_query = "UPDATE `users` SET `hash`=%s WHERE `user_id`=%s"
+
+    if not all([field in request.json for field in ["user_id", "password", "token"]]):
+        return "Invalid request", 400
+    
+    id = request["user_id"]
+    password = request.json["password"].encode()
+    token = request["token"]
+
+
+    db = get_db()
+    with db.cursor() as cursor:
+        # Query for user and use password to decode token
+        result = cursor.execute(get_query, (id, ))
+        # TODO , assert should be found
+
+        old_hash = cursor.fetchone()
+
+        if (id != verify_reset_token(token, hash)):
+            return "Invalid token", 400
+
+        new_hash = bcrypt.hashpw(hashlib.sha256(password).digest(), bcrypt.gensalt())
+        cursor.execute(update_query, (new_hash, id))
+
+    return "Password Changed", 200
