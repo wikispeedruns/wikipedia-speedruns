@@ -38,7 +38,7 @@ user_api.register_blueprint(google_bp, url_prefix="/api/users/auth")
 
 def send_reset_email(id, email, hashed, url_root):
     token = create_reset_token(id, hashed)
-    link = url_root + "reset/" + token.decode('utf-8')
+    link = url_root + "reset/" + token
 
     msg = Message("Reset Your Password - wikispeedruns.com",
       recipients=[email])
@@ -258,7 +258,7 @@ def change_password():
     get_query = "SELECT hash FROM `users` WHERE `user_id`=%s"
     update_query = "UPDATE `users` SET `hash`=%s WHERE `user_id`=%s"
 
-    if ("old_password" not in request.json or "new_password" not in request):
+    if ("old_password" not in request.json or "new_password" not in request.json):
         return ("Password(s) not in request", 400)
     
     id = session["user_id"]
@@ -272,20 +272,22 @@ def change_password():
 
         # TODO , should be found
 
-        old_hash = cursor.fetchone()
-
-        if not bcrypt.checkpw(hashlib.sha256(old_password).digest(), hash):
+        (old_hash,) = cursor.fetchone()
+        old_hash = old_hash.encode()
+        
+        if not bcrypt.checkpw(hashlib.sha256(old_password).digest(), old_hash):
             return "Incorrect password", 401
 
         new_hash = bcrypt.hashpw(hashlib.sha256(new_password).digest(), bcrypt.gensalt())
 
         cursor.execute(update_query, (new_hash, id))
+        db.commit()
 
     return "Password Changed", 200
 
 
 
-@user_api.post("/confirm_email_req")
+@user_api.post("/confirm_email_request")
 @check_user
 def confirm_email_request():
     '''
@@ -331,7 +333,7 @@ def reset_password_request():
 
     email = request.json['email']
 
-    query = "SELECT `user_id, hash` FROM `users` WHERE `email`=%s"
+    query = "SELECT `user_id`, `hash` FROM `users` WHERE `email`=%s"
 
     db = get_db()
     with db.cursor() as cursor:
@@ -356,9 +358,9 @@ def reset_password():
     if not all([field in request.json for field in ["user_id", "password", "token"]]):
         return "Invalid request", 400
     
-    id = request["user_id"]
+    id = request.json["user_id"]
     password = request.json["password"].encode()
-    token = request["token"]
+    token = request.json["token"]
 
 
     db = get_db()
@@ -367,12 +369,15 @@ def reset_password():
         result = cursor.execute(get_query, (id, ))
         # TODO , assert should be found
 
-        old_hash = cursor.fetchone()
+        (old_hash, ) = cursor.fetchone()
 
-        if (id != verify_reset_token(token, hash)):
+        if (id != verify_reset_token(token, old_hash)):
             return "Invalid token", 400
 
         new_hash = bcrypt.hashpw(hashlib.sha256(password).digest(), bcrypt.gensalt())
         cursor.execute(update_query, (new_hash, id))
+        # TODO check
+
+        db.commit()
 
     return "Password Changed", 200
