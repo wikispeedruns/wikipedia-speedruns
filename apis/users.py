@@ -43,7 +43,7 @@ def send_reset_email(id, email, hashed, url_root):
     msg = Message("Reset Your Password - wikispeedruns.com",
       recipients=[email])
 
-    msg.body = 'Hello,\n\nYou or someone else has requested that a new password'\
+    msg.body = 'Hello,\n\nYou or someone else has requested that a new password '\
                'be generated for your account. If you made this request, then '\
                'please follow this link: ' + link
     # msg.html = render_template('email_reset.html', link=link) #TODO
@@ -52,7 +52,7 @@ def send_reset_email(id, email, hashed, url_root):
 
 def send_confirmation_email(id, email, url_root):
     token = create_confirm_token(id)
-    link = url_root + "api/users/confirm_email/" + token
+    link = url_root + "confirm/" + token
 
     msg = Message("Confirm your Email - Wikispeedruns.com", recipients=[email])
 
@@ -306,8 +306,9 @@ def confirm_email_request():
 
     return "New confirmation email sent", 200
 
-@user_api.get("/confirm_email/<token>")
-def confirm_email(token):
+@user_api.post("/confirm_email")
+def confirm_email():
+    token = request.json["token"]
     id = verify_confirm_token(token)
     
     if (id is None):
@@ -322,7 +323,7 @@ def confirm_email(token):
 
         # TODO throw error if not right?
 
-    return redirect("/profile")
+    return "Email Confirmed"
 
 @user_api.post("/reset_password_request")
 def reset_password_request():

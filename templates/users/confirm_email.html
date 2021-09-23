@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script defer>
+
+const token = "{{token}}";
+
+async function handleConfirm()
+{
+    const body = {token};
+
+    const response = await fetch("/api/users/confirm_email", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+
+    if (response.status == 200) {
+        window.location.href = "/profile";
+    } else if (response.status == 400) {
+        alert("Could not confirm email (expired or invalid link)");
+    } else {
+        alert("Error in confirming email");
+    }
+}
+
+window.onload = function() {
+    var confirmButton = document.getElementById('confirm');
+    confirmButton.addEventListener("click", handleConfirm);
+}
+
+</script>
+{% endblock %}
+
+{% block content %}
+    <br>
+    <p>Click the following button to confirm your email</p>
+    <button id="confirm">here</button>
+{% endblock %}

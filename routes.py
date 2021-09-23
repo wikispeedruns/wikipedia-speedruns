@@ -78,3 +78,9 @@ def get_prompt_page(id):
 def get_play_page(id):
     return render_with_user('play.html', prompt_id=id)
     
+
+
+@app.route('/confirm/<token>', methods=['GET'])
+def get_confirm_page(token):
+    return render_with_user('users/confirm_email.html', token=token)
+    
