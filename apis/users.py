@@ -35,10 +35,9 @@ google_bp = oauth_google.make_google_blueprint(redirect_url="/api/users/auth/goo
 user_api.register_blueprint(google_bp, url_prefix="/api/users/auth")
 
 
-
 def send_reset_email(id, email, hashed, url_root):
     token = create_reset_token(id, hashed)
-    link = url_root + "reset/" + token
+    link = f"{url_root}reset/{id}/{token}"
 
     msg = Message("Reset Your Password - wikispeedruns.com",
       recipients=[email])
@@ -335,7 +334,7 @@ def reset_password_request():
     email = request.json['email']
 
     query = "SELECT `user_id`, `hash` FROM `users` WHERE `email`=%s"
-
+    
     db = get_db()
     with db.cursor() as cursor:
         res = cursor.execute(query, (email, ))
@@ -368,7 +367,9 @@ def reset_password():
     with db.cursor() as cursor:
         # Query for user and use password to decode token
         result = cursor.execute(get_query, (id, ))
-        # TODO , assert should be found
+
+        if (result == 0):
+            return "Invalid id", 400
 
         (old_hash, ) = cursor.fetchone()
 
