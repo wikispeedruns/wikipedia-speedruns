@@ -3,6 +3,7 @@ import time
 from dbsearch import getLinks
 from dbcreation import log
 
+debugMode = False
 articleCount = 0
 reverseArticleCount = 0
 
@@ -13,8 +14,8 @@ def bidirectionalSearcher(start, end):
     forwardVisited = {start : (None, 0, 0)}
     reverseVisited = {end : (None, 0, 0)}
 
-    forwardQueue = [startTitle]
-    reverseQueue = [endTitle]
+    forwardQueue = [start]
+    reverseQueue = [end]
     
     while True:
         a = forwardBFS(start, end, forwardVisited, reverseVisited, forwardQueue)
@@ -32,10 +33,12 @@ def bidirectionalSearcher(start, end):
                     b = None
                 
             if a:
-                log("Found intersection!: \"" + a + '\"\n')
+                if debugMode:
+                    log("Found intersection!: \"" + a + '\"\n')
                 return [traceBidirectionalPath(a, start, end, forwardVisited, reverseVisited)]
             else:
-                log("Found intersection!: \"" + b + '\"\n')
+                if debugMode:
+                    log("Found intersection!: \"" + b + '\"\n')
                 return [traceBidirectionalPath(b, start, end, forwardVisited, reverseVisited)]
             
             
@@ -52,6 +55,8 @@ def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
     pages = {}
     startingDepth = 0
 
+    #print(queue)
+
     if not queue:
         raise RuntimeError('No Path')
     
@@ -59,7 +64,8 @@ def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
         pageTitle = queue.pop(0)
         if c == 0:
             startingDepth = forwardVisited[pageTitle][1]
-            log("Forward depth reached: " + str(forwardVisited[pageTitle][1] + 1))
+            if debugMode:
+                log("Forward depth reached: " + str(forwardVisited[pageTitle][1] + 1))
         elif forwardVisited[pageTitle][1] != startingDepth:
             queue.insert(0, pageTitle)
             break
@@ -91,7 +97,8 @@ def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
                 articleCount += 1
                 
                 if articleCount % 10000 == 0:
-                    log("Forward: " + str(tracePath(forwardVisited, link, start)) + ", " + str(articleCount))
+                    if debugMode:
+                        log("Forward: " + str(tracePath(forwardVisited, link, start)) + ", " + str(articleCount))
                     
     return None  
 
@@ -115,7 +122,8 @@ def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
         pageTitle = queue.pop(0)
         if c == 0:
             startingDepth = reverseVisited[pageTitle][1]
-            log("Reverse depth reached: " + str(reverseVisited[pageTitle][1] + 1))
+            if debugMode:
+                log("Reverse depth reached: " + str(reverseVisited[pageTitle][1] + 1))
         elif reverseVisited[pageTitle][1] != startingDepth:
             queue.insert(0, pageTitle)
             break
@@ -147,7 +155,8 @@ def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
                 reverseArticleCount += 1
                 
                 if reverseArticleCount % 10000 == 0:
-                    log("Reverse: " + str(tracePath(reverseVisited, link, end)) + ", " + str(reverseArticleCount))
+                    if debugMode:
+                        log("Reverse: " + str(tracePath(reverseVisited, link, end)) + ", " + str(reverseArticleCount))
                     
     return None      
         
@@ -183,28 +192,42 @@ def Reverse(lst):
 
 
 
-
-maxLength = 5   
-
-startTitle = "Lady of Tikal"
-endTitle = "Austrosetia"
-
-start_time = time.time()
-
-try:
-    paths = bidirectionalSearcher(startTitle, endTitle)
+def findPaths(startTitle, endTitle):
     
-    for path in paths:
-        print("Path:")
-        print(path[0])
-        print("DEBUG - EdgeID:")
-        print(str(path[1]) + '\n')
+    start_time = time.time()
+
+    try:
+        paths = bidirectionalSearcher(startTitle, endTitle)
         
-except Exception as error:
-    print(repr(error))
+        if debugMode:
+            print(paths)
+        
+        for path in paths:
+            print("Path:")
+            print(path[0])
+            if debugMode:
+                print("DEBUG - EdgeID:")
+                print(str(path[1]) + '\n')
+            
+    except Exception as error:
+        print(repr(error))
 
-print("Forward articles: " + str(articleCount))
-print("Reverse articles: " + str(reverseArticleCount))
-print("Total checked articles: " + str(articleCount + reverseArticleCount))
+    if debugMode:
+        print("Forward articles: " + str(articleCount))
+        print("Reverse articles: " + str(reverseArticleCount))
+        print("Total checked articles: " + str(articleCount + reverseArticleCount))
+            
+        print("Elapsed time:" + str(time.time() - start_time) + ' seconds\n')
+
+
+if __name__ == '__main__':
     
-print("Elapsed time:" + str(time.time() - start_time) + ' seconds\n')
+    debugMode = False
+
+    start = "Candidates of the 1955 Australian federal election"
+    end = "Leech"
+    
+    findPaths(start, end)
+
+
+
