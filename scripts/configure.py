@@ -18,6 +18,13 @@ def create_prod_conf():
     config["GOOGLE_OAUTH_CLIENT_SECRET"] = input("Google Secret for Oath: ")
     # TODO more here
 
+    config["MAIL_SERVER"] = input("Mail Server URL: ")
+    config["MAIL_PORT"] = input("Mail Server Port: ")
+    config["MAIL_USERNAME"] = input("SMTP Username: ")
+    config["MAIL_PASSWORD"] = input("SMTP Password: ")
+    config["MAIL_DEFAULT_SENDER"] = input("Default Sender for mail: ")
+
+
     json.dump(config, open('../config/prod.json', 'w'), indent=4)
 
 def create_admin_account():

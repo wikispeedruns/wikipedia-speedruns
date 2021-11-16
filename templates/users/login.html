@@ -28,7 +28,6 @@ async function handleLogin(event)
 
     const response = await fetch("/api/users/login", {
         method: 'POST',
-        redirect: 'follow',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -38,6 +37,7 @@ async function handleLogin(event)
     if (response.ok) {
         document.getElementById("loginForm").reset();
         document.getElementById("message").innerText = "Successfully logged in!";
+        window.location.href = "/"; // Change this once we have a profile page
     } else if (response.status == 401) {
         document.getElementById("message").innerText = "Invalid username or password";
     } else {
@@ -56,7 +56,7 @@ window.onload = function() {
 
 {% block content %}
 <br>
-<form id="loginForm" onsubmit="handleLogin">
+<form id="loginForm">
     <label for="login">Login</label>
     <input name="login" id="login" required>
     <br>
@@ -66,6 +66,10 @@ window.onload = function() {
     <input type="submit" value="Log In">
 </form>
 <p id="message"></p>
+
+<br>
+
+<a href="{{url_for('get_reset_request_page')}}">Forgot your password?</a>
 
 <br>
 

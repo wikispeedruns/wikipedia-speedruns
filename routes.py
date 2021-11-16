@@ -77,4 +77,17 @@ def get_prompt_page(id):
 @app.route('/play/<id>', methods=['GET'])
 def get_play_page(id):
     return render_with_user('play.html', prompt_id=id)
+    
 
+
+@app.route('/confirm/<token>', methods=['GET'])
+def get_confirm_page(token):
+    return render_with_user('users/confirm_email.html', token=token)
+
+@app.route('/reset/request', methods=['GET'])
+def get_reset_request_page():
+    return render_template('users/reset_password_request.html')
+
+@app.route('/reset/<id>/<token>', methods=['GET'])
+def get_reset_page(id, token):
+    return render_template('users/reset_password.html', id=id, token=token)
