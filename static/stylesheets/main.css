@@ -54,6 +54,10 @@ a {
     text-decoration: none !important;
 }
 
+a:hover {
+    text-decoration: underline !important;
+}
+
 .path {
     font-size: 15px !important;
     text-align: left;
