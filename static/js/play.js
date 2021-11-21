@@ -73,6 +73,9 @@ async function finish() {
     clearInterval(timerInterval);
     document.getElementById("timer").innerHTML="";
 
+    // Prevent prompt
+    window.onbeforeunload = null;
+
     const reqBody = {
         "start_time": startTime,
         "end_time": endTime,
@@ -196,3 +199,7 @@ window.addEventListener("load", async function() {
         loadPage(article)
     }, 5000);
 });
+
+window.onbeforeunload = function() {
+    return true;
+};
