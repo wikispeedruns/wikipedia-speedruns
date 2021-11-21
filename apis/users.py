@@ -190,7 +190,7 @@ def check_google_auth():
             user = cursor.fetchone()
             login_session(user)
 
-    return "Logged in", 200
+    return redirect("/")
 
 
 @user_api.post("/login")
