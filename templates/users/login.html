@@ -3,6 +3,19 @@
 {% block head %}
 <script>
 // Should we make this a separate file?
+
+function validationAlert(msg, isErr=true)
+{
+    var element = document.getElementById("message");
+
+    element.classList.add("text-danger");
+
+    if (!isErr)
+        element.classList.remove("text-danger");
+
+    element.innerText = msg;
+}
+
 async function handleLogin(event)    
 {
     event.preventDefault();
@@ -36,12 +49,12 @@ async function handleLogin(event)
 
     if (response.ok) {
         document.getElementById("loginForm").reset();
-        document.getElementById("message").innerText = "Successfully logged in!";
+        validationAlert("Successfully logged in!", false);
         window.location.href = "/"; // Change this once we have a profile page
     } else if (response.status == 401) {
-        document.getElementById("message").innerText = "Invalid username or password";
+        validationAlert("Invalid username or password");
     } else {
-        document.getElementById("message").innerText = "Error logging in";
+        validationAlert("Error logging in");
     }
     
 }
@@ -51,27 +64,40 @@ window.onload = function() {
     form.addEventListener("submit", handleLogin);
 }
 </script>
+
+<style>
+    
+
+</style>
 {% endblock %}
 
 
 {% block content %}
-<br>
-<form id="loginForm">
-    <label for="login">Login</label>
-    <input name="login" id="login" required>
-    <br>
-    <label for="password">Password</label>
-    <input type="password" name="password" id="password" required>
-    <br>
-    <input type="submit" value="Log In">
-</form>
-<p id="message"></p>
 
-<br>
+<div class="col-lg-4 col-md-6" >
+    <form id="loginForm">
 
-<a href="{{url_for('get_reset_request_page')}}">Forgot your password?</a>
+        <div class="form-floating mb-2">
+            <input id="login" class="form-control" required >
+            <label for="login" class="form-label">Login</label>
 
-<br>
+        </div>
+        <div class="form-floating mb-2">
+            <input type="password" id="password" class="form-control" required>
+            <label for="password" class="form-label">Password</label>
+        </div>
+        <p id="message" class="form-text text-danger">
 
-<a href="{{url_for('users.google.login')}}">Login with Google</a>
+        </p>
+
+
+        <button type="submit" class="btn btn-light">Login</button>
+
+        <p class="mt-2"><a href="{{url_for('get_reset_request_page')}}">Forgot your password?</a></p>
+        <p><a href="{{url_for('users.google.login')}}">Login with Google</a></p>
+
+    </form>
+</div>
+
+
 {% endblock %}

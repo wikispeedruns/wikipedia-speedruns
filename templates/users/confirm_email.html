@@ -5,7 +5,7 @@
 
 const token = "{{token}}";
 
-async function handleConfirm()
+async function confirm()
 {
     const body = {token};
 
@@ -18,24 +18,21 @@ async function handleConfirm()
     });
 
     if (response.status == 200) {
-        window.location.href = "/profile";
+        document.getElementById("message").innerText = "Email Confirmed!";
     } else if (response.status == 400) {
-        alert("Could not confirm email (expired or invalid link)");
+        document.getElementById("message").innerText = "Could not confirm email (expired or invalid link)";
     } else {
-        alert("Error in confirming email");
+        document.getElementById("message").innerText = "Error in confirming email";
     }
 }
 
-window.onload = function() {
-    var confirmButton = document.getElementById('confirm');
-    confirmButton.addEventListener("click", handleConfirm);
-}
+window.onload = confirm()
 
 </script>
 {% endblock %}
 
 {% block content %}
-    <br>
-    <p>Click the following button to confirm your email</p>
-    <button id="confirm">here</button>
+<p id="message" class="text">
+    Confirming Email ...
+</p>
 {% endblock %}
