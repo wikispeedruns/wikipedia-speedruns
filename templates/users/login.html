@@ -3,6 +3,19 @@
 {% block head %}
 <script>
 // Should we make this a separate file?
+
+function validationAlert(msg, isErr=true)
+{
+    var element = document.getElementById("message");
+
+    element.classList.add("text-danger");
+
+    if (!isErr)
+        element.classList.remove("text-danger");
+
+    element.innerText = msg;
+}
+
 async function handleLogin(event)    
 {
     event.preventDefault();
@@ -36,12 +49,12 @@ async function handleLogin(event)
 
     if (response.ok) {
         document.getElementById("loginForm").reset();
-        document.getElementById("message").innerText = "Successfully logged in!";
+        validationAlert("Successfully logged in!", false);
         window.location.href = "/"; // Change this once we have a profile page
     } else if (response.status == 401) {
-        document.getElementById("message").innerText = "Invalid username or password";
+        validationAlert("Invalid username or password");
     } else {
-        document.getElementById("message").innerText = "Error logging in";
+        validationAlert("Error logging in");
     }
     
 }

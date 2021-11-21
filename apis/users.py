@@ -1,5 +1,6 @@
 import email
 from flask.helpers import url_for
+import pymysql
 from werkzeug.utils import redirect
 from util.decorators import check_user
 from flask import session, request, render_template, Blueprint, current_app
@@ -152,17 +153,19 @@ def create_user():
 
     db = get_db()
     with get_db().cursor() as cursor:
-        result = cursor.execute(query, (username, hash, email, False))
 
-        if (result == 0):
+        try:
+            cursor.execute(query, (username, hash, email, False))
+
+            cursor.execute(get_id_query)
+            (id,) = cursor.fetchone()
+            
+            send_confirmation_email(id, email, request.url_root)
+
+            db.commit()
+
+        except pymysql.error.IntegrityError:
             return ("User {} already exists".format(username), 409)
-
-        cursor.execute(get_id_query)
-        (id,) = cursor.fetchone()
-        
-        send_confirmation_email(id, email, request.url_root)
-
-        db.commit()
 
     return ("User {} ({}) added".format(username, id), 201)
 
