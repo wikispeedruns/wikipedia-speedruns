@@ -1,5 +1,6 @@
 from util.decorators import check_admin
 from flask import Flask, jsonify, request, Blueprint, session
+import json
 
 from db import get_db
 from pymysql.cursors import DictCursor
@@ -7,7 +8,7 @@ from pymysql.cursors import DictCursor
 prompt_api = Blueprint('prompts', __name__, url_prefix='/api/prompts')
 
 
-@prompt_api.post('')
+@prompt_api.post('/')
 @check_admin
 def create_prompt():
     # TODO is this the best way to do this?
@@ -108,4 +109,8 @@ def get_prompt_runs(id):
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (id,))
         results = cursor.fetchall()
+        
+        for run in results:
+            run['path'] = json.loads(run['path'])
+
         return jsonify(results)

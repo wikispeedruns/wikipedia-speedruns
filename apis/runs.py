@@ -3,6 +3,8 @@ from flask import jsonify, request, Blueprint, session
 from db import get_db
 from pymysql.cursors import DictCursor
 
+import json
+
 from datetime import datetime
 
 
@@ -17,7 +19,7 @@ def create_run():
     # datetime wants timestamp in seconds since epoch
     start_time = datetime.fromtimestamp(request.json['start_time']/1000)
     end_time = datetime.fromtimestamp(request.json['end_time']/1000)
-    path = str(request.json['path']) # TODO Format path
+    path = json.dumps(request.json['path'])
     prompt_id = request.json['prompt_id']
 
     if ('user_id' in session):
@@ -44,7 +46,7 @@ def create_run():
 @run_api.get('')
 def get_all_runs():
     # TODO this should probably be paginated, and return just ids
-    query = "SELECT * FROM `runs`"
+    query = "SELECT run_id FROM `runs`"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:

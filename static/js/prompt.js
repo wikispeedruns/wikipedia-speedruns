@@ -90,7 +90,7 @@ function populateGraph(runs) {
         if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
 
 
-        var pathNodes = parsePath(runs[i]["path"].substring(1, runs[i]["path"].length - 1));
+        var pathNodes = runs[i]["path"]
         var cur = (runs[i]["run_id"] === Number(run_id)) ? true : false;
 
         if (cur) {
@@ -213,24 +213,7 @@ function componentToHex(c) {
 }
 
 function rgbToHex(r, g, b) {
-return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-}
-
-function parsePath(path) {
-    var nodes = path.split("\', \'");
-    var out = [];
-    
-    for (var i = 0; i < nodes.length; i++) {
-        if (i === 0) {
-            out.push(nodes[i].substring(1, nodes[i].length));
-        } else if  (i === nodes.length - 1) {
-            out.push(nodes[i].substring(0, nodes[i].length - 1));
-        } else {
-            out.push(nodes[i]);
-        }
-    }
-    
-    return out;
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
 window.addEventListener("load", async function() {
