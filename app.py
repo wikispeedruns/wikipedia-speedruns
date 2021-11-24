@@ -24,10 +24,11 @@ tokens.init_app(app)
 from apis.prompts import prompt_api
 from apis.runs import run_api
 from apis.users import user_api
-from apis.user_stats import stats_api
+from apis.profiles import profile_api
+
 app.register_blueprint(prompt_api)
 app.register_blueprint(run_api)
 app.register_blueprint(user_api)
-app.register_blueprint(stats_api)
+app.register_blueprint(profile_api)
 
 import routes

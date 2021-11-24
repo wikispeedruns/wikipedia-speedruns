@@ -1,4 +1,3 @@
-import email
 from flask.helpers import url_for
 import pymysql
 from werkzeug.utils import redirect
@@ -386,3 +385,4 @@ def reset_password():
         db.commit()
 
     return "Password Changed", 200
+
