@@ -5,7 +5,6 @@ from dbsearch import getSrc
 import random
 
 import bidirectionalSearch as searcher
-from math import exp
 
 debugMode = False
 
@@ -23,8 +22,6 @@ def randStart(thresholdStart):
         start = getSrc(randIndex, cur)
         if checkStart(start, thresholdStart):
             yield start
-        #else:
-            #log("Not long enough start: " + start)
         
 def checkStart(start, thresholdStart):
     
@@ -62,7 +59,7 @@ def checkEnd(end, thresholdEnd):
     
     x = countWords(end)
     
-    if randomFilter(True, 0.0047 *x*x*x - 0.0777*x*x + 0.2244*x + 1.226): #exp(-countWords(end)/5.0)):
+    if randomFilter(True, 0.0047 *x*x*x - 0.0777*x*x + 0.2244*x + 1.226):
         print("Random filtered:",end)
         return False
     
@@ -138,6 +135,7 @@ def generatePrompts(thresholdStart=100, thresholdEnd=100, n=20, dist=15):
     
     
     startGenerator = randStart(thresholdStart)
+    endGenerator = randStart(thresholdEnd)
     
     while len(generatedPromptPaths) <= n:
         
@@ -145,6 +143,8 @@ def generatePrompts(thresholdStart=100, thresholdEnd=100, n=20, dist=15):
         
         if checkEnd(sample[-1], thresholdEnd) and len(sample) == d + 1:
             generatedPromptPaths.append(sample)
+        
+        #generatedPromptPaths.append([startGenerator.__next__(), endGenerator.__next__()])
         
     print("Finished generating prompts: \n")
     
@@ -164,10 +164,13 @@ if __name__ == "__main__":
         if debugMode:
             print(path)
         print(path[0] + "  ->  " + path[-1])
-        #searchedPaths = searcher.bidirectionalSearcher(path[0], path[-1])
-        #print("Shortest paths:")
-        #for a in searchedPaths:
-        #    print(a[0])
+        try:
+            searchedPaths = searcher.bidirectionalSearcher(path[0], path[-1])
+            #print("Shortest paths:")
+            for a in searchedPaths:
+                print(a[0])
+        except RuntimeError as e:
+            print(e)
             
         print("==========================")
 
