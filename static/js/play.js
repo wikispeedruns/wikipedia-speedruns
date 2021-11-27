@@ -192,6 +192,8 @@ function countdownOnLoad(start, end) {
     var timerBlock = document.getElementById("timer");
     var tipsBlock = document.getElementById("tips");
 
+    var gifBlock = document.getElementById("mirroredimgblock");
+
     guideBlock.innerHTML = "<strong>Starting article: </strong>" + start + "    -->    <strong>Goal article: </strong>" + end
 
     mainBlock.style.display = "none";
@@ -203,9 +205,24 @@ function countdownOnLoad(start, end) {
     tipsBlock.innerHTML = getRandTip();
 
     //countdownBlock.innerHTML = "Prompt will begin in " + "5" + " seconds";
+    /*    <img class="startgun" src="{{url_for('static', filename='assets/startgun.gif')}}">
+    <img class="startgun invgif" src="{{url_for('static', filename='assets/startgun.gif')}}">
+    */
 
     var countDownStart = Date.now();
-    var countDownTime = 6000;
+    var countDownTime = 5000;
+
+
+    var gunimg1 = document.createElement('img');
+    var gunimg2 = document.createElement('img');
+    imgpath = "/static/assets/startgun.gif";
+
+    gunimg1.classList.add("startgun");
+    gunimg2.classList.add("startgun");
+    gunimg2.classList.add("invgif");
+    gunimg2.src = imgpath;
+    gunimg1.src = imgpath;
+
 
     var x = setInterval(function() {
 
@@ -224,10 +241,16 @@ function countdownOnLoad(start, end) {
             guideBlock.innerHTML = "<strong>" + start + "</strong> --> <strong>" + end + "</strong>";
             timerBlock.style.display = "block";
             tipsBlock.style.display = "none";
+            gifBlock.style.display = "none";
             startTime = Date.now();
 
         }
-      }, 1050);
+        if (distance < 700 && distance > 610) {
+            gifBlock.style.visibility = "visible";
+            gifBlock.appendChild(gunimg1);
+            gifBlock.appendChild(gunimg2);
+        }
+      }, 50);
 
 }
 

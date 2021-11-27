@@ -81,3 +81,19 @@ th {
 .tips {
     font-size: 20px;
 }
+
+.startgun {
+    width: 200px;
+    position: absolute;
+    left:60%;
+}
+
+.invgif {
+    transform: scaleX(-1);
+    left:25% !important;
+}
+
+.mirroredimgblock {
+    position:relative;
+    visibility:hidden;
+}
