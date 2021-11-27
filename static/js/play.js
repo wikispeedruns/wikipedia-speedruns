@@ -52,6 +52,7 @@ async function loadPage(page) {
         startTime = Date.now()
         timerInterval = setInterval(displayTimer, 20);    
     }
+    
 
     path.push(title)
 
@@ -179,6 +180,56 @@ function displayTimer() {
     document.getElementById("timer").innerHTML = seconds + "s";
 }
 
+function getRandTip() {
+    return "There are five permanent members of the UN security council: China, France, Russia, United Kingdom, and the United States."
+}
+
+function countdownOnLoad(start, end) {
+    
+    var guideBlock = document.getElementById("guide");
+    var mainBlock = document.getElementById("main");
+    var countdownBlock = document.getElementById("countdown");
+    var timerBlock = document.getElementById("timer");
+    var tipsBlock = document.getElementById("tips");
+
+    guideBlock.innerHTML = "<strong>Starting article: </strong>" + start + "    -->    <strong>Goal article: </strong>" + end
+
+    mainBlock.style.display = "none";
+    countdownBlock.style.display = "block";
+    timerBlock.style.display = "none";
+    tipsBlock.style.display = "block";
+
+
+    tipsBlock.innerHTML = getRandTip();
+
+    //countdownBlock.innerHTML = "Prompt will begin in " + "5" + " seconds";
+
+    var countDownStart = Date.now();
+    var countDownTime = 6000;
+
+    var x = setInterval(function() {
+
+        var now = Date.now()
+      
+        // Find the distance between now and the count down date
+        var distance = countDownStart + countDownTime - now;
+        console.log(distance);
+        console.log(String(Math.floor(distance/1000)+1));
+        countdownBlock.innerHTML = String(Math.floor(distance/1000)+1);
+        countdownBlock.style.visibility = "visible";
+        if (distance < -1000) {
+            clearInterval(x);
+            mainBlock.style.display = "block";
+            countdownBlock.style.display = "none";
+            guideBlock.innerHTML = "<strong>" + start + "</strong> --> <strong>" + end + "</strong>";
+            timerBlock.style.display = "block";
+            tipsBlock.style.display = "none";
+            startTime = Date.now();
+
+        }
+      }, 1050);
+
+}
 
 window.addEventListener("load", async function() {
     const response = await fetch("/api/prompts/" + prompt_id);
@@ -187,17 +238,10 @@ window.addEventListener("load", async function() {
     const article = prompt["start"];
 
     goalPage = prompt["end"];
-    document.getElementById("guide").innerHTML = "<strong>Starting article: </strong>" + article + "    -->    <strong>Goal article: </strong>" + goalPage
 
-    document.getElementById("main").style.display = "none";
-    document.getElementById("countdown").innerHTML = "Prompt will begin in " + "5" + " seconds";
+    await countdownOnLoad(article,goalPage);
 
-    setTimeout(() => {
-        document.getElementById("main").style.display = "block";
-        document.getElementById("countdown").style.display = "none";
-        document.getElementById("guide").innerHTML = article + " --> " + goalPage
-        loadPage(article)
-    }, 5000);
+    loadPage(article);
 });
 
 window.onbeforeunload = function() {

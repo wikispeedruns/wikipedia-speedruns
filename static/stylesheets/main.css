@@ -73,5 +73,11 @@ th {
     width: 60%;
     margin: 50px auto;
     text-align: center;
-    font-size: 30px;
+    font-size: 250px;
+    font-weight: bold;
+    visibility:hidden;
+}
+
+.tips {
+    font-size: 20px;
 }

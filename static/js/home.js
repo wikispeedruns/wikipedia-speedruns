@@ -62,7 +62,7 @@ async function getPromptsHome()
         var header2 = document.createElement("th");
         header1.style.width = "25%";
         header1.style.width = "auto";
-        header1.appendChild(document.createTextNode("Prompt #"));
+        header1.appendChild(document.createTextNode("Prompt #         "));
         header2.appendChild(document.createTextNode("Starting Article"));
         item.appendChild(header1);
         item.appendChild(header2);
