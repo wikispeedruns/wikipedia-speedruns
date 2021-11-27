@@ -4,6 +4,10 @@ var startTime = 0;
 var path = [];
 var endTime = 0;
 
+var keyMap = {};
+
+var ctrlfwarnings = false;
+
 function handleWikipediaLink(e) 
 {
     e.preventDefault();
@@ -210,7 +214,7 @@ function countdownOnLoad(start, end) {
     */
 
     var countDownStart = Date.now();
-    var countDownTime = 5000;
+    var countDownTime = 8000;
 
 
     var gunimg1 = document.createElement('img');
@@ -230,8 +234,8 @@ function countdownOnLoad(start, end) {
       
         // Find the distance between now and the count down date
         var distance = countDownStart + countDownTime - now;
-        console.log(distance);
-        console.log(String(Math.floor(distance/1000)+1));
+        //console.log(distance);
+        //console.log(String(Math.floor(distance/1000)+1));
         countdownBlock.innerHTML = String(Math.floor(distance/1000)+1);
         countdownBlock.style.visibility = "visible";
         if (distance < -1000) {
@@ -243,6 +247,7 @@ function countdownOnLoad(start, end) {
             tipsBlock.style.display = "none";
             gifBlock.style.display = "none";
             startTime = Date.now();
+            ctrlfwarnings = true;
 
         }
         if (distance < 700 && distance > 610) {
@@ -252,6 +257,30 @@ function countdownOnLoad(start, end) {
         }
       }, 50);
 
+}
+
+function checkForFind(e) {
+
+    var guideBlock = document.getElementById("guide");
+    var mainBlock = document.getElementById("main");
+    var timerBlock = document.getElementById("timer");
+
+    console.log(e.code);
+    e = e || event;
+    keyMap[e.code] = e.type == 'keydown';
+    if (keyMap["KeyF"] && (keyMap["ControlLeft"] || keyMap["ControlRight"])) {
+        if (ctrlfwarnings == true) {
+            //ctrlfwarnings = 1;
+            mainBlock.style.display = "none";
+            timerBlock.style.display = "none";
+            guideBlock.innerHTML = "STOP! You violated the law. Pay the court a fine or serve your sentence."
+            var tesguard = document.createElement('img');
+            tesguard.src = "/static/assets/stop.jpg";
+            tesguard.width= "700";
+            tesguard.style.marginTop = "40px";
+            guideBlock.appendChild(tesguard);
+        }
+    }
 }
 
 window.addEventListener("load", async function() {
@@ -270,3 +299,11 @@ window.addEventListener("load", async function() {
 window.onbeforeunload = function() {
     return true;
 };
+
+
+window.addEventListener("keydown", function(e) {
+    checkForFind(e);
+});
+window.addEventListener("keyup", function(e) {
+    checkForFind(e);
+});
