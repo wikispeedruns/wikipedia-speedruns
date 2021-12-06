@@ -104,6 +104,9 @@ def main():
         cursor.execute(RUNS_QUERY)
         runs = cursor.fetchall()
 
+        # Assert to catch case where RUNS_QUERY has duplicates
+        assert(len(runs) == len(set((r["prompt_id"], r["user_id"]) for r in runs)))
+
     for k, round in itertools.groupby(runs, lambda r: r['prompt_id']):
         print(f"Processing Round {k}")
 
@@ -111,6 +114,12 @@ def main():
         round = [run["username"] for run in round]        
         update(users, round)
 
+    users = sorted([(v["rating"], k) for k, v in users.items()])
+
+    for (rating, username) in users:
+        print(f"{username}: {rating}")
+    
+    
 
 if __name__ == "__main__":
     main()
