@@ -49,6 +49,29 @@ CREATE TABLE IF NOT EXISTS `runs` (
 );
 ''')
 
+TABLES['achievements']=(
+'''
+CREATE TABLE IF NOT EXISTS `achievements` (
+    `achievement_id` INT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`achievement_id`)
+);
+'''
+)
+
+TABLES['user_achievements']=(
+'''
+CREATE TABLE IF NOT EXISTS `user_achievements` (
+    `user_id` INT NOT NULL,
+    `achievement_id` INT NOT NULL,
+    `time_achieved` DATETIME,
+    PRIMARY KEY (`user_id`, `achievement_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`),
+    FOREIGN KEY (`achievement_id`) REFERENCES `achievements`(`achievement_id`)
+);
+'''
+)
+
 
 def create_tables(cursor):
     for table in TABLES:
