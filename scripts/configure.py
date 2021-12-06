@@ -66,9 +66,9 @@ def create_admin_account():
         result = cursor.execute(query, (username, hash, email, True, True))
 
         if (result == 0):
-            print("User {} already exists".format(username))
+            print(f"User {username} already exists")
         else:
-            print("Admin User {} added".format(username))
+            print(f"Admin User {username} added")
         db.commit()
     db.close()
 

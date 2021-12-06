@@ -5,8 +5,8 @@ import pymysql
 
 DB_NAME='wikipedia_speedruns'
 
-CREATE_DB_QUERY = 'CREATE DATABASE IF NOT EXISTS {}'.format(DB_NAME)
-USE_DB_QUERY = 'USE {}'.format(DB_NAME)
+CREATE_DB_QUERY = f'CREATE DATABASE IF NOT EXISTS {DB_NAME}'
+USE_DB_QUERY = f'USE {DB_NAME}'
 
 TABLES={}
 

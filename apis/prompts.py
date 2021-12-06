@@ -90,7 +90,7 @@ def set_prompt_publicity(id):
         if (res == 0): return "prompt not found", 404
 
         db.commit()
-        return "Changed prompt to {}".format("public" if public else "ranked"), 200
+        return f"Changed prompt to {'public' if public else 'ranked'}", 200
 
 
 @prompt_api.get('/<id>/runs')

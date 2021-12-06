@@ -116,11 +116,11 @@ def create_user_oauth():
         result = cursor.execute(query, (username, email, True))
 
         if (result == 0):
-            return ("User {} already exists".format(username), 409)
+            return (f"User {username} already exists", 409)
 
         db.commit()
 
-    return ("User {} added".format(username), 201)
+    return (f"User {username} added", 201)
 
 
 @user_api.post("/create/email")
@@ -164,9 +164,9 @@ def create_user():
             db.commit()
 
         except pymysql.error.IntegrityError:
-            return ("User {} already exists".format(username), 409)
+            return (f"User {username} already exists", 409)
 
-    return ("User {} ({}) added".format(username, id), 201)
+    return (f"User {username} ({id}) added", 201)
 
 
 @user_api.get("/auth/google/check")
