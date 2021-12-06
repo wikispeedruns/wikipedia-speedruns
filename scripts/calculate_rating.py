@@ -12,14 +12,18 @@ import pprint
 
 USER_QUERY = 'SELECT username from users'
 
+# TODO technically if a user has the same start time, they'll show up twice, this could be an issue
 RUNS_QUERY = ('''
-SELECT runs.run_id, runs.prompt_id, users.user_id, users.username, MIN(runs.start_time) as start_time,
+SELECT runs.run_id, runs.prompt_id, runs.user_id, users.username,
         TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
 FROM runs 
-LEFT JOIN users ON runs.user_id=users.user_id 
-WHERE users.user_id IS NOT NULL
-GROUP BY runs.user_id, runs.prompt_id
-ORDER BY runs.prompt_id, run_time
+RIGHT JOIN users ON runs.user_id=users.user_id 
+INNER JOIN (
+    SELECT user_id, MIN(start_time) as start_time
+    FROM runs
+    GROUP BY runs.prompt_id, runs.user_id
+) t ON runs.user_id = t.user_id AND runs.start_time = t.start_time
+ORDER BY runs.prompt_id, run_time;
 ''')
 
 INITIAL_RATING = 1500
@@ -102,7 +106,9 @@ def main():
 
     for k, round in itertools.groupby(runs, lambda r: r['prompt_id']):
         print(f"Processing Round {k}")
-        round = [run["username"] for run in round]
+
+        # Only take the first run for each
+        round = [run["username"] for run in round]        
         update(users, round)
 
 
