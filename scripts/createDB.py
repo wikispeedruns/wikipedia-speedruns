@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     `hash` CHAR(60),
     `email` VARCHAR(255) NOT NULL UNIQUE,
     `email_confirmed` BOOLEAN NOT NULL DEFAULT 0,
+    `join_date` DATE,
     `admin` BOOLEAN NOT NULL DEFAULT 0,
     PRIMARY KEY (`user_id`)
 );
