@@ -220,7 +220,7 @@ window.addEventListener("load", async function() {
     var response = await fetch("/api/prompts/" + prompt_id);
     const prompt = await response.json();
 
-    response = await fetch("/api/prompts/" + prompt_id + "/first_runs");
+    response = await fetch("/api/prompts/" + prompt_id + "/runs");
     const runs = await response.json(); 
 
     generate_prompt(prompt);
