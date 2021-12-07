@@ -97,15 +97,16 @@ def set_prompt_publicity(id):
 def get_prompt_runs(id):
     # TODO this could probably return details as well
     query = ("""
-    SELECT runs.run_id, runs.path, users.user_id, users.username,
-            TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
+    SELECT run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
     FROM runs
-    LEFT JOIN users ON runs.user_id=users.user_id 
-    WHERE prompt_id=%s AND runs.start_time = (
-        SELECT MIN(start_time)
-        FROM runs AS r
-        WHERE r.user_id = runs.user_id
-    )
+    JOIN (
+            SELECT users.user_id, username, MIN(start_time) AS first_run 
+            FROM runs
+            JOIN users ON users.user_id=runs.user_id
+            WHERE prompt_id=%s AND end_time IS NOT NULL
+            GROUP BY user_id
+    ) firsts
+    ON firsts.user_id=runs.user_id AND first_run=start_time
     ORDER BY run_time
     """)
 
