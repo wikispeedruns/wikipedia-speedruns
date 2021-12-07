@@ -101,7 +101,7 @@ def get_prompt_runs(id):
             TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
     FROM runs 
     LEFT JOIN users ON runs.user_id=users.user_id 
-    WHERE prompt_id=%s
+    WHERE prompt_id=%s AND end_time IS NOT NULL
     ORDER BY run_time 
     """)
 
