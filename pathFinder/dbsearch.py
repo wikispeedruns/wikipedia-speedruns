@@ -10,7 +10,8 @@ def getLinks(pages, cur, forward = True):
     output = {}
     
     if forward:
-        queryString = "SELECT * FROM edges WHERE src IN (%s)"
+        queryString = "SELECT * FROM edgeidarticleid WHERE src IN (%s)"
+        #queryString = "SELECT * FROM edges WHERE src IN (%s)"
         queryResults = batchQuery(queryString, list(pages.keys()), cur)
         
         for queryEntry in queryResults:
@@ -23,7 +24,7 @@ def getLinks(pages, cur, forward = True):
                     output[title].append((queryEntry['dest'], queryEntry['edgeID']))
                     
     else:
-        queryString = "SELECT * FROM edges WHERE dest IN (%s)"
+        queryString = "SELECT * FROM edgeidarticleid WHERE dest IN (%s)"
         queryResults = batchQuery(queryString, list(pages.keys()), cur)
         
         for queryEntry in queryResults:
@@ -40,7 +41,8 @@ def getLinks(pages, cur, forward = True):
 
 
 def getSrc(edgeID, cur):
-    queryString = "SELECT src FROM edges WHERE edgeID=%s"
+    queryString = "SELECT src FROM edgeidarticleid WHERE edgeID=%s"
+    #queryString = "SELECT src FROM edges WHERE edgeID=%s"
     cur.execute(queryString, str(edgeID))
     output = cur.fetchall()
     

@@ -3,7 +3,7 @@ import time
 from dbsearch import getLinks
 from dbcreation import log
 
-debugMode = False
+debugMode = True
 articleCount = 0
 reverseArticleCount = 0
 
@@ -34,11 +34,11 @@ def bidirectionalSearcher(start, end):
                 
             if a:
                 if debugMode:
-                    log("Found intersection!: \"" + a + '\"\n')
+                    log("Found intersection!: \"" + str(a) + '\"\n')
                 return [traceBidirectionalPath(a, start, end, forwardVisited, reverseVisited)]
             else:
                 if debugMode:
-                    log("Found intersection!: \"" + b + '\"\n')
+                    log("Found intersection!: \"" + str(b) + '\"\n')
                 return [traceBidirectionalPath(b, start, end, forwardVisited, reverseVisited)]
             
             
@@ -191,26 +191,53 @@ def Reverse(lst):
     return [ele for ele in reversed(lst)]      
 
 
+def convertToID(name):
+    queryString = "SELECT * from articleID where name=%s"
+    cur.execute(queryString, str(name))
+    output = cur.fetchall()
+    
+    if len(output)>0:
+        return output[0]['articleID']
+    
+    
+def convertToArticleName(id):
+    queryString = "SELECT * from articleID where articleID=%s"
+    cur.execute(queryString, str(id))
+    output = cur.fetchall()
+    
+    if len(output)>0:
+        return output[0]['name']
+    
+def convertPathToNames(idpath):
+    output = []
+    for item in idpath:
+        output.append(convertToArticleName(item))
+        
+    return output
 
 def findPaths(startTitle, endTitle):
     
     start_time = time.time()
+    
+    startID = int(convertToID(startTitle))
+    endID = int(convertToID(endTitle))
 
-    try:
-        paths = bidirectionalSearcher(startTitle, endTitle)
-        
+    #try:
+    paths = bidirectionalSearcher(startID, endID)
+    
+    if debugMode:
+        print(paths)
+    
+    for path in paths:
+        print("Path:")
+        print(path[0])
+        print(convertPathToNames(path[0]))
         if debugMode:
-            print(paths)
-        
-        for path in paths:
-            print("Path:")
-            print(path[0])
-            if debugMode:
-                print("DEBUG - EdgeID:")
-                print(str(path[1]) + '\n')
+            print("DEBUG - EdgeID:")
+            print(str(path[1]) + '\n')
             
-    except Exception as error:
-        print(repr(error))
+    #except Exception as error:
+    #    print(repr(error))
 
     if debugMode:
         print("Forward articles: " + str(articleCount))
@@ -222,7 +249,7 @@ def findPaths(startTitle, endTitle):
 
 if __name__ == '__main__':
     
-    debugMode = False
+    debugMode = True
 
     start = "Candidates of the 1955 Australian federal election"
     end = "Leech"
