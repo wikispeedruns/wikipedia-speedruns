@@ -50,7 +50,7 @@ achievements[meta.name] = meta
 def you_lost_eval(run):
     pathArr = parseRunForPath(run)
     pathArr.sort()
-    for i in range(len(pathArr)):
+    for i in range(len(pathArr)-1):
         if pathArr[i] == pathArr[i+1]:
             return True
     return False
@@ -63,6 +63,14 @@ you_lost = achievement("You Lost?",
 achievements[you_lost.name] = you_lost
 
 
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
     
     db = pymysql.connect(host="localhost", user="root", password="9EEB00@@", database="wikipedia_speedruns")
@@ -71,7 +79,7 @@ if __name__ == '__main__':
     queryString = "SELECT max(run_id) FROM runs;"
     cur.execute(queryString)
     maxID = int(cur.fetchall()[0]['max(run_id)'])
-    
+        
     queryString = "SELECT * FROM runs WHERE run_id=%s;"
     cur.execute(queryString, str(maxID))
     runDict = cur.fetchall()[0]
