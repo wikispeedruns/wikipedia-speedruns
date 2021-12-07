@@ -69,7 +69,7 @@ def get_prompt(id):
 @check_admin
 def set_prompt_publicity(id):
     '''
-    Change whether a prompt is public
+    Change wheter a prompt is public
 
     Example json
     {
@@ -93,20 +93,16 @@ def set_prompt_publicity(id):
         return "Changed prompt to {}".format("public" if public else "ranked"), 200
 
 
-@prompt_api.get('/<id>/first_runs')
+@prompt_api.get('/<id>/runs')
 def get_prompt_runs(id):
     # TODO this could probably return details as well
     query = ("""
     SELECT runs.run_id, runs.path, users.user_id, users.username,
             TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
-    FROM runs
+    FROM runs 
     LEFT JOIN users ON runs.user_id=users.user_id 
-    WHERE prompt_id=%s AND runs.start_time = (
-        SELECT MIN(start_time)
-        FROM runs AS r
-        WHERE r.user_id = runs.user_id
-    )
-    ORDER BY run_time
+    WHERE prompt_id=%s
+    ORDER BY run_time 
     """)
 
     db = get_db()
