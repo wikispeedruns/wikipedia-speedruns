@@ -39,7 +39,7 @@ TABLES['runs']=(
 CREATE TABLE IF NOT EXISTS `runs` (
     `run_id` INT NOT NULL AUTO_INCREMENT,
     `start_time` TIMESTAMP(3) NOT NULL,
-    `end_time` TIMESTAMP(3) NOT NULL,
+    `end_time` TIMESTAMP(3) NULL,
     `path` TEXT NOT NULL,
     `prompt_id` INT NOT NULL,
     `user_id` INT,

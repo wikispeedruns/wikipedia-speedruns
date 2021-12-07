@@ -18,8 +18,8 @@ def create_run():
 
     # datetime wants timestamp in seconds since epoch
     start_time = datetime.fromtimestamp(request.json['start_time']/1000)
-    end_time = datetime.fromtimestamp(request.json['end_time']/1000)
-    path = json.dumps(request.json['path'])
+    end_time = datetime.fromtimestamp(request.json['end_time']/1000) if 'end_time' in request.json else None
+    path = json.dumps(request.json['path'] if 'path' in request.json else [])
     prompt_id = request.json['prompt_id']
 
     if ('user_id' in session):
@@ -38,9 +38,26 @@ def create_run():
         id = cursor.fetchone()[0]
         db.commit()
 
-        return jsonify(id)
+        return jsonify(id), 200
 
-    return "Error submitting prompt"
+    return "Error creating run", 500
+
+
+@run_api.patch('/<id>')
+def finish_run(id):
+    query = 'UPDATE `runs` SET `end_time`=%s, `path`=%s WHERE `run_id`=%s'
+    
+    end_time = datetime.fromtimestamp(request.json['end_time']/1000)
+    path = json.dumps(request.json['path'])
+
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute(query, (end_time, path, id))
+        db.commit()
+
+        return f'Updated run {id}', 200
+
+    return f'Error updating run {id}', 500
 
 
 @run_api.get('')
