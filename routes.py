@@ -48,16 +48,20 @@ def get_latest_prompt():
 def get_register_page():
     return render_with_user('users/register.html')
 
+@app.route('/pending', methods=['GET'])
+def get_create_oauth_account_page():
+    if ("pending_oauth_creation" in session):
+        return render_with_user('users/pending.html')
+    else:
+        return redirect('/')
+
 @app.route('/login', methods=['GET'])
 def get_login_page():
     return render_with_user('users/login.html')
 
-@app.route('/profile', methods = ['GET'])
-def get_profile_page():
-    if ("pending_oauth_creation" in session):
-        return render_with_user('users/pending.html')
-
-    return render_with_user('users/profile.html')
+@app.route('/profile/<username>', methods = ['GET'])
+def get_profile_page(username):
+    return render_with_user('profile.html', un=username)
 
 @app.route('/manage', methods=['GET'])
 @check_admin
