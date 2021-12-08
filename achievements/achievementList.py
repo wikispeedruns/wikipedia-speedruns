@@ -10,14 +10,12 @@ from .achievementObj.achievementObj import achievement
 
 achievement_api = Blueprint("achievements", __name__, url_prefix="/api/achievements")
 
-
-
-def runContains(run, article):
+def runContains(run, alist):
     pathArr = parseRunForPath(run)
-    for a in pathArr:
-        if a == article:
-            return True
-    return False
+    for article in alist:
+        if not article in pathArr:
+            return False
+    return True
 
 def parseRunForPath(run):
     #print(run)
@@ -36,6 +34,20 @@ def checkAllAchievementsAgainstRun(run):
             
     return outputDict
 
+def countArticleInRun(run, article):
+    count = 0
+    path = parseRunForPath(run)
+    for item in path:
+        if item == article:
+            count += 1
+    return count
+
+def countArticleInAllRuns(runs, article):
+    count = 0
+    for run in runs:
+        count += countArticleInRun(run, article)
+    return count
+
 
 def get_all_achievements():
     achievements = {}
@@ -44,7 +56,7 @@ def get_all_achievements():
         return True
     baby_steps = achievement("Baby Steps",
                             "Complete a ranked prompt",
-                            baby_steps_eval,
+                            runEval=baby_steps_eval,
                             imgLink = "/static/assets/achievementIcons/baby_steps.png",
                             runSpecific=True,
                             secret=False)
@@ -52,12 +64,10 @@ def get_all_achievements():
 
 
     def meta_eval(run):
-        if runContains(run, "Wikipedia"):
-            return True
-        return False
+        return runContains(run, ["Wikipedia"])
     meta = achievement("Meta",
                     "Arrive at the page: 'Wikipedia'",
-                    meta_eval,
+                    runEval=meta_eval,
                     imgLink = "/static/assets/achievementIcons/meta.png",
                     runSpecific=True,
                     secret=False)
@@ -73,30 +83,143 @@ def get_all_achievements():
         return False
     you_lost = achievement("You Lost?",
                         "Arrive at the same page twice in the same run",
-                        you_lost_eval,
+                        runEval=you_lost_eval,
                         imgLink = "/static/assets/achievementIcons/you_lost.png",
                         runSpecific=True,
                         secret=False)
     achievements[you_lost.name] = you_lost
     
+    def bathroom_break_eval(run):
+        return runContains(run, ["Bathroom"])
+    bathroom = achievement("Bathroom Break",
+                    "Arrive at the page: 'Bathroom'",
+                    runEval=bathroom_break_eval,
+                    imgLink = "/static/assets/achievementIcons/bathroom.png",
+                    runSpecific=True,
+                    secret=False)
+    achievements[bathroom.name] = bathroom
     
-    def test_eval(run):
-        return False
-    test = achievement("Test",
-                        "Test",
-                        test_eval,
-                        imgLink = "/static/assets/achievementIcons/you_lost.png",
-                        runSpecific=True,
-                        secret=False)
-    achievements[test.name] = test
+    def rome_eval(run):
+        return runContains(run, ["Rome"])
+    rome = achievement("All Roads Lead To Rome",
+                    "Arrive at the page: 'Rome'",
+                    runEval=rome_eval,
+                    imgLink = "/static/assets/achievementIcons/rome.png",
+                    runSpecific=True,
+                    secret=False)
+    achievements[rome.name] = rome
+    
+    def time_is_money_eval(run):
+        return runContains(run, ["Currency"])
+    time_is_money = achievement("Time Is Money",
+                    "Arrive at the page: 'Currency'",
+                    runEval=time_is_money_eval,
+                    imgLink = "/static/assets/achievementIcons/time_is_money.png",
+                    runSpecific=True,
+                    secret=False)
+    achievements[time_is_money.name] = time_is_money
+    
+    def luck_of_the_irish_eval(run):
+        return runContains(run, ["Ireland"])
+    luck_of_the_irish = achievement("Luck Of The Irish",
+                    "Arrive at the page: 'Ireland'",
+                    runEval=luck_of_the_irish_eval,
+                    imgLink = "/static/assets/achievementIcons/luck_of_the_irish.png",
+                    runSpecific=True,
+                    secret=False)
+    achievements[luck_of_the_irish.name] = luck_of_the_irish
+    
+    def carthage_eval(run):
+        return runContains(run, ["Third Punic War", "Cato the Elder"])
+    carthage = achievement("Carthago Delenda Est",
+                    "Arrive at these pages in the same game: 'Third Punic War', 'Cato the Elder'",
+                    runEval=carthage_eval,
+                    imgLink = "/static/assets/achievementIcons/carthage.png",
+                    runSpecific=True,
+                    secret=False)
+    achievements[carthage.name] = carthage
+    
+    def jet_fuel_eval(run):
+        return runContains(run, ["Conspiracy theory"])
+    jet_fuel = achievement("Jet Fuel Can't Melt Steel Beams",
+                    "Arrive at the page: 'Conspiracy theory'",
+                    runEval=jet_fuel_eval,
+                    imgLink = "/static/assets/achievementIcons/jet_fuel.png",
+                    runSpecific=True,
+                    secret=False)
+    achievements[jet_fuel.name] = jet_fuel
+    
+    def not_a_crook_eval(run):
+        return runContains(run, ["Richard Nixon"])
+    not_a_crook = achievement("I am NOT a Crook!",
+                    "Arrive at the page: 'Richard Nixon'",
+                    runEval=not_a_crook_eval,
+                    imgLink = "/static/assets/achievementIcons/not_a_crook.png",
+                    runSpecific=True,
+                    secret=False)
+    achievements[not_a_crook.name] = not_a_crook
+    
+    def sparta_eval(run):
+        return runContains(run, ["Sparta"])
+    sparta = achievement("This is Sparta!",
+                    "Arrive at the page: 'Sparta'",
+                    runEval=sparta_eval,
+                    imgLink = "/static/assets/achievementIcons/sparta.png",
+                    runSpecific=True,
+                    secret=False)
+    achievements[sparta.name] = sparta
+    
+    def simba_eval(run):
+        return runContains(run, ["Simba"])
+    simba = achievement("Mufasa Would Be Proud",
+                    "Arrive at the page: 'Simba'",
+                    runEval=simba_eval,
+                    imgLink = "/static/assets/achievementIcons/simba.png",
+                    runSpecific=True,
+                    secret=False)
+    achievements[simba.name] = simba
+    
+    def how_bizarre_eval(run):
+        return runContains(run, ["One-hit wonder"])
+    how_bizarre = achievement("How Bizarre",
+                    "Arrive at the page: 'One-hit wonder'",
+                    runEval=how_bizarre_eval,
+                    imgLink = "/static/assets/achievementIcons/how_bizarre.png",
+                    runSpecific=True,
+                    secret=False)
+    achievements[how_bizarre.name] = how_bizarre
+    
+    
+    
+    def land_of_the_free_eval(username):
+        runs = get_user_runs(username)
+        return 49 < countArticleInAllRuns(runs, "United States")
+    land_of_the_free = achievement("Land of the Free, Home of the Brave",
+                                   "Visit 'United States' 50 or more times",
+                                   imgLink = "/static/assets/achievementIcons/land_of_the_free.png",
+                                   runSpecific=False,
+                                   secret=False,
+                                   userEval=land_of_the_free_eval)
+    achievements[land_of_the_free.name] = land_of_the_free
+    
+    
+    def should_have_went_to_art_school_eval(username):
+        runs = get_user_runs(username)
+        return 24 < countArticleInAllRuns(runs, "Adolf Hitler")
+    should_have_went_to_art_school = achievement("Should Have Went to Art School",
+                                   "Visit 'Adolf Hitler' 25 or more times",
+                                   imgLink = "/static/assets/achievementIcons/should_have_went_to_art_school.png",
+                                   runSpecific=False,
+                                   secret=False,
+                                   userEval=should_have_went_to_art_school_eval)
+    achievements[should_have_went_to_art_school.name] = should_have_went_to_art_school
+    
+    
     
     
     return achievements
 
-
-@achievement_api.get("/user/<username>")
-def get_user_achievements(username):
-    
+def get_user_runs(username):
     query = "SELECT * FROM runs INNER JOIN users ON runs.user_id = users.user_id WHERE username=%s;"
 
     with get_db().cursor(cursor=DictCursor) as cursor:
@@ -107,7 +230,15 @@ def get_user_achievements(username):
         for run in results:
             run['path'] = json.loads(run['path'])
 
-        #print(results)
+        print(results)
+
+        return results
+
+
+@achievement_api.get("/user/<username>")
+def get_user_achievements(username):
+    
+    results = get_user_runs(username)
 
     if len(results) == 0:
         return jsonify({})

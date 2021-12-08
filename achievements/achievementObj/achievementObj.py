@@ -1,19 +1,24 @@
+def placeholderFun():
+    return False
+
 class achievement():
     
     def __init__(self, 
                  name,
                  description,
-                 evalFunction,
-                 imgLink="/assets/images/a.png",
+                 runEval=placeholderFun,
+                 imgLink="/static/assets/achievementIcons/meta.png",
                  runSpecific=True,
-                 secret=False
+                 secret=False,
+                 userEval=placeholderFun
                  ):
         self.name = name
         self.description = description
-        self.evalFunction = evalFunction
+        self.runEval = runEval
         self.imgLink = imgLink
         self.runSpecific = runSpecific
         self.secret = secret
+        self.userEval = userEval
         
         
     def toString(self):
@@ -26,7 +31,7 @@ class achievement():
         if not self.runSpecific:
             return False
         
-        return self.evalFunction(run)
+        return self.runEval(run)
     
     
     def checkUser(self, username):
@@ -34,5 +39,5 @@ class achievement():
         if self.runSpecific:
             return False
         
-        return self.evalFunction(username)
+        return self.userEval(username)
     
