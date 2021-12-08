@@ -34,11 +34,15 @@ var vm = new Vue({
 
 function update_data(runs, user) {
             
-    console.log(runs.length);
-    console.log(user[0]['user_id']);
-    console.log(user[0]['email']);
-    console.log(user[0]['email_confirmed']);
-    console.log(user[0]['username']);
+    vm.totalratedruns = runs.length;
+    vm.email = user[0]['email'];
+    if (user[0]['email_confirmed']) {
+        vm.emailverified = "Yes";
+    } else {
+        vm.emailverified = "No";
+    }
+    
+    vm.user_name = user[0]['username'];
 }
 
 async function get_data(usern) {

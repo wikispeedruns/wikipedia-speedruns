@@ -1,10 +1,11 @@
 {
     "SECRET_KEY": "ahhhhhhhhhh",
  
-    "MYSQL_HOST": "127.0.0.1",
-    "MYSQL_USER": "mliu59",
+    "MYSQL_HOST": "localhost",
+    "MYSQL_USER": "root",
     "MYSQL_PASSWORD": "9EEB00@@",
     "DATABASE": "wikipedia_speedruns",
 
     "MAIL_USE_TLS": true
 }
+
