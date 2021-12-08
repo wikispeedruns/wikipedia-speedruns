@@ -109,7 +109,7 @@ def get_prompt_runs(id):
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (id,))
         results = cursor.fetchall()
-        
+
         for run in results:
             run['path'] = json.loads(run['path'])
 

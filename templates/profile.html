@@ -1,22 +1,45 @@
 {% extends 'base.html' %}
 {% block head %}
 
-<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://vuejs.org/js/vue.js"></script>
 
-<script>
-    new Vue({
-        el: '#blog-posts-events-demo',
-        data: {
-            message: 'Hello Vue!'
-        }     
-    })
-</script>
+
+
+
 {% endblock %}
 
 
 {% block content %}
 
 <div id="app">
-    {{ message }}
+    <table>
+        <tr>
+            <td>Username</td>
+            <td v-text="user_name"></td>
+        </tr>
+        <tr>
+            <td>Email</td>
+            <td v-text="email"></td>
+        </tr>
+        <tr>
+            <td>Profile Age</td>
+            <td v-text="profileage"></td>
+        </tr>
+        <tr>
+            <td>Skill Rating</td>
+            <td v-text="skillrating"></td>
+        </tr>
+        <tr>
+            <td>Total Rated Runs</td>
+            <td v-text="totalratedruns"></td>
+        </tr>
+        <tr>
+            <td>Email Verification Status</td>
+            <td v-text="emailverified"></td>
+        </tr>
+    </table>
+    
 </div>
+<script type="text/javascript" src="{{url_for('static', filename='js/profile.js') }}"></script>
+<script>get_data("{{username}}")</script>
 {% endblock %}
