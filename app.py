@@ -32,3 +32,8 @@ app.register_blueprint(user_api)
 app.register_blueprint(profile_api)
 
 import routes
+
+
+
+from achievements.achievementList import achievement_api
+app.register_blueprint(achievement_api)

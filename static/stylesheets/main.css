@@ -97,3 +97,9 @@ th {
     position:relative;
     visibility:hidden;
 }
+
+.user_info_table {
+    width:100%;
+    margin-top:50px;
+    margin-bottom: 50px;
+}

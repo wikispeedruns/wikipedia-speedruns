@@ -49,13 +49,76 @@ async function get_data(usern) {
     response = await fetch("/api/runs/user/" + usern);
     const runs = await response.json(); 
 
-    console.log(runs);
+    //console.log(runs);
 
     response = await fetch("/api/users/get_user_data/" + usern);
     const user = await response.json(); 
 
-    console.log(user);
+    //console.log(user);
 
     update_data(runs, user);
 }
 
+
+
+async function get_achievement_data(usern) {
+    response = await fetch("/api/achievements/user/" + usern);
+    const user_ach = await response.json(); 
+
+    response = await fetch("/api/achievements/get_achievements");
+    const all_ach = await response.json(); 
+
+    
+    console.log(user_ach);
+    console.log("==================");
+    console.log(all_ach);
+    console.log("==================");
+
+    achievementsTable = document.getElementById("achievements")
+    
+    for (i = 0; i < all_ach['achievements'].length; i++) {
+        
+        var row = document.createElement("tr");
+        
+        var picSlot = document.createElement("td");
+        var pic = document.createElement("img");
+        
+        if (user_ach[all_ach['achievements'][i]['name']] == false) {
+            pic.src = "/static/assets/achievementIcons/locked.png";
+        } else {
+            pic.src = all_ach['achievements'][i]['imgURL'];
+        }
+        pic.width = '100';
+        
+        picSlot.appendChild(pic);
+
+        var textSlot = document.createElement("td");
+        var title = document.createElement("p");
+        title.innerHTML = all_ach['achievements'][i]['name'];
+        title.style.fontWeight = 'bold';
+        var desc = document.createElement("p");
+        desc.innerHTML = all_ach['achievements'][i]['description'];
+
+        textSlot.appendChild(title);
+        if (all_ach['achievements'][i]['secret'] == false) {
+            textSlot.appendChild(desc);
+        }
+
+        var statusSlot = document.createElement("td");
+        var status = document.createElement("p");
+        if (user_ach[all_ach['achievements'][i]['name']] == false) {
+            status.innerHTML = "Incomplete...";
+        } else {
+            status.innerHTML = "Complete!";
+        }
+        statusSlot.appendChild(status)
+
+
+        row.appendChild(picSlot);
+        row.appendChild(textSlot);
+        row.appendChild(statusSlot);
+
+        achievementsTable.appendChild(row);
+    }
+
+}

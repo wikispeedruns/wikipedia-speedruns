@@ -1,6 +1,3 @@
-
-
-
 class achievement():
     
     def __init__(self, 

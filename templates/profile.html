@@ -11,8 +11,10 @@
 
 {% block content %}
 
+<div style="width:75%; margin: auto; margin-top: 50px">
 <div id="app">
-    <table style="width:75%; margin: auto; margin-top: 50px">
+    <h1>Player Stats</h1>
+    <table class="user_info_table">
         <tr>
             <td style="width:40%">Username</td>
             <td v-text="user_name"></td>
@@ -38,8 +40,19 @@
             <td v-text="emailverified"></td>
         </tr>
     </table>
+
+
     
 </div>
+<div>
+    <h1>Achievements</h1>
+    <table id="achievements" class="user_info_table"></table>
+</div>
+</div>
+
 <script type="text/javascript" src="{{url_for('static', filename='js/profile.js') }}"></script>
-<script>get_data("{{un}}")</script>
+<script>
+    get_data("{{un}}");
+    get_achievement_data("{{un}}");
+</script>
 {% endblock %}
