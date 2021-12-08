@@ -2,11 +2,12 @@ var vm = new Vue({
     el: '#app',
     data: {
         user_name: 'test',
-        skillrating:'1000',
+        skillrating:'--',
         totalratedruns:'20',
         email:'test@123.org',
         emailverified:'True',
-        profileage:'32 Days'
+        profileage:'--',
+        articleCount:0
     }
 });
 
@@ -43,6 +44,65 @@ function update_data(runs, user) {
     }
     
     vm.user_name = user[0]['username'];
+
+    let temp = get_most_visited_pages(runs)
+    vm.articleCount = temp[1]
+    convMostVisitedToHTML(temp[0]);
+}
+
+function convMostVisitedToHTML(pages) {
+    var el = document.getElementById("mostvisitedpages");
+    for (var i = 0 ; i < pages.length; i++) {
+        var row = document.createElement("tr");
+        var name = document.createElement("td");
+        name.innerHTML = pages[i]['name'];
+        var times = document.createElement("td");
+        times.innerHTML = pages[i]['times'];
+        times.style.paddingLeft = "25px";
+        row.appendChild(name)
+        row.appendChild(times)
+        el.appendChild(row)
+    }
+}
+
+function get_most_visited_pages(runs) {
+
+    arr = []
+    count = {}
+    for (var i = 0; i < runs.length; i++) {
+        //console.log(runs[i]['path'])
+        for (var j = 0; j < runs[i]['path'].length; j++) {
+            if (count[runs[i]['path'][j]] == null) {
+                count[runs[i]['path'][j]] = 1;
+            } else {
+                count[runs[i]['path'][j]] ++;
+            }
+        }
+    }
+
+    //console.log(count)
+
+    var keys = Object.keys(count)
+    var l = keys
+
+    keys.sort((b, a) => {
+        if (count[a] > count[b]) {
+            return 1
+        } else if (count[b] > count[a]) {
+            return -1
+        }
+        return 0
+    })
+
+    if (keys.length > 4) {
+        l = keys.slice(0, 5)
+    }
+
+    l.forEach(element => {
+        arr.push({"name":element, "times":count[element]})
+    })
+
+    return [arr, keys.length]
 }
 
 async function get_data(usern) {
@@ -69,10 +129,10 @@ async function get_achievement_data(usern) {
     const all_ach = await response.json(); 
 
     
-    console.log(user_ach);
-    console.log("==================");
-    console.log(all_ach);
-    console.log("==================");
+    //console.log(user_ach);
+    //console.log("==================");
+    //console.log(all_ach);
+    //console.log("==================");
 
     achievementsTable = document.getElementById("achievements")
     
