@@ -35,16 +35,16 @@ pip install -r requirements.txt
 ## 3. App Setup
 There are a number of scripts to help setup the web app in [scripts](scripts).
 
-Once the MySQL server is running, you need to create thed database and tables
+Once the MySQL server is running, you need to create the database and tables
 ```
-cd scripts;
-python createDB.py;
+cd scripts
+python createDB.py
 ```
 
 There is also an interactive script (follow the instructions in the scripts)
 to create a configuration file and set up and admin account.
 ```
-cd scripts;
+cd scripts
 python configure.py
 ```
 
