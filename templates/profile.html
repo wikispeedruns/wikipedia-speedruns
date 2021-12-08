@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block head %}
+
+<script src="https://vuejs.org/js/vue.js"></script>
+
+
+
+
+{% endblock %}
+
+
+{% block content %}
+
+<div id="app">
+    <table style="width:75%; margin: auto; margin-top: 50px">
+        <tr>
+            <td style="width:40%">Username</td>
+            <td v-text="user_name"></td>
+        </tr>
+        <tr>
+            <td style="width:40%">Email</td>
+            <td v-text="email"></td>
+        </tr>
+        <tr>
+            <td style="width:40%">Profile Age</td>
+            <td v-text="profileage"></td>
+        </tr>
+        <tr>
+            <td style="width:40%">Skill Rating</td>
+            <td v-text="skillrating"></td>
+        </tr>
+        <tr>
+            <td style="width:40%">Total Rated Runs</td>
+            <td v-text="totalratedruns"></td>
+        </tr>
+        <tr>
+            <td style="width:40%">Email Verification Status</td>
+            <td v-text="emailverified"></td>
+        </tr>
+    </table>
+    
+</div>
+<script type="text/javascript" src="{{url_for('static', filename='js/profile.js') }}"></script>
+<script>get_data("{{username}}")</script>
+{% endblock %}

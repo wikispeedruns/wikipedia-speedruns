@@ -2,7 +2,7 @@ from flask.helpers import url_for
 import pymysql
 from werkzeug.utils import redirect
 from util.decorators import check_user
-from flask import session, request, render_template, Blueprint, current_app
+from flask import session, request, render_template, Blueprint, current_app, jsonify
 import flask_dance.contrib.google as oauth_google
 from flask_mail import Message
 
@@ -189,7 +189,7 @@ def check_google_auth():
             user = cursor.fetchone()
             login_session(user)
 
-    return redirect("/")
+    return redirect("/pending")
 
 
 @user_api.post("/login")
@@ -385,4 +385,20 @@ def reset_password():
         db.commit()
 
     return "Password Changed", 200
+
+
+
+@user_api.get('/get_user_data/<id>')
+def get_user_data(id):
+    # TODO this could probably return details as well
+    query = ("""SELECT * FROM users WHERE username=%s""")
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (id,))
+        results = cursor.fetchall()
+
+        #print(results)
+        
+        return jsonify(results)
 
