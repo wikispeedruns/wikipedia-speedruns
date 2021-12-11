@@ -191,10 +191,10 @@ function populateGraph(runs) {
 
         if (edgeCountMax === 1) {
             colorScale = 255;
-            weightScale = 2.25;
+            weightScale = 0.8;
         } else {
             colorScale = parseInt(255 - (255 / (edgeCountMax - 1)) * (edge.count - 1), 10);
-            weightScale = 1.5 / (edgeCountMax - 1) * (edge.count - 1) + 1.5; //map from 1.5 to 3
+            weightScale = 1.5 / (edgeCountMax - 1) * (edge.count - 1) + 0.5; //map from 0.5 to 2.0
         }
 
         var color = edge.current ? "#ff9700" : rgbToHex(255 - colorScale, 0, colorScale);

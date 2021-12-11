@@ -324,7 +324,7 @@ jQuery.fn.springy = function(params) {
 			var boxWidth = contentWidth + paddingX + 20;
 			var boxHeight = contentHeight + paddingY;
 
-			if (node.data.type === 0) {
+			//if (node.data.type === 0) {
 
 				var defaultDiameter = (node.data.weightScale !== undefined) ? node.data.weightScale : 12;
 				var padding = 6;
@@ -367,6 +367,15 @@ jQuery.fn.springy = function(params) {
 
 					ctx.clearRect(xStart, yStart, boxWidth, boxHeight);
 					
+					if (node.data.type !== 0) {
+
+						ctx.fillStyle = (node.data.color !== undefined) ? node.data.color : "#000000";
+
+					}
+					
+
+
+
 					ctx.fillText(text + ": " + node.data.count, textXStart, textYStart);
 				}
 
@@ -379,8 +388,12 @@ jQuery.fn.springy = function(params) {
 				} else {
 					drawCircles("#FFFFFF");
 				}
+			
+			
 
-			} else {
+
+			//} 
+			/*else {
 				
 				// Pulled out the padding aspect sso that the size functions could be used in multiple places
 				// These should probably be settable by the user (and scoped higher) but this suffices for now
@@ -429,7 +442,7 @@ jQuery.fn.springy = function(params) {
 						img.src = src;
 					}
 				}
-			}
+			}*/
 			ctx.restore();
 		}
 	);
