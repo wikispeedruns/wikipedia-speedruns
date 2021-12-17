@@ -93,10 +93,11 @@ def set_prompt_publicity(id):
         return "Changed prompt to {}".format("public" if public else "ranked"), 200
 
 
-@prompt_api.get('/<id>/first_runs')
-def get_prompt_runs(id):
+@prompt_api.get('/<id>/leaderboard', defaults={'run_id' : None})
+@prompt_api.get('/<id>/leaderboard/<run_id>')
+def get_prompt_leaderboard(id, run_id):
     # TODO this could probably return details as well
-    query = ("""
+    query = '''
     SELECT run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
     FROM runs
     JOIN (
@@ -107,12 +108,35 @@ def get_prompt_runs(id):
             GROUP BY user_id
     ) firsts
     ON firsts.user_id=runs.user_id AND first_run=start_time
-    ORDER BY run_time
-    """)
+    '''
 
+    args = [id]
+
+    specificRunQuery = '''
+    SELECT runs.run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
+    FROM runs
+    JOIN (
+            SELECT run_id
+            FROM runs
+            WHERE prompt_id=%s AND run_id=%s
+    ) latest
+    ON latest.run_id=runs.run_id
+    LEFT JOIN users
+    ON runs.user_id=users.user_id
+    '''
+
+    ordering = f'\nORDER BY run_time'
+
+    if run_id:
+        query = f'({query}) UNION ({specificRunQuery})'
+        args.extend([id, run_id])
+
+    query += ordering
+    
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query, (id,))
+        # print(cursor.mogrify(query, tuple(args)))         # debug
+        cursor.execute(query, tuple(args))
         results = cursor.fetchall()
 
         for run in results:
