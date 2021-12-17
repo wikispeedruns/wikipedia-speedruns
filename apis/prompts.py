@@ -115,21 +115,16 @@ def get_prompt_leaderboard(id, run_id):
     specificRunQuery = '''
     SELECT runs.run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
     FROM runs
-    JOIN (
-            SELECT run_id
-            FROM runs
-            WHERE prompt_id=%s AND run_id=%s
-    ) latest
-    ON latest.run_id=runs.run_id
     LEFT JOIN users
     ON runs.user_id=users.user_id
+    WHERE runs.run_id=%s
     '''
 
     ordering = f'\nORDER BY run_time'
 
     if run_id:
         query = f'({query}) UNION ({specificRunQuery})'
-        args.extend([id, run_id])
+        args.append(run_id)
 
     query += ordering
     
