@@ -93,7 +93,7 @@ def set_prompt_publicity(id):
         return "Changed prompt to {}".format("public" if public else "ranked"), 200
 
 
-@prompt_api.get('/<id>/leaderboard', defaults={'run_id' : None})
+@prompt_api.get('/<id>/leaderboard/', defaults={'run_id' : None})
 @prompt_api.get('/<id>/leaderboard/<run_id>')
 def get_prompt_leaderboard(id, run_id):
     # TODO this could probably return details as well
