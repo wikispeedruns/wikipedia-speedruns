@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask.helpers import url_for
 import pymysql
 from werkzeug.utils import redirect
@@ -109,11 +110,13 @@ def create_user_oauth():
     if (not valid_username(username)):
         return "Invalid username", 400
 
-    query = "INSERT INTO `users` (`username`, `email`, `email_confirmed`) VALUES (%s, %s, %s)"
+    query = "INSERT INTO `users` (`username`, `email`, `email_confirmed`, `join_date`) VALUES (%s, %s, %s, %s)"
+    now = datetime.now()
+    date = now.strftime('%Y-%m-%d')
 
     db = get_db()
     with get_db().cursor() as cursor:
-        result = cursor.execute(query, (username, email, True))
+        result = cursor.execute(query, (username, email, True, date))
 
         if (result == 0):
             return ("User {} already exists".format(username), 409)
@@ -147,14 +150,17 @@ def create_user():
 
     # Use SHA256 to allow for arbitrary length passwords
     hash = bcrypt.hashpw(hashlib.sha256(password).digest(), bcrypt.gensalt())
-    query = "INSERT INTO `users` (`username`, `hash`, `email`, `email_confirmed`) VALUES (%s, %s, %s, %s)"
+    query = "INSERT INTO `users` (`username`, `hash`, `email`, `email_confirmed`, `join_date`) VALUES (%s, %s, %s, %s, %s)"
     get_id_query = "SELECT LAST_INSERT_ID()"
+
+    now = datetime.now()
+    date = now.strftime('%Y-%m-%d')
 
     db = get_db()
     with get_db().cursor() as cursor:
 
         try:
-            cursor.execute(query, (username, hash, email, False))
+            cursor.execute(query, (username, hash, email, False, date))
 
             cursor.execute(get_id_query)
             (id,) = cursor.fetchone()
@@ -163,10 +169,13 @@ def create_user():
 
             db.commit()
 
-        except pymysql.error.IntegrityError:
-            return ("User {} already exists".format(username), 409)
+        except pymysql.IntegrityError:
+            return (f'User {username} already exists', 409)
+        except pymysql.Error as e:
+            print(e)
+            return ("Unknown error", 500) 
 
-    return ("User {} ({}) added".format(username, id), 201)
+    return (f'User {username} ({id}) added', 201)
 
 
 @user_api.get("/auth/google/check")
