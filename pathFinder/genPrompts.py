@@ -2,6 +2,7 @@ import pymysql
 import time
 from dbsearch import getLinks
 from dbsearch import getSrc
+
 import random
 
 import bidirectionalSearch as searcher
@@ -13,7 +14,7 @@ cur = db.cursor(pymysql.cursors.DictCursor)
 
 def randStart(thresholdStart):
     
-    queryString = "SELECT max(edgeID) FROM edges;"
+    queryString = "SELECT max(edgeID) FROM edgeidarticleid;"
     cur.execute(queryString)
     maxID = int(cur.fetchall()[0]['max(edgeID)'])
     
@@ -25,18 +26,20 @@ def randStart(thresholdStart):
         
 def checkStart(start, thresholdStart):
     
-    if len(start) > 7:
-        if start[0:7] == "List of":
+    title = searcher.convertToArticleName(start)
+    
+    if len(title) > 7:
+        if title[0:7] == "List of":
             return False
     
-    x = countWords(start)
+    x = countWords(title)
     
     if randomFilter(True, 0.0047 *x*x*x - 0.0777*x*x + 0.2244*x + 1.226):
-        print("Random filtered:",start)
+        #print("Random filtered:",start)
         return False
     
-    if randomFilter(checkSports(start), 0.1):
-        print("Sports filtered:",start)
+    if randomFilter(checkSports(title), 0.1):
+        #print("Sports filtered:",start)
         return False
     
     if numLinksOnArticle(start) < thresholdStart:
@@ -53,18 +56,20 @@ def countWords(string):
 
 def checkEnd(end, thresholdEnd):
     
-    if len(end) > 7:
-        if end[0:7] == "List of":
+    title = searcher.convertToArticleName(end)
+    
+    if len(title) > 7:
+        if title[0:7] == "List of":
             return False
     
-    x = countWords(end)
+    x = countWords(title)
     
     if randomFilter(True, 0.0047 *x*x*x - 0.0777*x*x + 0.2244*x + 1.226):
-        print("Random filtered:",end)
+        #print("Random filtered:",end)
         return False
     
-    if randomFilter(checkSports(end), 0.05):
-        print("Sports filtered:",end)
+    if randomFilter(checkSports(title), 0.05):
+        #print("Sports filtered:",end)
         return False
     
     if numLinksOnArticle(end) < thresholdEnd:
@@ -143,6 +148,7 @@ def generatePrompts(thresholdStart=100, thresholdEnd=100, n=20, dist=15):
         
         if checkEnd(sample[-1], thresholdEnd) and len(sample) == d + 1:
             generatedPromptPaths.append(sample)
+            print(sample)
         
         #generatedPromptPaths.append([startGenerator.__next__(), endGenerator.__next__()])
         
@@ -153,25 +159,27 @@ def generatePrompts(thresholdStart=100, thresholdEnd=100, n=20, dist=15):
 
 if __name__ == "__main__":
     
-    n = 40
+    n = 100
     d = 25
     thresholdStart = 200
     debugMode = False
 
     paths = generatePrompts(thresholdStart=thresholdStart, thresholdEnd=thresholdStart, n=n, dist=d)
     
+    
+    
     for path in paths:
         if debugMode:
             print(path)
-        print(path[0] + "  ->  " + path[-1])
-        try:
-            searchedPaths = searcher.bidirectionalSearcher(path[0], path[-1])
+        print(str(searcher.convertToArticleName(path[0])) + "  ->  " + str(searcher.convertToArticleName(path[-1])))
+        #try:
+        #    searchedPaths = searcher.bidirectionalSearcher(path[0], path[-1])
             #print("Shortest paths:")
-            for a in searchedPaths:
-                print(a[0])
-        except RuntimeError as e:
-            print(e)
+        #    for a in searchedPaths:
+        #        print(a[0])
+        #except RuntimeError as e:
+        #    print(e)
             
-        print("==========================")
+        #print("==========================")
 
     
