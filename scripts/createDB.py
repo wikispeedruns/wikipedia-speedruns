@@ -50,6 +50,33 @@ CREATE TABLE IF NOT EXISTS `runs` (
 );
 ''')
 
+TABLES['marathonprompts']=(
+'''
+CREATE TABLE IF NOT EXISTS `marathonprompts` (
+    `prompt_id` INT NOT NULL AUTO_INCREMENT,
+    `start` VARCHAR(255) NOT NULL,
+    `checkpoint1` VARCHAR(255) NOT NULL,
+    `checkpoint2` VARCHAR(255) NOT NULL,
+    `checkpoint3` VARCHAR(255) NOT NULL,
+    `checkpoint4` VARCHAR(255) NOT NULL,
+    `checkpoint5` VARCHAR(255) NOT NULL,
+    `public` BOOLEAN NOT NULL DEFAULT 0,
+    `seed` INT NOT NULL, 
+    PRIMARY KEY (`prompt_id`)
+);
+''')
+
+TABLES['marathonruns']=(
+'''
+CREATE TABLE IF NOT EXISTS `marathonruns` (
+    `run_id` INT NOT NULL AUTO_INCREMENT,
+    `path` TEXT NOT NULL,
+    `prompt_id` INT NOT NULL,
+    `user_id` INT,
+    PRIMARY KEY (`run_id`)
+);
+''')
+
 
 def create_tables(cursor):
     for table in TABLES:

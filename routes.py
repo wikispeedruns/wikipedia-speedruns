@@ -81,6 +81,22 @@ def get_prompt_page(id):
 @app.route('/play/<id>', methods=['GET'])
 def get_play_page(id):
     return render_with_user('play.html', prompt_id=id)
+
+
+
+@app.route('/marathon/<id>', methods=['GET'])
+def get_marathon_play_page(id):
+    print(id, "Loading")
+    return render_with_user('marathon.html', prompt_id=id)
+
+#@app.route('/prompt/marathon/<id>', methods=['GET'])
+#def get_marathon_prompt_page(id):
+#    run_id = request.args.get('run_id', '')
+#    
+#    if len(run_id) != 0:
+#        return render_with_user('marathon_prompt.html', prompt_id=id, run_id=run_id)
+#    else:
+#        return render_with_user('marathon_prompt.html', prompt_id=id)
     
 
 
