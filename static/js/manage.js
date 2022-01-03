@@ -79,7 +79,7 @@ function createPromptItem(prompt)
     checkPath.onclick = (e) => {
         e.preventDefault();
         console.log("Received request, processing...")
-        consoleLogPath(prompt["start"], prompt["end"])
+        console.log(getPath(prompt["start"], prompt["end"]))
     }
     
     item.append(public)
@@ -88,7 +88,7 @@ function createPromptItem(prompt)
     return item;
 }
 
-async function consoleLogPath(start, end) {
+async function getPath(start, end) {
     try {
         const response = await fetch("/api/scraper/path/", {
             method: "POST",
@@ -102,7 +102,9 @@ async function consoleLogPath(start, end) {
         });
         const path = await response.json();
 
-        console.log(path)
+        return path['Articles'];
+
+
 
     } catch(e) {
         console.log(e);
@@ -150,13 +152,43 @@ async function genPrompts(n) {
         var generatedBlock = document.getElementById("generated");
         var item = document.createElement("p");
         item.innerHTML = resp['Prompts'][0][0] + " -> " + resp['Prompts'][0][1]+"\n";
+        
         generatedBlock.appendChild(item)
+        
+        var button = document.createElement("button");
+        button.innerHTML = "Click to get the path of this random prompt"
+        
+
+        button.onclick = (e) => {
+            e.preventDefault();
+            console.log("Received request, processing...")
+            appendPath(item, resp['Prompts'][0][0], resp['Prompts'][0][1])
+        }
+
+        item.appendChild(button)
 
     } catch(e) {
         console.log(e);
     }
 }
 
+async function pathCheck() {
+    var block = document.getElementById("pathchecker")
+    try {
+        appendPath(block, document.getElementById("pathstart").value, document.getElementById("pathend").value);
+    } catch(e) {
+        console.log(e);
+    }
+}
+
+
+async function appendPath(item, start, end) {
+    var path = await getPath(start, end)
+    console.log(path)
+    var pathdisp = document.createElement("span");
+    pathdisp.innerHTML = path.toString()
+    item.appendChild(pathdisp)
+}
 
 function genPromptButton() {
     var button = document.getElementById("genPromptButton");
@@ -165,10 +197,18 @@ function genPromptButton() {
         
         genPrompts(1);
     }
+
+    var pathButton = document.getElementById("pathcheckerButton")
+    pathButton.onclick = (e) => {
+        e.preventDefault();
+        
+        pathCheck();
+    }
 }
 
 window.addEventListener("load", function() {
     document.getElementById("newPrompt").addEventListener("submit", submitPrompt);
+
     getPrompts()
     genPromptButton()
 });

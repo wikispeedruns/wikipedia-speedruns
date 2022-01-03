@@ -10,7 +10,7 @@ import time
 
 scraper_api = Blueprint("scraper", __name__, url_prefix="/api/scraper")
 
-scraperdbname = "scraper_graph"
+scraperdbname = "testdb"
 articletable = scraperdbname + ".articleid"
 edgetable = scraperdbname + ".edgeidarticleid"
 
