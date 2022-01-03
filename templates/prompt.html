@@ -1,43 +1,38 @@
-<html>
-    <head>
-        <script>
-            const prompt_id='{{prompt_id}}';
-            const run_id='{{run_id}}';
-        </script>
+{% extends 'base.html' %}
 
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
-        
-        <script src="{{url_for('static', filename='js/springy-master/springy.js') }}"></script>
-        <script src="{{url_for('static', filename='js/springy-master/springyui.js') }}"></script>
+{% block head %}
+<script>
+    const prompt_id='{{prompt_id}}';
+    const run_id='{{run_id}}';
+</script>
 
-        
-        <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/main.css')}}">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
 
+<script src="{{url_for('static', filename='js/springy-master/springy.js') }}"></script>
+<script src="{{url_for('static', filename='js/springy-master/springyui.js') }}"></script>
 
-    </head>
+<script type=text/javascript src="{{url_for('static', filename='js/prompt.js') }}"></script>
+{% endblock %}
+
+{% block content %}
     
-    <body style="position: relative;">
-        <h3>Prompt #{{prompt_id}}</h3>
-        <p id="prompt"></p>
+    <h3>Prompt #{{prompt_id}}</h3>
+    <p id="prompt"></p>
 
-        <table id="leaderboard" style="width:85%; margin: auto; margin-top: 50px">
-            <tr>
-                <th style="width:10%">Rank</th>
-                <th style="width:10%">Name</th>
-                <th style="width:10%">Time</th>
-                <th>Path</th>
-            </tr>
-            
-        </table>
-
-        <canvas id="springydemo" width="1200" height="900" style="margin-top: 50px; display: block;
-        margin-left: auto;
-        margin-right: auto;
-        font-size: 10px;" />
-
+    <table id="leaderboard" style="width:85%; margin: auto; margin-top: 50px">
+        <tr>
+            <th style="width:10%">Rank</th>
+            <th style="width:10%">Name</th>
+            <th style="width:10%">Time</th>
+            <th>Path</th>
+        </tr>
         
-        <script type=text/javascript src="{{url_for('static', filename='js/prompt.js') }}"></script>
-    </body>
-    
+    </table>
 
-</html>
+    <canvas id="springydemo" width="1200" height="900" style="margin-top: 50px; display: block;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 10px;">
+
+    
+{% endblock %}

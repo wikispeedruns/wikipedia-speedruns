@@ -1,33 +1,41 @@
-<html>
-    <head>
-        <title>Wikipedia Speedruns!</title>
-        <script type=text/javascript src="{{url_for('static', filename='js/home.js') }}"></script>
-        <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/main.css')}}">
+{% extends 'base.html' %}
 
-    </head>
+{% block head %}
+<script defer type=text/javascript src="{{url_for('static', filename='js/home.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <h3>Welcome to Wikipedia Speedruns!</h3>
+
+        <p><strong>New Prompts Out!</strong></p>
+
+    <p>Goal of this game is simple. Try to get to one wikipedia page to another as fast as possible by clicking on the links in the page. Once you finish each prompt, you will get a chance to submit your time to the leaderboard!</p>
+    <p>A few simple rules apply:<br>
+        <ul>
+            <li>Any link shown on the page is fair game.</li>
+            <li>DO NOT use word search or find on your browser!</li>
+            <li>Live with your mistakes. Don't even bother trying the back page button, you will just be forced to restart.</li>
+            <li>Luck is king, so put on your lucky hat and lucky socks!</li>
+        </ul>
+    </p>
+
+    <p>Click <a href="/latest">here</a> to try the latest prompt, starts immediately after click!</p>
+    <p>Click <a href="/random">here</a> to try a random prompt, starts immediately after click!</p>
     
-    <body>
-        <h3>Welcome to Wikipedia Speedruns!</h3>
+    <p>Here are links to all available public prompts:</p>
+    <table id="publicPrompts">
+    </table>
 
-        <p>Goal of this game is simple. Try to get to one wikipedia page to another as fast as possible by clicking on the links in the page. Once you finish each prompt, you will get a chance to submit your time to the leaderboard!</p>
-        <p>A few simple rules apply:<br>
-            <ul>
-                <li>Any link shown on the page is fair game.</li>
-                <li>DO NOT use word search or find on your browser!</li>
-                <li>Live with your mistakes. Don't even bother trying the back page button, you will just be forced to restart.</li>
-                <li>Luck is king, so put on your lucky hat and lucky socks!</li>
-            </ul>
-        </p>
+    <p>
+        {% if username %}
+        Here is the listed of rated prompts.
+        {% else %}
+        Login to see rated prompts.
+        {% endif %}
+    </p>
 
-        <p>Click <a href="/latest">here</a> to try the latest prompt, starts immediately after click!</p>
-        <p>Click <a href="/random">here</a> to try a random prompt, starts immediately after click!</p>
-        
-        <p>Here are links to all available prompts:</p>
-        <table id="prompts">
-        </table>
+    <table id="ratedPrompts">
 
-        <p>Created by <a href="https://danqian.net">Daniel Qian</a> and <a href="https://mliu59.github.io/">Miles Liu</a></p>
-    </body>
-
-
-</html>
+    </table>
+    <p style="margin-top:50px;">Created by <a href="https://danqian.net">Daniel Qian</a> and <a href="https://mliu59.github.io/">Miles Liu</a></p>
+{% endblock %}

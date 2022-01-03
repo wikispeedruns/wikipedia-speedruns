@@ -4,38 +4,9 @@ var startTime = 0;
 var path = [];
 var endTime = 0;
 
-async function submitName(event)
-{
-    event.preventDefault();
+var keyMap = {};
 
-    const reqBody = {
-        "start_time": startTime,
-        "end_time": endTime,
-        "prompt_id": prompt_id,
-        "path": path,
-        "name": document.getElementById("name").value
-    }
-
-    // Send results to API
-    try {
-        const response = await fetch("/api/runs/create", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(reqBody)
-        })
-
-        const run_id = await response.json();
-
-        // Move to prompt page after 3 seconds
-        window.location.href = "/prompt/" + prompt_id + "?run_id=" + run_id;
-
-    } catch(e) {
-        console.log(e);
-    }
-
-}
+var ctrlfwarnings = false;
 
 function handleWikipediaLink(e) 
 {
@@ -85,11 +56,12 @@ async function loadPage(page) {
         startTime = Date.now()
         timerInterval = setInterval(displayTimer, 20);    
     }
+    
 
     path.push(title)
 
     if (formatStr(title) === formatStr(goalPage)) {
-        finish(); // No need to await this
+        await finish();
     }
 
     document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
@@ -101,21 +73,38 @@ async function loadPage(page) {
 }
 
 async function finish() {
-
     // Stop timer
     endTime = Date.now();
     clearInterval(timerInterval);
     document.getElementById("timer").innerHTML="";
 
+    // Prevent prompt
+    window.onbeforeunload = null;
 
-    // Display finish stats and path
-    Array.from(document.getElementsByClassName("finish")).forEach((el) => {
-        el.style.display = "block";
-    });
-    document.getElementById("finishStats").innerHTML = "<p>You Found It! Final Time: " + (endTime - startTime)/1000 + "</p>";
-    document.getElementById("path").innerHTML = "<p>" + formatPath(path) + "</p>";
+    const reqBody = {
+        "start_time": startTime,
+        "end_time": endTime,
+        "prompt_id": prompt_id,
+        "path": path,
+    }
 
-    document.getElementById("submitName").addEventListener("submit", submitName);
+    // Send results to API
+    try {
+        const response = await fetch("/api/runs", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(reqBody)
+        })
+
+        const run_id = await response.json();
+
+        window.location.href = "/prompt/" + prompt_id + "?run_id=" + run_id;
+
+    } catch(e) {
+        console.log(e);
+    }
 }
 
 
@@ -195,23 +184,126 @@ function displayTimer() {
     document.getElementById("timer").innerHTML = seconds + "s";
 }
 
+function getRandTip() {
+    return "There are five permanent members of the UN security council: China, France, Russia, United Kingdom, and the United States."
+}
 
-window.onload = async function() {
-    const response = await fetch("/api/prompts/get/" + prompt_id);
+function countdownOnLoad(start, end) {
+    
+    var guideBlock = document.getElementById("guide");
+    var mainBlock = document.getElementById("main");
+    var countdownBlock = document.getElementById("countdown");
+    var timerBlock = document.getElementById("timer");
+    var tipsBlock = document.getElementById("tips");
+
+    var gifBlock = document.getElementById("mirroredimgblock");
+
+    guideBlock.innerHTML = "<strong>Starting article: </strong>" + start + "    -->    <strong>Goal article: </strong>" + end
+
+    mainBlock.style.display = "none";
+    countdownBlock.style.display = "block";
+    timerBlock.style.display = "none";
+    tipsBlock.style.display = "block";
+
+
+    tipsBlock.innerHTML = getRandTip();
+
+    //countdownBlock.innerHTML = "Prompt will begin in " + "5" + " seconds";
+    /*    <img class="startgun" src="{{url_for('static', filename='assets/startgun.gif')}}">
+    <img class="startgun invgif" src="{{url_for('static', filename='assets/startgun.gif')}}">
+    */
+
+    var countDownStart = Date.now();
+    var countDownTime = 8000;
+
+
+    var gunimg1 = document.createElement('img');
+    var gunimg2 = document.createElement('img');
+    imgpath = "/static/assets/startgun.gif";
+
+    gunimg1.classList.add("startgun");
+    gunimg2.classList.add("startgun");
+    gunimg2.classList.add("invgif");
+    gunimg2.src = imgpath;
+    gunimg1.src = imgpath;
+
+
+    var x = setInterval(function() {
+
+        var now = Date.now()
+      
+        // Find the distance between now and the count down date
+        var distance = countDownStart + countDownTime - now;
+        //console.log(distance);
+        //console.log(String(Math.floor(distance/1000)+1));
+        countdownBlock.innerHTML = String(Math.floor(distance/1000)+1);
+        countdownBlock.style.visibility = "visible";
+        if (distance < -1000) {
+            clearInterval(x);
+            mainBlock.style.display = "block";
+            countdownBlock.style.display = "none";
+            guideBlock.innerHTML = "<strong>" + start + "</strong> --> <strong>" + end + "</strong>";
+            timerBlock.style.display = "block";
+            tipsBlock.style.display = "none";
+            gifBlock.style.display = "none";
+            startTime = Date.now();
+            ctrlfwarnings = true;
+
+        }
+        if (distance < 700 && distance > 610) {
+            gifBlock.style.visibility = "visible";
+            gifBlock.appendChild(gunimg1);
+            gifBlock.appendChild(gunimg2);
+        }
+      }, 50);
+
+}
+
+function checkForFind(e) {
+
+    var guideBlock = document.getElementById("guide");
+    var mainBlock = document.getElementById("main");
+    var timerBlock = document.getElementById("timer");
+
+    console.log(e.code);
+    e = e || event;
+    keyMap[e.code] = e.type == 'keydown';
+    if (keyMap["KeyF"] && (keyMap["ControlLeft"] || keyMap["ControlRight"])) {
+        if (ctrlfwarnings == true) {
+            //ctrlfwarnings = 1;
+            mainBlock.style.display = "none";
+            timerBlock.style.display = "none";
+            guideBlock.innerHTML = "STOP! You violated the law. Pay the court a fine or serve your sentence."
+            var tesguard = document.createElement('img');
+            tesguard.src = "/static/assets/stop.jpg";
+            tesguard.width= "700";
+            tesguard.style.marginTop = "40px";
+            guideBlock.appendChild(tesguard);
+        }
+    }
+}
+
+window.addEventListener("load", async function() {
+    const response = await fetch("/api/prompts/" + prompt_id);
     const prompt = await response.json();
 
     const article = prompt["start"];
 
     goalPage = prompt["end"];
-    document.getElementById("guide").innerHTML = "<strong>Starting article: </strong>" + article + "    -->    <strong>Goal article: </strong>" + goalPage
 
-    document.getElementById("main").style.display = "none";
-    document.getElementById("countdown").innerHTML = "Prompt will begin in " + "5" + " seconds";
+    await countdownOnLoad(article,goalPage);
 
-    setTimeout(() => {
-        document.getElementById("main").style.display = "block";
-        document.getElementById("countdown").style.display = "none";
-        document.getElementById("guide").innerHTML = article + " --> " + goalPage
-        loadPage(article)
-    }, 5000);
-}
+    loadPage(article);
+});
+
+window.onbeforeunload = function() {
+    return true;
+};
+
+
+window.addEventListener("keydown", function(e) {
+    checkForFind(e);
+});
+window.addEventListener("keyup", function(e) {
+    checkForFind(e);
+});

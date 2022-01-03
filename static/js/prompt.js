@@ -7,12 +7,18 @@ function generate_leaderboard(runs)
 {
     var table = document.getElementById("leaderboard");
     // TODO probably add class and stuff
+
+    var rank = 1;
+
     for (var i = 0; i < runs.length; i++) {
+        // Ignore all runs without user_ids
+        if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
 
         var item = document.createElement("tr");
         
-        var rank = document.createElement("td");
-        rank.appendChild(document.createTextNode(i + 1));
+        var rankEl = document.createElement("td");
+        rankEl.appendChild(document.createTextNode(rank));
+        rank++;
 
         var time = document.createElement("td");
         time.appendChild(document.createTextNode((runs[i]["run_time"]/1000000).toFixed(2) + " s"));
@@ -21,13 +27,18 @@ function generate_leaderboard(runs)
         path.appendChild(document.createTextNode(runs[i]["path"]));
 
         var name = document.createElement("td");
-        name.appendChild(document.createTextNode(runs[i]["name"]));
+
+        if (runs[i]["username"]) {
+            name.appendChild(document.createTextNode( runs[i]["username"]));
+        } else  {
+            name.appendChild(document.createTextNode("You"));
+        }
 
         if (runs[i]["run_id"] === Number(run_id)) {
             item.style.fontWeight = "bold";
         }
 
-        item.appendChild(rank);
+        item.appendChild(rankEl);
         item.appendChild(name);
         item.appendChild(time);
         item.appendChild(path);
@@ -76,7 +87,10 @@ function populateGraph(runs) {
     
 
     for (var i = 0; i < runs.length; i++) {
-        var pathNodes = parsePath(runs[i]["path"].substring(1, runs[i]["path"].length - 1));
+        if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
+
+
+        var pathNodes = runs[i]["path"]
         var cur = (runs[i]["run_id"] === Number(run_id)) ? true : false;
 
         if (cur) {
@@ -104,6 +118,7 @@ function populateGraph(runs) {
 
         
         for (var j = 0; j < pathNodes.length - 1; j++) {
+
 
             var index = checkIncludeEdgeLabels(pathNodes[j], pathNodes[j + 1], edges);
 
@@ -198,36 +213,18 @@ function componentToHex(c) {
 }
 
 function rgbToHex(r, g, b) {
-return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
-function parsePath(path) {
-    var nodes = path.split("\', \'");
-    var out = [];
-    
-    for (var i = 0; i < nodes.length; i++) {
-        if (i === 0) {
-            out.push(nodes[i].substring(1, nodes[i].length));
-        } else if  (i === nodes.length - 1) {
-            out.push(nodes[i].substring(0, nodes[i].length - 1));
-        } else {
-            out.push(nodes[i]);
-        }
-    }
-    
-    return out;
-}
-
-window.onload = async function() {
-
-    var response = await fetch("/api/prompts/get/" + prompt_id);
+window.addEventListener("load", async function() {
+    var response = await fetch("/api/prompts/" + prompt_id);
     const prompt = await response.json();
 
-    response = await fetch("/api/prompts/get/" + prompt_id + "/runs");
+    response = await fetch("/api/prompts/" + prompt_id + "/leaderboard/" + run_id);
     const runs = await response.json(); 
 
     generate_prompt(prompt);
     generate_leaderboard(runs);
     var graph1 = populateGraph(runs);
     $('#springydemo').springy({ graph: graph1 });
-}
+});

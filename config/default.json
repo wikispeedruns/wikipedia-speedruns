@@ -1,0 +1,11 @@
+{
+    "SECRET_KEY": "ahhhhhhhhhh",
+ 
+    "MYSQL_HOST": "127.0.0.1",
+    "MYSQL_USER": "user",
+    "MYSQL_PASSWORD": null,
+    "DATABASE": "wikipedia_speedruns",
+
+    "MAIL_USE_TLS": true
+}
+

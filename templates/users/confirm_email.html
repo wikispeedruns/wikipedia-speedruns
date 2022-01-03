@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script defer>
+
+const token = "{{token}}";
+
+async function confirm()
+{
+    const body = {token};
+
+    const response = await fetch("/api/users/confirm_email", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+
+    if (response.status == 200) {
+        document.getElementById("message").innerText = "Email Confirmed!";
+    } else if (response.status == 400) {
+        document.getElementById("message").innerText = "Could not confirm email (expired or invalid link)";
+    } else {
+        document.getElementById("message").innerText = "Error in confirming email";
+    }
+}
+
+window.onload = confirm()
+
+</script>
+{% endblock %}
+
+{% block content %}
+<p id="message" class="text">
+    Confirming Email ...
+</p>
+{% endblock %}

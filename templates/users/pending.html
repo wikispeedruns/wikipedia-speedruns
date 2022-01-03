@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script defer>
+// Should we make this a separate file?
+async function handleRegister(event)    
+{
+    event.preventDefault();
+
+    const username = document.getElementById("username").value;
+    
+    // TODO validation
+    const reqBody = {
+        "username": username,
+    }
+
+    const response = await fetch("/api/users/create/oauth", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(reqBody)
+    });
+
+    if (response.ok) {
+        document.getElementById("registerForm").reset();
+        document.getElementById("message").innerText = "Successfully Registered!"
+        setTimeout(() => {
+            window.location.href = "/profile"; 
+        }, 2000);       
+    } else if (response.status == 409) {
+        document.getElementById("message").innerText = "User already exists";
+    } else {
+        document.getElementById("message").innerText = "Error in registering";
+    }
+}
+
+window.onload = function() {
+    var form = document.getElementById('registerForm');
+    form.addEventListener("submit", handleRegister);
+}
+</script>
+
+
+
+{% endblock %}
+
+{% block content %}
+
+<div class="col-lg-4 col-md-6" >
+    <p> We need a few more details to create an account: </p>
+
+    <form id="registerForm">
+
+        <div class="form-floating mb-2">
+            <input id="username" class="form-control" required >
+            <label for="username" class="form-label">Display Username</label>
+        </div>
+
+
+        <p id="message" class="form-text text-danger"></p>
+
+        <button type="submit" class="btn btn-light">Submit</button>
+    </form>
+</div>
+{% endblock %}

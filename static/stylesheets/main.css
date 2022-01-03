@@ -1,12 +1,4 @@
 
-body {
-    width: 80%;
-    max-width: 1500px !important;
-    margin: 40px auto !important;
-    font-size: 18px;
-    /*font-family: Arial, sans-serif;*/
-}
-
 #wikipedia-frame {
     width: 100%;
     height: 100%;
@@ -59,7 +51,11 @@ body {
 }
 
 a {
-    text-decoration: none;
+    text-decoration: none !important;
+}
+
+a:hover {
+    text-decoration: underline !important;
 }
 
 .path {
@@ -77,5 +73,27 @@ th {
     width: 60%;
     margin: 50px auto;
     text-align: center;
-    font-size: 30px;
+    font-size: 250px;
+    font-weight: bold;
+    visibility:hidden;
+}
+
+.tips {
+    font-size: 20px;
+}
+
+.startgun {
+    width: 200px;
+    position: absolute;
+    left:60%;
+}
+
+.invgif {
+    transform: scaleX(-1);
+    left:25% !important;
+}
+
+.mirroredimgblock {
+    position:relative;
+    visibility:hidden;
 }

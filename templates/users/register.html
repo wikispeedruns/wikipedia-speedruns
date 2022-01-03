@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script defer>
+// Should we make this a separate file?
+
+function validationAlert(msg, isErr=true)
+{
+    var element = document.getElementById("message");
+
+    element.classList.add("text-danger");
+
+    if (!isErr)
+        element.classList.remove("text-danger");
+
+    element.innerText = msg;
+}
+
+async function handleRegister(event)    
+{
+    event.preventDefault();
+
+    const username = document.getElementById("username").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    
+
+    if (password != confirmPassword) {
+        validationAlert("Passwords do not match!");
+        return;
+    }
+
+    // TODO more validation
+
+    // 
+    const reqBody = {
+        "username": username,
+        "email": email,
+        "password": password,
+    }
+
+    const response = await fetch("/api/users/create/email", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(reqBody)
+    });
+
+    if (response.ok) {
+        document.getElementById("registerForm").reset();
+        validationAlert("Successfully Registered!", false);
+        setTimeout(() => {
+            window.location.href = "/login"; 
+        }, 2000);       
+    } else if (response.status == 409) {
+        validationAlert("User already exists");
+    } else {
+
+        const errMsg = await response.text();
+        validationAlert(errMsg);
+    }
+
+
+}
+
+window.onload = function() {
+    var form = document.getElementById('registerForm');
+    form.addEventListener("submit", handleRegister);
+}
+</script>
+
+
+
+{% endblock %}
+
+{% block content %}
+
+<div class="col-lg-4 col-md-6" >
+    <form id="registerForm">
+
+        <div class="form-floating mb-2">
+            <input id="username" class="form-control" required >
+            <label for="username" class="form-label">Username</label>
+        </div>
+
+        <div class="form-floating mb-2">
+            <input type="email" id="email" class="form-control" required >
+            <label for="email" class="form-label">Email</label>
+        </div>
+
+        <div class="form-floating mb-2">
+            <input type="password" id="password" class="form-control" required>
+            <label for="password" class="form-label">Password</label>
+        </div>
+
+        <div class="form-floating mb-2">
+            <input type="password" id="confirmPassword" class="form-control" required>
+            <label for="confirmPassword" class="form-label">Confirm Password</label>
+        </div>
+
+        <p id="message" class="form-text text-danger"></p>
+
+        <button type="submit" class="btn btn-light">Submit</button>
+    </form>
+</div>
+
+{% endblock %}

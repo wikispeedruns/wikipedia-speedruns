@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script>
+// Should we make this a separate file?
+
+function validationAlert(msg, isErr=true)
+{
+    var element = document.getElementById("message");
+
+    element.classList.add("text-danger");
+
+    if (!isErr)
+        element.classList.remove("text-danger");
+
+    element.innerText = msg;
+}
+
+async function handleLogin(event)    
+{
+    event.preventDefault();
+    var re = /\S+@\S+\.\S+/;
+
+    const login = document.getElementById("login").value;
+    const password = document.getElementById("password").value;
+    
+    var reqBody;
+
+    // TODO what if username looks like an email? We should prevent that somehow
+    if (re.test(login)) {
+        reqBody = {
+            "email" : login,
+            "password": password,
+        };
+    } else {
+        reqBody = {
+            "username" : login,
+            "password": password,
+        };
+    }
+
+    const response = await fetch("/api/users/login", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(reqBody)
+    });
+
+    if (response.ok) {
+        document.getElementById("loginForm").reset();
+        validationAlert("Successfully logged in!", false);
+        window.location.href = "/"; // Change this once we have a profile page
+    } else if (response.status == 401) {
+        validationAlert("Invalid username or password");
+    } else {
+        validationAlert("Error logging in");
+    }
+    
+}
+
+window.onload = function() {
+    var form = document.getElementById('loginForm');
+    form.addEventListener("submit", handleLogin);
+}
+</script>
+
+<style>
+    
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="col-lg-4 col-md-6" >
+    <form id="loginForm">
+
+        <div class="form-floating mb-2">
+            <input id="login" class="form-control" required >
+            <label for="login" class="form-label">Login</label>
+
+        </div>
+        <div class="form-floating mb-2">
+            <input type="password" id="password" class="form-control" required>
+            <label for="password" class="form-label">Password</label>
+        </div>
+        <p id="message" class="form-text text-danger">
+
+        </p>
+
+
+        <button type="submit" class="btn btn-light">Login</button>
+
+        <p class="mt-2"><a href="{{url_for('get_reset_request_page')}}">Forgot your password?</a></p>
+        <p><a href="{{url_for('users.google.login')}}">Login with Google</a></p>
+
+    </form>
+</div>
+
+
+{% endblock %}
