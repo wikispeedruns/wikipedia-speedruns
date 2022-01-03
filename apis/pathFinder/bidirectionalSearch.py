@@ -1,14 +1,15 @@
 import pymysql
 import time
-from dbsearch import getLinks
-from dbcreation import log
+from .dbsearch import getLinks
+
+from db import get_db
+from pymysql.cursors import DictCursor
 
 debugMode = True
 articleCount = 0
 reverseArticleCount = 0
 
-db = pymysql.connect(host="localhost", user="root", password="9EEB00@@", database="testDB")
-cur = db.cursor(pymysql.cursors.DictCursor)
+cur = get_db().cursor(cursor=DictCursor)
 
 def bidirectionalSearcher(start, end):
     forwardVisited = {start : (None, 0, 0)}
@@ -34,12 +35,10 @@ def bidirectionalSearcher(start, end):
                 
             if a:
                 if debugMode:
-                    log("Found intersection!: \"" + str(a) + '\"\n')
-                return [traceBidirectionalPath(a, start, end, forwardVisited, reverseVisited)]
+                    return [traceBidirectionalPath(a, start, end, forwardVisited, reverseVisited)]
             else:
                 if debugMode:
-                    log("Found intersection!: \"" + str(b) + '\"\n')
-                return [traceBidirectionalPath(b, start, end, forwardVisited, reverseVisited)]
+                    return [traceBidirectionalPath(b, start, end, forwardVisited, reverseVisited)]
             
             
             
@@ -64,8 +63,6 @@ def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
         pageTitle = queue.pop(0)
         if c == 0:
             startingDepth = forwardVisited[pageTitle][1]
-            if debugMode:
-                log("Forward depth reached: " + str(forwardVisited[pageTitle][1] + 1))
         elif forwardVisited[pageTitle][1] != startingDepth:
             queue.insert(0, pageTitle)
             break
@@ -95,11 +92,7 @@ def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
                 queue.append(link)
             
                 articleCount += 1
-                
-                if articleCount % 10000 == 0:
-                    if debugMode:
-                        log("Forward: " + str(tracePath(forwardVisited, link, start)) + ", " + str(articleCount))
-                    
+                                    
     return None  
 
 
@@ -122,8 +115,6 @@ def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
         pageTitle = queue.pop(0)
         if c == 0:
             startingDepth = reverseVisited[pageTitle][1]
-            if debugMode:
-                log("Reverse depth reached: " + str(reverseVisited[pageTitle][1] + 1))
         elif reverseVisited[pageTitle][1] != startingDepth:
             queue.insert(0, pageTitle)
             break
@@ -153,10 +144,6 @@ def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
                 queue.append(link)
             
                 reverseArticleCount += 1
-                
-                if reverseArticleCount % 10000 == 0:
-                    if debugMode:
-                        log("Reverse: " + str(tracePath(reverseVisited, link, end)) + ", " + str(reverseArticleCount))
                     
     return None      
         
@@ -192,7 +179,7 @@ def Reverse(lst):
 
 
 def convertToID(name):
-    queryString = "SELECT * from articleID where name=%s"
+    queryString = "SELECT * from testdb.articleID where name=%s"
     cur.execute(queryString, str(name))
     output = cur.fetchall()
     
@@ -201,7 +188,7 @@ def convertToID(name):
     
     
 def convertToArticleName(id):
-    queryString = "SELECT * from articleID where articleID=%s"
+    queryString = "SELECT * from testdb.articleID where articleID=%s"
     cur.execute(queryString, str(id))
     output = cur.fetchall()
     
@@ -245,6 +232,14 @@ def findPaths(startTitle, endTitle):
         print("Total checked articles: " + str(articleCount + reverseArticleCount))
             
         print("Elapsed time:" + str(time.time() - start_time) + ' seconds\n')
+        
+    
+    output = {"Articles":convertPathToNames(paths[0][0]),
+              "ArticlesIDs":paths[0][0],
+              "EdgeIDs": paths[0][1]}
+    
+    
+    return output
 
 
 if __name__ == '__main__':
@@ -254,7 +249,7 @@ if __name__ == '__main__':
     start = "Candidates of the 1955 Australian federal election"
     end = "Leech"
     
-    findPaths(start, end)
+    print(findPaths(start, end))
 
 
 

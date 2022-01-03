@@ -25,10 +25,12 @@ from apis.prompts import prompt_api
 from apis.runs import run_api
 from apis.users import user_api
 from apis.profiles import profile_api
+from apis.scraper import scraper_api
 
 app.register_blueprint(prompt_api)
 app.register_blueprint(run_api)
 app.register_blueprint(user_api)
 app.register_blueprint(profile_api)
+app.register_blueprint(scraper_api)
 
 import routes

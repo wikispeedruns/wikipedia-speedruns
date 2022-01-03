@@ -10,7 +10,7 @@ def getLinks(pages, cur, forward = True):
     output = {}
     
     if forward:
-        queryString = "SELECT * FROM edgeidarticleid WHERE src IN (%s)"
+        queryString = "SELECT * FROM scraper_graph.edgeidarticleid WHERE src IN (%s)"
         #queryString = "SELECT * FROM edges WHERE src IN (%s)"
         queryResults = batchQuery(queryString, list(pages.keys()), cur)
         
@@ -24,7 +24,7 @@ def getLinks(pages, cur, forward = True):
                     output[title].append((queryEntry['dest'], queryEntry['edgeID']))
                     
     else:
-        queryString = "SELECT * FROM edgeidarticleid WHERE dest IN (%s)"
+        queryString = "SELECT * FROM scraper_graph.edgeidarticleid WHERE dest IN (%s)"
         queryResults = batchQuery(queryString, list(pages.keys()), cur)
         
         for queryEntry in queryResults:

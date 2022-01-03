@@ -73,10 +73,42 @@ function createPromptItem(prompt)
         getPrompts();
     }
 
+
+    var checkPath = document.createElement('button');
+    checkPath.append(document.createTextNode(`Return prompt's shortest path in console`));
+    checkPath.onclick = (e) => {
+        e.preventDefault();
+        console.log("Received request, processing...")
+        consoleLogPath(prompt["start"], prompt["end"])
+    }
+    
     item.append(public)
+    item.append(checkPath)
 
     return item;
 }
+
+async function consoleLogPath(start, end) {
+    try {
+        const response = await fetch("/api/scraper/path/", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "start": start,
+                "end": end
+            })
+        });
+        const path = await response.json();
+
+        console.log(path)
+
+    } catch(e) {
+        console.log(e);
+    }
+}
+
 
 async function getPrompts()
 {
@@ -101,8 +133,42 @@ async function getPrompts()
     }
 }
 
+async function genPrompts(n) {
+    try {
+        const response = await fetch("/api/scraper/gen_prompts/", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'N':n.toString()})
+        })
+
+        const resp = await response.json()
+
+        console.log(resp['Prompts'][0]);
+
+        var generatedBlock = document.getElementById("generated");
+        var item = document.createElement("p");
+        item.innerHTML = resp['Prompts'][0][0] + " -> " + resp['Prompts'][0][1]+"\n";
+        generatedBlock.appendChild(item)
+
+    } catch(e) {
+        console.log(e);
+    }
+}
+
+
+function genPromptButton() {
+    var button = document.getElementById("genPromptButton");
+    button.onclick = (e) => {
+        e.preventDefault();
+        
+        genPrompts(1);
+    }
+}
 
 window.addEventListener("load", function() {
     document.getElementById("newPrompt").addEventListener("submit", submitPrompt);
     getPrompts()
+    genPromptButton()
 });
