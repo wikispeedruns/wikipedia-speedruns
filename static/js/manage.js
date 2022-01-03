@@ -73,17 +73,18 @@ function createPromptItem(prompt)
         getPrompts();
     }
 
-
+    
     var checkPath = document.createElement('button');
-    checkPath.append(document.createTextNode(`Return prompt's shortest path in console`));
+    checkPath.append(document.createTextNode(`Get prompt's shortest path`));
+
+    item.append(public)
+    item.append(checkPath)
+
     checkPath.onclick = (e) => {
         e.preventDefault();
         console.log("Received request, processing...")
-        console.log(getPath(prompt["start"], prompt["end"]))
+        appendPath(item, prompt["start"], prompt["end"])
     }
-    
-    item.append(public)
-    item.append(checkPath)
 
     return item;
 }
