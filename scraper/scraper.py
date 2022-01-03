@@ -7,12 +7,8 @@ from db import get_db
 from pymysql.cursors import DictCursor
 import time
 
-
 scraper_api = Blueprint("scraper", __name__, url_prefix="/api/scraper")
 
-scraperdbname = "scraper_graph"
-articletable = scraperdbname + ".articleid"
-edgetable = scraperdbname + ".edgeidarticleid"
 
 
 
@@ -46,6 +42,9 @@ def get_prompts():
 
 
 
+scraperdbname = "scraper_graph"
+articletable = scraperdbname + ".articleid"
+edgetable = scraperdbname + ".edgeidarticleid"
 
 
 def batchQuery(queryString, arr, cur):
