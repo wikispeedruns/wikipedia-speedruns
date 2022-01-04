@@ -1,4 +1,6 @@
 import pymysql
+import json
+
 # TODO Probably want to do this at some point
 # http://jan.kneschke.de/projects/mysql/order-by-rand/
 # TODO add indexes
@@ -55,7 +57,18 @@ def create_tables(cursor):
     for table in TABLES:
         cursor.execute(TABLES[table])
 
-conn = pymysql.connect(user='user', host='127.0.0.1')
+# Load database settings
+config = json.load(open("../config/default.json"))
+try:
+    config.update(json.load(open("../config/prod.json")))
+except FileNotFoundError:
+    pass
+
+conn = pymysql.connect(
+    user=config["MYSQL_USER"], 
+    host=config["MYSQL_HOST"],
+    password=config["MYSQL_PASSWORD"]
+)
 
 with conn.cursor() as cursor:
     cursor.execute(CREATE_DB_QUERY)
