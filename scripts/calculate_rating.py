@@ -5,6 +5,7 @@ https://codeforces.com/blog/entry/20762
 
 import datetime
 import pymysql
+import json
 from pymysql.cursors import DictCursor
 
 import itertools
@@ -28,7 +29,7 @@ ORDER BY runs.prompt_id, run_time;
 
 STORE_RATINGS_QUERY = (
 '''
-INSERT INTO ratings (user_id, rating, num_rounds) VALUES (%s, %s, %s);
+REPLACE INTO ratings (user_id, rating, num_rounds) VALUES (%s, %s, %s);
 '''
 )
 
@@ -100,7 +101,18 @@ def _update(users, round):
     _calculate_new_ratings(users, round)
 
 def calculate_ratings():
-    conn = pymysql.connect(user='user', host='127.0.0.1', database='wikipedia_speedruns')
+    config = json.load(open("../config/default.json"))
+    try:
+        config.update(json.load(open("../config/prod.json")))
+    except FileNotFoundError:
+        pass
+
+    conn = pymysql.connect(
+        user=config["MYSQL_USER"], 
+        host=config["MYSQL_HOST"],
+        password=config["MYSQL_PASSWORD"],
+        database=config['DATABASE']
+    )
 
     with conn.cursor(cursor=DictCursor) as cursor:
         cursor.execute(USER_QUERY)
