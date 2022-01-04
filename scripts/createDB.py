@@ -26,6 +26,19 @@ CREATE TABLE IF NOT EXISTS `users` (
 );
 ''')
 
+# Add info for better calculations
+TABLES['ratings']=(
+'''
+CREATE TABLE IF NOT EXISTS `ratings` (
+    `user_id` INT NOT NULL,
+    `rating` INT NOT NULL,
+    `num_rounds` INT NOT NULL,
+    PRIMARY KEY (`user_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
+);
+'''
+)
+
 TABLES['prompts']=(
 '''
 CREATE TABLE IF NOT EXISTS `prompts` (

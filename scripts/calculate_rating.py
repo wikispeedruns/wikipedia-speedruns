@@ -10,7 +10,7 @@ from pymysql.cursors import DictCursor
 import itertools
 import pprint
 
-USER_QUERY = 'SELECT username from users'
+USER_QUERY = 'SELECT user_id, username from users'
 
 # TODO technically if a user has the same start time, they'll show up twice, this could be an issue
 RUNS_QUERY = ('''
@@ -26,33 +26,39 @@ INNER JOIN (
 ORDER BY runs.prompt_id, run_time;
 ''')
 
+STORE_RATINGS_QUERY = (
+'''
+INSERT INTO ratings (user_id, rating, num_rounds) VALUES (%s, %s, %s);
+'''
+)
+
 INITIAL_RATING = 1500
 
 pp = pprint.PrettyPrinter(indent=4)
 
-def elo_prob(ri, rj):
+def _elo_prob(ri, rj):
     return 1 / (1 + 10 ** ((rj - ri) / 400 ))
 
-def calculate_seed(users, round):
+def _calculate_seed(users, round):
     for u in round:
         users[u]["seed"] = 1
         for v in round:
             if (u == v): continue
-            users[u]["seed"] += elo_prob(users[v]["rating"], users[u]["rating"])
+            users[u]["seed"] += _elo_prob(users[v]["rating"], users[u]["rating"])
 
 
-def calculate_place(users, round):
+def _calculate_place(users, round):
     for place, u in enumerate(round):
         users[u]["place"] = (place + 1)
 
-def calculate_desired_seed(users):
+def _calculate_desired_seed(users):
     for u in users:
         user = users[u]
         if ("seed" not in user or "place" not in user): continue
 
         user["desired_seed"] = (user["seed"] * user["place"]) ** 0.5
 
-def rating_for_seed(users, round, u, desired_seed):
+def _rating_for_seed(users, round, u, desired_seed):
     lo = 1
     hi = 8000
 
@@ -64,7 +70,7 @@ def rating_for_seed(users, round, u, desired_seed):
         # TODO should we exclude ourselves?
         for v in round:
             if (u == v): continue
-            mid_seed += elo_prob(users[v]["rating"], mid)
+            mid_seed += _elo_prob(users[v]["rating"], mid)
 
         if (mid_seed > desired_seed):
             lo = mid + 1
@@ -73,33 +79,39 @@ def rating_for_seed(users, round, u, desired_seed):
 
     return lo
 
-def calculate_new_ratings(users, round):
+
+def _calculate_new_ratings(users, round):
     for u in round:
-        users[u]["target"] = rating_for_seed(users, round, u, users[u]["desired_seed"])
+        users[u]["target"] = _rating_for_seed(users, round, u, users[u]["desired_seed"])
     
     # if we change it in the loop above, it will affect things
     for u in round:
         users[u]["rating"] = (users[u]["target"] + users[u]["rating"]) // 2
 
 
-def update(users, round):
+def _update(users, round):
     if (len(round) == 1): return
 
-    calculate_seed(users, round)
-    calculate_place(users, round)
-    calculate_desired_seed(users)
-    calculate_new_ratings(users, round)
-    pp.pprint(users)
+    for u in round: users[u]["num_rounds"] += 1
 
-    # Erase temp. fields and add new rating
-    users = {k: {"rating": v["rating"] }  for k, v in users.items()}
+    _calculate_seed(users, round)
+    _calculate_place(users, round)
+    _calculate_desired_seed(users)
+    _calculate_new_ratings(users, round)
 
-def main():
+def calculate_ratings():
     conn = pymysql.connect(user='user', host='127.0.0.1', database='wikipedia_speedruns')
 
     with conn.cursor(cursor=DictCursor) as cursor:
         cursor.execute(USER_QUERY)
-        users = {u['username']: {"rating": INITIAL_RATING}  for u in cursor.fetchall()}
+        
+        users = {
+            u['user_id']: {
+                "rating": INITIAL_RATING, 
+                "num_rounds": 0, 
+                "username": u["username"]
+            } for u in cursor.fetchall()
+        }
 
         cursor.execute(RUNS_QUERY)
         runs = cursor.fetchall()
@@ -111,15 +123,17 @@ def main():
         print(f"Processing Round {k}")
 
         # Only take the first run for each
-        round = [run["username"] for run in round]        
-        update(users, round)
+        round = [run["user_id"] for run in round]        
+        _update(users, round)
 
-    users = sorted([(v["rating"], k) for k, v in users.items()])
+    ratings = sorted([(v["rating"], v["num_rounds"], v["username"]) for k, v in users.items()])
+    for (rating, num_rounds, username) in ratings:
+        print(f"{username}: {rating} ({num_rounds})")
 
-    for (rating, username) in users:
-        print(f"{username}: {rating}")
-    
-    
+    # Update database
+    with conn.cursor(cursor=DictCursor) as cursor:
+        cursor.executemany(STORE_RATINGS_QUERY, [(k, v["rating"], v["num_rounds"]) for k, v in users.items()])
+        conn.commit()
 
 if __name__ == "__main__":
-    main()
+    calculate_ratings()
