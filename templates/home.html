@@ -2,9 +2,16 @@
 
 {% block head %}
 <script defer type=text/javascript src="{{url_for('static', filename='js/home.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script> 
+<style>
+    [v-cloak] { display: none }
+</style>
 {% endblock %}
 
 {% block content %}
+
+<div id="app">
+
     <h3>Welcome to Wikipedia Speedruns!</h3>
 
         <p><strong>New Prompts Out!</strong></p>
@@ -22,20 +29,47 @@
     <p>Click <a href="/latest">here</a> to try the latest prompt, starts immediately after click!</p>
     <p>Click <a href="/random">here</a> to try a random prompt, starts immediately after click!</p>
     
-    <p>Here are links to all available public prompts:</p>
-    <table id="publicPrompts">
+    <p>Here are links to all available prompts:</p>
+    <table class="table">
+        <thead>
+            <th scope="col">Prompt #</th>
+            <th scope="col">Starting Article</th>
+        </thead>
+        <tbody id="publicPrompts">
+            <tr v-for="prompt in prompts" v-cloak>
+                <td><a v-bind:href="'/play/' + prompt.prompt_id">[[prompt.prompt_id]]</a></td>
+                <td>[[prompt.start]]</td>
+            </tr>
+        </tbody>
     </table>
 
-    <p>
-        {% if username %}
-        Here is the listed of rated prompts.
-        {% else %}
-        Login to see rated prompts.
-        {% endif %}
-    </p>
-
-    <table id="ratedPrompts">
-
+    <table class="table" style="display: none" id="ratedPrompts">
+        <thead>
+            <th>Prompt #</th>
+            <th>Starting Article</th>
+        </thead>
     </table>
+
+
+    <p><strong> Top 25 players: </strong> (Note rating system is still experimental) </p>
+
+    <table class="table">
+        <thead>
+            <th>#</th>
+            <th>Username</th> 
+            <th>Rating</th> 
+        </thead>
+        <tbody>
+            <tr v-for="(user, index) in topUsers" v-cloak>
+                <td>[[index + 1]]</td>
+                <td>[[user.username]]</td>
+                <td>[[user.rating]]</td>
+            </tr>
+        </tbody>
+    </table>
+
+
+
     <p style="margin-top:50px;">Created by <a href="https://danqian.net">Daniel Qian</a> and <a href="https://mliu59.github.io/">Miles Liu</a></p>
+</div>
 {% endblock %}
