@@ -5,8 +5,6 @@ async function getPromptsHome()
     // Defined in base.html based on template
     if (!user_id) {
         queryString = "?public=true"
-        ratedList.style="display: none"
-
     }
 
     const response = await fetch("/api/prompts" + queryString);
