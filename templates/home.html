@@ -30,45 +30,44 @@
     <p>Click <a href="/random">here</a> to try a random prompt, starts immediately after click!</p>
     
     <p>Here are links to all available prompts:</p>
-    <table class="table">
-        <thead>
-            <th scope="col">Prompt #</th>
-            <th scope="col">Starting Article</th>
-        </thead>
-        <tbody id="publicPrompts">
-            <tr v-for="prompt in prompts" v-cloak>
-                <td><a v-bind:href="'/play/' + prompt.prompt_id">[[prompt.prompt_id]]</a></td>
-                <td>[[prompt.start]]</td>
-            </tr>
-        </tbody>
-    </table>
 
-    <table class="table" style="display: none" id="ratedPrompts">
-        <thead>
-            <th>Prompt #</th>
-            <th>Starting Article</th>
-        </thead>
-    </table>
-
+    <div class="row justify-content-md-center">
+    <div class="col-6">
+            <table class="table table-hover">
+            <thead>
+                <th scope="col">Prompt #</th>
+                <th scope="col">Starting Article</th>
+            </thead>
+            <tbody id="publicPrompts">
+                <tr v-for="prompt in prompts" v-cloak>
+                    <td>[[prompt.prompt_id]] (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
+                    <td>[[prompt.start]]  </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    </div>
 
     <p><strong> Top 25 players: </strong> (Note rating system is still experimental) </p>
 
-    <table class="table">
-        <thead>
-            <th>#</th>
-            <th>Username</th> 
-            <th>Rating</th> 
-        </thead>
-        <tbody>
-            <tr v-for="(user, index) in topUsers" v-cloak>
-                <td>[[index + 1]]</td>
-                <td>[[user.username]]</td>
-                <td>[[user.rating]]</td>
-            </tr>
-        </tbody>
-    </table>
-
-
+    <div class="row justify-content-md-center">
+    <div class="col-6">
+        <table class="table">
+            <thead>
+                <th>#</th>
+                <th>Username</th> 
+                <th>Rating</th> 
+            </thead>
+            <tbody>
+                <tr v-for="(user, index) in topUsers" v-cloak>
+                    <td>[[index + 1]]</td>
+                    <td><a v-bind:href="'/profile/' + user.username">[[user.username]]</a></td>
+                    <td>[[user.rating]]</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    </div>
 
     <p style="margin-top:50px;">Created by <a href="https://danqian.net">Daniel Qian</a> and <a href="https://mliu59.github.io/">Miles Liu</a></p>
 </div>
