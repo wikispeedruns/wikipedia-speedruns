@@ -34,24 +34,25 @@ var vm = new Vue({
 
 function update_data(runs, user) {
             
-    vm.totalratedruns = runs.length;
-    vm.email = user[0]['email'];
-    if (user[0]['email_confirmed']) {
+    vm.totalratedruns = runs['total_prompts'];
+    vm.email = user['email'];
+    if (user['email_confirmed']) {
         vm.emailverified = "Yes";
     } else {
         vm.emailverified = "No";
     }
     
-    vm.user_name = user[0]['username'];
+    vm.user_name = user['username'];
 }
 
 async function get_data(usern) {
-    response = await fetch("/api/runs/user/" + usern);
+    
+    response = await fetch("/api/profiles/" + usern + "/totals");
     const runs = await response.json(); 
 
     console.log(runs);
 
-    response = await fetch("/api/users/get_user_data/" + usern);
+    response = await fetch("/api/profiles/" + usern);
     const user = await response.json(); 
 
     console.log(user);
