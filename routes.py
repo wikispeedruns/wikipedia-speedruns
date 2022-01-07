@@ -61,7 +61,7 @@ def get_login_page():
 
 @app.route('/profile/<username>', methods = ['GET'])
 def get_profile_page(username):
-    return render_with_user('profile.html', un=username)
+    return render_with_user('profile.html', profile_name=username)
 
 @app.route('/manage', methods=['GET'])
 @check_admin

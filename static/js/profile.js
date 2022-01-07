@@ -1,14 +1,4 @@
-var vm = new Vue({
-    el: '#app',
-    data: {
-        user_name: 'test',
-        skillrating:'1000',
-        totalratedruns:'20',
-        email:'test@123.org',
-        emailverified:'True',
-        profileage:'32 Days'
-    }
-});
+var vm;
 
 
 /*
@@ -35,7 +25,6 @@ var vm = new Vue({
 function update_data(runs, user) {
             
     vm.totalratedruns = runs['total_prompts'];
-    vm.email = user['email'];
     if (user['email_confirmed']) {
         vm.emailverified = "Yes";
     } else {
@@ -60,3 +49,17 @@ async function get_data(usern) {
     update_data(runs, user);
 }
 
+window.addEventListener("load", function() {
+    get_data(profile_name);
+
+    vm = new Vue({
+        el: '#app',
+        data: {
+            user_name: 'test',
+            skillrating:'1000',
+            totalratedruns:'20',
+            emailverified:'True',
+            profileage:'32 Days'
+        }
+    });
+});
