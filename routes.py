@@ -48,6 +48,7 @@ def get_latest_prompt():
 def get_register_page():
     return render_with_user('users/register.html')
 
+
 @app.route('/pending', methods=['GET'])
 def get_create_oauth_account_page():
     if ("pending_oauth_creation" in session):
@@ -95,3 +96,10 @@ def get_reset_request_page():
 @app.route('/reset/<id>/<token>', methods=['GET'])
 def get_reset_page(id, token):
     return render_template('users/reset_password.html', id=id, token=token)
+
+
+
+
+@app.route('/error', methods=['GET'])
+def get_gen_error_page():
+    return render_with_user('users/generic_error.html')
