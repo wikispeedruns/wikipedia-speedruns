@@ -21,5 +21,7 @@ export async function fetchJson(path, method='GET', body=null)
             }
         })
         return await response.json();
+
     }
+
 }

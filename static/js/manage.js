@@ -1,5 +1,28 @@
 import {fetchJson} from "./modules/fetch.js"
 
+Vue.component('prompt-item', {
+    // The todo-item component now accepts a
+    // "prop", which is like a custom attribute.
+    // This prop is called todo.
+    props: ['prompt'],
+
+    methods: {
+        async deletePrompt() {
+            const prompts = await fetch("/api/prompts/" + this.prompt.prompt_id, {method: "DELETE"});
+            this.$emit('change')
+        }
+    },
+
+    template: (`
+    <li>
+        <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}} -> {{prompt.end}} 
+        <button v-on:click="deletePrompt" type="button" class="btn btn-default">
+            <i class="bi bi-trash"></i>
+        </button>
+    </li>`
+    )
+})
+
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',

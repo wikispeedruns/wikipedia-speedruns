@@ -21,16 +21,32 @@
         <div class="col-sm-4"> <div class="card"> <div class="card-body">
            
             <h4> Unused: </h4>
-                
-            <p> [[unused]]  </p>          
+            
+            <ul>
+                <prompt-item
+                    v-for="p in unused"
+                    v-bind:prompt="p"
+                    v-bind:key="p.prompt_id"
+                    v-on:change="getPrompts"
+                >
+                </prompt-item>
+            </ul>
         </div></div></div>  
 
         <div class="col-sm-4"> <div class="card"> <div class="card-body">
            
             <h4> Public: </h4>
-        
-
-            <p> [[public]]  </p>          
+            
+            
+            <ul>
+                <prompt-item
+                    v-for="p in public"
+                    v-bind:prompt="p"
+                    v-bind:key="p.prompt_id"
+                    v-on:change="getPrompts"
+                >
+                </prompt-item>
+            </ul>
 
         </div></div></div>  
     </div>
