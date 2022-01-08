@@ -1,6 +1,8 @@
 from util.decorators import check_admin
 from flask import Flask, jsonify, request, Blueprint, session
+
 import json
+import datetime
 
 from db import get_db
 from pymysql.cursors import DictCursor
@@ -8,10 +10,10 @@ from pymysql.cursors import DictCursor
 prompt_api = Blueprint('prompts', __name__, url_prefix='/api/prompts')
 
 
+### Prompt Management Endpoints
 @prompt_api.post('/')
 @check_admin
 def create_prompt():
-    # TODO is this the best way to do this?
     query = "INSERT INTO prompts (start, end) VALUES (%s, %s);"
 
     start = request.json['start']
@@ -23,23 +25,79 @@ def create_prompt():
         db.commit()
         return "Prompt added!"
 
-    return "Error adding prompt"
+
+@prompt_api.delete('/<id>')
+@check_admin
+def delete_prompt(id):
+    query = "DELETE FROM prompts WHERE prompt_id=%s"
+
+    db = get_db()
+    with db.cursor() as cursor:
+        result = cursor.execute(query, (id))
+        db.commit()
+        return "Prompt deleted!"
 
 
-@prompt_api.get('')
-def get_all_prompts():
-    # TODO this should probably be paginated
-    query = "SELECT * FROM prompts"
+@prompt_api.patch('/<id>/type')
+@check_admin
+def set_prompt_type(id):
+    '''
+    Change whether a prompt is public, daily, or unsued
 
-    if (request.args.get("public") == "true"):
-        query += " WHERE public=TRUE"
+    Example json inputs
+    {
+        "type": "public"
+    }
+    ...
+    {
+        "type: "unused"
+    }
+    ...
+    {
+        "type": "daily"
+        "date": "2020-10-20"      // <---- ISO Date
+        "ranked": true
+    }
+
+    '''
+    query = "UPDATE prompts SET `type`=%s WHERE `prompt_id`=%s"
+    db = get_db()
+
+    prompt_type = request.json.get("type")
+
+    if prompt_type == "public" or prompt_type == "unused":
+
+        with db.cursor(cursor=DictCursor) as cursor:
+            res = cursor.execute(query, (prompt_type, id))
+            if (res == 0): return "Prompt not found", 404
+            db.commit()
+            return f"Changed prompt to {prompt_type}", 200
+
+    elif prompt_type == "daily":
+
+        try:
+            date = datetime.date.fromisoformat(request.json.get("date", "")) # "" to raise ValueError
+            ranked = request.json.get("ranked", False)
+        except (KeyError, ValueError):
+            return f"Invalid input", 400
+
+        daily_query = "REPLACE INTO daily_prompts (date, prompt_id, ranked)"
+
+        with db.cursor(cursor=DictCursor) as cursor:
+            res = cursor.execute(query, (prompt_type, id))
+            if (res == 0): return "Prompt not found", 404
+            cursor.execute(daily_query, (date, id, ranked))
+            db.commit()
+            return f"Changed prompt to {prompt_type} for {date} (ranked: {ranked}", 200
+
     else:
-        # user needs to be logged in to see ranked prompts
-        if ("user_id" not in session):
-            return "User account required to see this", 401
+        return "Invalid input", 400
 
-        if (request.args.get("public") == "false"):
-            query += " WHERE public=FALSE"
+
+### Prompt Search Endpoints
+@prompt_api.get('/public')
+def get_public_prompts():
+    query = "SELECT start FROM prompts WHERE type='PUBLIC'"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
@@ -47,6 +105,30 @@ def get_all_prompts():
         results = cursor.fetchall()
         return jsonify(results)
 
+
+@prompt_api.get('/daily')
+def get_daily_prompts():
+    query = """
+    SELECT prompt_id, start 
+    FROM prompts as p
+    JOIN prompts_daily as d ON p.prompt_id = d.prompt_id
+    WHERE type='DAILY' 
+        AND d.date <= CURDATE() 
+        AND d.date > CURDATE - %s;
+    """
+
+    # how many days to look back for daily prompts, defaults to 7
+    # TODO add more of these params
+    count = request.args.get('count', 7)
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (count, ))
+        results = cursor.fetchall()
+        return jsonify(results)
+
+
+### Specific prompt endpoints
 
 @prompt_api.get('/<id>')
 def get_prompt(id):
@@ -61,36 +143,8 @@ def get_prompt(id):
         if (not results["public"] and "user_id" not in session):
             return "User account required to see this", 401
 
-
         return jsonify(results)
 
-
-@prompt_api.patch('/<id>/changepublic')
-@check_admin
-def set_prompt_publicity(id):
-    '''
-    Change whether a prompt is public
-
-    Example json
-    {
-        "public": true
-    }
-    '''
-    query = "UPDATE prompts SET `public`=%s WHERE `prompt_id`=%s"
-
-    if ("public" not in request.json):
-        return "invalid request", 400
-
-    public = request.json["public"]
-
-    db = get_db()
-    with db.cursor(cursor=DictCursor) as cursor:
-        res = cursor.execute(query, (public, id))
-
-        if (res == 0): return "prompt not found", 404
-
-        db.commit()
-        return "Changed prompt to {}".format("public" if public else "ranked"), 200
 
 
 @prompt_api.get('/<id>/leaderboard/', defaults={'run_id' : None})

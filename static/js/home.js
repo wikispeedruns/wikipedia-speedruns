@@ -1,13 +1,6 @@
-async function getPromptsHome()
+async function getPromptsPublic()
 {
-    queryString = "";
-
-    // Defined in base.html based on template
-    if (!user_id) {
-        queryString = "?public=true"
-    }
-
-    const response = await fetch("/api/prompts" + queryString);
+    const response = await fetch("/api/prompts/public");
     const prompts = await response.json();
 
     return prompts;
@@ -32,6 +25,6 @@ var app = new Vue({
 
     created: async function() {
         this.topUsers = await getTopUsers();
-        this.prompts = await getPromptsHome();    
+        this.prompts = await getPromptsPublic(); 
     }
 })
