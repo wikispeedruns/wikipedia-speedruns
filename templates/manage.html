@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<script type=text/javascript src="{{url_for('static', filename='js/manage.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script> 
+<script type="module" src="{{url_for('static', filename='js/manage.js') }}"></script>
 {% endblock %}
     
 {% block content %}
-    <form id="newPrompt">
+<div id="app">    
+    <form id="newPrompt" v-on:submit.prevent="onSubmit">
         <label for="start">Start Article:</label>
         <input type="text" id="start" name="start">
         <label for="end">End Article:</label>
@@ -14,6 +16,34 @@
         <input type="submit" value="Submit">
     </form>
 
-    <ul id="prompts"></ul>
-    
+    <div class="row">
+
+        <div class="col-sm-4"> <div class="card"> <div class="card-body">
+           
+            <h4> Unused: </h4>
+                
+            <p> [[unused]]  </p>          
+        </div></div></div>  
+
+        <div class="col-sm-4"> <div class="card"> <div class="card-body">
+           
+            <h4> Public: </h4>
+        
+
+            <p> [[public]]  </p>          
+
+        </div></div></div>  
+    </div>
+
+    <div class="row">
+
+        <div class="col-sm-8"> <div class="card"> <div class="card-body">
+           
+            <h4> Prompts of the Day: </h4>
+            <p> [[daily]]  </p>          
+
+        </div></div></div>  
+    </div>        
+</div>
+
 {% endblock %}

@@ -95,6 +95,23 @@ def set_prompt_type(id):
 
 
 ### Prompt Search Endpoints
+@prompt_api.get('/all')
+@check_admin
+def get_all_prompts():
+    query = """
+    SELECT p.prompt_id, start, end, type, d.date, d.rated
+    FROM prompts AS p
+    LEFT JOIN daily_prompts as d ON p.prompt_id = d.prompt_id
+    """
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query)
+        results = cursor.fetchall()
+        return jsonify(results)
+
+
+
 @prompt_api.get('/public')
 def get_public_prompts():
     query = "SELECT prompt_id, start FROM prompts WHERE type='PUBLIC'"

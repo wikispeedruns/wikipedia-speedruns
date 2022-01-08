@@ -14,9 +14,8 @@
 
     <h3>Welcome to Wikipedia Speedruns!</h3>
 
-        <p><strong>New Prompts Out!</strong></p>
 
-    <p>Goal of this game is simple. Try to get to one wikipedia page to another as fast as possible by clicking on the links in the page. Once you finish each prompt, you will get a chance to submit your time to the leaderboard!</p>
+    <p>The goal of this game is simple. Try to get to one wikipedia page to another as fast as possible by clicking on the links in the page. </p>
     <p>A few simple rules apply:<br>
         <ul>
             <li>Any link shown on the page is fair game.</li>
@@ -26,26 +25,44 @@
         </ul>
     </p>
 
-    <p>Click <a href="/latest">here</a> to try the latest prompt, starts immediately after click!</p>
-    <p>Click <a href="/random">here</a> to try a random prompt, starts immediately after click!</p>
-    
-    <p>Here are links to all available prompts:</p>
 
+    <!-- Fix random to choose a public prompt <p>Click <a href="/random">here</a> to try a random prompt, starts immediately after click!</p> -->
+
+    
     <div class="row justify-content-md-center">
-    <div class="col-6">
-            <table class="table table-hover">
-            <thead>
-                <th scope="col">Prompt #</th>
-                <th scope="col">Starting Article</th>
-            </thead>
-            <tbody id="publicPrompts">
-                <tr v-for="prompt in prompts" v-cloak>
-                    <td>[[prompt.prompt_id]] (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
-                    <td>[[prompt.start]]  </td>
-                </tr>
-            </tbody>
-        </table>
+
+    <div class="col-sm-6">
+        <div class="card">
+            <div class="card-body">
+       
+                <h4> Prompts of the Day: </h4>
+            
+
+        
+            </div>  
+        </div>
     </div>
+    <div class="col-sm-6">
+        <div class="card">
+            <div class="card-body">
+                <h4>Try some prompts:</h4>
+
+                <table class="table table-hover">
+                <thead>
+                    <th scope="col">Prompt #</th>
+                    <th scope="col">Starting Article</th>
+                </thead>
+                <tbody id="publicPrompts">
+                    <tr v-for="prompt in prompts" v-cloak>
+                        <td>[[prompt.prompt_id]] (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
+                        <td>[[prompt.start]]  </td>
+                    </tr>
+                </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     </div>
 
     <p><strong> Top 25 players: </strong> (Note rating system is still experimental) </p>
