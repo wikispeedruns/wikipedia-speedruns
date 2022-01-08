@@ -80,22 +80,3 @@ def get_all_runs():
         results = cursor.fetchall()
         return jsonify(results)
     
-    
-@run_api.get('/user/<id>')
-def get_user_runs(id):
-    # TODO this could probably return details as well
-    query = ("""SELECT * FROM runs INNER JOIN users ON runs.user_id = users.user_id WHERE username=%s""")
-
-    db = get_db()
-    with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query, (id,))
-        results = cursor.fetchall()
-        
-        for run in results:
-            run['path'] = json.loads(run['path'])
-
-        #print(results)
-
-        return jsonify(results)
-
-
