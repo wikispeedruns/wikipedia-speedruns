@@ -1,5 +1,5 @@
 from pymysql.cursors import DictCursor
-from flask import session, request, abort, Blueprint, jsonify
+from flask import session, request, abort, Blueprint, jsonify, current_app
 
 import random
 
@@ -8,10 +8,15 @@ from pymysql.cursors import DictCursor
 
 import time
 
+from util.timeout import timer
+
+
+#from multiprocessing import Pool, TimeoutError
+
 scraper_api = Blueprint("scraper", __name__, url_prefix="/api/scraper")
 
-
-scraperdbname = "testdb"
+scraper_timeout = 5
+scraperdbname = "scraper_graph"
 articletable = scraperdbname + ".articleid"
 edgetable = scraperdbname + ".edgeidarticleid"
 
@@ -22,14 +27,30 @@ def get_path():
     start = request.json['start']
     end = request.json['end']
     
+    
     try:
-        output = findPaths(start, end)
-    except ValueError as err:
-        print(err)
+        output = timer(scraper_timeout, findPaths, start, end)
+    except Exception as err:
+        print(f"ERROR {str(err)}")
         return str(err), 500
     
+    """
+    pool = Pool(processes=1)
+    result = pool.apply_async(findPaths, (start, end))
+    
+    try:
+        output = result.get(timeout=scraper_timeout)
+    except TimeoutError:
+        msg = f"Scraper search exceeded {scraper_timeout} seconds"
+        print(msg)
+        return msg, 500
+    except Exception as err:
+        print(f"ERROR {str(err)}")
+        return str(err), 500
+    """
+    
     return jsonify(output)
-
+    
 
 @scraper_api.post('/gen_prompts/')
 def get_prompts():
@@ -321,6 +342,7 @@ def convertPathToNames(idpath):
 
 def findPaths(startTitle, endTitle):
     
+      
     start_time = time.time()
     
     startID = int(convertToID(startTitle))
