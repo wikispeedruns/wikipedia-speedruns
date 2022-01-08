@@ -19,7 +19,7 @@ def get_top_ratings():
     SELECT users.username, ratings.rating FROM ratings
     JOIN users ON users.user_id = ratings.user_id
     WHERE ratings.num_rounds > 0
-    ORDER by ratings.rating
+    ORDER by ratings.rating DESC
     LIMIT 20
     '''
 
