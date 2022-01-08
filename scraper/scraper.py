@@ -5,12 +5,13 @@ import random
 
 from db import get_db
 from pymysql.cursors import DictCursor
+
 import time
 
 scraper_api = Blueprint("scraper", __name__, url_prefix="/api/scraper")
 
 
-scraperdbname = "scraper_graph"
+scraperdbname = "testdb"
 articletable = scraperdbname + ".articleid"
 edgetable = scraperdbname + ".edgeidarticleid"
 
@@ -21,8 +22,12 @@ def get_path():
     start = request.json['start']
     end = request.json['end']
     
-    output = findPaths(start, end)
-
+    try:
+        output = findPaths(start, end)
+    except ValueError as err:
+        print(err)
+        return str(err), 500
+    
     return jsonify(output)
 
 
@@ -33,7 +38,11 @@ def get_prompts():
     d = 25
     thresholdStart = 200
     
-    paths = generatePrompts(thresholdStart=thresholdStart, thresholdEnd=thresholdStart, n=n, dist=d)
+    try:
+        paths = generatePrompts(thresholdStart=thresholdStart, thresholdEnd=thresholdStart, n=n, dist=d)
+    except Exception as err:
+        print(err)
+        return str(err), 500
     
     outputArr = []
     
@@ -286,6 +295,8 @@ def convertToID(name):
     
     if len(output)>0:
         return output[0]['articleID']
+    else:
+        raise ValueError(f"Could not find article with name: {name}")
     
     
 def convertToArticleName(id):
@@ -298,6 +309,8 @@ def convertToArticleName(id):
     
     if len(output)>0:
         return output[0]['name']
+    else:
+        raise ValueError(f"Could not find article with id: {id}")
     
 def convertPathToNames(idpath):
     output = []
@@ -312,7 +325,8 @@ def findPaths(startTitle, endTitle):
     
     startID = int(convertToID(startTitle))
     endID = int(convertToID(endTitle))
-
+    
+    
     #try:
     paths = bidirectionalSearcher(startID, endID)
     

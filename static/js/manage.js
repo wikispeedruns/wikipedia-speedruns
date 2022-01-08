@@ -109,6 +109,7 @@ async function getPath(start, end) {
 
     } catch(e) {
         console.log(e);
+        return "500 ERROR: Path not found"
     }
 }
 
