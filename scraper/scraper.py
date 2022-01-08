@@ -10,6 +10,9 @@ import time
 scraper_api = Blueprint("scraper", __name__, url_prefix="/api/scraper")
 
 
+scraperdbname = "scraper_graph"
+articletable = scraperdbname + ".articleid"
+edgetable = scraperdbname + ".edgeidarticleid"
 
 
 @scraper_api.post('/path/')
@@ -42,9 +45,6 @@ def get_prompts():
 
 
 
-scraperdbname = "scraper_graph"
-articletable = scraperdbname + ".articleid"
-edgetable = scraperdbname + ".edgeidarticleid"
 
 
 def batchQuery(queryString, arr, cur):
@@ -110,8 +110,10 @@ def bidirectionalSearcher(start, end):
     
     while True:
         a = forwardBFS(start, end, forwardVisited, reverseVisited, forwardQueue)
-        
-        b = reverseBFS(start, end, forwardVisited, reverseVisited, reverseQueue)
+
+        b = None
+        if a != end:
+            b = reverseBFS(start, end, forwardVisited, reverseVisited, reverseQueue)
         
         if a or b:
             
@@ -122,7 +124,7 @@ def bidirectionalSearcher(start, end):
                     a = None
                 else:
                     b = None
-                
+                    
             if a:
                 return [traceBidirectionalPath(a, start, end, forwardVisited, reverseVisited)]
             else:
@@ -169,6 +171,13 @@ def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
         
             link = linkTuple[0]
             edgeID = linkTuple[1]
+            
+            
+            if link == end:
+                print("Found end in forward search")
+                forwardVisited[link] = (title, forwardVisited[title][1] + 1, edgeID)
+                return link
+            
         
             if link in reverseVisited:
                 forwardVisited[link] = (title, forwardVisited[title][1] + 1, edgeID)
@@ -219,6 +228,12 @@ def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
         
             link = linkTuple[0]
             edgeID = linkTuple[1]
+            
+            
+            if link == start:
+                print("Found start in reverse search")
+                reverseVisited[link] = (title, reverseVisited[title][1] + 1, edgeID)
+                return link
             
             if link in forwardVisited:
                 reverseVisited[link] = (title, reverseVisited[title][1] + 1, edgeID)
@@ -301,6 +316,8 @@ def findPaths(startTitle, endTitle):
     #try:
     paths = bidirectionalSearcher(startID, endID)
     
+    print(paths)
+    
     for path in paths:
         print("Path:")
         print(path[0])
@@ -310,6 +327,8 @@ def findPaths(startTitle, endTitle):
     output = {"Articles":convertPathToNames(paths[0][0]),
               "ArticlesIDs":paths[0][0],
               "EdgeIDs": paths[0][1]}
+    
+    print(f"Search duration: {time.time() - start_time}")
     
     
     return output
