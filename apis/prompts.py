@@ -97,7 +97,7 @@ def set_prompt_type(id):
 ### Prompt Search Endpoints
 @prompt_api.get('/public')
 def get_public_prompts():
-    query = "SELECT start FROM prompts WHERE type='PUBLIC'"
+    query = "SELECT prompt_id, start FROM prompts WHERE type='PUBLIC'"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
@@ -132,18 +132,33 @@ def get_daily_prompts():
 
 @prompt_api.get('/<id>')
 def get_prompt(id):
-    # TODO this could probably return details as well
-    query = "SELECT * FROM prompts WHERE prompt_id=%s"
+    query = "SELECT prompt_id, start, end, type FROM prompts WHERE prompt_id=%s"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (id,))
-        results = cursor.fetchone()
+        prompt = cursor.fetchone()
 
-        if (not results["public"] and "user_id" not in session):
-            return "User account required to see this", 401
+        # Check permissions for users
+        if (not session.get("admin")):
+            if (prompt["type"] == "unused"):
+                return "You do not have permission to view this prompt", 401
 
-        return jsonify(results)
+            if (prompt["type"] == "daily"):
+
+                # TODO move this logic into separate logic that maybe returns a dict?
+                daily_query = "SELECT date, ranked FROM daily_prompts WHERE prompt_id=%s"
+                cursor.execute(query, (id,))                
+                daily_prompt = cursor.fetchone()
+
+                today = datetime.date.today()
+                if (today < daily_prompt["date"]):
+                    return "This prompt is not avaiable yet", 401
+
+                if ("user_id" not in session and daily_prompt["ranked"] and daily_prompt["date"] == today):
+                    return "Login to see this prompt", 401
+                    
+        return jsonify(prompt)
 
 
 
