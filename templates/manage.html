@@ -7,7 +7,7 @@
     
 {% block content %}
 <div id="app">    
-    <form id="newPrompt" v-on:submit.prevent="onSubmit">
+    <form id="newPrompt" v-on:submit.prevent="newPrompt">
         <label for="start">Start Article:</label>
         <input type="text" id="start" name="start">
         <label for="end">End Article:</label>
@@ -18,7 +18,7 @@
 
     <div class="row">
 
-        <div class="col-sm-4"> <div class="card"> <div class="card-body">
+        <div class="col-sm-6"> <div class="card"> <div class="card-body">
            
             <h4> Unused: </h4>
             
@@ -33,11 +33,14 @@
             </ul>
         </div></div></div>  
 
-        <div class="col-sm-4"> <div class="card"> <div class="card-body">
-           
+        <div class="col-sm-6"> <div class="card"> <div class="card-body">
+
             <h4> Public: </h4>
-            
-            
+            <form v-on:submit.prevent="makePublic">
+                <p>Move prompt # to public</p>
+                <input v-model="toMakePublic">
+                <button type="submit">Submit</button>
+            </form>
             <ul>
                 <prompt-item
                     v-for="p in public"
@@ -52,11 +55,34 @@
     </div>
 
     <div class="row">
+        <div class="col-sm-12"> <div class="card"> <div class="card-body">
 
-        <div class="col-sm-8"> <div class="card"> <div class="card-body">
-           
             <h4> Prompts of the Day: </h4>
-            <p> [[daily]]  </p>          
+           
+            <table class="table table-bordered" style="table-layout: fixed;">
+                <thead>
+                    <th>Su</th>
+                    <th>M</th>
+                    <th>T</th>
+                    <th>W</th>
+                    <th>Th</th>
+                    <th>F</th>
+                    <th>Sa</th>
+                </thead>
+
+                <tbody style="font-size:x-small">
+                    <tr v-for="week in weeks">
+                        <td v-for="day in week">
+                            <daily-item 
+                                v-bind:day="day"
+                                v-bind:key="day.dateIso"
+                                v-on:change="getPrompts"
+                            >
+                            </daily-item>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
         </div></div></div>  
     </div>        

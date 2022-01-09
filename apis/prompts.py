@@ -56,7 +56,7 @@ def set_prompt_type(id):
     {
         "type": "daily"
         "date": "2020-10-20"      // <---- ISO Date
-        "ranked": true
+        "rated": true
     }
 
     '''
@@ -69,7 +69,7 @@ def set_prompt_type(id):
 
         with db.cursor(cursor=DictCursor) as cursor:
             res = cursor.execute(query, (prompt_type, id))
-            if (res == 0): return "Prompt not found", 404
+            if (res == 0): return "Prompt not found", 404  # TODO this also is true if it's not changed
             db.commit()
             return f"Changed prompt to {prompt_type}", 200
 
@@ -77,18 +77,20 @@ def set_prompt_type(id):
 
         try:
             date = datetime.date.fromisoformat(request.json.get("date", "")) # "" to raise ValueError
-            ranked = request.json.get("ranked", False)
-        except (KeyError, ValueError):
+            rated = request.json.get("rated", False)
+        except (KeyError, ValueError) as e:
             return f"Invalid input", 400
 
-        daily_query = "REPLACE INTO daily_prompts (date, prompt_id, ranked)"
+        daily_query = "REPLACE INTO daily_prompts (date, prompt_id, rated) VALUES (%s, %s, %s)"
 
         with db.cursor(cursor=DictCursor) as cursor:
             res = cursor.execute(query, (prompt_type, id))
-            if (res == 0): return "Prompt not found", 404
-            cursor.execute(daily_query, (date, id, ranked))
+            if (res == 0): 
+                return "Prompt not found", 404 # TODO this also is true if it's not changed
+ 
+            cursor.execute(daily_query, (date, id, rated))
             db.commit()
-            return f"Changed prompt to {prompt_type} for {date} (ranked: {ranked}", 200
+            return f"Changed prompt to {prompt_type} for {date} (rated: {rated}", 200
 
     else:
         return "Invalid input", 400
@@ -108,6 +110,10 @@ def get_all_prompts():
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query)
         results = cursor.fetchall()
+
+        for p in results:
+            if (p["date"]): p["date"] = p["date"].isoformat()
+
         return jsonify(results)
 
 

@@ -1,9 +1,7 @@
-import {fetchJson} from "./modules/fetch.js"
+import {fetchJson} from "./modules/fetch.js";
+import {dateToIso} from "./modules/date.js";
 
 Vue.component('prompt-item', {
-    // The todo-item component now accepts a
-    // "prop", which is like a custom attribute.
-    // This prop is called todo.
     props: ['prompt'],
 
     methods: {
@@ -21,7 +19,69 @@ Vue.component('prompt-item', {
         </button>
     </li>`
     )
+});
+
+
+// TODO maybe these should load the date stuff themselves (At least on update)
+Vue.component('daily-item', {
+    props: ['day'],
+
+    methods: {
+        async moveToDay() {
+            const response = await fetchJson("/api/prompts/" + this.promptToAdd + "/type", "PATCH", {
+                "type": "daily",
+                "date": this.day.dateIso,
+                "ranked": false,
+            });
+
+            if (response.status != 200) {
+                alert(await response.text());
+            } else {
+                this.$emit('change')  // TODO reload just this box instead of triggering a full realead
+            }
+        },
+        dateToIso,
+    },
+
+    data: function () {
+        return {
+            promptToAdd: 0
+        }
+    },
+
+    template: (`
+    <div>
+        <strong v-if="day.dateIso === dateToIso(new Date())">
+            <p>{{day.dateIso.substring(5)}}</p>
+        </strong>
+        <p v-else>{{day.dateIso.substring(5)}}</p>
+
+
+        <ul class="ps-3 my-0">
+            <prompt-item 
+                v-for="p in day.prompts"
+                v-bind:prompt="p"
+                v-bind:key="p.prompt_id"
+            >
+            </prompt-item>
+        </ul>
+
+        <form class="form-inline" v-on:submit.prevent="moveToDay">
+            <div class="input-group input-group-sm mb-2">
+                <input type="number" class="form-control" v-model="promptToAdd">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-dark"> 
+                        <i class="bi bi-arrow-right-square"></i> 
+                    </button>
+                </div>
+            </div>
+        </form>
+
+
+    </div>
+    `)
 })
+
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
@@ -29,7 +89,9 @@ var app = new Vue({
     data: {
         unused: [],
         public: [],
-        daily: [],
+        weeks: [],
+
+        toMakePublic: 0
     },
 
     created: async function() {
@@ -38,16 +100,67 @@ var app = new Vue({
     
     methods: {
         async getPrompts() {
-            const prompts = await fetchJson("/api/prompts/all");
+            const prompts = await (await fetchJson("/api/prompts/all")).json();
             
-            this.unused = prompts.filter(p => p["type"] === "unused")
-            this.public = prompts.filter(p => p["type"] === "public")
-            this.daily = prompts.filter(p => p["type"] === "daily")
+            this.unused = prompts.filter(p => p["type"] === "unused");
+            this.public = prompts.filter(p => p["type"] === "public");
+            
+            
+            let daily = prompts.filter(p =>  p["type"] === "daily");
+            
+            let daysToPrompts = {};
+
+            daily.forEach((p) => {
+                if (!daysToPrompts[p["date"]]) {
+                    daysToPrompts[p["date"]] = [];
+                }
+                daysToPrompts[p["date"]].push(p);
+            });
+
+            console.log(daysToPrompts)
+
+            let today = new Date();
+            let cur = new Date(today);
+
+            // Change cur to first day of this week
+            cur.setDate(cur.getDate() - cur.getDay());
+
+            this.weeks = [];
+            for (let i = 0; i < 3; i++) {
+                this.weeks.push([]);
+                for (let j = 0; j < 7; j++) {
+
+                    const day =  new Date(cur);
+                    this.weeks[i].push( {
+                        "date": day,
+                        "dateIso": dateToIso(day),
+                        "prompts": daysToPrompts[dateToIso(day)]
+                    });
+
+                    console.log(daysToPrompts[dateToIso(day)])
+                    cur.setDate(cur.getDate() + 1);
+                }
+            }
         },
 
-        async onsubmit(event) {
+
+        async makePublic() {
+            const response = await fetchJson("/api/prompts/" + this.toMakePublic + "/type", "PATCH", {
+                "type": "public"
+            });
+
+            if (response.status != 200) {
+                alert(await response.text());
+            } else {
+                this.getPrompts();
+            }
+
+        },
+
+
+        async newPrompt(event) {
         
-            reqBody = {};
+            let reqBody = {};
         
             const resp = await fetch(
                 `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("start").value}`,
@@ -79,12 +192,11 @@ var app = new Vue({
                     body: JSON.stringify(reqBody)
                 })
         
-                console.log(response);
             } catch(e) {
                 console.log(e);
             }
         
-            getPrompts();
+            this.getPrompts();
         }
         
 
