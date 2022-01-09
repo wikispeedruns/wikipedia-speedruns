@@ -46,7 +46,7 @@
                     v-for="p in public"
                     v-bind:prompt="p"
                     v-bind:key="p.prompt_id"
-                    v-on:change="getPrompts"
+                    v-on:delete-prompt="getPrompts"
                 >
                 </prompt-item>
             </ul>
@@ -76,7 +76,8 @@
                             <daily-item 
                                 v-bind:day="day"
                                 v-bind:key="day.dateIso"
-                                v-on:change="getPrompts"
+                                v-on:delete-prompt="getPrompts"
+                                v-on:move-prompt="getPrompts"
                             >
                             </daily-item>
                         </td>

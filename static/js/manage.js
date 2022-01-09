@@ -6,8 +6,10 @@ Vue.component('prompt-item', {
 
     methods: {
         async deletePrompt() {
-            const prompts = await fetch("/api/prompts/" + this.prompt.prompt_id, {method: "DELETE"});
-            this.$emit('change')
+            const resp = await fetchJson("/api/prompts/" + this.prompt.prompt_id, "DELETE");
+            
+            if (resp.status == 200) this.$emit('delete-prompt')
+            else alert(await resp.text())
         }
     },
 
@@ -37,7 +39,7 @@ Vue.component('daily-item', {
             if (response.status != 200) {
                 alert(await response.text());
             } else {
-                this.$emit('change')  // TODO reload just this box instead of triggering a full realead
+                this.$emit('move-prompt')  // TODO reload just this box instead of triggering a full realead
             }
         },
         dateToIso,
@@ -62,13 +64,14 @@ Vue.component('daily-item', {
                 v-for="p in day.prompts"
                 v-bind:prompt="p"
                 v-bind:key="p.prompt_id"
+                v-on="$listeners"
             >
             </prompt-item>
         </ul>
 
         <form class="form-inline" v-on:submit.prevent="moveToDay">
             <div class="input-group input-group-sm mb-2">
-                <input type="number" class="form-control" v-model="promptToAdd">
+                <input class="form-control" v-model="promptToAdd">
                 <div class="input-group-append">
                     <button type="submit" class="btn btn-dark"> 
                         <i class="bi bi-arrow-right-square"></i> 
@@ -117,7 +120,6 @@ var app = new Vue({
                 daysToPrompts[p["date"]].push(p);
             });
 
-            console.log(daysToPrompts)
 
             let today = new Date();
             let cur = new Date(today);
@@ -134,10 +136,9 @@ var app = new Vue({
                     this.weeks[i].push( {
                         "date": day,
                         "dateIso": dateToIso(day),
-                        "prompts": daysToPrompts[dateToIso(day)]
+                        "prompts": daysToPrompts[dateToIso(day)] || []
                     });
 
-                    console.log(daysToPrompts[dateToIso(day)])
                     cur.setDate(cur.getDate() + 1);
                 }
             }

@@ -1,3 +1,4 @@
+import pymysql
 from util.decorators import check_admin
 from flask import Flask, jsonify, request, Blueprint, session
 
@@ -33,9 +34,13 @@ def delete_prompt(id):
 
     db = get_db()
     with db.cursor() as cursor:
-        result = cursor.execute(query, (id))
-        db.commit()
-        return "Prompt deleted!"
+        try:
+            cursor.execute(query, (id))
+            db.commit()
+            return "Prompt deleted!", 200
+        
+        except pymysql.IntegrityError:
+            return "Integrity error, prompt may already have run(s)", 400
 
 
 @prompt_api.patch('/<id>/type')
