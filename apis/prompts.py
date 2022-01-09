@@ -89,10 +89,9 @@ def set_prompt_type(id):
         daily_query = "REPLACE INTO daily_prompts (date, prompt_id, rated) VALUES (%s, %s, %s)"
 
         with db.cursor(cursor=DictCursor) as cursor:
-            res = cursor.execute(query, (prompt_type, id))
-            if (res == 0): 
-                return "Prompt not found", 404 # TODO this also is true if it's not changed
- 
+
+            # TODO Error check for non existent prompt
+            res = cursor.execute(query, (prompt_type, id)) 
             cursor.execute(daily_query, (date, id, rated))
             db.commit()
             return f"Changed prompt to {prompt_type} for {date} (rated: {rated}", 200

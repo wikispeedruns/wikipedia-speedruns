@@ -4,18 +4,38 @@ import {dateToIso} from "./modules/date.js";
 Vue.component('prompt-item', {
     props: ['prompt'],
 
+    data: function() {
+        return {
+            ratedChecked: this.prompt.rated
+        }
+    },
+
     methods: {
+
         async deletePrompt() {
             const resp = await fetchJson("/api/prompts/" + this.prompt.prompt_id, "DELETE");
             
             if (resp.status == 200) this.$emit('delete-prompt')
             else alert(await resp.text())
+        },
+
+        async changeRated() {
+            const resp = await fetchJson("/api/prompts/" + this.prompt.prompt_id + "/type", "PATCH", {
+                "type": "daily",
+                "date": this.prompt.date,
+                "rated": this.ratedChecked,
+            });
+
+            if (resp.status != 200) alert(await resp.text())
         }
     },
 
     template: (`
     <li>
         <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}} -> {{prompt.end}} 
+
+        <input type="checkbox" v-if="prompt.type==='daily'" v-model="ratedChecked" v-on:change="changeRated">
+
         <button v-on:click="deletePrompt" type="button" class="btn btn-default">
             <i class="bi bi-trash"></i>
         </button>
@@ -33,7 +53,7 @@ Vue.component('daily-item', {
             const response = await fetchJson("/api/prompts/" + this.promptToAdd + "/type", "PATCH", {
                 "type": "daily",
                 "date": this.day.dateIso,
-                "ranked": false,
+                "rated": false,
             });
 
             if (response.status != 200) {
