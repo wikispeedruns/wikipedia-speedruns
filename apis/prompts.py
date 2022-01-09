@@ -137,17 +137,17 @@ def get_public_prompts():
 @prompt_api.get('/daily')
 def get_daily_prompts():
     query = """
-    SELECT prompt_id, start 
+    SELECT p.prompt_id, start, d.date, d.rated 
     FROM prompts as p
-    JOIN prompts_daily as d ON p.prompt_id = d.prompt_id
+    JOIN daily_prompts as d ON p.prompt_id = d.prompt_id
     WHERE type='DAILY' 
         AND d.date <= CURDATE() 
-        AND d.date > CURDATE - %s;
+        AND d.date > CURDATE() - %s;
     """
 
-    # how many days to look back for daily prompts, defaults to 7
+    # how many days to look back for daily prompts, defaults to 1
     # TODO add more of these params
-    count = request.args.get('count', 7)
+    count = request.args.get('count', 1)
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
@@ -175,16 +175,16 @@ def get_prompt(id):
             if (prompt["type"] == "daily"):
 
                 # TODO move this logic into separate logic that maybe returns a dict?
-                daily_query = "SELECT date, ranked FROM daily_prompts WHERE prompt_id=%s"
-                cursor.execute(query, (id,))                
+                daily_query = "SELECT date, rated FROM daily_prompts WHERE prompt_id=%s"
+                cursor.execute(daily_query, (id,))                
                 daily_prompt = cursor.fetchone()
 
                 today = datetime.date.today()
                 if (today < daily_prompt["date"]):
                     return "This prompt is not avaiable yet", 401
 
-                if ("user_id" not in session and daily_prompt["ranked"] and daily_prompt["date"] == today):
-                    return "Login to see this prompt", 401
+                if ("user_id" not in session and daily_prompt["rated"] and daily_prompt["date"] == today):
+                    return "Login to see this rated prompt", 401
                     
         return jsonify(prompt)
 
