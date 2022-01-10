@@ -117,7 +117,7 @@ async function finish() {
             body: JSON.stringify(reqBody)
         })
 
-        window.location.href = "/prompt/" + prompt_id + "?run_id=" + run_id;
+        window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
 
     } catch(e) {
         console.log(e);
