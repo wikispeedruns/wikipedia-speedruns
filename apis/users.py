@@ -14,7 +14,6 @@ from tokens import (
     verify_reset_token, 
     create_confirm_token, 
     verify_confirm_token
-
 )
 
 from pymysql.cursors import DictCursor

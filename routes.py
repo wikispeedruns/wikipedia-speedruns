@@ -18,6 +18,10 @@ def render_with_user(template, **kwargs):
 def get_home_page():    
     return render_with_user('home.html')
 
+@app.route('/about', methods=['GET'])
+def get_about_page():    
+    return render_with_user('about.html')
+
 @app.route('/random', methods=['GET'])
 def get_random_prompt():
     # TODO this is insanely inefficient, it needs to sort the whole set of public prompts!

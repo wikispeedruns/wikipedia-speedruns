@@ -99,7 +99,7 @@ async function finish() {
     clearInterval(timerInterval);
     document.getElementById("timer").innerHTML="";
 
-    // Prevent prompt
+    // Prevent are you sure you want to leave prompt
     window.onbeforeunload = null;
 
     const reqBody = {
@@ -302,8 +302,17 @@ function checkForFind(e) {
 
 window.addEventListener("load", async function() {
     const response = await fetch("/api/prompts/" + prompt_id);
-    const prompt = await response.json();
 
+    if (response.status != 200) {
+        const error = await response.text();
+        this.alert(error)
+        // Prevent are your sure you want to leave prompt
+        window.onbeforeunload = null;
+        window.location.href = "/"   // TODO error page
+
+    }
+
+    const prompt = await response.json();
     const article = prompt["start"];
 
     goalPage = prompt["end"];

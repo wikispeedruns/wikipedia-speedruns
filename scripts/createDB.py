@@ -26,16 +26,46 @@ CREATE TABLE IF NOT EXISTS `users` (
 );
 ''')
 
+# TODO: Add info for better calculations
+TABLES['ratings']=(
+'''
+CREATE TABLE IF NOT EXISTS `ratings` (
+    `user_id` INT NOT NULL,
+    `rating` INT NOT NULL,
+    `num_rounds` INT NOT NULL,
+    PRIMARY KEY (`user_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
+);
+'''
+)
+
+
+# `type` column defines in what contexts the prompt is available
 TABLES['prompts']=(
 '''
 CREATE TABLE IF NOT EXISTS `prompts` (
     `prompt_id` INT NOT NULL AUTO_INCREMENT,
     `start` VARCHAR(255) NOT NULL,
     `end` VARCHAR(255) NOT NULL,
-    `public` BOOLEAN NOT NULL DEFAULT 0,
+    `type` ENUM ('unused', 'public', 'daily') NOT NULL DEFAULT 'unused',
     PRIMARY KEY (`prompt_id`)
 );
 ''')
+
+
+# Prompts of the day
+TABLES['daily_prompts']=(
+'''
+CREATE TABLE IF NOT EXISTS `daily_prompts` (
+    `date` DATE NOT NULL,
+    `prompt_id` INT NOT NULL,
+    `rated` BOOLEAN NOT NULL DEFAULT 0,
+    PRIMARY KEY (`date`, `prompt_id`),
+    FOREIGN KEY (`prompt_id`) REFERENCES `prompts`(`prompt_id`) ON DELETE CASCADE
+);
+'''
+)
+
 
 TABLES['runs']=(
 '''
