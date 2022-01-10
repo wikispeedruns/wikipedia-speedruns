@@ -376,10 +376,9 @@ def reset_password():
     db = get_db()
     with db.cursor() as cursor:
         # Query for user and use password to decode token
-        result = cursor.execute(get_query, (id, ))
 
-        if (result == 0):
-            return "Invalid id", 400
+        print(cursor.mogrify(get_query, (id, )))
+        cursor.execute(get_query, (id, ))
 
         (old_hash, ) = cursor.fetchone()
 
