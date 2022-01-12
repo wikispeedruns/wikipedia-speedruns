@@ -93,3 +93,22 @@ a:hover {
     position:relative;
     visibility:hidden;
 }
+
+.HUD {
+    position:fixed;
+    z-index: 1000000;
+    width:10%;
+    margin: 20px 20px;
+    left: 0;
+    top: 0;
+}
+
+.guideblockhud {
+    text-align: left !important;
+    margin-left: 0 !important;
+    font-size: 20px !important;
+}
+
+.mw-parser-output {
+    padding-bottom: 50px !important;
+}

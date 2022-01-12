@@ -52,6 +52,7 @@ async function loadPage(page) {
 
     document.getElementById("wikipedia-frame").innerHTML = body["parse"]["text"]["*"]
     document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
+    
 
     // Start timer if we are at the start
     if (path.length == 0) {
@@ -198,7 +199,7 @@ function formatStr(string) {
 
 function displayTimer() {
     seconds = (Date.now() - startTime) / 1000;
-    document.getElementById("timer").innerHTML = seconds + "s";
+    document.getElementById("timer").innerHTML = "Elapsed Time:<br/><strong>"+seconds + "s</strong>";
 }
 
 function getRandTip() {
@@ -271,12 +272,17 @@ function countdownOnLoad(start, end) {
             clearInterval(x);
             mainBlock.style.display = "block";
             countdownBlock.style.display = "none";
-            guideBlock.innerHTML = "<strong>" + start + "</strong> --> <strong>" + end + "</strong>";
+            guideBlock.innerHTML = "<p>Start Article:<br/><strong>" + start + "</strong></p><p>End Article:<br/><strong>" + end + "</strong></p>";
             timerBlock.style.display = "block";
             tipsBlock.style.display = "none";
             gifBlock.style.display = "none";
             startTime = Date.now();
             ctrlfwarnings = true;
+
+            //Temporary implementation
+            var HUDblock = document.getElementById("HUD");
+            HUDblock.classList.add("HUD");
+            guideBlock.classList.add("guideblockhud");
 
         }
         if (distance < 700 && distance > 610) {
