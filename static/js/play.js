@@ -52,6 +52,7 @@ async function loadPage(page) {
 
     document.getElementById("wikipedia-frame").innerHTML = body["parse"]["text"]["*"]
     document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
+    
 
     // Start timer if we are at the start
     if (path.length == 0) {
@@ -198,11 +199,23 @@ function formatStr(string) {
 
 function displayTimer() {
     seconds = (Date.now() - startTime) / 1000;
-    document.getElementById("timer").innerHTML = seconds + "s";
+    document.getElementById("timer").innerHTML = "Elapsed Time:<br/><strong>"+seconds + "s</strong>";
 }
 
 function getRandTip() {
-    return "There are five permanent members of the UN security council: China, France, Russia, United Kingdom, and the United States."
+    const tips = [
+        "There are five permanent members of the UN security council: China, France, Russia, United Kingdom, and the United States.",
+        "The Fortune magazine has a list for top 500 United States companies (“Fortune 500”), as well as a list for top 500 global companies (“Fortune Global 500”).",
+        "Brazil is currently the world’s largest producer of sugarcane, and by a lot!",
+        "Buddhism originated in ancient India sometime between the 6th and 4th centuries BCE.",
+        "Pressing the back button will forfeit your attempt!",
+        "Infoboxes on the right often give very quick and useful links, especially for biographical and geographical pages.",
+        "Plan ahead, but be flexible! If you foresee a better route than what you had planned, go for it!",
+        "Use the Table of Contents to your advantage!",
+        "Some article subsections have an associated main article, usually linked under the subsection title."
+    ];
+
+    return tips[Math.floor(Math.random() * tips.length)];
 }
 
 function countdownOnLoad(start, end) {
@@ -259,12 +272,17 @@ function countdownOnLoad(start, end) {
             clearInterval(x);
             mainBlock.style.display = "block";
             countdownBlock.style.display = "none";
-            guideBlock.innerHTML = "<strong>" + start + "</strong> --> <strong>" + end + "</strong>";
+            guideBlock.innerHTML = "<p>Start Article:<br/><strong>" + start + "</strong></p><p>End Article:<br/><strong>" + end + "</strong></p>";
             timerBlock.style.display = "block";
             tipsBlock.style.display = "none";
             gifBlock.style.display = "none";
             startTime = Date.now();
             ctrlfwarnings = true;
+
+            //Temporary implementation
+            var HUDblock = document.getElementById("HUD");
+            HUDblock.classList.add("HUD");
+            guideBlock.classList.add("guideblockhud");
 
         }
         if (distance < 700 && distance > 610) {
