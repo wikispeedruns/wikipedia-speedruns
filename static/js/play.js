@@ -2,16 +2,37 @@ var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     data: {
-        startArticle: "test",
-        endArticle: "test",
-        timer: "test",
+        startArticle: "",
+        endArticle: "",
+        timer: "",
         countdown: 3,
         finished: false,
         started: false,
-        pathString: "",
         gunShow: false,
         activeTip: "",
         caught: false,
+        path:[],
+        finalTime:"",
+    },
+    methods : {
+        formatPath: function (pathArr) {
+            output = "";
+            for(i=0; i<pathArr.length - 1;i++) {
+                output = output.concat(pathArr[i])
+                output = output.concat(" -> ")
+            }
+            output = output.concat(pathArr[pathArr.length - 1])
+            return output;
+        }, 
+
+        finishPrompt: function (event) {
+            window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
+        }, 
+
+        home: function (event) {
+            window.location.replace("/");
+        }
+
     }
 })
 
@@ -116,6 +137,8 @@ async function loadPage(page) {
 async function finish() {
 
     app.$data.finished = true;
+    app.$data.path = path;
+    app.$data.finalTime = app.$data.timer;
 
     // Stop timer
     endTime = Date.now();
@@ -140,7 +163,7 @@ async function finish() {
             body: JSON.stringify(reqBody)
         })
 
-        window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
+        //window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
 
     } catch(e) {
         console.log(e);
@@ -205,15 +228,7 @@ function hideElements() {
     
 }
 
-function formatPath(pathArr) {
-    output = "";
-    for(i=0; i<pathArr.length - 1;i++) {
-        output = output.concat(pathArr[i])
-        output = output.concat(" -><br>")
-    }
-    output = output.concat(pathArr[pathArr.length - 1])
-    return output;
-}
+
 
 function formatStr(string) {
     return string.replace("_", " ").toLowerCase()

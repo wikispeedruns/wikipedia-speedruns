@@ -20,10 +20,10 @@
 }
 
 .finish {
-    display: none;
-    text-align: center;
-    font-size: 30px;
+    text-align: left;
+    font-size: 18px;
     margin: 10px;
+    width: 60%;
 }
 
 .tleft {
@@ -129,7 +129,12 @@ a:hover {
 }
 
 .HUDblock {
-    min-width: 150px;
+    /*min-width: 150px;*/
     margin: 10px 25px;
     font-size: 18px;
+}
+
+.finishButton {
+    width: auto !important;
+    margin: 10px 0;
 }

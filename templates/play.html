@@ -48,9 +48,19 @@
         <p id="tips" class="tips">[[activeTip]]</p>
     </div>  
 
-    <div v-show="finished">
-        <div id="finishStats" class="finish"></div>
-        <div id="path" class="finish path"></div>
+    <div v-if="finished" class="finish">
+        <h4>You found it! <strong>[[endArticle]]</strong></h4>
+        <p>Your run was submitted to the leaderboard.</p>
+        <h4>Here's how you did:</h4>
+        <div class="card md">
+            <div class="card-body">
+                <p>Time: <strong>[[finalTime]] </strong>Seconds</p>
+                <p>Number of links visited: <strong>[[path.length-1]]</strong></p>
+                <p>The path you took: <br>[[path]]</p>
+                <div><button v-on:click="finishPrompt" class="finishButton">See the leaderboard</button></div>
+                <div><button v-on:click="home" class="finishButton">Return to home page</button></div>
+            </div>
+        </div>
     </div>
 
 
@@ -59,7 +69,7 @@
         <div id="wikipedia-frame"></div>
     </div>
 
-    <div v-if="caught && started">
+    <div v-if="caught && started && !finished">
         <p>STOP! You violated the law. Pay the court a fine or serve your sentence.</p>
         <img src="{{url_for('static', filename='assets/stop.jpg')}}" width="700" style="margin-top: 40px;">
     </div>
