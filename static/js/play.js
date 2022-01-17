@@ -5,7 +5,7 @@ var app = new Vue({
         startArticle: "",
         endArticle: "",
         timer: "",
-        countdown: 3,
+        countdown: 8,
         finished: false,
         started: false,
         gunShow: false,
@@ -13,6 +13,8 @@ var app = new Vue({
         caught: false,
         path:[],
         finalTime:"",
+        prompt_id: 0,
+
     },
     methods : {
         formatPath: function (pathArr) {
@@ -312,6 +314,8 @@ function checkForFind(e) {
 
 window.addEventListener("load", async function() {
     const response = await fetch("/api/prompts/" + prompt_id);
+
+    app.$data.prompt_id = prompt_id;
 
     if (response.status != 200) {
         const error = await response.text();

@@ -49,11 +49,12 @@
     </div>  
 
     <div v-if="finished" class="finish">
-        <h4>You found it! <strong>[[endArticle]]</strong></h4>
+        <p><h4>You found it!</h4></p>
         <p>Your run was submitted to the leaderboard.</p>
-        <h4>Here's how you did:</h4>
+        <p><h4>Here's how you did:</h4></p>
         <div class="card md">
             <div class="card-body">
+                <p><h4><strong class="italics">"[[startArticle]]"</strong> to <strong class="italics">"[[endArticle]]"</strong></h4></p>
                 <p>Time: <strong>[[finalTime]] </strong>Seconds</p>
                 <p>Number of links visited: <strong>[[path.length-1]]</strong></p>
                 <p>The path you took: <br>[[path]]</p>

@@ -138,3 +138,7 @@ a:hover {
     width: auto !important;
     margin: 10px 0;
 }
+
+.italics {
+    font-style: italic;
+}
