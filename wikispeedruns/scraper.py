@@ -6,14 +6,11 @@ from pymysql.cursors import DictCursor
 
 import time
 
-from util.timeout import time
-
 #from multiprocessing import Pool, TimeoutError
 
-scraper_timeout = 5
-scraperdbname = "scraper_graph"
-articletable = scraperdbname + ".articleid"
-edgetable = scraperdbname + ".edgeidarticleid"
+SCRAPER_DB = "scraper_graph"
+ARTICLE_TABLE = SCRAPER_DB + ".articleid"
+EDGE_TABLE = SCRAPER_DB + ".edgeidarticleid"
 
 def batchQuery(queryString, arr, cur):
     format_strings = ','.join(['%s'] * len(arr))
@@ -27,7 +24,7 @@ def getLinks(pages, forward = True):
     
     with get_db().cursor(cursor=DictCursor) as cur:
         if forward:
-            queryString = "SELECT * FROM " + edgetable + " WHERE src IN (%s)"
+            queryString = "SELECT * FROM " + EDGE_TABLE + " WHERE src IN (%s)"
             #queryString = "SELECT * FROM edges WHERE src IN (%s)"
             queryResults = batchQuery(queryString, list(pages.keys()), cur)
             
@@ -41,7 +38,7 @@ def getLinks(pages, forward = True):
                         output[title].append((queryEntry['dest'], queryEntry['edgeID']))
                         
         else:
-            queryString = "SELECT * FROM " + edgetable + " WHERE dest IN (%s)"
+            queryString = "SELECT * FROM " + EDGE_TABLE + " WHERE dest IN (%s)"
             queryResults = batchQuery(queryString, list(pages.keys()), cur)
             
             for queryEntry in queryResults:
@@ -58,7 +55,7 @@ def getLinks(pages, forward = True):
 
 
 def getSrc(edgeID, cur):
-    queryString = "SELECT src FROM " + edgetable + " WHERE edgeID=%s"
+    queryString = "SELECT src FROM " + EDGE_TABLE + " WHERE edgeID=%s"
     #queryString = "SELECT src FROM edges WHERE edgeID=%s"
     cur.execute(queryString, str(edgeID))
     output = cur.fetchall()
@@ -246,7 +243,7 @@ def Reverse(lst):
 
 def convertToID(name):
     with get_db().cursor(cursor=DictCursor) as cur: 
-        queryString = "SELECT articleID from " + articletable + " where name=%s"
+        queryString = "SELECT articleID from " + ARTICLE_TABLE + " where name=%s"
         cur.execute(queryString, str(name))
         output = cur.fetchall()
 
@@ -259,7 +256,7 @@ def convertToID(name):
 def convertToArticleName(id):
     
     with get_db().cursor(cursor=DictCursor) as cur: 
-        queryString = "SELECT * from " + articletable + " where articleID=%s"
+        queryString = "SELECT * from " + ARTICLE_TABLE + " where articleID=%s"
         cur.execute(queryString, str(id))
         output = cur.fetchall()
 
@@ -309,7 +306,7 @@ def findPaths(startTitle, endTitle):
 def randStart(thresholdStart):
     
     with get_db().cursor(cursor=DictCursor) as cur:
-        queryString = "SELECT max(edgeID) FROM " + edgetable + ";"
+        queryString = "SELECT max(edgeID) FROM " + EDGE_TABLE + ";"
         cur.execute(queryString)
         maxID = int(cur.fetchall()[0]['max(edgeID)'])
         
