@@ -32,7 +32,7 @@ def create_admin_account():
 
     # load prod settings if they exist
     try:
-        config.update(json.load(open('config/prod.json')))
+        config.update(json.load(open('../config/prod.json')))
     except FileNotFoundError:
         pass
 

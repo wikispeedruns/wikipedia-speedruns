@@ -14,7 +14,6 @@ from tokens import (
     verify_reset_token, 
     create_confirm_token, 
     verify_confirm_token
-
 )
 
 from pymysql.cursors import DictCursor
@@ -394,20 +393,4 @@ def reset_password():
         db.commit()
 
     return "Password Changed", 200
-
-
-
-@user_api.get('/get_user_data/<id>')
-def get_user_data(id):
-    # TODO this could probably return details as well
-    query = ("""SELECT * FROM users WHERE username=%s""")
-
-    db = get_db()
-    with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query, (id,))
-        results = cursor.fetchall()
-
-        #print(results)
-        
-        return jsonify(results)
 

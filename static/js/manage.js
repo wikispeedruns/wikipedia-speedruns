@@ -1,141 +1,269 @@
-async function submitPrompt(event)
-{
-    event.preventDefault();
+import {fetchJson} from "./modules/fetch.js";
+import {dateToIso} from "./modules/date.js";
 
-    reqBody = {};
+Vue.component('prompt-item', {
+    props: ['prompt'],
 
-    const resp = await fetch(
-        `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("start").value}`,
-        {
-            mode: "cors"
+    data: function() {
+        return {
+            ratedChecked: this.prompt.rated
         }
-    )
-    const body = await resp.json()
+    },
 
-    reqBody["start"] = body["parse"]["title"];
+    methods: {
 
+        async deletePrompt() {
+            const resp = await fetchJson("/api/prompts/" + this.prompt.prompt_id, "DELETE");
+            
+            if (resp.status == 200) this.$emit('delete-prompt')
+            else alert(await resp.text())
+        },
 
-    const resp1 = await fetch(
-        `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("end").value}`,
-        {
-            mode: "cors"
+        async changeRated() {
+            const resp = await fetchJson("/api/prompts/" + this.prompt.prompt_id + "/type", "PATCH", {
+                "type": "daily",
+                "date": this.prompt.date,
+                "rated": this.ratedChecked,
+            });
+
+            if (resp.status != 200) alert(await resp.text())
         }
+    },
+
+    template: (`
+    <li>
+        <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}} -> {{prompt.end}} 
+
+        <input type="checkbox" v-if="prompt.type==='daily'" v-model="ratedChecked" v-on:change="changeRated">
+
+        <button v-on:click="deletePrompt" type="button" class="btn btn-default">
+            <i class="bi bi-trash"></i>
+        </button>
+    </li>`
     )
-    const body1 = await resp1.json()
+});
 
-    reqBody["end"] = body1["parse"]["title"];
 
-    try {
-        const response = await fetch("/api/prompts/", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(reqBody)
-        })
+// TODO maybe these should load the date stuff themselves (At least on update)
+Vue.component('daily-item', {
+    props: ['day'],
 
-        console.log(response);
-    } catch(e) {
-        console.log(e);
-    }
+    methods: {
+        async moveToDay() {
+            const response = await fetchJson("/api/prompts/" + this.promptToAdd + "/type", "PATCH", {
+                "type": "daily",
+                "date": this.day.dateIso,
+                "rated": false,
+            });
 
-    getPrompts();
-}
+            if (response.status != 200) {
+                alert(await response.text());
+            } else {
+                this.$emit('move-prompt')  // TODO reload just this box instead of triggering a full realead
+            }
+        },
+        dateToIso,
+    },
 
-function createPromptItem(prompt)
-{
-    var item = document.createElement("li");
-    var link = document.createElement('a');
+    data: function () {
+        return {
+            promptToAdd: 0
+        }
+    },
 
-    link.appendChild(document.createTextNode(`#${prompt['prompt_id'].toString()}`));
-    link.href="/prompt/" + prompt['prompt_id'];
+    template: (`
+    <div>
+        <strong v-if="day.dateIso === dateToIso(new Date())">
+            <p>{{day.dateIso.substring(5)}}</p>
+        </strong>
+        <p v-else>{{day.dateIso.substring(5)}}</p>
+
+
+        <ul class="ps-3 my-0">
+            <prompt-item 
+                v-for="p in day.prompts"
+                v-bind:prompt="p"
+                v-bind:key="p.prompt_id"
+                v-on="$listeners"
+            >
+            </prompt-item>
+        </ul>
+
+        <form class="form-inline" v-on:submit.prevent="moveToDay">
+            <div class="input-group input-group-sm mb-2">
+                <input class="form-control" v-model="promptToAdd">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-dark"> 
+                        <i class="bi bi-arrow-right-square"></i> 
+                    </button>
+                </div>
+            </div>
+        </form>
+
+
+    </div>
+    `)
+})
+
+
+var app = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    data: {
+        unused: [],
+        public: [],
+        weeks: [],
+
+        toMakePublic: 0
+    },
+
+    created: async function() {
+        await this.getPrompts();
+    },
     
-    item.appendChild(document.createTextNode(`Prompt `));
-    item.append(link);
-    item.append(document.createTextNode(`: ${prompt["start"]}/${prompt["end"]}`))
+    methods: {
+        async getPrompts() {
+            const prompts = await (await fetchJson("/api/prompts/all")).json();
+            
+            this.unused = prompts.filter(p => p["type"] === "unused");
+            this.public = prompts.filter(p => p["type"] === "public");
+            
+            
+            let daily = prompts.filter(p =>  p["type"] === "daily");
+            
+            let daysToPrompts = {};
 
-    var public = document.createElement('button');
-    public.append(document.createTextNode(prompt["public"] ? " public" : " ranked"));
+            daily.forEach((p) => {
+                if (!daysToPrompts[p["date"]]) {
+                    daysToPrompts[p["date"]] = [];
+                }
+                daysToPrompts[p["date"]].push(p);
+            });
 
-    public.onclick = (e) => {
-        e.preventDefault();
+
+            let today = new Date();
+            let cur = new Date(today);
+
+            // Change cur to first day of this week
+            cur.setDate(cur.getDate() - cur.getDay());
+
+            this.weeks = [];
+            for (let i = 0; i < 3; i++) {
+                this.weeks.push([]);
+                for (let j = 0; j < 7; j++) {
+
+                    const day =  new Date(cur);
+                    this.weeks[i].push( {
+                        "date": day,
+                        "dateIso": dateToIso(day),
+                        "prompts": daysToPrompts[dateToIso(day)] || []
+                    });
+
+                    cur.setDate(cur.getDate() + 1);
+                }
+            }
+        },
+
+
+        async makePublic() {
+            const response = await fetchJson("/api/prompts/" + this.toMakePublic + "/type", "PATCH", {
+                "type": "public"
+            });
+
+            if (response.status != 200) {
+                alert(await response.text());
+            } else {
+                this.getPrompts();
+            }
+
+        },
+
+
+        async newPrompt(event) {
+    
+            let reqBody = {};
         
-        fetch('/api/prompts/' + prompt["prompt_id"] + "/changepublic", {
-            method: "PATCH",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                "public": !prompt["public"]
-            })
-        })
+            const resp = await fetch(
+                `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("start").value}`,
+                {
+                    mode: "cors"
+                }
+            )
+            const body = await resp.json()
+        
+            reqBody["start"] = body["parse"]["title"];
+        
+        
+            const resp1 = await fetch(
+                `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("end").value}`,
+                {
+                    mode: "cors"
+                }
+            )
+            const body1 = await resp1.json()
+        
+            reqBody["end"] = body1["parse"]["title"];
+        
+            try {
+                const response = await fetch("/api/prompts/", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(reqBody)
+                })
+        
+            } catch(e) {
+                console.log(e);
+            }
+        
+            this.getPrompts();
+        },
 
-        getPrompts();
-    }
-
+        //     var checkPath = document.createElement('button');
+        //     checkPath.append(document.createTextNode(`Get prompt's shortest path`));
+        
+        //     item.append(public)
+        //     item.append(checkPath)
+        
+        //     checkPath.onclick = (e) => {
+        //         e.preventDefault();
+        //         console.log("Received request, processing...")
+        //         appendPath(item, prompt["start"], prompt["end"])
+        //     }
+        
+        //     return item;
+        // }
     
-    var checkPath = document.createElement('button');
-    checkPath.append(document.createTextNode(`Get prompt's shortest path`));
-
-    item.append(public)
-    item.append(checkPath)
-
-    checkPath.onclick = (e) => {
-        e.preventDefault();
-        console.log("Received request, processing...")
-        appendPath(item, prompt["start"], prompt["end"])
-    }
-
-    return item;
-}
-
-async function getPath(start, end) {
-    try {
-        const response = await fetch("/api/scraper/path/", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                "start": start,
-                "end": end
-            })
-        });
-        const path = await response.json();
-
-        return path['Articles'];
-
-
-
-    } catch(e) {
-        console.log(e);
-        return "500 ERROR: Path not found"
-    }
-}
-
-
-async function getPrompts()
-{
-    var list = document.getElementById("prompts");
-  
-    try {
-        const response = await fetch("/api/prompts");
-        const prompts = await response.json();
-
-        // Remove old list
-        while (list.firstChild) {
-            list.removeChild(list.firstChild);
+        async getPath(start, end) {
+            try {
+                const response = await fetch("/api/scraper/path/", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "start": start,
+                        "end": end
+                    })
+                });
+                const path = await response.json();
+        
+                return path['Articles'];
+        
+        
+        
+            } catch(e) {
+                console.log(e);
+                return "500 ERROR: Path not found"
+            }
         }
+    
+    
+        
 
-        // Add new prompt
-        prompts.forEach( (p) => {
-            list.appendChild(createPromptItem(p));
-        }); 
-
-    } catch(e) {
-        console.log(e);
-    }
-}
+    } // End methods
+}); // End vue
 
 async function genPrompts(n) {
     try {
@@ -207,10 +335,3 @@ function genPromptButton() {
         pathCheck();
     }
 }
-
-window.addEventListener("load", function() {
-    document.getElementById("newPrompt").addEventListener("submit", submitPrompt);
-
-    getPrompts()
-    genPromptButton()
-});

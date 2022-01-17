@@ -4,6 +4,8 @@ var startTime = 0;
 var path = [];
 var endTime = 0;
 
+var run_id = -1;
+
 var keyMap = {};
 
 var ctrlfwarnings = false;
@@ -55,9 +57,28 @@ async function loadPage(page) {
     if (path.length == 0) {
         startTime = Date.now()
         timerInterval = setInterval(displayTimer, 20);    
+
+        const reqBody = {
+            "start_time": startTime,
+            "prompt_id": prompt_id,
+        }
+
+        try {
+            const response = await fetch("/api/runs", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(reqBody)
+            })
+    
+            run_id = await response.json();
+
+        } catch(e) {
+            console.log(e);
+        }
     }
     
-
     path.push(title)
 
     if (formatStr(title) === formatStr(goalPage)) {
@@ -78,29 +99,25 @@ async function finish() {
     clearInterval(timerInterval);
     document.getElementById("timer").innerHTML="";
 
-    // Prevent prompt
+    // Prevent are you sure you want to leave prompt
     window.onbeforeunload = null;
 
     const reqBody = {
-        "start_time": startTime,
         "end_time": endTime,
-        "prompt_id": prompt_id,
         "path": path,
     }
 
     // Send results to API
     try {
-        const response = await fetch("/api/runs", {
-            method: 'POST',
+        const response = await fetch(`/api/runs/${run_id}`, {
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(reqBody)
         })
 
-        const run_id = await response.json();
-
-        window.location.href = "/prompt/" + prompt_id + "?run_id=" + run_id;
+        window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
 
     } catch(e) {
         console.log(e);
@@ -285,8 +302,17 @@ function checkForFind(e) {
 
 window.addEventListener("load", async function() {
     const response = await fetch("/api/prompts/" + prompt_id);
-    const prompt = await response.json();
 
+    if (response.status != 200) {
+        const error = await response.text();
+        this.alert(error)
+        // Prevent are your sure you want to leave prompt
+        window.onbeforeunload = null;
+        window.location.href = "/"   // TODO error page
+
+    }
+
+    const prompt = await response.json();
     const article = prompt["start"];
 
     goalPage = prompt["end"];

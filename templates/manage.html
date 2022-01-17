@@ -1,18 +1,17 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<script type=text/javascript src="{{url_for('static', filename='js/manage.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script> 
+<script type="module" src="{{url_for('static', filename='js/manage.js') }}"></script>
 {% endblock %}
     
 {% block content %}
-    
-    <div>
-        Submit a new prompt here:
-        <form id="newPrompt">
-            <label for="start">Start Article:</label>
-            <input type="text" id="start" name="start">
-            <label for="end">End Article:</label>
-            <input type="text" id="end" name="end">
+<div id="app">    
+    <form id="newPrompt" v-on:submit.prevent="newPrompt">
+        <label for="start">Start Article:</label>
+        <input type="text" id="start" name="start">
+        <label for="end">End Article:</label>
+        <input type="text" id="end" name="end">
 
             <input type="submit" value="Submit">
             
@@ -38,5 +37,78 @@
 
     <button id="genPromptButton">Click to generate a random prompt</button>
     <div id="generated"></div>
+
+    <div class="row">
+
+        <div class="col-sm-6"> <div class="card"> <div class="card-body">
+           
+            <h4> Unused: </h4>
+            
+            <ul>
+                <prompt-item
+                    v-for="p in unused"
+                    v-bind:prompt="p"
+                    v-bind:key="p.prompt_id"
+                    v-on:change="getPrompts"
+                >
+                </prompt-item>
+            </ul>
+        </div></div></div>  
+
+        <div class="col-sm-6"> <div class="card"> <div class="card-body">
+
+            <h4> Public: </h4>
+            <form v-on:submit.prevent="makePublic">
+                <p>Move prompt # to public</p>
+                <input v-model="toMakePublic">
+                <button type="submit">Submit</button>
+            </form>
+            <ul>
+                <prompt-item
+                    v-for="p in public"
+                    v-bind:prompt="p"
+                    v-bind:key="p.prompt_id"
+                    v-on:delete-prompt="getPrompts"
+                >
+                </prompt-item>
+            </ul>
+
+        </div></div></div>  
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12"> <div class="card"> <div class="card-body">
+
+            <h4> Prompts of the Day: </h4>
+            <p><input type="checkbox" checked> = rated</p>
+            <table class="table table-bordered" style="table-layout: fixed;">
+                <thead>
+                    <th>Su</th>
+                    <th>M</th>
+                    <th>T</th>
+                    <th>W</th>
+                    <th>Th</th>
+                    <th>F</th>
+                    <th>Sa</th>
+                </thead>
+
+                <tbody style="font-size:x-small">
+                    <tr v-for="week in weeks">
+                        <td v-for="day in week">
+                            <daily-item 
+                                v-bind:day="day"
+                                v-bind:key="day.dateIso"
+                                v-on:delete-prompt="getPrompts"
+                                v-on:move-prompt="getPrompts"
+                            >
+                            </daily-item>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div></div></div>  
+    </div>        
+</div>
 
 {% endblock %}

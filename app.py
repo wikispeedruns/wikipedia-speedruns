@@ -26,11 +26,13 @@ from apis.runs import run_api
 from apis.users import user_api
 from apis.profiles import profile_api
 from scraper.scraper import scraper_api
+from apis.ratings import ratings_api
 
 app.register_blueprint(prompt_api)
 app.register_blueprint(run_api)
 app.register_blueprint(user_api)
 app.register_blueprint(profile_api)
 app.register_blueprint(scraper_api)
+app.register_blueprint(ratings_api)
 
 import routes

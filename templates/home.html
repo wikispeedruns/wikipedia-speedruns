@@ -2,40 +2,109 @@
 
 {% block head %}
 <script defer type=text/javascript src="{{url_for('static', filename='js/home.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script> 
+<style>
+    [v-cloak] { display: none }
+</style>
 {% endblock %}
 
 {% block content %}
+
+<div id="app">
+
     <h3>Welcome to Wikipedia Speedruns!</h3>
 
-        <p><strong>New Prompts Out!</strong></p>
 
-    <p>Goal of this game is simple. Try to get to one wikipedia page to another as fast as possible by clicking on the links in the page. Once you finish each prompt, you will get a chance to submit your time to the leaderboard!</p>
-    <p>A few simple rules apply:<br>
+    <p>The goal of this game is simple. Try to get to one wikipedia page to another as fast as possible by clicking on the links in the page. </p>
+    <p>There are a few simple rules:<br>
         <ul>
             <li>Any link shown on the page is fair game.</li>
-            <li>DO NOT use word search or find on your browser!</li>
-            <li>Live with your mistakes. Don't even bother trying the back page button, you will just be forced to restart.</li>
+            <li>DO NOT use Ctrl+F/find in your browser!</li>
+            <li>Live with your mistakes (the back button will end your run)</li>
             <li>Luck is king, so put on your lucky hat and lucky socks!</li>
         </ul>
     </p>
 
-    <p>Click <a href="/latest">here</a> to try the latest prompt, starts immediately after click!</p>
-    <p>Click <a href="/random">here</a> to try a random prompt, starts immediately after click!</p>
-    
-    <p>Here are links to all available public prompts:</p>
-    <table id="publicPrompts">
-    </table>
 
-    <p>
-        {% if username %}
-        Here is the listed of rated prompts.
-        {% else %}
-        Login to see rated prompts.
-        {% endif %}
-    </p>
+    <hr>
 
-    <table id="ratedPrompts">
+    <!-- Fix random to choose a public prompt <p>Click <a href="/random">here</a> to try a random prompt, starts immediately after click!</p> -->
 
-    </table>
+    <div class="row justify-content-md-center">
+
+    <div class="col-sm-6">
+        <div class="card">
+            <div class="card-body">
+       
+                <h4> Prompts of the Day</h4> 
+                <h6><span v-cloak v-once>([[new Date().toDateString()]])</span></h6>
+                <table class="table table-hover">
+                    <thead>
+                        <th scope="col">Prompt #</th>
+                        <th scope="col">Starting Article</th>
+                    </thead>
+                    <tbody>
+                        <tr v-for="prompt in dailyPrompts" v-cloak>
+                            <td>[[prompt.prompt_id]]<span v-if="prompt.rated">*</span> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
+                            
+                            <td>[[prompt.start]]</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </ul>
+            </div>  
+
+            <div class="card-footer text-muted">
+                *rated prompt, must be logged in to play (<a href="/about#ratings">about</a>)
+            </div>            
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="card">
+            <div class="card-body">
+                <h4>Try some prompts:</h4>
+
+                <table class="table table-hover">
+                <thead>
+                    <th scope="col">Prompt #</th>
+                    <th scope="col">Starting Article</th>
+                </thead>
+                <tbody>
+                    <tr v-for="prompt in publicPrompts" v-cloak>
+                        <td>[[prompt.prompt_id]] (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
+                        <td>[[prompt.start]]  </td>
+                    </tr>
+                </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+
+    <hr>
+    <h4> Top 10 rated players:</h4> Note the <a href="/about#ratings">rating system</a> is still experimental </p>
+
+    <div class="row justify-content-md-center">
+    <div class="col-6">
+        <table class="table">
+            <thead>
+                <th>#</th>
+                <th>Username</th> 
+                <th>Rating</th> 
+            </thead>
+            <tbody>
+                <tr v-for="(user, index) in topUsers" v-cloak>
+                    <td>[[index + 1]]</td>
+                    <td><a v-bind:href="'/profile/' + user.username">[[user.username]]</a></td>
+                    <td>[[user.rating]]</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    </div>
+
     <p style="margin-top:50px;">Created by <a href="https://danqian.net">Daniel Qian</a> and <a href="https://mliu59.github.io/">Miles Liu</a></p>
+</div>
 {% endblock %}

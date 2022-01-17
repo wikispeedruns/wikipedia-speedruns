@@ -18,6 +18,10 @@ def render_with_user(template, **kwargs):
 def get_home_page():    
     return render_with_user('home.html')
 
+@app.route('/about', methods=['GET'])
+def get_about_page():    
+    return render_with_user('about.html')
+
 @app.route('/random', methods=['GET'])
 def get_random_prompt():
     # TODO this is insanely inefficient, it needs to sort the whole set of public prompts!
@@ -48,6 +52,7 @@ def get_latest_prompt():
 def get_register_page():
     return render_with_user('users/register.html')
 
+
 @app.route('/pending', methods=['GET'])
 def get_create_oauth_account_page():
     if ("pending_oauth_creation" in session):
@@ -61,7 +66,7 @@ def get_login_page():
 
 @app.route('/profile/<username>', methods = ['GET'])
 def get_profile_page(username):
-    return render_with_user('profile.html', un=username)
+    return render_with_user('profile.html', profile_name=username)
 
 @app.route('/manage', methods=['GET'])
 @check_admin
@@ -95,3 +100,10 @@ def get_reset_request_page():
 @app.route('/reset/<id>/<token>', methods=['GET'])
 def get_reset_page(id, token):
     return render_template('users/reset_password.html', id=id, token=token)
+
+
+
+
+@app.route('/error', methods=['GET'])
+def get_gen_error_page():
+    return render_with_user('users/generic_error.html')
