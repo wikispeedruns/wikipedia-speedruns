@@ -1,5 +1,7 @@
-import {fetchJson} from "./modules/fetch.js";
-import {dateToIso} from "./modules/date.js";
+import { fetchJson } from "./modules/fetch.js";
+import { dateToIso } from "./modules/date.js";
+
+import { getPath } from "./modules/scraper.js";
 
 Vue.component('prompt-item', {
     props: ['prompt'],
@@ -103,7 +105,100 @@ Vue.component('daily-item', {
 
     </div>
     `)
-})
+});
+
+Vue.component('path-checker', {
+    data: function() {
+        return {
+            pathStart: "",
+            pathEnd: "",
+
+            path: "",
+        }
+    },
+
+    methods: {
+        async pathCheck() {
+            const path = await getPath(this.pathStart, this.pathEnd);
+            console.log(path);
+        }
+    },
+
+    template: (`
+    <div>
+        <p> Check for shortest paths of any 2 articles here: </p>
+        <form id="checkPath"  v-on:submit.prevent="pathCheck">
+            <label for="pathStart">Start Article:</label>
+            <input type="text" name="pathStart" v-model="pathStart">
+            <label for="pathEnd">End Article:</label>
+            <input type="text" name="pathEnd" v-model="pathEnd">
+            <button type="submit">Check for shortest path</button>
+        </form>
+    </div>
+    `)
+});
+
+Vue.component('path-generator', {
+    data: function() {
+        return {
+            prompts: []
+        }
+    },
+
+
+    methods: {
+        async genPrompts(n) {
+            try {
+                const response = await fetch("/api/scraper/gen_prompts/", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({'N':n.toString()})
+                })
+        
+                const resp = await response.json()
+        
+                console.log(resp['Prompts'][0]);
+        
+                var generatedBlock = document.getElementById("generated");
+                var item = document.createElement("p");
+                item.innerHTML = resp['Prompts'][0][0] + " -> " + resp['Prompts'][0][1]+"\n";
+                
+                generatedBlock.appendChild(item)
+                
+                var button = document.createElement("button");
+                button.innerHTML = "Click to get the path of this random prompt"
+                
+        
+                button.onclick = (e) => {
+                    e.preventDefault();
+                    console.log("Received request, processing...")
+                    appendPath(item, resp['Prompts'][0][0], resp['Prompts'][0][1])
+                }
+        
+                item.appendChild(button)
+        
+            } catch(e) {
+                console.log(e);
+            }
+        }
+    },
+
+    template: (`
+        <div>
+            <button id="genPromptButton" v-on:click="genPrompts(1)">Click to generate a random prompt</button>
+            <ul>
+                <li v-for="prompt in prompts">
+
+                </li
+            </ul>
+        </div>
+    `)
+
+});
+
+
 
 
 var app = new Vue({
@@ -114,7 +209,7 @@ var app = new Vue({
         public: [],
         weeks: [],
 
-        toMakePublic: 0
+        toMakePublic: 0,
     },
 
     created: async function() {
@@ -234,104 +329,10 @@ var app = new Vue({
         
         //     return item;
         // }
-    
-        async getPath(start, end) {
-            try {
-                const response = await fetch("/api/scraper/path/", {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        "start": start,
-                        "end": end
-                    })
-                });
-                const path = await response.json();
-        
-                return path['Articles'];
-        
-        
-        
-            } catch(e) {
-                console.log(e);
-                return "500 ERROR: Path not found"
-            }
-        }
-    
-    
         
 
     } // End methods
 }); // End vue
 
-async function genPrompts(n) {
-    try {
-        const response = await fetch("/api/scraper/gen_prompts/", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({'N':n.toString()})
-        })
-
-        const resp = await response.json()
-
-        console.log(resp['Prompts'][0]);
-
-        var generatedBlock = document.getElementById("generated");
-        var item = document.createElement("p");
-        item.innerHTML = resp['Prompts'][0][0] + " -> " + resp['Prompts'][0][1]+"\n";
-        
-        generatedBlock.appendChild(item)
-        
-        var button = document.createElement("button");
-        button.innerHTML = "Click to get the path of this random prompt"
-        
-
-        button.onclick = (e) => {
-            e.preventDefault();
-            console.log("Received request, processing...")
-            appendPath(item, resp['Prompts'][0][0], resp['Prompts'][0][1])
-        }
-
-        item.appendChild(button)
-
-    } catch(e) {
-        console.log(e);
-    }
-}
-
-async function pathCheck() {
-    var block = document.getElementById("pathchecker")
-    try {
-        appendPath(block, document.getElementById("pathstart").value, document.getElementById("pathend").value);
-    } catch(e) {
-        console.log(e);
-    }
-}
 
 
-async function appendPath(item, start, end) {
-    var path = await getPath(start, end)
-    console.log(path)
-    var pathdisp = document.createElement("span");
-    pathdisp.innerHTML = path.toString()
-    item.appendChild(pathdisp)
-}
-
-function genPromptButton() {
-    var button = document.getElementById("genPromptButton");
-    button.onclick = (e) => {
-        e.preventDefault();
-        
-        genPrompts(1);
-    }
-
-    var pathButton = document.getElementById("pathcheckerButton")
-    pathButton.onclick = (e) => {
-        e.preventDefault();
-        
-        pathCheck();
-    }
-}

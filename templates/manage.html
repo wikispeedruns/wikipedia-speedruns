@@ -13,30 +13,12 @@
         <label for="end">End Article:</label>
         <input type="text" id="end" name="end">
 
-            <input type="submit" value="Submit">
-            
-        </form>
-    </div>
+        <input type="submit" value="Submit">
+    </form>
 
+    <path-checker></path-checker>
 
-    <div id="pathchecker" style="margin: 40px 0;">
-        Check for shortest paths of any 2 articles here:
-        <form id="checkPath">
-            <label for="pathstart">Start Article:</label>
-            <input type="text" id="pathstart" name="pathstart">
-            <label for="pathend">End Article:</label>
-            <input type="text" id="pathend" name="pathend">
-        </form>
-        <button id="pathcheckerButton">Check for shortest path</button>
-    </div>
-
-    <div style="margin: 40px 0;">
-        List of existing prompts:
-        <ul id="prompts"></ul>
-    </div>
-
-    <button id="genPromptButton">Click to generate a random prompt</button>
-    <div id="generated"></div>
+    <path-generator></path-generator>
 
     <div class="row">
 
