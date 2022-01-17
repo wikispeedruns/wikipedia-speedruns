@@ -6,7 +6,7 @@ from util.timeout import timer
 
 scraper_api = Blueprint("scraper", __name__, url_prefix="/api/scraper")
 
-SCRAPER_TIMEOUT = 5
+SCRAPER_TIMEOUT = 20
 
 @scraper_api.post('/path')
 def get_path():
