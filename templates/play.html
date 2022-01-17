@@ -5,31 +5,69 @@
     const prompt_id='{{prompt_id}}';
 </script>
 
-<script type=text/javascript src="{{url_for('static', filename='js/play.js') }}"></script>
+
 <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+
+
 {% endblock %}
 
 {% block content %}
-<div id="finishStats" class="finish"></div>
-<div id="HUD">
-    <div id="guide" class="guide"></div>
-    <div><p id = timer></p></div>
+
+<div id="app">
+
+    <div v-show="started && !finished" class="HUDwrapper">
+        <div class="card" style="flex-direction: row; border: 2px solid #000000 !important;">
+            <div class="HUDblock">
+                Start Article<br><strong>[[startArticle]]</strong>
+            </div>
+            <div class="HUDblock">
+                End Article<br><strong>[[endArticle]]</strong>
+            </div>
+            <div class="HUDblock">
+                Time Elapsed<br><strong>[[timer]] s</strong>
+            </div>
+        </div>
+    </div>
+
+    <div v-show="!started">
+        <div class="start">
+            <p>Starting Article: <strong>[[startArticle]]</strong></p>
+            <p>Goal Article: <strong>[[endArticle]]</strong></p>
+            <p>Good Luck!</p>
+        </div>
+        <div v-if="gunShow" id="mirroredimgblock" class="mirroredimgblock hide-on-mobile">
+            <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun">
+            <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun invgif">
+        </div>
+
+        <div>
+            <p id="countdown" class="countdown">[[countdown]]</p>
+        </div>
+
+        <p id="tips" class="tips">[[activeTip]]</p>
+    </div>  
+
+    <div v-show="finished">
+        <div id="finishStats" class="finish"></div>
+        <div id="path" class="finish path"></div>
+    </div>
+
+
+    <div v-show="started && !finished" id="main">
+        <div id="title"></div>
+        <div id="wikipedia-frame"></div>
+    </div>
+
+    <div v-if="caught && started">
+        <p>STOP! You violated the law. Pay the court a fine or serve your sentence.</p>
+        <img src="{{url_for('static', filename='assets/stop.jpg')}}" width="700" style="margin-top: 40px;">
+    </div>
+
 </div>
 
-<div id="path" class="finish path"></div>
 
-<div id="mirroredimgblock" class="mirroredimgblock">
-</div>
-<div>
-<p id="countdown" class="countdown">0</p>
-</div>
 
-<div><p id="tips" class="guide tips"></p>
-</div>
-<div id="main">
-    <div id="title"></div>
-    <div id="wikipedia-frame"></div>
-</div>
-
+<script type=text/javascript src="{{url_for('static', filename='js/play.js') }}"></script>
 
 {% endblock %}

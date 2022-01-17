@@ -87,33 +87,39 @@
     <h4> Top 10 rated players:</h4> Note the <a href="/about#ratings">rating system</a> is still experimental </p>
 
     <div class="row justify-content-md-center">
-    <div class="col-6">
-        <table class="table">
-            <thead>
-                <th>#</th>
-                <th>Username</th> 
-                <th>Rating</th> 
-            </thead>
-            <tbody>
-                <tr v-for="(user, index) in topUsers" v-cloak>
-                    <td>[[index + 1]]</td>
-                    <td><a v-bind:href="'/profile/' + user.username">[[user.username]]</a></td>
-                    <td>[[user.rating]]</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+        <div class="col-6">
+            <table class="table">
+                <thead>
+                    <th>#</th>
+                    <th>Username</th> 
+                    <th>Rating</th> 
+                </thead>
+                <tbody>
+                    <tr v-for="(user, index) in topUsers" v-cloak>
+                        <td>[[index + 1]]</td>
+                        <td><a v-bind:href="'/profile/' + user.username">[[user.username]]</a></td>
+                        <td>[[user.rating]]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <p style="margin-top:50px;">
-        Created by <a href="https://danqian.net">Daniel Qian</a>, 
-        <a href="https://mliu59.github.io/">Miles Liu</a>, 
-        <a href="">Brice Halder</a>, 
-        and <a href="https://xablexa.com/">Axel Bax</a>
-    </p>
-    <p>
-        <a href="/about#acknowledgements">Special Thanks and Acknowledgements</a>
-    </p>
+    <hr>
+
+    <div>
+        <p>
+            Created by <a href="https://danqian.net">Daniel Qian</a>, 
+            <a href="https://mliu59.github.io/">Miles Liu</a>, 
+            <a href="http://bricehalder.com/">Brice Halder</a>, 
+            and <a href="https://xablexa.com/">Axel Bax</a>
+        </p>
+        <p>
+            <a href="/about#acknowledgements">Special Thanks and Acknowledgements</a>
+        </p>
+    </div>
+    
+    <hr>
 
     <div class="smm-footer">
         <a href="https://twitter.com/WikiSpeedruns">
