@@ -2,7 +2,7 @@ import { fetchJson } from './fetch.js'
 
 
 async function getPath(start, end) {
-    const response = await fetchJson("/api/scraper/path/", "POST", {
+    const response = await fetchJson("/api/scraper/path", "POST", {
         "start": start,
         "end": end  
     });
