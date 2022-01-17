@@ -149,7 +149,7 @@ Vue.component('path-generator', {
     methods: {
         async genPrompt() {
             try {
-                const response = await fetchJson("/api/scraper/gen_prompts/", 'POST', {
+                const response = await fetchJson("/api/scraper/gen_prompts", 'POST', {
                     'N': 1
                 })
         

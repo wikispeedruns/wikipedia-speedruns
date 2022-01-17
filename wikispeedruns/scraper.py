@@ -1,5 +1,3 @@
-from pymysql.cursors import DictCursor
-from flask import session, request, abort, Blueprint, jsonify, current_app
 
 import random
 
@@ -8,74 +6,11 @@ from pymysql.cursors import DictCursor
 
 import time
 
-from util.timeout import timer
-
-
 #from multiprocessing import Pool, TimeoutError
 
-scraper_api = Blueprint("scraper", __name__, url_prefix="/api/scraper")
-
-scraper_timeout = 5
-scraperdbname = "scraper_graph"
-articletable = scraperdbname + ".articleid"
-edgetable = scraperdbname + ".edgeidarticleid"
-
-
-@scraper_api.post('/path/')
-def get_path():
-    
-    start = request.json['start']
-    end = request.json['end']
-    
-    
-    try:
-        output = timer(scraper_timeout, findPaths, start, end)
-    except Exception as err:
-        print(f"ERROR {str(err)}")
-        return str(err), 500
-    
-    """
-    pool = Pool(processes=1)
-    result = pool.apply_async(findPaths, (start, end))
-    
-    try:
-        output = result.get(timeout=scraper_timeout)
-    except TimeoutError:
-        msg = f"Scraper search exceeded {scraper_timeout} seconds"
-        print(msg)
-        return msg, 500
-    except Exception as err:
-        print(f"ERROR {str(err)}")
-        return str(err), 500
-    """
-    
-    return jsonify(output)
-    
-
-@scraper_api.post('/gen_prompts/')
-def get_prompts():
-    
-    n = int(request.json['N']) - 1
-    d = 25
-    thresholdStart = 200
-    
-    try:
-        paths = generatePrompts(thresholdStart=thresholdStart, thresholdEnd=thresholdStart, n=n, dist=d)
-    except Exception as err:
-        print(err)
-        return str(err), 500
-    
-    outputArr = []
-    
-    for path in paths:
-        
-        outputArr.append([str(convertToArticleName(path[0])), str(convertToArticleName(path[-1]))])
-        
-    return jsonify({'Prompts':outputArr})
-
-
-
-
+SCRAPER_DB = "scraper_graph"
+ARTICLE_TABLE = SCRAPER_DB + ".articleid"
+EDGE_TABLE = SCRAPER_DB + ".edgeidarticleid"
 
 def batchQuery(queryString, arr, cur):
     format_strings = ','.join(['%s'] * len(arr))
@@ -87,41 +22,40 @@ def getLinks(pages, forward = True):
 
     output = {}
     
-    cur = get_db().cursor(cursor=DictCursor)
-    
-    if forward:
-        queryString = "SELECT * FROM " + edgetable + " WHERE src IN (%s)"
-        #queryString = "SELECT * FROM edges WHERE src IN (%s)"
-        queryResults = batchQuery(queryString, list(pages.keys()), cur)
-        
-        for queryEntry in queryResults:
-            title = queryEntry['src']
-            if title in pages:
-                
-                if title not in output:
-                    output[title] = [(queryEntry['dest'], queryEntry['edgeID'])]
-                else:
-                    output[title].append((queryEntry['dest'], queryEntry['edgeID']))
+    with get_db().cursor(cursor=DictCursor) as cur:
+        if forward:
+            queryString = "SELECT * FROM " + EDGE_TABLE + " WHERE src IN (%s)"
+            #queryString = "SELECT * FROM edges WHERE src IN (%s)"
+            queryResults = batchQuery(queryString, list(pages.keys()), cur)
+            
+            for queryEntry in queryResults:
+                title = queryEntry['src']
+                if title in pages:
                     
-    else:
-        queryString = "SELECT * FROM " + edgetable + " WHERE dest IN (%s)"
-        queryResults = batchQuery(queryString, list(pages.keys()), cur)
-        
-        for queryEntry in queryResults:
-            title = queryEntry['dest']
-            if title in pages:
-                
-                if title not in output:
-                    output[title] = [(queryEntry['src'], queryEntry['edgeID'])]
-                else:
-                    output[title].append((queryEntry['src'], queryEntry['edgeID']))
-        
-    return output
+                    if title not in output:
+                        output[title] = [(queryEntry['dest'], queryEntry['edgeID'])]
+                    else:
+                        output[title].append((queryEntry['dest'], queryEntry['edgeID']))
+                        
+        else:
+            queryString = "SELECT * FROM " + EDGE_TABLE + " WHERE dest IN (%s)"
+            queryResults = batchQuery(queryString, list(pages.keys()), cur)
+            
+            for queryEntry in queryResults:
+                title = queryEntry['dest']
+                if title in pages:
+                    
+                    if title not in output:
+                        output[title] = [(queryEntry['src'], queryEntry['edgeID'])]
+                    else:
+                        output[title].append((queryEntry['src'], queryEntry['edgeID']))
+            
+        return output
 
 
 
 def getSrc(edgeID, cur):
-    queryString = "SELECT src FROM " + edgetable + " WHERE edgeID=%s"
+    queryString = "SELECT src FROM " + EDGE_TABLE + " WHERE edgeID=%s"
     #queryString = "SELECT src FROM edges WHERE edgeID=%s"
     cur.execute(queryString, str(edgeID))
     output = cur.fetchall()
@@ -308,30 +242,28 @@ def Reverse(lst):
 
 
 def convertToID(name):
-    cur = get_db().cursor(cursor=DictCursor)
-    
-    queryString = "SELECT * from " + articletable + " where name=%s"
-    cur.execute(queryString, str(name))
-    output = cur.fetchall()
-    
-    if len(output)>0:
-        return output[0]['articleID']
-    else:
-        raise ValueError(f"Could not find article with name: {name}")
+    with get_db().cursor(cursor=DictCursor) as cur: 
+        queryString = "SELECT articleID from " + ARTICLE_TABLE + " where name=%s"
+        cur.execute(queryString, str(name))
+        output = cur.fetchall()
+
+        if len(output) > 0:
+            return output[0]['articleID']
+        else:
+            raise ValueError(f"Could not find article with name: {name}")
     
     
 def convertToArticleName(id):
     
-    cur = get_db().cursor(cursor=DictCursor)
-    
-    queryString = "SELECT * from " + articletable + " where articleID=%s"
-    cur.execute(queryString, str(id))
-    output = cur.fetchall()
-    
-    if len(output)>0:
-        return output[0]['name']
-    else:
-        raise ValueError(f"Could not find article with id: {id}")
+    with get_db().cursor(cursor=DictCursor) as cur: 
+        queryString = "SELECT * from " + ARTICLE_TABLE + " where articleID=%s"
+        cur.execute(queryString, str(id))
+        output = cur.fetchall()
+
+        if len(output)>0:
+            return output[0]['name']
+        else:
+            raise ValueError(f"Could not find article with id: {id}")
     
 def convertPathToNames(idpath):
     output = []
@@ -371,23 +303,18 @@ def findPaths(startTitle, endTitle):
 
 
 
-
-
-
-
 def randStart(thresholdStart):
     
-    cur = get_db().cursor(cursor=DictCursor)
-    
-    queryString = "SELECT max(edgeID) FROM " + edgetable + ";"
-    cur.execute(queryString)
-    maxID = int(cur.fetchall()[0]['max(edgeID)'])
-    
-    while True:
-        randIndex = random.randint(1, maxID)
-        start = getSrc(randIndex, cur)
-        if checkStart(start, thresholdStart):
-            yield start
+    with get_db().cursor(cursor=DictCursor) as cur:
+        queryString = "SELECT max(edgeID) FROM " + EDGE_TABLE + ";"
+        cur.execute(queryString)
+        maxID = int(cur.fetchall()[0]['max(edgeID)'])
+        
+        while True:
+            randIndex = random.randint(1, maxID)
+            start = getSrc(randIndex, cur)
+            if checkStart(start, thresholdStart):
+                yield start
         
 def checkStart(start, thresholdStart):
     
