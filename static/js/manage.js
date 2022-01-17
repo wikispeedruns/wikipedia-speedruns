@@ -147,38 +147,27 @@ Vue.component('path-generator', {
 
 
     methods: {
-        async genPrompts(n) {
+        async genPrompt() {
             try {
-                const response = await fetch("/api/scraper/gen_prompts/", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({'N':n.toString()})
+                const response = await fetchJson("/api/scraper/gen_prompts/", 'POST', {
+                    'N': 1
                 })
         
-                const resp = await response.json()
-        
-                console.log(resp['Prompts'][0]);
-        
-                var generatedBlock = document.getElementById("generated");
-                var item = document.createElement("p");
-                item.innerHTML = resp['Prompts'][0][0] + " -> " + resp['Prompts'][0][1]+"\n";
-                
-                generatedBlock.appendChild(item)
-                
-                var button = document.createElement("button");
-                button.innerHTML = "Click to get the path of this random prompt"
-                
-        
-                button.onclick = (e) => {
-                    e.preventDefault();
-                    console.log("Received request, processing...")
-                    appendPath(item, resp['Prompts'][0][0], resp['Prompts'][0][1])
+                if (response.status != 200) {
+                    // For user facing interface, do something other than this
+                    alert(await response.text());
+                    return;
                 }
-        
-                item.appendChild(button)
-        
+
+                const resp = await response.json()
+                
+                let prompt = {};
+
+                prompt.start = resp['Prompts'][0][0];
+                prompt.end = resp['Prompts'][0][1];
+                prompt.path = await getPath(prompt.start, prompt.end);    
+            
+                this.prompts.push(prompt);
             } catch(e) {
                 console.log(e);
             }
@@ -187,11 +176,11 @@ Vue.component('path-generator', {
 
     template: (`
         <div>
-            <button id="genPromptButton" v-on:click="genPrompts(1)">Click to generate a random prompt</button>
+            <button id="genPromptButton" v-on:click="genPrompt">Click to generate a random prompt</button>
             <ul>
-                <li v-for="prompt in prompts">
-
-                </li
+                <li v-for="p in prompts">
+                    {{p.start}} -> {{p.end}}: ({{p.path}})
+                </li>
             </ul>
         </div>
     `)
@@ -313,23 +302,7 @@ var app = new Vue({
             }
         
             this.getPrompts();
-        },
-
-        //     var checkPath = document.createElement('button');
-        //     checkPath.append(document.createTextNode(`Get prompt's shortest path`));
-        
-        //     item.append(public)
-        //     item.append(checkPath)
-        
-        //     checkPath.onclick = (e) => {
-        //         e.preventDefault();
-        //         console.log("Received request, processing...")
-        //         appendPath(item, prompt["start"], prompt["end"])
-        //     }
-        
-        //     return item;
-        // }
-        
+        }
 
     } // End methods
 }); // End vue
