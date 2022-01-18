@@ -33,9 +33,9 @@ def getLinks(pages, forward = True):
                 if title in pages:
                     
                     if title not in output:
-                        output[title] = [(queryEntry['dest'], queryEntry['edgeID'])]
+                        output[title] = [queryEntry['dest']]
                     else:
-                        output[title].append((queryEntry['dest'], queryEntry['edgeID']))
+                        output[title].append(queryEntry['dest'])
                         
         else:
             queryString = "SELECT * FROM " + EDGE_TABLE + " WHERE dest IN (%s)"
@@ -46,22 +46,11 @@ def getLinks(pages, forward = True):
                 if title in pages:
                     
                     if title not in output:
-                        output[title] = [(queryEntry['src'], queryEntry['edgeID'])]
+                        output[title] = [queryEntry['src']]
                     else:
-                        output[title].append((queryEntry['src'], queryEntry['edgeID']))
+                        output[title].append(queryEntry['src'])
             
         return output
-
-
-
-def getSrc(edgeID, cur):
-    queryString = "SELECT src FROM " + EDGE_TABLE + " WHERE edgeID=%s"
-    #queryString = "SELECT src FROM edges WHERE edgeID=%s"
-    cur.execute(queryString, str(edgeID))
-    output = cur.fetchall()
-    
-    if len(output)>0:
-        return output[0]['src']
 
 
 
@@ -133,23 +122,21 @@ def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
             
         for linkTuple in links[title]:
         
-            link = linkTuple[0]
-            edgeID = linkTuple[1]
-            
+            link = linkTuple            
             
             if link == end:
                 print("Found end in forward search")
-                forwardVisited[link] = (title, forwardVisited[title][1] + 1, edgeID)
+                forwardVisited[link] = (title, forwardVisited[title][1] + 1)
                 return link
             
         
             if link in reverseVisited:
-                forwardVisited[link] = (title, forwardVisited[title][1] + 1, edgeID)
+                forwardVisited[link] = (title, forwardVisited[title][1] + 1)
                 return link
         
         
             if link not in forwardVisited:
-                forwardVisited[link] = (title, forwardVisited[title][1] + 1, edgeID)
+                forwardVisited[link] = (title, forwardVisited[title][1] + 1)
                 queue.append(link)
                                     
     return None  
@@ -190,22 +177,20 @@ def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
             
         for linkTuple in links[title]:
         
-            link = linkTuple[0]
-            edgeID = linkTuple[1]
-            
+            link = linkTuple[0]            
             
             if link == start:
                 print("Found start in reverse search")
-                reverseVisited[link] = (title, reverseVisited[title][1] + 1, edgeID)
+                reverseVisited[link] = (title, reverseVisited[title][1] + 1)
                 return link
             
             if link in forwardVisited:
-                reverseVisited[link] = (title, reverseVisited[title][1] + 1, edgeID)
+                reverseVisited[link] = (title, reverseVisited[title][1] + 1)
                 return link
         
         
             if link not in reverseVisited:
-                reverseVisited[link] = (title, reverseVisited[title][1] + 1, edgeID)
+                reverseVisited[link] = (title, reverseVisited[title][1] + 1)
                 queue.append(link)
                                 
     return None      
@@ -293,8 +278,7 @@ def findPaths(startTitle, endTitle):
         
     
     output = {"Articles":convertPathToNames(paths[0][0]),
-              "ArticlesIDs":paths[0][0],
-              "EdgeIDs": paths[0][1]}
+              "ArticlesIDs":paths[0][0]}
     
     print(f"Search duration: {time.time() - start_time}")
     
@@ -305,16 +289,16 @@ def findPaths(startTitle, endTitle):
 
 def randStart(thresholdStart):
     
-    with get_db().cursor(cursor=DictCursor) as cur:
-        queryString = "SELECT max(edgeID) FROM " + EDGE_TABLE + ";"
-        cur.execute(queryString)
-        maxID = int(cur.fetchall()[0]['max(edgeID)'])
+    with get_db().cursor() as cur:
+        query = "SELECT max(articleID) FROM " + ARTICLE_TABLE + ";"
+        cur.execute(query)
+        (maxID, ) = cur.fetchone()
         
         while True:
-            randIndex = random.randint(1, maxID)
-            start = getSrc(randIndex, cur)
+            start  = random.randint(1, maxID)
             if checkStart(start, thresholdStart):
                 yield start
+        
         
 def checkStart(start, thresholdStart):
     
@@ -436,7 +420,7 @@ def generatePrompts(thresholdStart=100, thresholdEnd=100, n=20, dist=15):
     startGenerator = randStart(thresholdStart)
     endGenerator = randStart(thresholdEnd)
     
-    while len(generatedPromptPaths) <= n:
+    while len(generatedPromptPaths) < n:
         
         sample = traceFromStart(startGenerator.__next__(), dist)
         
