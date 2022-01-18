@@ -42,7 +42,7 @@ def get_path():
 @scraper_api.post('/gen_prompts')
 def get_prompts():
     
-    n = int(request.json['N']) - 1
+    n = int(request.json['N'])
     d = 25
     thresholdStart = 200
     
