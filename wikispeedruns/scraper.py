@@ -73,7 +73,7 @@ def bidirectionalSearcher(start, end):
             if a and b:
                 aPath = traceBidirectionalPath(a, start, end, forwardVisited, reverseVisited)
                 bPath = traceBidirectionalPath(b, start, end, forwardVisited, reverseVisited)
-                if len(aPath[0]) > len(bPath[0]):
+                if len(aPath) > len(bPath):
                     a = None
                 else:
                     b = None
@@ -120,10 +120,8 @@ def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
     
     for title in links:
             
-        for linkTuple in links[title]:
-        
-            link = linkTuple            
-            
+        for link in links[title]:
+                    
             if link == end:
                 print("Found end in forward search")
                 forwardVisited[link] = (title, forwardVisited[title][1] + 1)
@@ -175,10 +173,7 @@ def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
     
     for title in links:
             
-        for linkTuple in links[title]:
-        
-            link = linkTuple[0]            
-            
+        for link in links[title]:            
             if link == start:
                 print("Found start in reverse search")
                 reverseVisited[link] = (title, reverseVisited[title][1] + 1)
@@ -199,16 +194,7 @@ def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
 def traceBidirectionalPath(intersection, start, end, forwardVisited, reverseVisited):
     forwardPath = tracePath(forwardVisited, intersection, start)
     reversePath = Reverse(tracePath(reverseVisited, intersection, end))
-    
-    forwardIDs = []
-    for node in forwardPath:
-        forwardIDs.append(forwardVisited[node][2])
-
-    reverseIDs = []
-    for node in reversePath:
-        reverseIDs.append(reverseVisited[node][2])
-
-    return (forwardPath + reversePath[1:], forwardIDs[1:] + reverseIDs[:-1])
+    return forwardPath + reversePath[1:]
     
 
 def tracePath(visited, page, start):
@@ -273,12 +259,12 @@ def findPaths(startTitle, endTitle):
     
     for path in paths:
         print("Path:")
-        print(path[0])
-        print(convertPathToNames(path[0]))
+        print(path)
+        print(convertPathToNames(path))
         
     
-    output = {"Articles":convertPathToNames(paths[0][0]),
-              "ArticlesIDs":paths[0][0]}
+    output = {"Articles":convertPathToNames(paths[0]),
+              "ArticlesIDs":paths[0]}
     
     print(f"Search duration: {time.time() - start_time}")
     
@@ -403,7 +389,7 @@ def traceFromStart(startTitle, dist):
         
         randIndex = random.randint(0, len(links) - 1)
         
-        currentTitle = links[randIndex][0]
+        currentTitle = links[randIndex]
         
         dist -= 1
     

@@ -113,14 +113,13 @@ Vue.component('path-checker', {
             pathStart: "",
             pathEnd: "",
 
-            path: "",
+            path: [],
         }
     },
 
     methods: {
         async pathCheck() {
-            const path = await getPath(this.pathStart, this.pathEnd);
-            console.log(path);
+            this.path = await getPath(this.pathStart, this.pathEnd);
         }
     },
 
@@ -134,6 +133,8 @@ Vue.component('path-checker', {
             <input type="text" name="pathEnd" v-model="pathEnd">
             <button type="submit">Check for shortest path</button>
         </form>
+
+        <p> {{path}} </p>
     </div>
     `)
 });

@@ -13,13 +13,8 @@ def get_path():
     
     start = request.json['start']
     end = request.json['end']
-    
-    
-    try:
-        output = timer(SCRAPER_TIMEOUT, findPaths, start, end)
-    except Exception as err:
-        print(f"ERROR {str(err)}")
-        return str(err), 500
+        
+    output = timer(SCRAPER_TIMEOUT, findPaths, start, end)
     
     """
     pool = Pool(processes=1)
@@ -46,11 +41,11 @@ def get_prompts():
     d = 25
     thresholdStart = 200
     
-    try:
-        paths = generatePrompts(thresholdStart=thresholdStart, thresholdEnd=thresholdStart, n=n, dist=d)
-    except Exception as err:
-        print(err)
-        return str(err), 500
+    # try:
+    paths = generatePrompts(thresholdStart=thresholdStart, thresholdEnd=thresholdStart, n=n, dist=d)
+    # except Exception as err:
+    #     print(err)
+    #     return str(err), 500
     
     outputArr = []
     
