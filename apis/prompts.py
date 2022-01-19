@@ -140,8 +140,8 @@ def get_daily_prompts():
     FROM prompts as p
     JOIN daily_prompts as d ON p.prompt_id = d.prompt_id
     WHERE type='DAILY' 
-	    AND d.date <= CONVERT_TZ(CURDATE(), 'UTC', 'US/Eastern')
-        AND d.date > CONVERT_TZ(CURDATE() - %s, 'UTC', 'US/Eastern');
+	    AND d.date <= CURDATE()
+        AND d.date > CURDATE();
     """
 
     # how many days to look back for daily prompts, defaults to 1
