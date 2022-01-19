@@ -1,3 +1,45 @@
+var app = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    data: {
+        startArticle: "",
+        endArticle: "",
+        timer: "",
+        countdown: 8,
+        finished: false,
+        started: false,
+        gunShow: false,
+        activeTip: "",
+        caught: false,
+        path:[],
+        finalTime:"",
+        prompt_id: 0,
+
+    },
+    methods : {
+        formatPath: function (pathArr) {
+            output = "";
+            for(i=0; i<pathArr.length - 1;i++) {
+                output = output.concat(pathArr[i])
+                output = output.concat(" -> ")
+            }
+            output = output.concat(pathArr[pathArr.length - 1])
+            return output;
+        }, 
+
+        finishPrompt: function (event) {
+            window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
+        }, 
+
+        home: function (event) {
+            window.location.replace("/");
+        }
+
+    }
+})
+
+
+
 var goalPage = "";
 var timerInterval = null;
 var startTime = 0;
@@ -95,10 +137,15 @@ async function loadPage(page) {
 }
 
 async function finish() {
+
+    app.$data.finished = true;
+    app.$data.path = path;
+    app.$data.finalTime = app.$data.timer;
+
     // Stop timer
     endTime = Date.now();
     clearInterval(timerInterval);
-    document.getElementById("timer").innerHTML="";
+    //document.getElementById("timer").innerHTML="";
 
     // Prevent are you sure you want to leave prompt
     window.onbeforeunload = null;
@@ -118,7 +165,7 @@ async function finish() {
             body: JSON.stringify(reqBody)
         })
 
-        window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
+        //window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
 
     } catch(e) {
         console.log(e);
@@ -183,15 +230,7 @@ function hideElements() {
     
 }
 
-function formatPath(pathArr) {
-    output = "";
-    for(i=0; i<pathArr.length - 1;i++) {
-        output = output.concat(pathArr[i])
-        output = output.concat(" -><br>")
-    }
-    output = output.concat(pathArr[pathArr.length - 1])
-    return output;
-}
+
 
 function formatStr(string) {
     return string.replace("_", " ").toLowerCase()
@@ -199,7 +238,8 @@ function formatStr(string) {
 
 function displayTimer() {
     seconds = (Date.now() - startTime) / 1000;
-    document.getElementById("timer").innerHTML = "Elapsed Time:<br/><strong>"+seconds + "s</strong>";
+    app.$data.timer = seconds;
+    //document.getElementById("timer").innerHTML = "Elapsed Time<br/><strong>"+seconds + "s</strong>";
 }
 
 function getRandTip() {
@@ -219,44 +259,15 @@ function getRandTip() {
 }
 
 function countdownOnLoad(start, end) {
-    
-    var guideBlock = document.getElementById("guide");
-    var mainBlock = document.getElementById("main");
-    var countdownBlock = document.getElementById("countdown");
-    var timerBlock = document.getElementById("timer");
-    var tipsBlock = document.getElementById("tips");
-
-    var gifBlock = document.getElementById("mirroredimgblock");
-
-    guideBlock.innerHTML = "<strong>Starting article: </strong>" + start + "    -->    <strong>Goal article: </strong>" + end
-
-    mainBlock.style.display = "none";
-    countdownBlock.style.display = "block";
-    timerBlock.style.display = "none";
-    tipsBlock.style.display = "block";
 
 
-    tipsBlock.innerHTML = getRandTip();
+    app.$data.startArticle = start;
+    app.$data.endArticle = end;
 
-    //countdownBlock.innerHTML = "Prompt will begin in " + "5" + " seconds";
-    /*    <img class="startgun" src="{{url_for('static', filename='assets/startgun.gif')}}">
-    <img class="startgun invgif" src="{{url_for('static', filename='assets/startgun.gif')}}">
-    */
+    app.$data.activeTip = getRandTip();
 
     var countDownStart = Date.now();
-    var countDownTime = 8000;
-
-
-    var gunimg1 = document.createElement('img');
-    var gunimg2 = document.createElement('img');
-    imgpath = "/static/assets/startgun.gif";
-
-    gunimg1.classList.add("startgun");
-    gunimg2.classList.add("startgun");
-    gunimg2.classList.add("invgif");
-    gunimg2.src = imgpath;
-    gunimg1.src = imgpath;
-
+    var countDownTime = app.$data.countdown * 1000;
 
     var x = setInterval(function() {
 
@@ -264,62 +275,47 @@ function countdownOnLoad(start, end) {
       
         // Find the distance between now and the count down date
         var distance = countDownStart + countDownTime - now;
-        //console.log(distance);
-        //console.log(String(Math.floor(distance/1000)+1));
-        countdownBlock.innerHTML = String(Math.floor(distance/1000)+1);
-        countdownBlock.style.visibility = "visible";
+
+        app.$data.countdown = Math.floor(distance/1000)+1;
+
         if (distance < -1000) {
             clearInterval(x);
-            mainBlock.style.display = "block";
-            countdownBlock.style.display = "none";
-            guideBlock.innerHTML = "<p>Start Article:<br/><strong>" + start + "</strong></p><p>End Article:<br/><strong>" + end + "</strong></p>";
-            timerBlock.style.display = "block";
-            tipsBlock.style.display = "none";
-            gifBlock.style.display = "none";
+
+            app.$data.started = true;
+            
+
             startTime = Date.now();
             ctrlfwarnings = true;
 
-            //Temporary implementation
-            var HUDblock = document.getElementById("HUD");
-            HUDblock.classList.add("HUD");
-            guideBlock.classList.add("guideblockhud");
-
         }
         if (distance < 700 && distance > 610) {
-            gifBlock.style.visibility = "visible";
-            gifBlock.appendChild(gunimg1);
-            gifBlock.appendChild(gunimg2);
+            app.$data.gunShow = true;
         }
       }, 50);
+
+      app.$data.gunShow = false;
 
 }
 
 function checkForFind(e) {
-
-    var guideBlock = document.getElementById("guide");
-    var mainBlock = document.getElementById("main");
-    var timerBlock = document.getElementById("timer");
 
     console.log(e.code);
     e = e || event;
     keyMap[e.code] = e.type == 'keydown';
     if (keyMap["KeyF"] && (keyMap["ControlLeft"] || keyMap["ControlRight"])) {
         if (ctrlfwarnings == true) {
-            //ctrlfwarnings = 1;
-            mainBlock.style.display = "none";
-            timerBlock.style.display = "none";
-            guideBlock.innerHTML = "STOP! You violated the law. Pay the court a fine or serve your sentence."
-            var tesguard = document.createElement('img');
-            tesguard.src = "/static/assets/stop.jpg";
-            tesguard.width= "700";
-            tesguard.style.marginTop = "40px";
-            guideBlock.appendChild(tesguard);
+
+            app.$data.finished = true;
+            app.$data.caught = true;
         }
     }
 }
 
+
 window.addEventListener("load", async function() {
     const response = await fetch("/api/prompts/" + prompt_id);
+
+    app.$data.prompt_id = prompt_id;
 
     if (response.status != 200) {
         const error = await response.text();
@@ -345,9 +341,14 @@ window.onbeforeunload = function() {
 };
 
 
+
 window.addEventListener("keydown", function(e) {
     checkForFind(e);
 });
 window.addEventListener("keyup", function(e) {
     checkForFind(e);
 });
+
+
+
+
