@@ -141,7 +141,7 @@ def get_daily_prompts():
     JOIN daily_prompts as d ON p.prompt_id = d.prompt_id
     WHERE type='DAILY' 
 	    AND d.date <= CURDATE()
-        AND d.date > CURDATE();
+        AND d.date > CURDATE() - %s;
     """
 
     # how many days to look back for daily prompts, defaults to 1
