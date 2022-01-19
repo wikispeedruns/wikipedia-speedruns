@@ -1,5 +1,7 @@
-import {fetchJson} from "./modules/fetch.js";
-import {dateToIso} from "./modules/date.js";
+import { fetchJson } from "./modules/fetch.js";
+import { dateToIso } from "./modules/date.js";
+
+import { getPath } from "./modules/scraper.js";
 
 Vue.component('prompt-item', {
     props: ['prompt'],
@@ -103,7 +105,90 @@ Vue.component('daily-item', {
 
     </div>
     `)
-})
+});
+
+Vue.component('path-checker', {
+    data: function() {
+        return {
+            pathStart: "",
+            pathEnd: "",
+
+            path: [],
+        }
+    },
+
+    methods: {
+        async pathCheck() {
+            this.path = await getPath(this.pathStart, this.pathEnd);
+        }
+    },
+
+    template: (`
+    <div>
+        <p> Check for shortest paths of any 2 articles here: </p>
+        <form id="checkPath"  v-on:submit.prevent="pathCheck">
+            <label for="pathStart">Start Article:</label>
+            <input type="text" name="pathStart" v-model="pathStart">
+            <label for="pathEnd">End Article:</label>
+            <input type="text" name="pathEnd" v-model="pathEnd">
+            <button type="submit">Check for shortest path</button>
+        </form>
+
+        <p> {{path}} </p>
+    </div>
+    `)
+});
+
+Vue.component('path-generator', {
+    data: function() {
+        return {
+            prompts: []
+        }
+    },
+
+
+    methods: {
+        async genPrompt() {
+            try {
+                const response = await fetchJson("/api/scraper/gen_prompts", 'POST', {
+                    'N': 1
+                })
+        
+                if (response.status != 200) {
+                    // For user facing interface, do something other than this
+                    alert(await response.text());
+                    return;
+                }
+
+                const resp = await response.json()
+                
+                let prompt = {};
+
+                prompt.start = resp['Prompts'][0][0];
+                prompt.end = resp['Prompts'][0][1];
+                prompt.path = await getPath(prompt.start, prompt.end);    
+            
+                this.prompts.push(prompt);
+            } catch(e) {
+                console.log(e);
+            }
+        }
+    },
+
+    template: (`
+        <div>
+            <button id="genPromptButton" v-on:click="genPrompt">Click to generate a random prompt</button>
+            <ul>
+                <li v-for="p in prompts">
+                    {{p.start}} -> {{p.end}}: ({{p.path}})
+                </li>
+            </ul>
+        </div>
+    `)
+
+});
+
+
 
 
 var app = new Vue({
@@ -114,7 +199,7 @@ var app = new Vue({
         public: [],
         weeks: [],
 
-        toMakePublic: 0
+        toMakePublic: 0,
     },
 
     created: async function() {
@@ -180,7 +265,7 @@ var app = new Vue({
 
 
         async newPrompt(event) {
-        
+    
             let reqBody = {};
         
             const resp = await fetch(
@@ -219,7 +304,9 @@ var app = new Vue({
         
             this.getPrompts();
         }
-        
 
-    }
-})
+    } // End methods
+}); // End vue
+
+
+
