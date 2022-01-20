@@ -18,7 +18,7 @@ def get_top_ratings():
     query = '''
     SELECT users.username, ratings.rating FROM ratings
     JOIN users ON users.user_id = ratings.user_id
-    WHERE ratings.num_rounds > 0
+    WHERE ratings.num_rounds >= 3
     ORDER by ratings.rating DESC
     LIMIT 10
     '''
