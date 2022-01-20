@@ -1,3 +1,5 @@
+import { getRandTip } from "./modules/tooltips.js";
+
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
@@ -49,6 +51,7 @@ var endTime = 0;
 var run_id = -1;
 
 var keyMap = {};
+var seconds;
 
 var ctrlfwarnings = false;
 
@@ -176,16 +179,16 @@ async function finish() {
 function hideElements() {
     
     var hide = ["reference","mw-editsection","reflist","portal","refbegin", "sidebar", "authority-control", "external", "sistersitebox"]
-    for(i=0; i<hide.length; i++) {
+    for(var i=0; i<hide.length; i++) {
         var elements = document.getElementsByClassName(hide[i])
         //console.log("found: " + hide[i] + elements.length)
-        for(j=0; j<elements.length; j++) {
+        for(var j=0; j<elements.length; j++) {
             elements[j].style.display = "none";
         }
     }
     
     var idS = ["See_also", "Notes_and_references", "Further_reading", "External_links", "References", "Notes", "Citations", "Explanatory_notes"];
-    for(i=0; i<idS.length; i++) {
+    for(var i=0; i<idS.length; i++) {
         var e = document.getElementById(idS[i]);
         if (e !== null) {
             e.style.display = "none";
@@ -195,7 +198,7 @@ function hideElements() {
     //hide Disambig
     
     var elements = document.getElementsByClassName("hatnote");
-    for (i=0; i < elements.length; i++) {
+    for (var i=0; i < elements.length; i++) {
         var a = elements[i].getElementsByClassName("mw-disambig");
         //console.log(a)
         if (a.length !== 0) {
@@ -207,14 +210,14 @@ function hideElements() {
     //var all = document.getElementsByClassName("mw-parser-output")[0].querySelectorAll("h2", "div", "ul", "p");
     var all = document.getElementById("wikipedia-frame").querySelectorAll("h2, div, ul, p, h3");
     var flip = false
-    for (i = 0; i < all.length; i++) {
+    for (var i = 0; i < all.length; i++) {
         if (!flip) {
             if (all[i].tagName == "H2") {
                 //console.log("checking h2");
                 var check = all[i].getElementsByClassName("mw-headline")
                 if (check.length !== 0) {
                     //console.log(check[0].id)
-                    for (j = 0; j < idS.length; j++) {
+                    for (var j = 0; j < idS.length; j++) {
                         if (check[0].id == idS[j]) {
                             //console.log("found see also at: " + i);
                             all[i].style.display = "none";
@@ -242,21 +245,7 @@ function displayTimer() {
     //document.getElementById("timer").innerHTML = "Elapsed Time<br/><strong>"+seconds + "s</strong>";
 }
 
-function getRandTip() {
-    const tips = [
-        "There are five permanent members of the UN security council: China, France, Russia, United Kingdom, and the United States.",
-        "The Fortune magazine has a list for top 500 United States companies (“Fortune 500”), as well as a list for top 500 global companies (“Fortune Global 500”).",
-        "Brazil is currently the world’s largest producer of sugarcane, and by a lot!",
-        "Buddhism originated in ancient India sometime between the 6th and 4th centuries BCE.",
-        "Pressing the back button will forfeit your attempt!",
-        "Infoboxes on the right often give very quick and useful links, especially for biographical and geographical pages.",
-        "Plan ahead, but be flexible! If you foresee a better route than what you had planned, go for it!",
-        "Use the Table of Contents to your advantage!",
-        "Some article subsections have an associated main article, usually linked under the subsection title."
-    ];
 
-    return tips[Math.floor(Math.random() * tips.length)];
-}
 
 function countdownOnLoad(start, end) {
 
