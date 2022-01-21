@@ -1,3 +1,6 @@
+const promptsPerPage = 1;
+
+/*
 function generate_prompt(prompt)
 {
     document.getElementById("prompt").innerHTML = prompt["start"] + "/" + prompt["end"];
@@ -47,6 +50,7 @@ function generate_leaderboard(runs)
         table.appendChild(item);
     }
 }
+*/
 
 function populateGraph(runs) {
 
@@ -222,6 +226,11 @@ var app = new Vue({
     data: {
         prompt: [],
         runs: [],
+        renderedRuns: [],
+        renderedRunsRank: [],
+        currentRun: null,
+        currentRunPosition: 0,
+        currentRunRank: 0,
     },
 
     methods : {
@@ -236,17 +245,71 @@ var app = new Vue({
         }, 
 
         genGraph: function () {
-            var graph1 = populateGraph(this.runs);
+            var paths = this.renderedRuns;
+            if (this.currentRunPosition === -1 || this.currentRunPosition === 1) {
+                paths = paths.concat(this.currentRun)
+            }
+            var graph1 = populateGraph(paths);
             $('#springydemo').springy({ graph: graph1 });
+        },
+
+        paginate: function () {
+            var first = (pg-1) * promptsPerPage
+            var last = pg * promptsPerPage
+            for (var i = 0; i < this.runs.length; i++) {
+                run = this.runs[i]
+                if (run_id) {
+                    if (run.run_id === parseInt(run_id)) {
+                        this.currentRun = run;
+                        this.currentRunRank = i+1;
+                        if (i < first) {
+                            this.currentRunPosition = -1;
+                        } else if (i >= last) {
+                            this.currentRunPosition = 1;
+                        }
+                    }
+                }
+
+                if (i >= first && i < last) {
+                    this.renderedRuns.push(run)
+                    this.renderedRunsRank.push(i+1)
+                }
+
+            }
+        },
+
+        getRenderedRank: function (index) {
+            return this.renderedRunsRank[index];
+        },
+
+        nextPage: function () {
+            if (run_id) {
+                window.location.replace("/prompt/" + prompt_id + "?page=" + String(parseInt(pg)+1) + "&run_id=" + run_id);
+            } else {
+                window.location.replace("/prompt/" + prompt_id + "?page=" + String(parseInt(pg)+1));
+            }
+        }, 
+
+        prevPage: function() {
+            if (run_id) {
+                window.location.replace("/prompt/" + prompt_id + "?page=" + String(parseInt(pg)-1) + "&run_id=" + run_id);
+            } else {
+                window.location.replace("/prompt/" + prompt_id + "?page=" + String(parseInt(pg)-1));
+            }
         }
     },
 
     created: async function() {
         this.prompt = await this.getPrompt();
         
-        this.runs = await this.getRuns(); 
+        this.runs = await this.getRuns();
+
         console.log(this.prompt);
         console.log(this.runs);
+
+        this.paginate(); 
+
+        
         
         this.genGraph();
     }

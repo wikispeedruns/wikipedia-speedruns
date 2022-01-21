@@ -16,7 +16,6 @@ var app = new Vue({
         path:[],
         finalTime:"",
         prompt_id: 0,
-
     },
     methods : {
         formatPath: function (pathArr) {

@@ -232,5 +232,4 @@ def get_prompt_leaderboard(id, run_id):
 
         for run in results:
             run['path'] = json.loads(run['path'])
-
         return jsonify(results)
