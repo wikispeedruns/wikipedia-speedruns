@@ -1,4 +1,4 @@
-const promptsPerPage = 1;
+const promptsPerPage = 10;
 
 /*
 function generate_prompt(prompt)
@@ -88,6 +88,8 @@ function populateGraph(runs) {
         return -1;
     }
 
+    var startNode;
+    var endNode;
     
 
     for (var i = 0; i < runs.length; i++) {
@@ -104,13 +106,22 @@ function populateGraph(runs) {
         for (var j = 0; j < pathNodes.length; j++) {
             var index = checkIncludeLabels(pathNodes[j], nodes);
             if (index === -1) {
-                var type;
-                if (j === 0) { type = 1;} 
-                else if (j === pathNodes.length - 1) { type = 2;} 
-                else { type = 0;}
+                let node = {type: 0, label: pathNodes[j], count: 1, current: cur};
+                if (j === 0) {
+                    node.type = 1;
+                    startNode = node;
+                } 
+                else if (j === pathNodes.length - 1) {
+                    node.type = 2;
+                    endNode = node;
+                } 
+                else {
+                    type = 0;
+                    nodes.push(node);
+                }
                 
-                let node = {type: type, label: pathNodes[j], count: 1, current: cur};
-                nodes.push(node);
+                //let node = {type: type, label: pathNodes[j], count: 1, current: cur};
+                //nodes.push(node);
                 
             } else {
                 if (cur) {
@@ -119,8 +130,21 @@ function populateGraph(runs) {
                 nodes[index].count = nodes[index].count + 1;
             }
         }
+    }
 
-        
+    if (runs.length > 0) {
+        nodes.push(startNode);
+        nodes.push(endNode);
+    }
+
+
+    for (var i = 0; i < runs.length; i++) {
+        if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
+
+
+        var pathNodes = runs[i]["path"]
+        var cur = (runs[i]["run_id"] === Number(run_id)) ? true : false;
+
         for (var j = 0; j < pathNodes.length - 1; j++) {
 
 
