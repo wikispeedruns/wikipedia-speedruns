@@ -1,56 +1,5 @@
 const promptsPerPage = 10;
 
-/*
-function generate_prompt(prompt)
-{
-    document.getElementById("prompt").innerHTML = prompt["start"] + "/" + prompt["end"];
-}
-
-function generate_leaderboard(runs)
-{
-    var table = document.getElementById("leaderboard");
-    // TODO probably add class and stuff
-
-    var rank = 1;
-
-    for (var i = 0; i < runs.length; i++) {
-        // Ignore all runs without user_ids
-        if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
-
-        var item = document.createElement("tr");
-        
-        var rankEl = document.createElement("td");
-        rankEl.appendChild(document.createTextNode(rank));
-        rank++;
-
-        var time = document.createElement("td");
-        time.appendChild(document.createTextNode((runs[i]["run_time"]/1000000).toFixed(2) + " s"));
-
-        var path = document.createElement("td");
-        path.appendChild(document.createTextNode(runs[i]["path"]));
-
-        var name = document.createElement("td");
-
-        if (runs[i]["username"]) {
-            name.appendChild(document.createTextNode( runs[i]["username"]));
-        } else  {
-            name.appendChild(document.createTextNode("You"));
-        }
-
-        if (runs[i]["run_id"] === Number(run_id)) {
-            item.style.fontWeight = "bold";
-        }
-
-        item.appendChild(rankEl);
-        item.appendChild(name);
-        item.appendChild(time);
-        item.appendChild(path);
-        
-
-        table.appendChild(item);
-    }
-}
-*/
 
 function populateGraph(runs) {
 
@@ -71,7 +20,7 @@ function populateGraph(runs) {
     var edges = [];
 
     var checkIncludeLabels = function(label, array) {
-        for (var i = 0; i < array.length; i++) {
+        for (let i = 0; i < array.length; i++) {
             if (array[i].label === label) {
                 return i;
             }
@@ -80,7 +29,7 @@ function populateGraph(runs) {
     }
 
     var checkIncludeEdgeLabels = function(src, dest, array) {
-        for (var i = 0; i < array.length; i++) {
+        for (let i = 0; i < array.length; i++) {
             if (array[i].src === src && array[i].dest === dest) {
                 return i;
             }
@@ -92,18 +41,13 @@ function populateGraph(runs) {
     var endNode;
     
 
-    for (var i = 0; i < runs.length; i++) {
+    for (let i = 0; i < runs.length; i++) {
         if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
-
 
         var pathNodes = runs[i]["path"]
         var cur = (runs[i]["run_id"] === Number(run_id)) ? true : false;
 
-        if (cur) {
-            console.log(runs[i]["path"]);
-        }
-
-        for (var j = 0; j < pathNodes.length; j++) {
+        for (let j = 0; j < pathNodes.length; j++) {
             var index = checkIncludeLabels(pathNodes[j], nodes);
             if (index === -1) {
                 let node = {type: 0, label: pathNodes[j], count: 1, current: cur};
@@ -138,17 +82,17 @@ function populateGraph(runs) {
     }
 
 
-    for (var i = 0; i < runs.length; i++) {
+    for (let i = 0; i < runs.length; i++) {
         if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
 
 
         var pathNodes = runs[i]["path"]
         var cur = (runs[i]["run_id"] === Number(run_id)) ? true : false;
 
-        for (var j = 0; j < pathNodes.length - 1; j++) {
+        for (let j = 0; j < pathNodes.length - 1; j++) {
 
 
-            var index = checkIncludeEdgeLabels(pathNodes[j], pathNodes[j + 1], edges);
+            let index = checkIncludeEdgeLabels(pathNodes[j], pathNodes[j + 1], edges);
 
             if (index === -1) {
                 let edge = {src: pathNodes[j], dest: pathNodes[j + 1], count: 1, current: cur};
@@ -307,6 +251,7 @@ var app = new Vue({
         },
 
         nextPage: function () {
+            //TODO: look into ways to use JS methods to update/insert new args
             if (run_id) {
                 window.location.replace("/prompt/" + prompt_id + "?page=" + String(parseInt(pg)+1) + "&run_id=" + run_id);
             } else {
@@ -325,32 +270,9 @@ var app = new Vue({
 
     created: async function() {
         this.prompt = await this.getPrompt();
-        
         this.runs = await this.getRuns();
 
-        console.log(this.prompt);
-        console.log(this.runs);
-
-        this.paginate(); 
-
-        
-        
+        this.paginate();      
         this.genGraph();
     }
 })
-
-
-
-/*
-window.addEventListener("load", async function() {
-    var response = await fetch("/api/prompts/" + prompt_id);
-    const prompt = await response.json();
-
-    response = await fetch("/api/prompts/" + prompt_id + "/leaderboard/" + run_id);
-    const runs = await response.json(); 
-
-    generate_prompt(prompt);
-    generate_leaderboard(runs);
-    var graph1 = populateGraph(runs);
-    $('#springydemo').springy({ graph: graph1 });
-});*/
