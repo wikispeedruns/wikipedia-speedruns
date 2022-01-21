@@ -216,6 +216,45 @@ function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
+var app = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    data: {
+        prompt: [],
+        runs: [],
+    },
+
+    methods : {
+        getPrompt: async function () {
+            var response = await fetch("/api/prompts/" + prompt_id);
+            return await response.json();
+        }, 
+
+        getRuns: async function () {
+            var response = await fetch("/api/prompts/" + prompt_id + "/leaderboard/" + run_id);
+            return await response.json(); 
+        }, 
+
+        genGraph: function () {
+            var graph1 = populateGraph(this.runs);
+            $('#springydemo').springy({ graph: graph1 });
+        }
+    },
+
+    created: async function() {
+        this.prompt = await this.getPrompt();
+        
+        this.runs = await this.getRuns(); 
+        console.log(this.prompt);
+        console.log(this.runs);
+        
+        this.genGraph();
+    }
+})
+
+
+
+/*
 window.addEventListener("load", async function() {
     var response = await fetch("/api/prompts/" + prompt_id);
     const prompt = await response.json();
@@ -227,4 +266,4 @@ window.addEventListener("load", async function() {
     generate_leaderboard(runs);
     var graph1 = populateGraph(runs);
     $('#springydemo').springy({ graph: graph1 });
-});
+});*/

@@ -11,28 +11,44 @@
 <script src="{{url_for('static', filename='js/springy-master/springy.js') }}"></script>
 <script src="{{url_for('static', filename='js/springy-master/springyui.js') }}"></script>
 
-<script type=text/javascript src="{{url_for('static', filename='js/prompt.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script> 
+
+
 {% endblock %}
 
 {% block content %}
+<div id="app">
+    <div class="col-xl-12">
+        <div class="card">
+            <div class="card-body">
     
-    <h3>Prompt #{{prompt_id}}</h3>
-    <p id="prompt"></p>
+                <h4>Prompt #{{prompt_id}}</h4> 
+                <h6><strong>[[prompt.start]]</strong> to <strong>[[prompt.end]]</strong></h6>
 
-    <table id="leaderboard" style="width:85%; margin: auto; margin-top: 50px">
-        <tr>
-            <th style="width:10%">Rank</th>
-            <th style="width:10%">Name</th>
-            <th style="width:10%">Time</th>
-            <th>Path</th>
-        </tr>
-        
-    </table>
+                <table class="table table-hover">
+                    <thead>
+                        <th scope="col">Rank</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Time</th>
+                        <th scope="col">Path</th>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(run, index) in runs" v-bind:class="{bold: run.run_id === {{run_id}}}" v-cloak>
+                            <td>[[index+1]]</td>
+                            <td v-if="run.username">[[run.username]]</td>
+                            <td v-else>You</td>
+                            <td>[[(run.run_time/1000000).toFixed(3)]] s</td>
+                            <td>[[run.path]]</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </ul>
+            </div>  
+        </div>
+    </div>
+</div>
 
-    <canvas id="springydemo" width="1200" height="900" style="margin-top: 50px; display: block;
-    margin-left: auto;
-    margin-right: auto;
-    font-size: 10px;">
+<script type=text/javascript src="{{url_for('static', filename='js/prompt.js') }}"></script>
 
-    
+<canvas id="springydemo" width="1200" height="900"> 
 {% endblock %}
