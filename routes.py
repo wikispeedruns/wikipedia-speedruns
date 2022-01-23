@@ -9,10 +9,17 @@ import random
 
 # Passes session args to function if needed
 def render_with_user(template, **kwargs):
+
+    data = kwargs
+
+
     if ("user_id" in session):
-        return render_template(template, user_id=session["user_id"], username=session["username"], **kwargs)
+        data["user_id"] = session["user_id"]
+        data["username"] = session["username"]
+
+        return render_template(template, data=data)
     else:
-        return render_template(template, **kwargs)
+        return render_template(template, data=data)
 
 # Front end pages
 @app.route('/', methods=['GET'])

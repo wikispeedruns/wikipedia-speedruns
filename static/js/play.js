@@ -1,3 +1,7 @@
+import { serverData } from "./modules/serverData.js"
+
+const prompt_id = serverData["prompt_id"];
+
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
