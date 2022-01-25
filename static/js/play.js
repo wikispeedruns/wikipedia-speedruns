@@ -311,6 +311,12 @@ function checkForFind(e) {
     }
 }
 
+function disableFind(e) {
+    console.log(e);
+    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) { 
+        e.preventDefault();
+    }
+}
 
 window.addEventListener("load", async function() {
     const response = await fetch("/api/prompts/" + prompt_id);
@@ -343,11 +349,11 @@ window.onbeforeunload = function() {
 
 
 window.addEventListener("keydown", function(e) {
-    checkForFind(e);
+    disableFind(e);
 });
-window.addEventListener("keyup", function(e) {
-    checkForFind(e);
-});
+// window.addEventListener("keyup", function(e) {
+//     checkForFind(e);
+// });
 
 
 
