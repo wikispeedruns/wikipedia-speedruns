@@ -5,6 +5,7 @@ from flask import render_template, request, redirect, session
 from util.decorators import check_admin
 
 import db
+import random
 
 # Passes session args to function if needed
 def render_with_user(template, **kwargs):
@@ -15,28 +16,26 @@ def render_with_user(template, **kwargs):
 
 # Front end pages
 @app.route('/', methods=['GET'])
-def get_home_page():    
+def get_home_page():
     return render_with_user('home.html')
 
 @app.route('/about', methods=['GET'])
-def get_about_page():    
+def get_about_page():
     return render_with_user('about.html')
 
 @app.route('/random', methods=['GET'])
 def get_random_prompt():
-    # TODO this is insanely inefficient, it needs to sort the whole set of public prompts!
     query = ("""
-    SELECT prompt_id FROM prompts
-    WHERE public=TRUE
-    ORDER BY RAND()
-    LIMIT 1;
+    SELECT prompt_id
+    FROM prompts
+    WHERE type='public';
     """)
 
     with db.get_db().cursor() as cursor:
         cursor.execute(query)
-        results = cursor.fetchone()
-        print(results)
-        return redirect("/play/" + str(results[0]), code=302)
+        results = cursor.fetchall()
+        rand_prompt = random.choice(results)[0]
+        return redirect("/play/" + str(rand_prompt), code=302)
 
 @app.route('/latest', methods=['GET'])
 def get_latest_prompt():
@@ -76,7 +75,7 @@ def get_manage_page():
 @app.route('/prompt/<id>', methods=['GET'])
 def get_prompt_page(id):
     run_id = request.args.get('run_id', '')
-    
+
     if len(run_id) != 0:
         return render_with_user('prompt.html', prompt_id=id, run_id=run_id)
     else:
@@ -86,7 +85,7 @@ def get_prompt_page(id):
 @app.route('/play/<id>', methods=['GET'])
 def get_play_page(id):
     return render_with_user('play.html', prompt_id=id)
-    
+
 
 
 @app.route('/confirm/<token>', methods=['GET'])
@@ -100,8 +99,6 @@ def get_reset_request_page():
 @app.route('/reset/<id>/<token>', methods=['GET'])
 def get_reset_page(id, token):
     return render_template('users/reset_password.html', id=id, token=token)
-
-
 
 
 @app.route('/error', methods=['GET'])

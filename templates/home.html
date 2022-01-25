@@ -2,7 +2,7 @@
 
 {% block head %}
 <script defer type=text/javascript src="{{url_for('static', filename='js/home.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/vue@2"></script> 
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
 <style>
     [v-cloak] { display: none }
 </style>
@@ -28,15 +28,15 @@
 
     <hr>
 
-    <!-- Fix random to choose a public prompt <p>Click <a href="/random">here</a> to try a random prompt, starts immediately after click!</p> -->
+    <p>Click <a href="/random">here</a> to try a random prompt, starts immediately after click!</p>
 
     <div class="row justify-content-md-center">
 
     <div class="col-sm-6">
         <div class="card">
             <div class="card-body">
-       
-                <h4> Prompts of the Day</h4> 
+
+                <h4> Prompts of the Day</h4>
                 <h6><span v-cloak v-once>([[new Date().toDateString()]])</span></h6>
                 <table class="table table-hover">
                     <thead>
@@ -46,17 +46,17 @@
                     <tbody>
                         <tr v-for="prompt in dailyPrompts" v-cloak>
                             <td>[[prompt.prompt_id]]<span v-if="prompt.rated">*</span> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
-                            
+
                             <td>[[prompt.start]]</td>
                         </tr>
                     </tbody>
                 </table>
                 </ul>
-            </div>  
+            </div>
 
             <div class="card-footer text-muted">
                 *rated prompt, must be logged in to play (<a href="/about#ratings">about</a>)
-            </div>            
+            </div>
         </div>
     </div>
     <div class="col-sm-6">
@@ -91,8 +91,8 @@
             <table class="table">
                 <thead>
                     <th>#</th>
-                    <th>Username</th> 
-                    <th>Rating</th> 
+                    <th>Username</th>
+                    <th>Rating</th>
                 </thead>
                 <tbody>
                     <tr v-for="(user, index) in topUsers" v-cloak>
@@ -111,16 +111,16 @@
         <p> Questions or Feedback? Email us at <a href="mailto:support@wikispeedruns.com">support@wikispeedruns.com</a></p>
 
         <p>
-            Created by <a href="https://danqian.net">Daniel Qian</a>, 
-            <a href="https://mliu59.github.io/">Miles Liu</a>, 
-            <a href="http://bricehalder.com/">Brice Halder</a>, 
+            Created by <a href="https://danqian.net">Daniel Qian</a>,
+            <a href="https://mliu59.github.io/">Miles Liu</a>,
+            <a href="https://bricehalder.com/">Brice Halder</a>,
             and <a href="https://xablexa.com/">Axel Bax</a>
         </p>
         <p>
             <a href="/about#acknowledgements">Special Thanks and Acknowledgements</a>
         </p>
     </div>
-    
+
 
 
 
