@@ -128,8 +128,8 @@ def create_user():
     """
     Example json input
     {
-        "username" : "echoingsins"
-        "email" : "echoingsins@gmail.com    
+        "username" : "echoingsins",
+        "email" : "echoingsins@gmail.com",
         "password" : "lmao"
     }
     """
