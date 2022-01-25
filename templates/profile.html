@@ -7,36 +7,27 @@
     const profile_name='{{profile_name}}';
 </script>
 
-<script type="text/javascript" src="{{url_for('static', filename='js/profile.js') }}"></script>
+<script defer type="text/javascript" src="{{url_for('static', filename='js/profile.js') }}"></script>
 
 {% endblock %}
 
 
 {% block content %}
 
-<div id="app">
-    <table style="width:75%; margin: auto; margin-top: 50px">
-        <tr>
-            <td style="width:40%">Username</td>
-            <td v-text="user_name"></td>
-        </tr>
-        <tr>
-            <td style="width:40%">Profile Age</td>
-            <td v-text="profileage"></td>
-        </tr>
-        <tr>
-            <td style="width:40%">Skill Rating</td>
-            <td v-text="skillrating"></td>
-        </tr>
-        <tr>
-            <td style="width:40%">Total Rated Runs</td>
-            <td v-text="totalratedruns"></td>
-        </tr>
-        <tr>
-            <td style="width:40%">Email Verification Status</td>
-            <td v-text="emailverified"></td>
-        </tr>
-    </table>
+<div id="app" class="col-sm-6">
+    <div class="card">
+        <div class="card-body">
+        <table class="table table-striped table-hover col-sm-6">
+            <thead>
+                <td colspan=2><h4>[[$data['user_name'].val]]'s Profile</h4></td>
+            </thead>
+            <tr v-for="key in Object.keys($data)" v-bind:key="">
+                <td>[[$data[key].field]]</td>
+                <td>[[$data[key].val]]</td>
+            </tr>
+        </table>
+    </div>
+</div>
     
 </div>
 
