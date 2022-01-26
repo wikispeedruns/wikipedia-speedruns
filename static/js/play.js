@@ -89,7 +89,14 @@ async function loadPage(page) {
 
     const title = body["parse"]["title"]
 
-    document.getElementById("wikipedia-frame").innerHTML = body["parse"]["text"]["*"]
+    let frameBody = document.getElementById("wikipedia-frame")
+    frameBody.innerHTML = body["parse"]["text"]["*"]
+    frameBody.querySelectorAll("a").forEach(function(a) {
+        a.innerHTML = '<div style="display:inline-block">' + a.text.split('').map(function(character) {
+            return '<div style="display:inline-block">' + character.replace(/\s/g, '&nbsp;') + '</div>'
+        }).join('') + '</div>'
+    });
+
     document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
     
 
