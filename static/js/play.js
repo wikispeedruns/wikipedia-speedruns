@@ -10,7 +10,6 @@ var app = new Vue({
         started: false,
         gunShow: false,
         activeTip: "",
-        caught: false,
         path:[],
         finalTime:"",
         prompt_id: 0,
@@ -49,8 +48,6 @@ var endTime = 0;
 var run_id = -1;
 
 var keyMap = {};
-
-var ctrlfwarnings = false;
 
 function handleWikipediaLink(e) 
 {
@@ -285,8 +282,6 @@ function countdownOnLoad(start, end) {
             
 
             startTime = Date.now();
-            ctrlfwarnings = true;
-
         }
         if (distance < 700 && distance > 610) {
             app.$data.gunShow = true;
@@ -297,24 +292,11 @@ function countdownOnLoad(start, end) {
 
 }
 
-function checkForFind(e) {
-
-    console.log(e.code);
-    e = e || event;
-    keyMap[e.code] = e.type == 'keydown';
-    if (keyMap["KeyF"] && (keyMap["ControlLeft"] || keyMap["ControlRight"])) {
-        if (ctrlfwarnings == true) {
-
-            app.$data.finished = true;
-            app.$data.caught = true;
-        }
-    }
-}
-
 function disableFind(e) {
     console.log(e);
     if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) { 
         e.preventDefault();
+        this.alert("WARNING: Attempt to Find in page. This will be recorded.")
     }
 }
 
@@ -351,10 +333,3 @@ window.onbeforeunload = function() {
 window.addEventListener("keydown", function(e) {
     disableFind(e);
 });
-// window.addEventListener("keyup", function(e) {
-//     checkForFind(e);
-// });
-
-
-
-
