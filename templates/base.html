@@ -44,11 +44,11 @@
 
                     <template v-if="loggedIn">
                         <li class="nav-item me-2">
-                            <a class="nav-link active" vbind:href="'/profile/' + username">[[username]]</a>
+                            <a class="nav-link active" v-bind:href="'/profile/' + username">[[username]]</a>
                         </li>
             
                         <li class="nav-item">
-                            <button class="btn btn-light" id="logout">Logout</button>
+                            <button class="btn btn-light" v-on:click="handleLogout">Logout</button>
                         </li>
                     </template>
                     
