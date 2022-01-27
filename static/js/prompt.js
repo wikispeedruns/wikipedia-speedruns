@@ -1,5 +1,10 @@
-const promptsPerPage = 10;
+import { serverData } from "./modules/serverData.js"
 
+const prompt_id = serverData["prompt_id"];
+const run_id = serverData["run_id"];
+const pg = serverData["pg"];
+
+const promptsPerPage = 10;
 
 function populateGraph(runs) {
 

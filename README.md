@@ -1,6 +1,6 @@
 # Competitive Wikipedia Speedrunning
 
-This repository holds the code for the code for [wikispeedruns.com](https://wikispeedruns.com).
+This repository holds the code for [wikispeedruns.com](https://wikispeedruns.com).
 
 ## 1. Prerequisites
 
@@ -52,7 +52,8 @@ python configure.py
 
 #### (Optional) Set environment variables for development
 Set the environment variable `FLASK_ENV` in whaterver command prompt you use plan to use
-for running the flask server.
+for running the flask server. This will allow the local instance to reload automatically
+when files are changed.
 
 For example, in Linux
 ```

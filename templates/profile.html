@@ -3,11 +3,7 @@
 
 <script src="https://vuejs.org/js/vue.js"></script>
 
-<script defer>
-    const profile_name='{{profile_name}}';
-</script>
-
-<script defer type="text/javascript" src="{{url_for('static', filename='js/profile.js') }}"></script>
+<script type="module" src="{{url_for('static', filename='js/profile.js') }}"></script>
 
 {% endblock %}
 
@@ -19,7 +15,7 @@
         <div class="card-body">
         <table class="table table-striped table-hover col-sm-6">
             <thead>
-                <td colspan=2><h4>[[$data['user_name'].val]]'s Profile</h4></td>
+                <td colspan=2><h4>[[user_name]]'s Profile</h4></td>
             </thead>
             <tr v-for="key in Object.keys($data)" v-bind:key="">
                 <td>[[$data[key].field]]</td>

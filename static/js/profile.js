@@ -1,4 +1,6 @@
-var vm; 
+import { serverData } from "./modules/serverData.js";
+
+const profile_name = serverData["profile_name"];
 
 function update_data(runs, user) {
             
@@ -29,7 +31,7 @@ async function get_data(usern) {
     
 }
 
-vm = new Vue({
+let vm = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     data: {
@@ -53,14 +55,12 @@ vm = new Vue({
             field: "Profile Age",
             val: "test5"
         },
+    },
+
+    created: async function () {
+        get_data(profile_name);
     }
 });
 
-window.addEventListener("load", function() {
-
-    get_data(profile_name);
-
-
-});
 
 

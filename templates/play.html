@@ -1,14 +1,9 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<script defer>
-    const prompt_id='{{prompt_id}}';
-</script>
 
-
-<link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
-<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
-
+<link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
+<script type="module" src="{{url_for('static', filename='js/play.js')}}"></script>
 
 {% endblock %}
 
@@ -71,9 +66,4 @@
     </div>
 
 </div>
-
-
-
-<script type="module" src="{{url_for('static', filename='js/play.js') }}"></script>
-
 {% endblock %}
