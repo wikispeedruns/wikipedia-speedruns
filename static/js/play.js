@@ -1,4 +1,8 @@
-var app = new Vue({
+import { serverData } from "./modules/serverData.js"
+
+const prompt_id = serverData["prompt_id"];
+
+let app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     data: {
@@ -18,7 +22,7 @@ var app = new Vue({
     methods : {
         formatPath: function (pathArr) {
             output = "";
-            for(i=0; i<pathArr.length - 1;i++) {
+            for(let i=0; i<pathArr.length - 1;i++) {
                 output = output.concat(pathArr[i])
                 output = output.concat(" -> ")
             }
@@ -39,15 +43,15 @@ var app = new Vue({
 
 
 
-var goalPage = "";
-var timerInterval = null;
-var startTime = 0;
-var path = [];
-var endTime = 0;
+let goalPage = "";
+let timerInterval = null;
+let startTime = 0;
+let path = [];
+let endTime = 0;
 
-var run_id = -1;
+let run_id = -1;
 
-var keyMap = {};
+let keyMap = {};
 
 function handleWikipediaLink(e) 
 {
@@ -55,7 +59,7 @@ function handleWikipediaLink(e)
     const linkEl = e.currentTarget;
 
     if (linkEl.getAttribute("href").substring(0, 1) === "#") {
-        var a = linkEl.getAttribute("href").substring(1);
+        let a = linkEl.getAttribute("href").substring(1);
         //console.log(a);
         document.getElementById(a).scrollIntoView();
 
@@ -172,18 +176,18 @@ async function finish() {
 
 function hideElements() {
     
-    var hide = ["reference","mw-editsection","reflist","portal","refbegin", "sidebar", "authority-control", "external", "sistersitebox"]
-    for(i=0; i<hide.length; i++) {
-        var elements = document.getElementsByClassName(hide[i])
+    const hide = ["reference","mw-editsection","reflist","portal","refbegin", "sidebar", "authority-control", "external", "sistersitebox"]
+    for(let i=0; i<hide.length; i++) {
+        let elements = document.getElementsByClassName(hide[i])
         //console.log("found: " + hide[i] + elements.length)
-        for(j=0; j<elements.length; j++) {
+        for(let j=0; j<elements.length; j++) {
             elements[j].style.display = "none";
         }
     }
     
-    var idS = ["See_also", "Notes_and_references", "Further_reading", "External_links", "References", "Notes", "Citations", "Explanatory_notes"];
-    for(i=0; i<idS.length; i++) {
-        var e = document.getElementById(idS[i]);
+    const idS = ["See_also", "Notes_and_references", "Further_reading", "External_links", "References", "Notes", "Citations", "Explanatory_notes"];
+    for(let i=0; i<idS.length; i++) {
+        let e = document.getElementById(idS[i]);
         if (e !== null) {
             e.style.display = "none";
         }
@@ -191,9 +195,9 @@ function hideElements() {
 
     //hide Disambig
     
-    var elements = document.getElementsByClassName("hatnote");
-    for (i=0; i < elements.length; i++) {
-        var a = elements[i].getElementsByClassName("mw-disambig");
+    let elements = document.getElementsByClassName("hatnote");
+    for (let i=0; i < elements.length; i++) {
+        let a = elements[i].getElementsByClassName("mw-disambig");
         //console.log(a)
         if (a.length !== 0) {
             elements[i].style.display = "none";
@@ -201,17 +205,17 @@ function hideElements() {
         //mw-disambig
     }
 
-    //var all = document.getElementsByClassName("mw-parser-output")[0].querySelectorAll("h2", "div", "ul", "p");
-    var all = document.getElementById("wikipedia-frame").querySelectorAll("h2, div, ul, p, h3");
-    var flip = false
-    for (i = 0; i < all.length; i++) {
+    //let all = document.getElementsByClassName("mw-parser-output")[0].querySelectorAll("h2", "div", "ul", "p");
+    let all = document.getElementById("wikipedia-frame").querySelectorAll("h2, div, ul, p, h3");
+    let flip = false
+    for (let i = 0; i < all.length; i++) {
         if (!flip) {
             if (all[i].tagName == "H2") {
                 //console.log("checking h2");
-                var check = all[i].getElementsByClassName("mw-headline")
+                let check = all[i].getElementsByClassName("mw-headline")
                 if (check.length !== 0) {
                     //console.log(check[0].id)
-                    for (j = 0; j < idS.length; j++) {
+                    for (let j = 0; j < idS.length; j++) {
                         if (check[0].id == idS[j]) {
                             //console.log("found see also at: " + i);
                             all[i].style.display = "none";
@@ -263,15 +267,15 @@ function countdownOnLoad(start, end) {
 
     app.$data.activeTip = getRandTip();
 
-    var countDownStart = Date.now();
-    var countDownTime = app.$data.countdown * 1000;
+    let countDownStart = Date.now();
+    let countDownTime = app.$data.countdown * 1000;
 
-    var x = setInterval(function() {
+    let x = setInterval(function() {
 
-        var now = Date.now()
+        let now = Date.now()
       
         // Find the distance between now and the count down date
-        var distance = countDownStart + countDownTime - now;
+        let distance = countDownStart + countDownTime - now;
 
         app.$data.countdown = Math.floor(distance/1000)+1;
 

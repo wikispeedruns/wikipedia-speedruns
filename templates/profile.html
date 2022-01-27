@@ -3,11 +3,7 @@
 
 <script src="https://vuejs.org/js/vue.js"></script>
 
-<script defer>
-    const profile_name='{{profile_name}}';
-</script>
-
-<script type="text/javascript" src="{{url_for('static', filename='js/profile.js') }}"></script>
+<script type="module" src="{{url_for('static', filename='js/profile.js') }}"></script>
 
 {% endblock %}
 
