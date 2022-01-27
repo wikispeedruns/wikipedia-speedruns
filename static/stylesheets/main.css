@@ -56,7 +56,7 @@ a {
     text-decoration: none !important;
 }
 
-a:hover {
+a:hover, a:hover * {
     text-decoration: underline !important;
 }
 
