@@ -21,7 +21,7 @@ let app = new Vue({
     },
     methods : {
         formatPath: function (pathArr) {
-            output = "";
+            let output = "";
             for(let i=0; i<pathArr.length - 1;i++) {
                 output = output.concat(pathArr[i])
                 output = output.concat(" -> ")
@@ -238,7 +238,7 @@ function formatStr(string) {
 }
 
 function displayTimer() {
-    seconds = (Date.now() - startTime) / 1000;
+    const seconds = (Date.now() - startTime) / 1000;
     app.$data.timer = seconds;
     //document.getElementById("timer").innerHTML = "Elapsed Time<br/><strong>"+seconds + "s</strong>";
 }
@@ -323,7 +323,7 @@ window.addEventListener("load", async function() {
 
     goalPage = prompt["end"];
 
-    await countdownOnLoad(article,goalPage);
+    await countdownOnLoad(article, goalPage);
 
     loadPage(article);
 });
