@@ -16,6 +16,21 @@ def get_path():
         
     output = timer(SCRAPER_TIMEOUT, findPaths, start, end)
     
+    """
+    pool = Pool(processes=1)
+    result = pool.apply_async(findPaths, (start, end))
+    
+    try:
+        output = result.get(timeout=scraper_timeout)
+    except TimeoutError:
+        msg = f"Scraper search exceeded {scraper_timeout} seconds"
+        print(msg)
+        return msg, 500
+    except Exception as err:
+        print(f"ERROR {str(err)}")
+        return str(err), 500
+    """
+    
     return jsonify(output)
     
 
