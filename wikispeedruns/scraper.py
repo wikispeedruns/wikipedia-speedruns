@@ -5,14 +5,17 @@ from pymysql.cursors import DictCursor
 
 import time
 
-from typing import List, Dict
+from typing import List, Dict, Any, Tuple
 
 #DB and table names for scraper
-SCRAPER_DB = "scraper_graph"
+SCRAPER_DB = "testdb"
 ARTICLE_TABLE = SCRAPER_DB + ".articleid"
 EDGE_TABLE = SCRAPER_DB + ".edgeidarticleid"
 
-def batchQuery(queryString, arr, cur):
+
+
+def batchQuery(queryString: str, arr: List[str], cur: Any) -> Dict[str, str]:
+#def batchQuery(queryString, arr, cur):
     """batchQuery helper function"""
     format_strings = ','.join(['%s'] * len(arr))
     cur.execute(queryString % format_strings,tuple(arr))
@@ -20,6 +23,7 @@ def batchQuery(queryString, arr, cur):
 
 
 def getLinks(pages: Dict[int, bool], forward: bool = True) -> Dict[int, List[int]]:
+#def getLinks(pages, forward):
     """Gets the outgoing/incoming links of a list of articles as a batch query
 
     Args:
@@ -68,7 +72,8 @@ def getLinks(pages: Dict[int, bool], forward: bool = True) -> Dict[int, List[int
 
 
 
-def bidirectionalSearcher(start: int, end:int) -> List[int]:
+def bidirectionalSearcher(start: int, end:int) -> List[List[int]]:
+#def bidirectionalSearcher(start, end):
     """High level logic for bidirectional search. Continuously calls forward and reverse search until an intersection is found, then traces the paths back to generate a concatenated final path.
 
     Args:
@@ -117,7 +122,9 @@ def bidirectionalSearcher(start: int, end:int) -> List[int]:
                 return [traceBidirectionalPath(b, start, end, forwardVisited, reverseVisited)]
             
 
-def forwardBFS(start: int, end: int, forwardVisited: Dict[int, tuple(int, int)], reverseVisited: Dict[int, tuple(int, int)], queue: List[int]) -> int:
+def forwardBFS(start: int, end: int, forwardVisited: Dict[int, Tuple[int, int]], reverseVisited: Dict[int, Tuple[int, int]], queue: List[int]) -> int:
+#def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
+
     """Forward search component of the bidirectional search. Looks for any article that the reverse search component has previously visited,
     which makes it an intersection. The full path can then be traced from the intersection
 
@@ -202,7 +209,8 @@ def forwardBFS(start: int, end: int, forwardVisited: Dict[int, tuple(int, int)],
     #if no intersection was found in this batch                                
     return None  
 
-def reverseBFS(start: int, end: int, forwardVisited: Dict[int, tuple(int, int)], reverseVisited: Dict[int, tuple(int, int)], queue: List[int]) -> int:
+def reverseBFS(start: int, end: int, forwardVisited: Dict[int, Tuple[int, int]], reverseVisited: Dict[int, Tuple[int, int]], queue: List[int]) -> int:
+#def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
     """Reverse search component of the bidirectional search. Looks for any article that the forward search component has previously visited,
     which makes it an intersection. The full path can then be traced from the intersection
 
@@ -288,7 +296,9 @@ def reverseBFS(start: int, end: int, forwardVisited: Dict[int, tuple(int, int)],
     return None      
         
 
-def traceBidirectionalPath(intersection: int, start: int, end: int, forwardVisited: Dict[int, tuple(int, int)], reverseVisited: Dict[int, tuple(int, int)]) -> List[int]:
+def traceBidirectionalPath(intersection: int, start: int, end: int, forwardVisited: Dict[int, Tuple[int, int]], reverseVisited: Dict[int, Tuple[int, int]]) -> List[int]:
+#def traceBidirectionalPath(intersection, start, end, forwardVisited, reverseVisited):
+
     """Once an intersection is found, use this function to trace back to the start and end pages on both directions using the visited dictionary, and return the concatenated full path
 
     Args:
@@ -306,7 +316,9 @@ def traceBidirectionalPath(intersection: int, start: int, end: int, forwardVisit
     return forwardPath + reversePath[1:]
     
 
-def tracePath(visited: Dict[int, tuple(int, int)], page: int, start: int) -> List[int]:
+def tracePath(visited: Dict[int, Tuple[int, int]], page: int, start: int) -> List[int]:
+#def tracePath(visited, page, start):
+
     """Given a Dict of visited pages and the 'end' page. Trace back the visited path and return a list representing the visited path from start to end
 
     Args:
@@ -327,12 +339,14 @@ def tracePath(visited: Dict[int, tuple(int, int)], page: int, start: int) -> Lis
     
     return Reverse(output)
 
-def Reverse(lst: List) -> List:
+def Reverse(lst: List[Any]) -> List[Any]:
+#def Reverse(lst):
     """Reverses the elements of a list, for building the reverse search section of the path"""
     return [ele for ele in reversed(lst)]      
 
 
 def convertToID(name: str) -> int:
+#def convertToID(name):
     """Converts a single article title to its corresponding article id
     """
     with get_db().cursor(cursor=DictCursor) as cur: 
@@ -347,6 +361,7 @@ def convertToID(name: str) -> int:
     
     
 def convertToArticleName(id: int) -> str:
+#def convertToArticleName(id):
     """Converts a single article ID to its corresponding article title
     """
     with get_db().cursor(cursor=DictCursor) as cur: 
@@ -360,6 +375,7 @@ def convertToArticleName(id: int) -> str:
             raise ValueError(f"Could not find article with id: {id}")
     
 def convertPathToNames(idpath: List[int])-> List[str]:
+#def convertPathToNames(idpath):
     """Converts a path in the form of article IDs to article Titles"""
     output = []
     for item in idpath:
@@ -369,6 +385,7 @@ def convertPathToNames(idpath: List[int])-> List[str]:
 
 
 def findPaths(startTitle: str, endTitle: str) -> Dict[str, List]:
+#def findPaths(startTitle, endTitle):
     """given a start and end article title, find a single shortest path using bidirectional BFS search
 
     Args:
@@ -406,7 +423,8 @@ def findPaths(startTitle: str, endTitle: str) -> Dict[str, List]:
     
     return output
 
-def randStart(thresholdStart: int):
+def randStart(thresholdStart: int) -> Any:
+#def randStart(thresholdStart):
     """Generator for starting article
 
     Args:
@@ -428,6 +446,7 @@ def randStart(thresholdStart: int):
 
 
 def checkEnd(end: int, thresholdEnd: int) -> bool:
+#def checkEnd(end, thresholdEnd):
     """Higher level checker function to determine whether or not a given end article is valid as the goal page of a randomly generated prompt
 
     Args:
@@ -465,6 +484,7 @@ def checkEnd(end: int, thresholdEnd: int) -> bool:
     return True        
         
 def checkStart(start: int, thresholdStart: int) -> bool:
+#def checkStart(start, thresholdStart):
     """Similar to checkEnd, with a higher tolerance for sports pages"""
 
     title = convertToArticleName(start)
@@ -489,6 +509,7 @@ def checkStart(start: int, thresholdStart: int) -> bool:
     return True
 
 def countWords(string: str) -> int:
+#def countWords(string):
     """Count words in a string, used for skewing start and end filters against articles with longer titles"""
     counter = 1
     for i in string:
@@ -497,6 +518,8 @@ def countWords(string: str) -> int:
     return counter
 
 def randomFilter(bln: bool, chance: float) -> bool:
+#def randomFilter(bln, chance):
+
     """Pass a boolean through a RNG gate. Overall, {chance}% of True booleans will remain True
 
     Args:
@@ -512,6 +535,7 @@ def randomFilter(bln: bool, chance: float) -> bool:
     return False
 
 def checkSports(title: str) -> bool:
+#def checkSports(title):
     """Check to see if the article is a sports season/team page. If true, bias against these articles. 
     To be considered a sports season/team/game page, the article's first 4 characters must form a year > 1900, 
     and the article name must also contain one of the identified sports keywords.
@@ -540,6 +564,7 @@ def checkSports(title: str) -> bool:
     return False
 
 def numLinksOnArticle(id : int) -> int:
+#def numLinksOnArticle(id):
     """get the number of outgoing links of a given article
 
     Args:
@@ -558,6 +583,7 @@ def numLinksOnArticle(id : int) -> int:
     return 0
 
 def traceFromStart(startID: int, dist: int) -> List[int]:
+#def traceFromStart(startID, dist):
     """helper function to trace a path from a given article number
 
     Args:
@@ -591,6 +617,7 @@ def traceFromStart(startID: int, dist: int) -> List[int]:
     return path + [currentTitle]
 
 def generatePrompts(thresholdStart : int = 100, thresholdEnd : int = 100, n : int = 20, dist: int = 15) -> List[List[int]]:
+#def generatePrompts(thresholdStart = 100, thresholdEnd = 100, n = 20, dist = 15):
     """Generates N random paths. THe function uses a random article generator to get a start article, traces a random path 'dist' steps away, 
     checks that the end article also fits the criteria, and appends the resulting path as a list to the output list. 
 
