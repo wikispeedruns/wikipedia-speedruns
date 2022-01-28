@@ -1,12 +1,57 @@
-var goalPage = "";
-var timerInterval = null;
-var startTime = 0;
-var path = [];
-var endTime = 0;
+import { serverData } from "./modules/serverData.js"
 
-var keyMap = {};
+const prompt_id = serverData["prompt_id"];
 
-var ctrlfwarnings = false;
+let app = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    data: {
+        startArticle: "",
+        endArticle: "",
+        timer: "",
+        countdown: 8,
+        finished: false,
+        started: false,
+        gunShow: false,
+        activeTip: "",
+        path:[],
+        finalTime:"",
+        prompt_id: 0,
+
+    },
+    methods : {
+        formatPath: function (pathArr) {
+            let output = "";
+            for(let i=0; i<pathArr.length - 1;i++) {
+                output = output.concat(pathArr[i])
+                output = output.concat(" -> ")
+            }
+            output = output.concat(pathArr[pathArr.length - 1])
+            return output;
+        }, 
+
+        finishPrompt: function (event) {
+            window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
+        }, 
+
+        home: function (event) {
+            window.location.replace("/");
+        }
+
+    }
+})
+
+
+
+let goalPage = "";
+let timerInterval = null;
+let startTime = 0;
+let path = [];
+let endTime = 0;
+
+let run_id = -1;
+
+let keyMap = {};
 
 function handleWikipediaLink(e) 
 {
@@ -14,7 +59,7 @@ function handleWikipediaLink(e)
     const linkEl = e.currentTarget;
 
     if (linkEl.getAttribute("href").substring(0, 1) === "#") {
-        var a = linkEl.getAttribute("href").substring(1);
+        let a = linkEl.getAttribute("href").substring(1);
         //console.log(a);
         document.getElementById(a).scrollIntoView();
 
@@ -48,16 +93,43 @@ async function loadPage(page) {
 
     const title = body["parse"]["title"]
 
-    document.getElementById("wikipedia-frame").innerHTML = body["parse"]["text"]["*"]
+    let frameBody = document.getElementById("wikipedia-frame")
+    frameBody.innerHTML = body["parse"]["text"]["*"]
+    frameBody.querySelectorAll("a").forEach(function(a) {
+        a.innerHTML = '<div style="display:inline-block">' + a.text.split('').map(function(character) {
+            return '<div style="display:inline-block">' + character.replace(/\s/g, '&nbsp;') + '</div>'
+        }).join('') + '</div>'
+    });
+
     document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
+    
 
     // Start timer if we are at the start
     if (path.length == 0) {
         startTime = Date.now()
         timerInterval = setInterval(displayTimer, 20);    
+
+        const reqBody = {
+            "start_time": startTime,
+            "prompt_id": prompt_id,
+        }
+
+        try {
+            const response = await fetch("/api/runs", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(reqBody)
+            })
+    
+            run_id = await response.json();
+
+        } catch(e) {
+            console.log(e);
+        }
     }
     
-
     path.push(title)
 
     if (formatStr(title) === formatStr(goalPage)) {
@@ -73,34 +145,35 @@ async function loadPage(page) {
 }
 
 async function finish() {
+
+    app.$data.finished = true;
+    app.$data.path = path;
+    app.$data.finalTime = app.$data.timer;
+
     // Stop timer
     endTime = Date.now();
     clearInterval(timerInterval);
-    document.getElementById("timer").innerHTML="";
+    //document.getElementById("timer").innerHTML="";
 
-    // Prevent prompt
+    // Prevent are you sure you want to leave prompt
     window.onbeforeunload = null;
 
     const reqBody = {
-        "start_time": startTime,
         "end_time": endTime,
-        "prompt_id": prompt_id,
         "path": path,
     }
 
     // Send results to API
     try {
-        const response = await fetch("/api/runs", {
-            method: 'POST',
+        const response = await fetch(`/api/runs/${run_id}`, {
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(reqBody)
         })
 
-        const run_id = await response.json();
-
-        window.location.href = "/prompt/" + prompt_id + "?run_id=" + run_id;
+        //window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
 
     } catch(e) {
         console.log(e);
@@ -110,18 +183,18 @@ async function finish() {
 
 function hideElements() {
     
-    var hide = ["reference","mw-editsection","reflist","portal","refbegin", "sidebar", "authority-control", "external", "sistersitebox"]
-    for(i=0; i<hide.length; i++) {
-        var elements = document.getElementsByClassName(hide[i])
+    const hide = ["reference","mw-editsection","reflist","portal","refbegin", "sidebar", "authority-control", "external", "sistersitebox"]
+    for(let i=0; i<hide.length; i++) {
+        let elements = document.getElementsByClassName(hide[i])
         //console.log("found: " + hide[i] + elements.length)
-        for(j=0; j<elements.length; j++) {
+        for(let j=0; j<elements.length; j++) {
             elements[j].style.display = "none";
         }
     }
     
-    var idS = ["See_also", "Notes_and_references", "Further_reading", "External_links", "References", "Notes", "Citations", "Explanatory_notes"];
-    for(i=0; i<idS.length; i++) {
-        var e = document.getElementById(idS[i]);
+    const idS = ["See_also", "Notes_and_references", "Further_reading", "External_links", "References", "Notes", "Citations", "Explanatory_notes"];
+    for(let i=0; i<idS.length; i++) {
+        let e = document.getElementById(idS[i]);
         if (e !== null) {
             e.style.display = "none";
         }
@@ -129,9 +202,9 @@ function hideElements() {
 
     //hide Disambig
     
-    var elements = document.getElementsByClassName("hatnote");
-    for (i=0; i < elements.length; i++) {
-        var a = elements[i].getElementsByClassName("mw-disambig");
+    let elements = document.getElementsByClassName("hatnote");
+    for (let i=0; i < elements.length; i++) {
+        let a = elements[i].getElementsByClassName("mw-disambig");
         //console.log(a)
         if (a.length !== 0) {
             elements[i].style.display = "none";
@@ -139,17 +212,17 @@ function hideElements() {
         //mw-disambig
     }
 
-    //var all = document.getElementsByClassName("mw-parser-output")[0].querySelectorAll("h2", "div", "ul", "p");
-    var all = document.getElementById("wikipedia-frame").querySelectorAll("h2, div, ul, p, h3");
-    var flip = false
-    for (i = 0; i < all.length; i++) {
+    //let all = document.getElementsByClassName("mw-parser-output")[0].querySelectorAll("h2", "div", "ul", "p");
+    let all = document.getElementById("wikipedia-frame").querySelectorAll("h2, div, ul, p, h3");
+    let flip = false
+    for (let i = 0; i < all.length; i++) {
         if (!flip) {
             if (all[i].tagName == "H2") {
                 //console.log("checking h2");
-                var check = all[i].getElementsByClassName("mw-headline")
+                let check = all[i].getElementsByClassName("mw-headline")
                 if (check.length !== 0) {
                     //console.log(check[0].id)
-                    for (j = 0; j < idS.length; j++) {
+                    for (let j = 0; j < idS.length; j++) {
                         if (check[0].id == idS[j]) {
                             //console.log("found see also at: " + i);
                             all[i].style.display = "none";
@@ -165,133 +238,99 @@ function hideElements() {
     
 }
 
-function formatPath(pathArr) {
-    output = "";
-    for(i=0; i<pathArr.length - 1;i++) {
-        output = output.concat(pathArr[i])
-        output = output.concat(" -><br>")
-    }
-    output = output.concat(pathArr[pathArr.length - 1])
-    return output;
-}
+
 
 function formatStr(string) {
     return string.replace("_", " ").toLowerCase()
 }
 
 function displayTimer() {
-    seconds = (Date.now() - startTime) / 1000;
-    document.getElementById("timer").innerHTML = seconds + "s";
+    const seconds = (Date.now() - startTime) / 1000;
+    app.$data.timer = seconds;
+    //document.getElementById("timer").innerHTML = "Elapsed Time<br/><strong>"+seconds + "s</strong>";
 }
 
 function getRandTip() {
-    return "There are five permanent members of the UN security council: China, France, Russia, United Kingdom, and the United States."
+    const tips = [
+        "There are five permanent members of the UN security council: China, France, Russia, United Kingdom, and the United States.",
+        "The Fortune magazine has a list for top 500 United States companies (“Fortune 500”), as well as a list for top 500 global companies (“Fortune Global 500”).",
+        "Brazil is currently the world’s largest producer of sugarcane, and by a lot!",
+        "Buddhism originated in ancient India sometime between the 6th and 4th centuries BCE.",
+        "Pressing the back button will forfeit your attempt!",
+        "Infoboxes on the right often give very quick and useful links, especially for biographical and geographical pages.",
+        "Plan ahead, but be flexible! If you foresee a better route than what you had planned, go for it!",
+        "Use the Table of Contents to your advantage!",
+        "Some article subsections have an associated main article, usually linked under the subsection title."
+    ];
+
+    return tips[Math.floor(Math.random() * tips.length)];
 }
 
 function countdownOnLoad(start, end) {
-    
-    var guideBlock = document.getElementById("guide");
-    var mainBlock = document.getElementById("main");
-    var countdownBlock = document.getElementById("countdown");
-    var timerBlock = document.getElementById("timer");
-    var tipsBlock = document.getElementById("tips");
-
-    var gifBlock = document.getElementById("mirroredimgblock");
-
-    guideBlock.innerHTML = "<strong>Starting article: </strong>" + start + "    -->    <strong>Goal article: </strong>" + end
-
-    mainBlock.style.display = "none";
-    countdownBlock.style.display = "block";
-    timerBlock.style.display = "none";
-    tipsBlock.style.display = "block";
 
 
-    tipsBlock.innerHTML = getRandTip();
+    app.$data.startArticle = start;
+    app.$data.endArticle = end;
 
-    //countdownBlock.innerHTML = "Prompt will begin in " + "5" + " seconds";
-    /*    <img class="startgun" src="{{url_for('static', filename='assets/startgun.gif')}}">
-    <img class="startgun invgif" src="{{url_for('static', filename='assets/startgun.gif')}}">
-    */
+    app.$data.activeTip = getRandTip();
 
-    var countDownStart = Date.now();
-    var countDownTime = 8000;
+    let countDownStart = Date.now();
+    let countDownTime = app.$data.countdown * 1000;
 
+    let x = setInterval(function() {
 
-    var gunimg1 = document.createElement('img');
-    var gunimg2 = document.createElement('img');
-    imgpath = "/static/assets/startgun.gif";
-
-    gunimg1.classList.add("startgun");
-    gunimg2.classList.add("startgun");
-    gunimg2.classList.add("invgif");
-    gunimg2.src = imgpath;
-    gunimg1.src = imgpath;
-
-
-    var x = setInterval(function() {
-
-        var now = Date.now()
+        let now = Date.now()
       
         // Find the distance between now and the count down date
-        var distance = countDownStart + countDownTime - now;
-        //console.log(distance);
-        //console.log(String(Math.floor(distance/1000)+1));
-        countdownBlock.innerHTML = String(Math.floor(distance/1000)+1);
-        countdownBlock.style.visibility = "visible";
+        let distance = countDownStart + countDownTime - now;
+
+        app.$data.countdown = Math.floor(distance/1000)+1;
+
         if (distance < -1000) {
             clearInterval(x);
-            mainBlock.style.display = "block";
-            countdownBlock.style.display = "none";
-            guideBlock.innerHTML = "<strong>" + start + "</strong> --> <strong>" + end + "</strong>";
-            timerBlock.style.display = "block";
-            tipsBlock.style.display = "none";
-            gifBlock.style.display = "none";
-            startTime = Date.now();
-            ctrlfwarnings = true;
 
+            app.$data.started = true;
+            
+
+            startTime = Date.now();
         }
         if (distance < 700 && distance > 610) {
-            gifBlock.style.visibility = "visible";
-            gifBlock.appendChild(gunimg1);
-            gifBlock.appendChild(gunimg2);
+            app.$data.gunShow = true;
         }
       }, 50);
 
+      app.$data.gunShow = false;
+
 }
 
-function checkForFind(e) {
-
-    var guideBlock = document.getElementById("guide");
-    var mainBlock = document.getElementById("main");
-    var timerBlock = document.getElementById("timer");
-
-    console.log(e.code);
-    e = e || event;
-    keyMap[e.code] = e.type == 'keydown';
-    if (keyMap["KeyF"] && (keyMap["ControlLeft"] || keyMap["ControlRight"])) {
-        if (ctrlfwarnings == true) {
-            //ctrlfwarnings = 1;
-            mainBlock.style.display = "none";
-            timerBlock.style.display = "none";
-            guideBlock.innerHTML = "STOP! You violated the law. Pay the court a fine or serve your sentence."
-            var tesguard = document.createElement('img');
-            tesguard.src = "/static/assets/stop.jpg";
-            tesguard.width= "700";
-            tesguard.style.marginTop = "40px";
-            guideBlock.appendChild(tesguard);
-        }
+function disableFind(e) {
+    console.log(e);
+    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) { 
+        e.preventDefault();
+        this.alert("WARNING: Attempt to Find in page. This will be recorded.")
     }
 }
 
 window.addEventListener("load", async function() {
     const response = await fetch("/api/prompts/" + prompt_id);
-    const prompt = await response.json();
 
+    app.$data.prompt_id = prompt_id;
+
+    if (response.status != 200) {
+        const error = await response.text();
+        this.alert(error)
+        // Prevent are your sure you want to leave prompt
+        window.onbeforeunload = null;
+        window.location.href = "/"   // TODO error page
+
+    }
+
+    const prompt = await response.json();
     const article = prompt["start"];
 
     goalPage = prompt["end"];
 
-    await countdownOnLoad(article,goalPage);
+    await countdownOnLoad(article, goalPage);
 
     loadPage(article);
 });
@@ -301,9 +340,7 @@ window.onbeforeunload = function() {
 };
 
 
+
 window.addEventListener("keydown", function(e) {
-    checkForFind(e);
-});
-window.addEventListener("keyup", function(e) {
-    checkForFind(e);
+    disableFind(e);
 });

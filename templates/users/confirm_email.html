@@ -1,9 +1,11 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<script defer>
+<script type="module">
 
-const token = "{{token}}";
+import { serverData } from "/static/js/modules/serverData.js"
+
+const token = serverData["token"];
 
 async function confirm()
 {

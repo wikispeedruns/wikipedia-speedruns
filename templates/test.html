@@ -1,0 +1,30 @@
+<html>
+    <head>
+        <script type=text/javascript src="{{url_for('static', filename='scraper/test.js') }}"></script>
+        <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/main.css')}}">
+
+    </head>
+    
+    <body>
+        <form id="newPrompt">
+            <label for="start">Start Article:</label>
+            <input type="text" id="start" name="start">
+            <label for="end">End Article:</label>
+            <input type="text" id="end" name="end">
+
+            <input type="submit" value="Submit">
+        </form>
+        <div id="main" style="display:none">
+            <div id="wikipedia-frame"></div>
+        </div>
+        <div id="testDisp">
+        </div>
+        
+        <ul id="output">
+            
+        </ul>
+    
+    </body>
+
+
+</html>

@@ -8,20 +8,22 @@
 .guide {
     margin: auto;
     font-size: 30px;
-    margin: 10px;
+    margin: 20px;
     text-align: center;
+    max-width: 40%;
 }
 
 .start {
     margin: auto;
     font-size: 25px;
+    text-align: center;
 }
 
 .finish {
-    display: none;
-    text-align: center;
-    font-size: 30px;
+    text-align: left;
+    font-size: 18px;
     margin: 10px;
+    width: 60%;
 }
 
 .tleft {
@@ -54,7 +56,7 @@ a {
     text-decoration: none !important;
 }
 
-a:hover {
+a:hover, a:hover * {
     text-decoration: underline !important;
 }
 
@@ -65,21 +67,17 @@ a:hover {
     margin: auto;
 }
 
-th {
-    text-align: left;
-}
-
 .countdown {
     width: 60%;
     margin: 50px auto;
     text-align: center;
     font-size: 250px;
     font-weight: bold;
-    visibility:hidden;
 }
 
 .tips {
     font-size: 20px;
+    text-align: center;
 }
 
 .startgun {
@@ -98,12 +96,49 @@ th {
     visibility:hidden;
 }
 
-#counter {
-    display:none;
+.mw-parser-output {
+    padding-bottom: 150px !important;
+}
+
+.smm-footer {
+    margin: 50px auto;
+    width: 400px;
+    display: flex;
+    justify-content: center;
+}
+
+.hide-on-mobile {
+    visibility: visible;
+
+}
+
+@media (max-width: 767px) {
+    .hide-on-mobile {
+      display: none;
+    }
+}
+
+.HUDwrapper {
     position:fixed;
     z-index: 1000000;
-    width:10%;
-    margin: 20px 20px;
-    left: 0;
-    top: 0;
+    width:auto;
+    bottom: 0;
+    background-color: #ffffff;
+    margin-bottom: 15px;
+    
+}
+
+.HUDblock {
+    /*min-width: 150px;*/
+    margin: 10px 25px;
+    font-size: 18px;
+}
+
+.finishButton {
+    width: auto !important;
+    margin: 10px 0;
+}
+
+.italics {
+    font-style: italic;
 }

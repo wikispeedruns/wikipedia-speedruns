@@ -1,4 +1,6 @@
 import pymysql
+import json
+
 # TODO Probably want to do this at some point
 # http://jan.kneschke.de/projects/mysql/order-by-rand/
 # TODO add indexes
@@ -24,24 +26,54 @@ CREATE TABLE IF NOT EXISTS `users` (
 );
 ''')
 
+# TODO: Add info for better calculations
+TABLES['ratings']=(
+'''
+CREATE TABLE IF NOT EXISTS `ratings` (
+    `user_id` INT NOT NULL,
+    `rating` INT NOT NULL,
+    `num_rounds` INT NOT NULL,
+    PRIMARY KEY (`user_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
+);
+'''
+)
+
+
+# `type` column defines in what contexts the prompt is available
 TABLES['prompts']=(
 '''
 CREATE TABLE IF NOT EXISTS `prompts` (
     `prompt_id` INT NOT NULL AUTO_INCREMENT,
     `start` VARCHAR(255) NOT NULL,
     `end` VARCHAR(255) NOT NULL,
-    `public` BOOLEAN NOT NULL DEFAULT 0,
+    `type` ENUM ('unused', 'public', 'daily') NOT NULL DEFAULT 'unused',
     PRIMARY KEY (`prompt_id`)
 );
 ''')
+
+
+# Prompts of the day
+TABLES['daily_prompts']=(
+'''
+CREATE TABLE IF NOT EXISTS `daily_prompts` (
+    `date` DATE NOT NULL,
+    `prompt_id` INT NOT NULL,
+    `rated` BOOLEAN NOT NULL DEFAULT 0,
+    PRIMARY KEY (`date`, `prompt_id`),
+    FOREIGN KEY (`prompt_id`) REFERENCES `prompts`(`prompt_id`) ON DELETE CASCADE
+);
+'''
+)
+
 
 TABLES['runs']=(
 '''
 CREATE TABLE IF NOT EXISTS `runs` (
     `run_id` INT NOT NULL AUTO_INCREMENT,
     `start_time` TIMESTAMP(3) NOT NULL,
-    `end_time` TIMESTAMP(3) NOT NULL,
-    `path` TEXT NOT NULL,
+    `end_time` TIMESTAMP(3) NULL,
+    `path` TEXT NULL,
     `prompt_id` INT NOT NULL,
     `user_id` INT,
     PRIMARY KEY (`run_id`),
@@ -82,7 +114,18 @@ def create_tables(cursor):
     for table in TABLES:
         cursor.execute(TABLES[table])
 
-conn = pymysql.connect(user='user', host='127.0.0.1')
+# Load database settings
+config = json.load(open("../config/default.json"))
+try:
+    config.update(json.load(open("../config/prod.json")))
+except FileNotFoundError:
+    pass
+
+conn = pymysql.connect(
+    user=config["MYSQL_USER"], 
+    host=config["MYSQL_HOST"],
+    password=config["MYSQL_PASSWORD"]
+)
 
 with conn.cursor() as cursor:
     cursor.execute(CREATE_DB_QUERY)

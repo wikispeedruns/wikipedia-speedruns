@@ -1,3 +1,10 @@
+import { serverData } from "./modules/serverData.js"
+
+
+const prompt_id = serverData["prompt_id"];
+const run_id = serverData["run_id"];
+
+
 function generate_prompt(prompt)
 {
     document.getElementById("prompt").innerHTML = prompt["start"] + "/" + prompt["end"];

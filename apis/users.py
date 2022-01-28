@@ -14,7 +14,6 @@ from tokens import (
     verify_reset_token, 
     create_confirm_token, 
     verify_confirm_token
-
 )
 
 from pymysql.cursors import DictCursor
@@ -36,28 +35,26 @@ google_bp = oauth_google.make_google_blueprint(redirect_url="/api/users/auth/goo
 user_api.register_blueprint(google_bp, url_prefix="/api/users/auth")
 
 
-def send_reset_email(id, email, hashed, url_root):
+def send_reset_email(id, email, username, hashed, url_root):
     token = create_reset_token(id, hashed)
     link = f"{url_root}reset/{id}/{token}"
 
     msg = Message("Reset Your Password - wikispeedruns.com",
       recipients=[email])
 
-    msg.body = 'Hello,\n\nYou or someone else has requested that a new password '\
-               'be generated for your account. If you made this request, then '\
-               'please follow this link: ' + link
-    # msg.html = render_template('email_reset.html', link=link) #TODO
+    msg.body = f"Hello {username},\n\n You are receiving this email because we received a request to reset your password. If this wasn't you, you can ignore this email. Otherwise, please follow this link: {link}"
+    msg.html = render_template('emails/reset.html', user=username, link=link)
     mail.send(msg)
 
 
-def send_confirmation_email(id, email, url_root):
+def send_confirmation_email(id, email, username, url_root, on_signup=False):
     token = create_confirm_token(id)
     link = url_root + "confirm/" + token
 
     msg = Message("Confirm your Email - Wikispeedruns.com", recipients=[email])
 
-    msg.body = 'Hello,\n\nClick the following link to confirm your email ' + link
-    # msg.html = render_template('email_confirmation.html', link=link) #TODO
+    msg.body = f"Hello {username},\n\nClick the following link to confirm your email: {link}"
+    msg.html = render_template('emails/confirm.html', link=link, user=username, on_signup=on_signup)
 
     mail.send(msg)
 
@@ -165,7 +162,7 @@ def create_user():
             cursor.execute(get_id_query)
             (id,) = cursor.fetchone()
             
-            send_confirmation_email(id, email, request.url_root)
+            send_confirmation_email(id, email, username, request.url_root, on_signup=True)
 
             db.commit()
 
@@ -304,15 +301,15 @@ def confirm_email_request():
         Request another email token be sent in as a logged in user, i.e. from profile page
     '''
     id = session["user_id"]
-    query = "SELECT `email` FROM `users` WHERE `user_id`=%s"
+    query = "SELECT `email`, `username` FROM `users` WHERE `user_id`=%s"
     
     db = get_db()
     with db.cursor() as cursor:
-        result = cursor.execute(query, (id, ))
-        (email,) = cursor.fetchone()
+        cursor.execute(query, (id, ))
+        (email, username) = cursor.fetchone()
         # TODO throw error?
 
-    send_confirmation_email(id, email, request.url_root)
+    send_confirmation_email(id, email, username, request.url_root)
 
     return "New confirmation email sent", 200
 
@@ -335,6 +332,7 @@ def confirm_email():
 
     return "Email Confirmed"
 
+
 @user_api.post("/reset_password_request")
 def reset_password_request():
     '''
@@ -344,15 +342,15 @@ def reset_password_request():
 
     email = request.json['email']
 
-    query = "SELECT `user_id`, `hash` FROM `users` WHERE `email`=%s"
+    query = "SELECT `user_id`, `username`, `hash` FROM `users` WHERE `email`=%s"
     
     db = get_db()
     with db.cursor() as cursor:
         res = cursor.execute(query, (email, ))
-        (id, hash) = cursor.fetchone()
+        (id, username, hash) = cursor.fetchone()
 
         if (res != 0):
-            send_reset_email(id, email, hash, request.url_root)
+            send_reset_email(id, email, username, hash, request.url_root)
 
     return f"If the account for {email} exists, an email has been sent with a reset link", 200
 
@@ -394,20 +392,4 @@ def reset_password():
         db.commit()
 
     return "Password Changed", 200
-
-
-
-@user_api.get('/get_user_data/<id>')
-def get_user_data(id):
-    # TODO this could probably return details as well
-    query = ("""SELECT * FROM users WHERE username=%s""")
-
-    db = get_db()
-    with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query, (id,))
-        results = cursor.fetchall()
-
-        #print(results)
-        
-        return jsonify(results)
 

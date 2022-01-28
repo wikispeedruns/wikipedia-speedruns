@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<script type=text/javascript src="{{url_for('static', filename='js/manage.js') }}"></script>
+<script type="module" src="{{url_for('static', filename='js/manage.js') }}"></script>
 {% endblock %}
     
 {% block content %}
-    <form id="newPrompt">
+<div id="app">    
+    <form id="newPrompt" v-on:submit.prevent="newPrompt">
         <label for="start">Start Article:</label>
         <input type="text" id="start" name="start">
         <label for="end">End Article:</label>
@@ -14,34 +15,81 @@
         <input type="submit" value="Submit">
     </form>
 
-    <form id="newMarathonPrompt">
-        <label for="marathonstart">Start Article:</label>
-        <input type="text" id="marathonstart" name="marathonstart">
+    <path-checker></path-checker>
 
-        <label for="cp1">Checkpoint 1:</label>
-        <input type="text" id="cp1" name="cp1">
+    <path-generator></path-generator>
 
-        <label for="cp2">Checkpoint 2:</label>
-        <input type="text" id="cp2" name="cp2">
+    <div class="row">
 
-        <label for="cp3">Checkpoint 3:</label>
-        <input type="text" id="cp3" name="cp3">
+        <div class="col-sm-6"> <div class="card"> <div class="card-body">
+           
+            <h4> Unused: </h4>
+            
+            <ul>
+                <prompt-item
+                    v-for="p in unused"
+                    v-bind:prompt="p"
+                    v-bind:key="p.prompt_id"
+                    v-on:change="getPrompts"
+                >
+                </prompt-item>
+            </ul>
+        </div></div></div>  
 
-        <label for="cp4">Checkpoint 4:</label>
-        <input type="text" id="cp4" name="cp4">
+        <div class="col-sm-6"> <div class="card"> <div class="card-body">
 
-        <label for="cp5">Checkpoint 5:</label>
-        <input type="text" id="cp5" name="cp5">
+            <h4> Public: </h4>
+            <form v-on:submit.prevent="makePublic">
+                <p>Move prompt # to public</p>
+                <input v-model="toMakePublic">
+                <button type="submit">Submit</button>
+            </form>
+            <ul>
+                <prompt-item
+                    v-for="p in public"
+                    v-bind:prompt="p"
+                    v-bind:key="p.prompt_id"
+                    v-on:delete-prompt="getPrompts"
+                >
+                </prompt-item>
+            </ul>
 
+        </div></div></div>  
+    </div>
 
-        <label for="seed">Seed:</label>
-        <input type="text" id="seed" name="seed">
+    <div class="row">
+        <div class="col-sm-12"> <div class="card"> <div class="card-body">
 
-        <input type="submit" value="Submit">
-    </form>
+            <h4> Prompts of the Day: </h4>
+            <p><input type="checkbox" checked> = rated</p>
+            <table class="table table-bordered" style="table-layout: fixed;">
+                <thead>
+                    <th>Su</th>
+                    <th>M</th>
+                    <th>T</th>
+                    <th>W</th>
+                    <th>Th</th>
+                    <th>F</th>
+                    <th>Sa</th>
+                </thead>
 
-    <ul id="prompts"></ul>
+                <tbody style="font-size:x-small">
+                    <tr v-for="week in weeks">
+                        <td v-for="day in week">
+                            <daily-item 
+                                v-bind:day="day"
+                                v-bind:key="day.dateIso"
+                                v-on:delete-prompt="getPrompts"
+                                v-on:move-prompt="getPrompts"
+                            >
+                            </daily-item>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
-    <ul id="marathonprompts"></ul>
-    
+        </div></div></div>  
+    </div>        
+</div>
+
 {% endblock %}
