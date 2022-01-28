@@ -1,16 +1,14 @@
-var vm; 
+import { serverData } from "./modules/serverData.js";
+
+const profile_name = serverData["profile_name"];
 
 function update_data(runs, user) {
             
     try {
-        vm.totalratedruns = runs['total_prompts'];
-        if (user['email_confirmed']) {
-            vm.emailverified = "Yes";
-        } else {
-            vm.emailverified = "No";
-        }
+        vm.totalratedruns.val = runs['total_prompts'];
+        vm.emailverified.val = user['email_confirmed'] ? "Yes" : "No";
         
-        vm.user_name = user['username'];
+        vm.user_name.val = user['username'];
     } catch (error) {
         console.error(error);
         window.location.href = "/error";
@@ -33,18 +31,36 @@ async function get_data(usern) {
     
 }
 
-window.addEventListener("load", function() {
+let vm = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    data: {
+        user_name: {
+            field: "Username",
+            val: "test1"
+        },
+        skillrating: {
+            field: "Skill Rating",
+            val: "test2"
+        },
+        totalratedruns: {
+            field: "Total runs",
+            val: "test3"
+        },
+        emailverified: {
+            field: "Email Verification Status",
+            val: "test4"
+        },
+        profileage: {
+            field: "Profile Age",
+            val: "test5"
+        },
+    },
 
-    get_data(profile_name);
-
-    vm = new Vue({
-        el: '#app',
-        data: {
-            user_name: '',
-            skillrating:'',
-            totalratedruns:'',
-            emailverified:'',
-            profileage:''
-        }
-    });
+    created: async function () {
+        get_data(profile_name);
+    }
 });
+
+
+

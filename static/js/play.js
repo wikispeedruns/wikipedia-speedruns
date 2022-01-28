@@ -1,3 +1,4 @@
+import { getRandTip } from "./modules/tooltips.js";
 import { serverData } from "./modules/serverData.js"
 
 const prompt_id = serverData["prompt_id"];
@@ -12,12 +13,10 @@ let app = new Vue({
         countdown: 8,
         finished: false,
         started: false,
-        gunShow: false,
         activeTip: "",
         path:[],
         finalTime:"",
         prompt_id: 0,
-
     },
     methods : {
         formatPath: function (pathArr) {
@@ -51,6 +50,7 @@ let endTime = 0;
 
 let run_id = -1;
 
+let seconds;
 let keyMap = {};
 
 function handleWikipediaLink(e) 
@@ -250,21 +250,7 @@ function displayTimer() {
     //document.getElementById("timer").innerHTML = "Elapsed Time<br/><strong>"+seconds + "s</strong>";
 }
 
-function getRandTip() {
-    const tips = [
-        "There are five permanent members of the UN security council: China, France, Russia, United Kingdom, and the United States.",
-        "The Fortune magazine has a list for top 500 United States companies (“Fortune 500”), as well as a list for top 500 global companies (“Fortune Global 500”).",
-        "Brazil is currently the world’s largest producer of sugarcane, and by a lot!",
-        "Buddhism originated in ancient India sometime between the 6th and 4th centuries BCE.",
-        "Pressing the back button will forfeit your attempt!",
-        "Infoboxes on the right often give very quick and useful links, especially for biographical and geographical pages.",
-        "Plan ahead, but be flexible! If you foresee a better route than what you had planned, go for it!",
-        "Use the Table of Contents to your advantage!",
-        "Some article subsections have an associated main article, usually linked under the subsection title."
-    ];
 
-    return tips[Math.floor(Math.random() * tips.length)];
-}
 
 function countdownOnLoad(start, end) {
 
@@ -288,18 +274,20 @@ function countdownOnLoad(start, end) {
 
         if (distance < -1000) {
             clearInterval(x);
-
             app.$data.started = true;
             
-
             startTime = Date.now();
         }
-        if (distance < 700 && distance > 610) {
-            app.$data.gunShow = true;
+        if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {
+            //app.$data.gunShow = true;
+            
+            document.getElementById("mirroredimgblock").classList.toggle("invisible")
+
+            console.log("guns should show")
         }
       }, 50);
 
-      app.$data.gunShow = false;
+      document.getElementById("mirroredimgblock").classList.toggle("invisible")
 
 }
 
