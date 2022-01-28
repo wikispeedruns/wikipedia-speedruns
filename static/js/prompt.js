@@ -65,7 +65,7 @@ function populateGraph(runs) {
                     endNode = node;
                 } 
                 else {
-                    type = 0;
+                    node.type = 0;
                     nodes.push(node);
                 }
                 
