@@ -61,7 +61,6 @@ a:hover {
 
 .mirroredimgblock {
     position:relative;
-    visibility:hidden;
 }
 
 .mw-parser-output {
@@ -73,8 +72,14 @@ a:hover {
     z-index: 1000000;
     width:auto !important;
     bottom: 0;
-    background-color: #ffffff;
+    background-color: #F8F8F8;
     margin-bottom: 15px;
     border: 2px solid #000000 !important;
     
+}
+
+@media (max-width: 1100px) {
+    .mirroredimgblock {
+        visibility:hidden !important;
+    }
 }

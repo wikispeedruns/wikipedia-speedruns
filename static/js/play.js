@@ -13,7 +13,6 @@ let app = new Vue({
         countdown: 8,
         finished: false,
         started: false,
-        gunShow: false,
         activeTip: "",
         path:[],
         finalTime:"",
@@ -272,12 +271,16 @@ function countdownOnLoad(start, end) {
             
             startTime = Date.now();
         }
-        if (distance < 700 && distance > 610) {
-            app.$data.gunShow = true;
+        if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {
+            //app.$data.gunShow = true;
+            
+            document.getElementById("mirroredimgblock").classList.toggle("invisible")
+
+            console.log("guns should show")
         }
       }, 50);
 
-      app.$data.gunShow = false;
+      document.getElementById("mirroredimgblock").classList.toggle("invisible")
 
 }
 

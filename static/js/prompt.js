@@ -4,7 +4,7 @@ const prompt_id = serverData["prompt_id"];
 const run_id = serverData["run_id"];
 const pg = serverData["pg"];
 
-const promptsPerPage = 10;
+const runsPerPage = 10;
 
 function populateGraph(runs) {
 
@@ -204,6 +204,7 @@ var app = new Vue({
         currentRun: null,
         currentRunPosition: 0,
         currentRunRank: 0,
+        runsPerPage: runsPerPage
     },
 
     methods : {
@@ -226,11 +227,23 @@ var app = new Vue({
             $('#springydemo').springy({ graph: graph1 });
         },
 
+        getPageNo: function () {
+            return parseInt(pg)
+        },
+
+        getPromptID: function() {
+            return prompt_id;
+        },
+
+        getRunID: function() {
+            return run_id;
+        },
+
         paginate: function () {
-            var first = (pg-1) * promptsPerPage
-            var last = pg * promptsPerPage
-            for (var i = 0; i < this.runs.length; i++) {
-                run = this.runs[i]
+            const first = (pg-1) * runsPerPage
+            const last = pg * runsPerPage
+            for (let i = 0; i < this.runs.length; i++) {
+                let run = this.runs[i]
                 if (run_id) {
                     if (run.run_id === parseInt(run_id)) {
                         this.currentRun = run;

@@ -12,14 +12,14 @@
 <div id="app">
 
     <div v-show="started && !finished" class="HUDwrapper container">
-        <div class="card" class="row">
-            <div class="col">
+        <div class="row flex-row">
+            <div class="col-sm-4 text-nowrap px-4 py-2">
                 Start Article<br><strong>[[startArticle]]</strong>
             </div>
-            <div class="col">
+            <div class="col-sm-4 text-nowrap px-4 py-2">
                 End Article<br><strong>[[endArticle]]</strong>
             </div>
-            <div class="col">
+            <div class="col-sm-4 text-nowrap px-4 py-2">
                 Time Elapsed<br><strong>[[timer]] s</strong>
             </div>
         </div>
@@ -31,16 +31,16 @@
             <p>Goal Article: <strong>[[endArticle]]</strong></p>
             <p>Good Luck!</p>
         </div>
-        <div v-if="gunShow" id="mirroredimgblock" class="mirroredimgblock d-md-none">
+        <div id="mirroredimgblock" class="mirroredimgblock">
             <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun">
             <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun invgif">
         </div>
 
         <div>
-            <p id="countdown" class="countdown text-center mx-auto my-auto">[[countdown]]</p>
+            <p id="countdown" class="countdown text-center mx-auto my-auto pb-5">[[countdown]]</p>
         </div>
 
-        <h6 id="tips">[[activeTip]]</h6>
+        <h6 id="tips" class="text-center">[[activeTip]]</h6>
     </div>  
 
     <div v-if="finished" class="text-left">
