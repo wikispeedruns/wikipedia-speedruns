@@ -8,7 +8,7 @@ import time
 from typing import List, Dict, Any, Tuple
 
 #DB and table names for scraper
-SCRAPER_DB = "testdb"
+SCRAPER_DB = "scraper_graph"
 ARTICLE_TABLE = SCRAPER_DB + ".articleid"
 EDGE_TABLE = SCRAPER_DB + ".edgeidarticleid"
 
