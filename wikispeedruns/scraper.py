@@ -1,6 +1,6 @@
 import time
 
-from scraper_graph_utils import getLinks, convertToID, convertToArticleName
+from wikispeedruns.scraper_graph_utils import getLinks, convertToID, convertToArticleName
 
 
 

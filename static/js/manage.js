@@ -190,6 +190,45 @@ Vue.component('path-generator', {
 
 
 
+Vue.component('marathon-generator', {
+    data: function() {
+        return {
+            prompts: []
+        }
+    },
+
+
+    methods: {
+        genMarathonPrompt: async function () {
+            try {
+                const response = await fetchJson("/api/marathon/getmarathonprompt/", 'GET')
+        
+                if (response.status != 200) {
+                    // For user facing interface, do something other than this
+                    alert(await response.text());
+                    return;
+                }
+
+                const resp = await response.json()
+
+                console.log(resp)
+                
+            } catch(e) {
+                console.log(e);
+            }
+        }
+    },
+
+    template: (`
+        <div>
+            <button id="genMarathonPromptButton" v-on:click="genMarathonPrompt">Click to generate a random marathon prompt</button>
+        </div>
+    `)
+
+});
+
+
+
 
 var app = new Vue({
     delimiters: ['[[', ']]'],

@@ -7,15 +7,13 @@ from pymysql.cursors import DictCursor
 
 import time
 
-from .pathFinder import bidirectionalSearch
-
-from .pathFinder import genPrompts
+from wikispeedruns.marathon import genPrompts
 
 import random
 
 marathon_api = Blueprint('marathon', __name__, url_prefix='/api/marathon')
 
-
+"""
 @marathon_api.post('/runs/')
 def create_run():
     query = "INSERT INTO `marathonruns` (`path`, `prompt_id`, `user_id`, `checkpoints`) VALUES (%s, %s, %s, %s)"
@@ -48,8 +46,6 @@ def create_run():
         return jsonify(id)
 
     return "Error submitting prompt"
-
-
 
 
 @marathon_api.post('/getcheckpoint/')
@@ -87,4 +83,10 @@ def get_new_checkpoint():
 
     print(finalTitle)
 
-    return jsonify({"checkpoint":finalTitle})
+    return jsonify({"checkpoint":finalTitle})"""
+    
+    
+    
+@marathon_api.get('/getmarathonprompt/')
+def get_marathon_prompt():
+    return jsonify(genPrompts())

@@ -1,4 +1,4 @@
-from scraper_graph_utils import getLinks, convertToArticleName, numLinksOnArticle, randomFilter, countWords, getRandomArticle
+from wikispeedruns.scraper_graph_utils import getLinks, convertToArticleName, numLinksOnArticle, randomFilter, countWords, getRandomArticle, traceFromStart
 import random
 
 
@@ -66,31 +66,6 @@ def checkEnd(end, thresholdEnd):
         return False
     
     return True
-
-
-def traceFromStart(startTitle, dist):
-
-    path = []
-    
-    currentTitle = startTitle
-    while dist > 0:
-        
-        path.append(currentTitle)
-        
-        links = getLinks({currentTitle:True}, forward=True)
-        
-        if currentTitle in links:
-            links = links[currentTitle]
-        else:
-            break
-        
-        randIndex = random.randint(0, len(links) - 1)
-        
-        currentTitle = links[randIndex]
-        
-        dist -= 1
-    
-    return path + [currentTitle]
 
 
 def generatePrompts(thresholdStart=100, thresholdEnd=100, n=20, dist=15):

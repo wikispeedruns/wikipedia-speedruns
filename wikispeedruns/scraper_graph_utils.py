@@ -4,7 +4,7 @@ from db import get_db
 from pymysql.cursors import DictCursor
 
 
-SCRAPER_DB = "scraper_graph"
+SCRAPER_DB = "testdb"
 ARTICLE_TABLE = SCRAPER_DB + ".articleid"
 EDGE_TABLE = SCRAPER_DB + ".edgeidarticleid"
 
@@ -78,9 +78,9 @@ def convertToArticleName(id):
         
         
 
-def numLinksOnArticle(title):
+def numLinksOnArticle(title, forward = True):
         
-    links = getLinks({title:True}, forward=True)
+    links = getLinks({title:True}, forward=forward)
         
     if title in links:
         links = links[title]
@@ -89,6 +89,13 @@ def numLinksOnArticle(title):
         
     return 0
 
+
+def countDigitsInTitle(title) :
+    count = 0
+    for character in title:
+        if character.isdigit():
+            count += 1
+    return count
 
 
 def randomFilter(bln, chance):
@@ -115,3 +122,28 @@ def getRandomArticle():
         
         while(True):
             yield random.randint(1, maxID)
+            
+            
+def traceFromStart(startTitle, dist):
+
+    path = []
+    
+    currentTitle = startTitle
+    while dist > 0:
+        
+        path.append(currentTitle)
+        
+        links = getLinks({currentTitle:True}, forward=True)
+        
+        if currentTitle in links:
+            links = links[currentTitle]
+        else:
+            break
+        
+        randIndex = random.randint(0, len(links) - 1)
+        
+        currentTitle = links[randIndex]
+        
+        dist -= 1
+    
+    return path + [currentTitle]
