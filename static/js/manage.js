@@ -247,9 +247,9 @@ Vue.component('marathon-generator', {
                     return;
                 }
 
-                const resp = await response.json()
+                //const resp = await response.json()
 
-                console.log(resp)
+                console.log(await response.text())
                 
             } catch(e) {
                 console.log(e);
