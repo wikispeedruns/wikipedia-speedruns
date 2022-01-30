@@ -45,14 +45,13 @@ def create_run():
     return "Error submitting prompt"
 
 
-@marathon_api.post('/add/')
+@marathon_api.post('/gen/')
 @check_admin
 def create_marathon_prompt():
     
     print("Received marathon prompt req")
     print(request.json)
     
-    query = "INSERT INTO `marathonprompts` (start, initcheckpoints, seed, checkpoints) VALUES (%s, %s, %s, %s);"
 
     nbucket = int(request.json.get("nbucket"))
     nbatch = int(request.json.get("nbatch"))
@@ -77,13 +76,37 @@ def create_marathon_prompt():
     checkpoints = genPrompts(initcheckpoints, batches=nbatch, nPerBatch=nperbatch, buckets=nbucket)
 
     print("Finished prompt generation")
+    
+    output = {'start': start,
+              'seed': seed,
+              'initcheckpoints': initcheckpoints,
+              'checkpoints': checkpoints}
+    
+    return json.dumps(output)
 
+    
+
+@marathon_api.post('/add/')
+@check_admin
+def add_marathon_prompt():
+    print("Received add marathon prompt req")
+    #print(request.json)
+    
+    data = json.loads(request.json.get("data"))
+    
+    print(data)
+    
+    start = data['start']
+    initcheckpoints = data['initcheckpoints']
+    seed = data['seed']
+    checkpoints = data['checkpoints']
+    
+    query = "INSERT INTO `marathonprompts` (start, initcheckpoints, seed, checkpoints) VALUES (%s, %s, %s, %s);"
     db = get_db()
     with db.cursor() as cursor:
         result = cursor.execute(query, (start, json.dumps(initcheckpoints), seed, json.dumps(checkpoints)))
         db.commit()
         return "Prompt added!"
-
 
 
 @marathon_api.delete('/delete/<id>')

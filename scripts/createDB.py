@@ -5,7 +5,7 @@ import json
 # http://jan.kneschke.de/projects/mysql/order-by-rand/
 # TODO add indexes
 
-DB_NAME='wikipedia_speedruns'
+DB_NAME='wikipedia_speedruns_beta'
 
 CREATE_DB_QUERY = 'CREATE DATABASE IF NOT EXISTS {}'.format(DB_NAME)
 USE_DB_QUERY = 'USE {}'.format(DB_NAME)

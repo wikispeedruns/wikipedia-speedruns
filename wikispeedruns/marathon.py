@@ -76,7 +76,7 @@ def genBatch(prevBatch, min_incoming=100, min_outgoing=100, N=10, d=2):
             
         
         item = {"a": utils.convertToArticleName(id), 
-                "s": s}#,
+                "s": round(s, 1)}#,
                 #"digits": s1,
                 #"words":s2,
                 #"incoming": s3,

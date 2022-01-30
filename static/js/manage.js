@@ -229,17 +229,17 @@ Vue.component('marathon-generator', {
             seed: "123456",
             nbucket: "5",
             nbatch: "5",
-            nperbatch: "10"
+            nperbatch: "10",
+            promptinput: "",
         }
     },
 
 
     methods: {
-        genMarathonPrompt: async function () {
+        submitMarathonPrompt: async function () {
             try {
-                console.log(this.$data)
 
-                const response = await fetchJson("/api/marathon/add/", 'POST', this.$data)
+                const response = await fetchJson("/api/marathon/add/", 'POST', {'data':this.promptinput})
         
                 if (response.status != 200) {
                     // For user facing interface, do something other than this
@@ -254,11 +254,53 @@ Vue.component('marathon-generator', {
             } catch(e) {
                 console.log(e);
             }
+        }, 
+
+        displayGenerated: async function () {
+
+            console.log("generating")
+            document.getElementById("generatedMarathonText").innerHTML = "Generating... Please give up to 3 minutes"
+
+            try {
+
+                const response = await fetchJson("/api/marathon/gen/", 'POST', this.$data)
+        
+                if (response.status != 200) {
+                    // For user facing interface, do something other than this
+                    alert(await response.text());
+                    return;
+                }
+
+                console.log("Finished, displaying output")
+
+                document.getElementById("generatedMarathonText").innerHTML = await response.text()
+
+                //const resp = await response.json()
+
+                //console.log(await response.text())
+                
+            } catch(e) {
+                console.log(e);
+                document.getElementById("generatedMarathonText").innerHTML = e
+            }
         }
     },
 
     template: (`
         <div>
+        <div>
+            <b>SUBMIT PRE-GENERATED PROMPT</b>
+            <div class="input-group">
+                <label class="input-group-text" for="promptinput">Full Prompt:</label>
+                <input class="form-control" type="text" name="promptinput" v-model="promptinput">
+            </div>
+            <button id="submitMarathonPromptButton" v-on:click="submitMarathonPrompt">Click to submit marathon prompt</button>
+        </div>
+        <hr>
+        <div id="generatedMarathonText"></div>
+        <hr>    
+        <div>
+            <b>***GENERATE PROMPT, ONLY USE ON LOCAL***</b>
             <div class="input-group">
                 <label class="input-group-text" for="startField">Start Article:</label>
                 <input class="form-control" type="text" name="startField" v-model="start">
@@ -295,9 +337,10 @@ Vue.component('marathon-generator', {
                 <label class="input-group-text form-control" for="nperbatch">N-PerBatch:</label>
                 <input class="form-control" type="text" name="nperbatch" v-model="nperbatch">
             </div>
-            <button id="genMarathonPromptButton" v-on:click="genMarathonPrompt">Click to generate and submit a random marathon prompt</button>
+            <button id="genMarathonPromptButton" v-on:click="displayGenerated">Click to generate random marathon prompt</button>
         </div>
         <hr>
+        </div>
     `)
 
 });
