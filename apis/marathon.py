@@ -152,9 +152,9 @@ def get_marathon_prompt(id):
         prompt = cursor.fetchone()
 
         # Check permissions for users
-        if (not session.get("admin")):
-            if (prompt["type"] == "unused"):
-                return "You do not have permission to view this prompt", 401
+        #if (not session.get("admin")):
+        #    if (prompt["type"] == "unused"):
+        #        return "You do not have permission to view this prompt", 401
                     
         return jsonify(prompt)
 
