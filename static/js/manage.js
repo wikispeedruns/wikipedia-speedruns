@@ -227,9 +227,9 @@ Vue.component('marathon-generator', {
             cp4: "DNA",
             cp5: "Clay",
             seed: "123456",
-            nbucket: "3",
-            nbatch: "2",
-            nperbatch: "3"
+            nbucket: "5",
+            nbatch: "5",
+            nperbatch: "10"
         }
     },
 
