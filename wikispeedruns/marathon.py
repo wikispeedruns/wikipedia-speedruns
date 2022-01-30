@@ -1,14 +1,12 @@
 import wikispeedruns.scraper_graph_utils as utils
+import wikispeedruns.scraper as scraper
 import math
+import random
 
 def getDifficultyScore(id, min_incoming, min_outgoing):
     
-    num_incoming = utils.numLinksOnArticle(id, forward = False)
-    if num_incoming < min_incoming:
-        return -1, 0, 0, 0, 0
-    
-    num_outgoing = utils.numLinksOnArticle(id)
-    if num_outgoing < min_outgoing:
+    linkCheckBool, num_incoming, num_outgoing = utils.articleLinkNumCheck(id, min_incoming, min_outgoing)
+    if not linkCheckBool:
         return -1, 0, 0, 0, 0
     
     title = utils.convertToArticleName(id)
@@ -22,54 +20,104 @@ def getDifficultyScore(id, min_incoming, min_outgoing):
     if num_words == 2:
         words_score * 0.5
     
-    digits_score = 10
+    digits_score = 0
     if num_digits == 4 or num_digits == 0:
-        digits_score = 50
+        digits_score = 100
         
-    digits_weight = 2
+    digits_weight = 1.5
     words_weight = 5
     incoming_weight = 8.5
     outgoing_weight = 10
     
-    final_score = digits_weight * digits_score + words_score * words_weight + incoming_score * incoming_weight + outgoing_score * outgoing_weight
+    ds = digits_weight * digits_score
+    ws = words_score * words_weight
+    iS = incoming_score * incoming_weight
+    oS = outgoing_score * outgoing_weight
     
-    return final_score, digits_weight * digits_score, words_score * words_weight, incoming_score * incoming_weight, outgoing_score * outgoing_weight
+    final = ds + ws + iS + oS
+    
+    return final, (ds, num_digits), (ws, num_words), (iS, num_incoming), (oS, num_outgoing)
             
             
-def genBuckets(min_incoming = 100, min_outgoing = 100, N=30, M=10, d=5):
+def genBatch(prevBatch, min_incoming=100, min_outgoing=100, N=10, d=2):
     
     outputList = []
     
     generator = utils.getRandomArticle()
     
-    while (len(outputList) < N*M):
+    while (len(outputList) < N):
         
-        start = generator.__next__()
-        id = utils.traceFromStart(start, d)[-1]
+        mid = -1
+        try:
+            rand = generator.__next__()
+            if not utils.articleLinkNumCheck(rand, int(min_incoming/3), int(min_outgoing/3)):
+                continue
+            
+            #start = random.choices(prevBucket, k=2)
+            start = random.choice(prevBatch)
+            if not type(start) is int:
+                start = utils.convertToID(start['a'])
+            
+            p1 = scraper.findPaths(rand, start, id=True)['ArticlesIDs']
+            #p1 = scraper.findPaths(rand, start[0], id=True)['ArticlesIDs']
+            #p2 = scraper.findPaths(rand, start[1], id=True)['ArticlesIDs']
+            #p3 = scraper.findPaths(p1[int(len(p1)/2)], p2[int(len(p2)/2)], id=True)['ArticlesIDs']
+            mid = p1[int(len(p1)/2)]
+        except RuntimeError as e:
+            print(e)
+            continue
+            
+        s = -1
+        id = -1
+        while (s == -1):
+            id = utils.traceFromStart(mid, d)[-1]
+            s, s1, s2, s3, s4 = getDifficultyScore(id, min_incoming, min_outgoing)
+            print("Checked: " + utils.convertToArticleName(id) + " " + str(s))
+            
         
-        s, s1, s2, s3, s4 = getDifficultyScore(id, min_incoming, min_outgoing)
-        if s > -1:
-            item = {"article": utils.convertToArticleName(id), 
-                    "score": s,
-                    "digits": s1,
-                    "words":s2,
-                    "incoming": s3,
-                    "outgoing": s4}
-            print(item)
-            outputList.append(item)
+        item = {"a": utils.convertToArticleName(id), 
+                "s": s}#,
+                #"digits": s1,
+                #"words":s2,
+                #"incoming": s3,
+                #"outgoing": s4}
+            
+        outputList.append(item)
         
         
-    outputList.sort(key = lambda x: x["score"])
+    outputList.sort(key = lambda x: x["s"])
     
-    #for item in outputList:#[1:int(len(outputList)/2)]: 
-    #    print(item)
+    for item in outputList:#[1:int(len(outputList)/2)]: 
+        print(item)
     
     return outputList#[1:int(len(outputList)/2)]
 
 
+def split(a, n):
+    k, m = divmod(len(a), n)
+    return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
 
-def genPrompts():
+
+def genPrompts(initBatch, batches=5, nPerBatch=10, buckets=5):
+        
+    mi = 100
+    mo = 100
     
-    output = genBuckets(min_incoming = 100, min_outgoing = 100, N=10, M=10, d=5)
+    batchesArr = []
     
-    return output
+    batchesArr.append(genBatch(utils.convertNamePathToID(initBatch), min_incoming = mi, min_outgoing = mo, N=nPerBatch))
+    
+    for i in range(batches-1):
+        batchesArr.append(genBatch(batchesArr[i], min_incoming = mi-(i+1)*1/(2*batches), min_outgoing = mo-(i+1)*1/(2*batches), N=nPerBatch))
+        
+    batchesArr = [j for i in batchesArr for j in i]
+        
+    batchesArr.sort(key = lambda x: x["s"])
+    
+    for item in batchesArr:
+        print(f"{item['a']}: {item['s']}")
+    
+    
+    final = list(split(batchesArr, buckets))
+    
+    return final

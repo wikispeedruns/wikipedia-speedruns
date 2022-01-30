@@ -147,3 +147,23 @@ def traceFromStart(startTitle, dist):
         dist -= 1
     
     return path + [currentTitle]
+
+
+def convertNamePathToID(path):
+    output = []
+    for item in path:
+        output.append(convertToID(item))
+    return output
+
+
+
+def articleLinkNumCheck(id, min_incoming, min_outgoing):
+    num_incoming = numLinksOnArticle(id, forward = False)
+    if num_incoming < min_incoming:
+        return False, None, None
+    
+    num_outgoing = numLinksOnArticle(id)
+    if num_outgoing < min_outgoing:
+        return False, None, None
+    
+    return True, num_incoming, num_outgoing

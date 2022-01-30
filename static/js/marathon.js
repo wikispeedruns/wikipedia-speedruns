@@ -1,21 +1,63 @@
+import { serverData } from "./modules/serverData.js"
+import { fetchJson } from "./modules/fetch.js";
+
+const prompt_id = serverData["prompt_id"];
+
+let app = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    data: {
+        startArticle: "",
+        timer: "",
+        countdown: 8,
+        finished: false,
+        started: false,
+        gunShow: false,
+        activeTip: "",
+        path:[],
+        finalTime:"",
+        prompt_id: 0,
+        
+        checkpoints:[],
+        activeCheckpoints: [],
+        visitedCheckpoints: [],
+        numVisitedUnique: 0,
+        clicksRemaining: 3,
+    },
+    computed: {
+        numCheckpointsVisited : function () {
+            return this.visitedCheckpoints.length
+        },
+    },
+    methods : {
+        formatPath: function (pathArr) {
+            let output = "";
+            for(let i=0; i<pathArr.length - 1;i++) {
+                output = output.concat(pathArr[i])
+                output = output.concat(" -> ")
+            }
+            output = output.concat(pathArr[pathArr.length - 1])
+            return output;
+        }, 
+
+        finishPrompt: function (event) {
+            window.location.replace("/marathonprompt/" + prompt_id);
+        }, 
+
+        home: function (event) {
+            window.location.replace("/");
+        }
+
+    }
+})
+
 var timerInterval = null;
-///var startTime = 0;
-var path = [];
-//var endTime = 0;
 
+var keyMap = {};
 
-var defaultStartingClicks = 11;
-var clicksPerCheckpoint = 5;
+const clicksPerCheckpoint = 5;
 
-var clicksRemaining = defaultStartingClicks;
-
-var seed = 0;
-
-
-var checkpoints = [];
-
-var visitedCheckpoints = [];
-var uniqueArticlesVisited = 0;
+var startTime = 0;
 
 function handleWikipediaLink(e) 
 {
@@ -23,7 +65,7 @@ function handleWikipediaLink(e)
     const linkEl = e.currentTarget;
 
     if (linkEl.getAttribute("href").substring(0, 1) === "#") {
-        var a = linkEl.getAttribute("href").substring(1);
+        let a = linkEl.getAttribute("href").substring(1);
         //console.log(a);
         document.getElementById(a).scrollIntoView();
 
@@ -45,24 +87,9 @@ function handleWikipediaLink(e)
     }
 }
 
-
-async function getTitle(page) {
-    const resp = await fetch(
-        `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${page}`,
-        {
-            mode: "cors"
-        }
-    )
-    const body = await resp.json()
-
-    return body["parse"]["title"]
-}
-
 async function loadPage(page) {
 
-    clicksRemaining -= 1;
-
-    
+    app.$data.clicksRemaining -= 1;
 
     const resp = await fetch(
         `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${page}`,
@@ -74,58 +101,51 @@ async function loadPage(page) {
 
     const title = body["parse"]["title"]
 
-    document.getElementById("wikipedia-frame").innerHTML = body["parse"]["text"]["*"]
-    document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
+    let frameBody = document.getElementById("wikipedia-frame")
+    frameBody.innerHTML = body["parse"]["text"]["*"]
+    frameBody.querySelectorAll("a").forEach(function(a) {
+        a.innerHTML = '<div style="display:inline-block">' + a.text.split('').map(function(character) {
+            return '<div style="display:inline-block">' + character.replace(/\s/g, '&nbsp;') + '</div>'
+        }).join('') + '</div>'
+    });
 
-    if (!path.includes(title)) {
-        uniqueArticlesVisited += 1;
+    document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
+    
+    if (!app.$data.path.includes(title)) {
+        app.$data.numVisitedUnique += 1;
     }
 
-    /*// Start timer if we are at the start
-    if (path.length == 0) {
+    // Start timer if we are at the start
+    if (app.$data.path.length == 0) {
         startTime = Date.now()
         timerInterval = setInterval(displayTimer, 20);    
-    }*/
+    }
     
-
-    path.push(title)
+    app.$data.path.push(title)
 
     var hitcheckpoint = false;
     var checkpointindex = -1;
-    reqBody = {'seed':seed};
 
-    for (let i = 0; i < checkpoints.length; i++) {
+    for (let i = 0; i < app.$data.activeCheckpoints.length; i++) {
 
-        if (formatStr(title) === formatStr(checkpoints[i])) {
-            clicksRemaining += clicksPerCheckpoint;
+        if (formatStr(title) === formatStr(app.$data.activeCheckpoints[i])) {
+            app.$data.clicksRemaining += clicksPerCheckpoint;
 
             //query for new checkpoint
 
             checkpointindex = i;
             hitcheckpoint = true;
 
-            for (let j = 0; j < checkpoints.length; j++) {
-                if (i !== j) {
-                    reqBody["cp"+String(j)] = checkpoints[j]
-                } else {
-                    reqBody["cp"+String(i)] = title
-                }
-                
-            }
-
-            checkpoints[i] = "Generating a new checkpoint..."
-            updateCounter();
-
-            visitedCheckpoints.push(title);
+            app.$data.visitedCheckpoints.push(title);
 
         }
         
     }
 
-    if (clicksRemaining === 0) {
+
+    if (app.$data.clicksRemaining === 0) {
         await finish();
     }
-
 
     document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
         el.onclick = handleWikipediaLink;
@@ -134,80 +154,48 @@ async function loadPage(page) {
     hideElements();
     window.scrollTo(0, 0)
 
-    updateCounter();
-
+    
     if (hitcheckpoint) {
-        console.log("hit checkpoint, generating new checkpoint")
+        console.log("hit checkpoint, getting new checkpoint")
 
-        do {
-            try {
-                console.log(reqBody)
-                const response = await fetch("/api/marathon/getcheckpoint/", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(reqBody)
-                })
+        console.log(app.$data.activeCheckpoints[checkpointindex])
 
-                const resp = await response.json();
-                checkpoints[checkpointindex] = await getTitle(resp["checkpoint"]);
+        let got = false
 
-                console.log(checkpoints)
-                console.log(resp)
-
-            } catch(e) {
-                console.log(e);
+        app.$data.checkpoints.forEach(bucket => {
+            if (bucket.length> 0 && !got) {
+                let el = bucket.pop()
+                app.$data.activeCheckpoints[checkpointindex] = el['a']
+                console.log(el['a'])
+                got = true
             }
-        } while ( countocc(checkpoints[checkpointindex], checkpoints) > 1);
-        
-        updateCounter();
+        })
     }
-}
 
-function countocc(item, arr) {
-    var count = 0;
-    for (i=0; i<arr.length; i++) {
-        if (item === arr[i]) {
-            count++;
-        }
-    }
+    console.log(app.$data)
 }
 
 async function finish() {
+
+    app.$data.finished = true;
+    app.$data.finalTime = app.$data.timer;
+
     // Stop timer
-    //endTime = Date.now();
-    //clearInterval(timerInterval);
-    //document.getElementById("timer").innerHTML="";
+    clearInterval(timerInterval);
 
-    // Prevent prompt
+    // Prevent are you sure you want to leave prompt
     window.onbeforeunload = null;
-
-    console.log(visitedCheckpoints)
-
-    const reqBody = {
-        //"start_time": startTime,
-        //"end_time": endTime,
-        "prompt_id": prompt_id,
-        "path": path,
-        "checkpoints": visitedCheckpoints,
-    }
 
     // Send results to API
     try {
-        const response = await fetch("/api/marathon/runs/", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(reqBody)
-        })
+        const response = await fetchJson(`/api/marathon/runs/`, "POST", {
+            path: JSON.stringify(app.$data.path),
+            checkpoints: JSON.stringify(app.$data.visitedCheckpoints),
+            prompt_id: String(app.$data.prompt_id)
+        }
+        )
 
-        const run_id = await response.json();
-
-        console.log("Run saved");
-
-        //window.location.href = "/prompt/" + prompt_id + "?run_id=" + run_id;
+        console.log("run saved")
 
     } catch(e) {
         console.log(e);
@@ -217,18 +205,18 @@ async function finish() {
 
 function hideElements() {
     
-    var hide = ["reference","mw-editsection","reflist","portal","refbegin", "sidebar", "authority-control", "external", "sistersitebox"]
-    for(i=0; i<hide.length; i++) {
-        var elements = document.getElementsByClassName(hide[i])
+    const hide = ["reference","mw-editsection","reflist","portal","refbegin", "sidebar", "authority-control", "external", "sistersitebox"]
+    for(let i=0; i<hide.length; i++) {
+        let elements = document.getElementsByClassName(hide[i])
         //console.log("found: " + hide[i] + elements.length)
-        for(j=0; j<elements.length; j++) {
+        for(let j=0; j<elements.length; j++) {
             elements[j].style.display = "none";
         }
     }
     
-    var idS = ["See_also", "Notes_and_references", "Further_reading", "External_links", "References", "Notes", "Citations", "Explanatory_notes"];
-    for(i=0; i<idS.length; i++) {
-        var e = document.getElementById(idS[i]);
+    const idS = ["See_also", "Notes_and_references", "Further_reading", "External_links", "References", "Notes", "Citations", "Explanatory_notes"];
+    for(let i=0; i<idS.length; i++) {
+        let e = document.getElementById(idS[i]);
         if (e !== null) {
             e.style.display = "none";
         }
@@ -236,9 +224,9 @@ function hideElements() {
 
     //hide Disambig
     
-    var elements = document.getElementsByClassName("hatnote");
-    for (i=0; i < elements.length; i++) {
-        var a = elements[i].getElementsByClassName("mw-disambig");
+    let elements = document.getElementsByClassName("hatnote");
+    for (let i=0; i < elements.length; i++) {
+        let a = elements[i].getElementsByClassName("mw-disambig");
         //console.log(a)
         if (a.length !== 0) {
             elements[i].style.display = "none";
@@ -246,17 +234,17 @@ function hideElements() {
         //mw-disambig
     }
 
-    //var all = document.getElementsByClassName("mw-parser-output")[0].querySelectorAll("h2", "div", "ul", "p");
-    var all = document.getElementById("wikipedia-frame").querySelectorAll("h2, div, ul, p, h3");
-    var flip = false
-    for (i = 0; i < all.length; i++) {
+    //let all = document.getElementsByClassName("mw-parser-output")[0].querySelectorAll("h2", "div", "ul", "p");
+    let all = document.getElementById("wikipedia-frame").querySelectorAll("h2, div, ul, p, h3");
+    let flip = false
+    for (let i = 0; i < all.length; i++) {
         if (!flip) {
             if (all[i].tagName == "H2") {
                 //console.log("checking h2");
-                var check = all[i].getElementsByClassName("mw-headline")
+                let check = all[i].getElementsByClassName("mw-headline")
                 if (check.length !== 0) {
                     //console.log(check[0].id)
-                    for (j = 0; j < idS.length; j++) {
+                    for (let j = 0; j < idS.length; j++) {
                         if (check[0].id == idS[j]) {
                             //console.log("found see also at: " + i);
                             all[i].style.display = "none";
@@ -272,212 +260,103 @@ function hideElements() {
     
 }
 
-
 function formatStr(string) {
     return string.replace("_", " ").toLowerCase()
 }
 
-/*function displayTimer() {
-    seconds = (Date.now() - startTime) / 1000;
-    document.getElementById("timer").innerHTML = seconds + "s";
-}*/
-
-function getRandTip() {
-    return "There are five permanent members of the UN security council: China, France, Russia, United Kingdom, and the United States."
+function displayTimer() {
+    const seconds = (Date.now() - startTime) / 1000;
+    app.$data.timer = seconds;
 }
 
-function countdownOnLoad(start, checkpoints) {
-    
-    var guideBlock = document.getElementById("guide");
-    var mainBlock = document.getElementById("main");
-    var countdownBlock = document.getElementById("countdown");
-    var tipsBlock = document.getElementById("tips");
+function getRandTip() {
+    const tips = [
+        "There are five permanent members of the UN security council: China, France, Russia, United Kingdom, and the United States.",
+        "The Fortune magazine has a list for top 500 United States companies (“Fortune 500”), as well as a list for top 500 global companies (“Fortune Global 500”).",
+        "Brazil is currently the world’s largest producer of sugarcane, and by a lot!",
+        "Buddhism originated in ancient India sometime between the 6th and 4th centuries BCE.",
+        "Pressing the back button will forfeit your attempt!",
+        "Infoboxes on the right often give very quick and useful links, especially for biographical and geographical pages.",
+        "Plan ahead, but be flexible! If you foresee a better route than what you had planned, go for it!",
+        "Use the Table of Contents to your advantage!",
+        "Some article subsections have an associated main article, usually linked under the subsection title."
+    ];
 
-    var gifBlock = document.getElementById("mirroredimgblock");
+    return tips[Math.floor(Math.random() * tips.length)];
+}
 
-    var guide = "<strong>Starting article: </strong>" + start + "    -->    <strong>Checkpoints: </strong>";
-    for(i=0; i<5; i++) {
-        guide = guide + checkpoints[i];
-        guide = guide + " | ";
-    }
+function countdownOnLoad() {
 
-    guideBlock.innerHTML = guide;
+    app.$data.activeTip = getRandTip();
 
-    mainBlock.style.display = "none";
-    countdownBlock.style.display = "block";
-    tipsBlock.style.display = "block";
+    let countDownStart = Date.now();
+    let countDownTime = app.$data.countdown * 1000;
 
+    let x = setInterval(function() {
 
-    tipsBlock.innerHTML = getRandTip();
-
-    //countdownBlock.innerHTML = "Prompt will begin in " + "5" + " seconds";
-    /*    <img class="startgun" src="{{url_for('static', filename='assets/startgun.gif')}}">
-    <img class="startgun invgif" src="{{url_for('static', filename='assets/startgun.gif')}}">
-    */
-
-    var countDownStart = Date.now();
-    var countDownTime = 8000;
-
-
-    var gunimg1 = document.createElement('img');
-    var gunimg2 = document.createElement('img');
-    imgpath = "/static/assets/startgun.gif";
-
-    gunimg1.classList.add("startgun");
-    gunimg2.classList.add("startgun");
-    gunimg2.classList.add("invgif");
-    gunimg2.src = imgpath;
-    gunimg1.src = imgpath;
-
-
-    var x = setInterval(function() {
-
-        var now = Date.now()
+        let now = Date.now()
       
         // Find the distance between now and the count down date
-        var distance = countDownStart + countDownTime - now;
-        //console.log(distance);
-        //console.log(String(Math.floor(distance/1000)+1));
-        countdownBlock.innerHTML = String(Math.floor(distance/1000)+1);
-        countdownBlock.style.visibility = "visible";
+        let distance = countDownStart + countDownTime - now;
+
+        app.$data.countdown = Math.floor(distance/1000)+1;
+
         if (distance < -1000) {
             clearInterval(x);
-            mainBlock.style.display = "block";
-            countdownBlock.style.display = "none";
-            //guideBlock.innerHTML = "<strong>" + start + "</strong> --> <strong>" + end + "</strong>";
-            guideBlock.style.display = "none";
-            tipsBlock.style.display = "none";
-            gifBlock.style.display = "none";
-            //startTime = Date.now();
 
+            app.$data.started = true;
+            
+
+            startTime = Date.now();
         }
         if (distance < 700 && distance > 610) {
-            gifBlock.style.visibility = "visible";
-            gifBlock.appendChild(gunimg1);
-            gifBlock.appendChild(gunimg2);
+            app.$data.gunShow = true;
         }
       }, 50);
 
+      app.$data.gunShow = false;
+
 }
 
-
-function updateCounter() {
-    var counterBlock = document.getElementById("counter");
-
-    while(counterBlock.firstChild){
-        counterBlock.removeChild(counterBlock.firstChild);
+function disableFind(e) {
+    console.log(e);
+    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) { 
+        e.preventDefault();
+        this.alert("WARNING: Attempt to Find in page. This will be recorded.")
     }
-
-    counterBlock.style.display = "block";
-
-    var b = document.createElement("div");
-    b.innerHTML = "Clicks Remaining:";
-    b.style.fontSize = "25px";
-    
-    var num = document.createElement("div");
-    num.innerHTML = String(clicksRemaining);
-    num.style.fontSize = "40px";
-
-    var c = document.createElement("div");
-    c.innerHTML = "Checkpoints:";
-    c.style.fontSize = "25px";
-
-    var checkpointList = document.createElement("ul");
-    for(i=0; i<checkpoints.length; i++) {
-        var a = document.createElement("li");
-        a.innerHTML = checkpoints[i];
-        checkpointList.appendChild(a);
-    }
-
-
-    var tip = document.createElement("div");
-    tip.innerHTML = "Go as far as you can! Each article you visit will cost 1 click, but each checkpoint you visit will grant you an extra 5 clicks! Game will end when you run out of clicks";
-    tip.style.fontSize = "15px";
-
-    var articles = document.createElement("div");
-    articles.innerHTML = "Articles visited:";
-    articles.style.fontSize = "20px";
-
-    var articlescount = document.createElement("div");
-    articlescount.innerHTML = String(uniqueArticlesVisited);
-    articlescount.style.fontSize = "40px";
-
-
-
-    var visitedCheckpointsTitle = document.createElement("div");
-    visitedCheckpointsTitle.innerHTML = "Checkpoints visited:";
-    visitedCheckpointsTitle.style.fontSize = "20px";
-
-    var visitedCheckpointsList = document.createElement("ul");
-    for(i=0; i<visitedCheckpoints.length; i++) {
-        var a = document.createElement("li");
-        a.innerHTML = visitedCheckpoints[i];
-        visitedCheckpointsList.appendChild(a);
-    }
-
-    counterBlock.appendChild(b)
-    counterBlock.appendChild(num)
-    counterBlock.appendChild(c)
-    counterBlock.appendChild(checkpointList)
-    counterBlock.appendChild(articles)
-    counterBlock.appendChild(articlescount)
-    counterBlock.appendChild(tip)
-    counterBlock.appendChild(visitedCheckpointsTitle)
-    counterBlock.appendChild(visitedCheckpointsList)
 }
-
-/*
-function checkForFind(e) {
-
-    var guideBlock = document.getElementById("guide");
-    var mainBlock = document.getElementById("main");
-    var timerBlock = document.getElementById("timer");
-
-    console.log(e.code);
-    e = e || event;
-    keyMap[e.code] = e.type == 'keydown';
-    if (keyMap["KeyF"] && (keyMap["ControlLeft"] || keyMap["ControlRight"])) {
-        if (ctrlfwarnings == true) {
-            //ctrlfwarnings = 1;
-            mainBlock.style.display = "none";
-            timerBlock.style.display = "none";
-            guideBlock.innerHTML = "STOP! You violated the law. Pay the court a fine or serve your sentence."
-            var tesguard = document.createElement('img');
-            tesguard.src = "/static/assets/stop.jpg";
-            tesguard.width= "700";
-            tesguard.style.marginTop = "40px";
-            guideBlock.appendChild(tesguard);
-        }
-    }
-}*/
 
 window.addEventListener("load", async function() {
-    const response = await fetch("/api/prompts/marathon/" + prompt_id);
+    const response = await fetch("/api/marathon/prompt/" + prompt_id);
+
+    app.$data.prompt_id = prompt_id;
+
+    if (response.status != 200) {
+        const error = await response.text();
+        this.alert(error)
+        // Prevent are your sure you want to leave prompt
+        window.onbeforeunload = null;
+        window.location.href = "/"   // TODO error page
+
+    }
+
     const prompt = await response.json();
 
-    const article = prompt["start"];
+    console.log(prompt)
 
-    checkpoints.push(prompt["checkpoint1"]);
-    checkpoints.push(prompt["checkpoint2"]);
-    checkpoints.push(prompt["checkpoint3"]);
-    checkpoints.push(prompt["checkpoint4"]);
-    checkpoints.push(prompt["checkpoint5"]);
-    seed = prompt["seed"];
+    app.$data.startArticle = prompt['start'];
+    app.$data.activeCheckpoints = JSON.parse(prompt['initcheckpoints']);
+    app.$data.checkpoints = JSON.parse(prompt['checkpoints']);
 
-    await countdownOnLoad(article,checkpoints);
+    await countdownOnLoad();
 
-    loadPage(article);
+    loadPage(app.$data.startArticle);
 });
 
 window.onbeforeunload = function() {
     return true;
 };
 
-/*
 window.addEventListener("keydown", function(e) {
-    checkForFind(e);
+    disableFind(e);
 });
-window.addEventListener("keyup", function(e) {
-    checkForFind(e);
-});
-*/

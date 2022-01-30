@@ -107,3 +107,9 @@ def get_reset_page(id, token):
 @app.route('/error', methods=['GET'])
 def get_gen_error_page():
     return render_with_data('users/generic_error.html')
+
+
+
+@app.route('/play/marathon/<id>', methods=['GET'])
+def get_marathon_play_page(id):
+    return render_with_data('marathon.html', prompt_id=id)

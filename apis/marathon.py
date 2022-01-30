@@ -5,15 +5,12 @@ import json
 from db import get_db
 from pymysql.cursors import DictCursor
 
-import time
 
 from wikispeedruns.marathon import genPrompts
 
-import random
-
 marathon_api = Blueprint('marathon', __name__, url_prefix='/api/marathon')
 
-"""
+
 @marathon_api.post('/runs/')
 def create_run():
     query = "INSERT INTO `marathonruns` (`path`, `prompt_id`, `user_id`, `checkpoints`) VALUES (%s, %s, %s, %s)"
@@ -48,45 +45,92 @@ def create_run():
     return "Error submitting prompt"
 
 
-@marathon_api.post('/getcheckpoint/')
-def get_new_checkpoint():
+@marathon_api.post('/add/')
+@check_admin
+def create_marathon_prompt():
+    
+    print("Received marathon prompt req")
+    print(request.json)
+    
+    query = "INSERT INTO `marathonprompts` (start, initcheckpoints, seed, checkpoints) VALUES (%s, %s, %s, %s);"
 
-    distFromSecondMidpoint = 1
+    nbucket = int(request.json.get("nbucket"))
+    nbatch = int(request.json.get("nbatch"))
+    nperbatch = int(request.json.get("nperbatch"))
+    
+    if nbucket < 1 or nbatch < 1 or nperbatch < 1:
+        raise ValueError("Bad input")
+    
+    
+    start = request.json.get("start")
+    cp1 = request.json.get("cp1")
+    cp2 = request.json.get("cp2")
+    cp3 = request.json.get("cp3")
+    cp4 = request.json.get("cp4")
+    cp5 = request.json.get("cp5")
+    seed = request.json.get("seed")
+    
+    initcheckpoints = [cp1, cp2, cp3, cp4, cp5]
+    
+    print("Starting prompt generation")
+    
+    checkpoints = genPrompts(initcheckpoints, batches=nbatch, nPerBatch=nperbatch, buckets=nbucket)
 
-    checkpoints = [request.json['cp0'],
-                   request.json['cp1'],
-                   request.json['cp2'],
-                   request.json['cp3'],
-                   request.json['cp4']]
-    
-    seed = request.json['seed']
-    
-    List = [0, 1, 2, 3, 4]
-    points = random.sample(List, 3)
-    
-    
-    firstPair = bidirectionalSearch.findPaths(checkpoints[points[0]], checkpoints[points[1]])
-    firstInd = int(len(firstPair[0][0]) / 2)
-    midpoint = bidirectionalSearch.convertToArticleName(firstPair[0][0][firstInd])
-    
-    print(midpoint)
-    
-    secondPair = bidirectionalSearch.findPaths(midpoint, checkpoints[points[2]])
-    secondInd = int(len(secondPair[0][0]) / 2)
-    secondmidpoint = bidirectionalSearch.convertToArticleName(secondPair[0][0][secondInd])    
-    
-    print(secondmidpoint)
-    
-    final = genPrompts.traceFromStart(bidirectionalSearch.convertToID(secondmidpoint), distFromSecondMidpoint)[-1]
-    
-    finalTitle = bidirectionalSearch.convertToArticleName(final)
+    print("Finished prompt generation")
 
-    print(finalTitle)
+    db = get_db()
+    with db.cursor() as cursor:
+        result = cursor.execute(query, (start, json.dumps(initcheckpoints), seed, json.dumps(checkpoints)))
+        db.commit()
+        return "Prompt added!"
 
-    return jsonify({"checkpoint":finalTitle})"""
+
+
+@marathon_api.delete('/delete/<id>')
+@check_admin
+def delete_prompt(id):
+    query = "DELETE FROM marathonprompts WHERE prompt_id=%s"
+
+    db = get_db()
+    with db.cursor() as cursor:
+        try:
+            cursor.execute(query, (id))
+            db.commit()
+            return "Prompt deleted!", 200
+        
+        except pymysql.IntegrityError:
+            return "Integrity error, prompt may already have run(s)", 400
     
+
+@marathon_api.get('/all')
+def get_all_marathon_prompts():
+    query = """
+    SELECT * FROM marathonprompts
+    """
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+        return jsonify(results)
+
+
+
+
+@marathon_api.get('/prompt/<id>')
+def get_marathon_prompt(id):
     
-    
-@marathon_api.get('/getmarathonprompt/')
-def get_marathon_prompt():
-    return jsonify(genPrompts())
+    query = "SELECT * FROM marathonprompts WHERE prompt_id=%s"
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (id,))
+        prompt = cursor.fetchone()
+
+        # Check permissions for users
+        if (not session.get("admin")):
+            if (prompt["type"] == "unused"):
+                return "You do not have permission to view this prompt", 401
+                    
+        return jsonify(prompt)

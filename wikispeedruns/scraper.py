@@ -50,7 +50,7 @@ def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
     #print(queue)
 
     if not queue:
-        raise RuntimeError('No Path')
+        raise RuntimeError(f'No Path in forward for {start}, {end}')
     
     while queue and c < batchSize:
         pageTitle = queue.pop(0)
@@ -102,7 +102,7 @@ def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
     startingDepth = 0
 
     if not queue:
-        raise RuntimeError('No Path')
+        raise RuntimeError(f'No Path in reverse for {start}, {end}')
     
     
     while queue and c < batchSize:
@@ -170,30 +170,36 @@ def convertPathToNames(idpath):
         
     return output
 
-def findPaths(startTitle, endTitle):
-    
+def findPaths(startTitle, endTitle, id=False):
       
     start_time = time.time()
     
-    startID = int(convertToID(startTitle))
-    endID = int(convertToID(endTitle))
+    if startTitle == endTitle:
+        return {"Articles":[convertToArticleName(startTitle)],
+              "ArticlesIDs":[endTitle]}
+    
+    startID = startTitle
+    endID = endTitle
+    if not id:
+        startID = int(convertToID(startTitle))
+        endID = int(convertToID(endTitle))
     
     
     #try:
     paths = bidirectionalSearcher(startID, endID)
     
-    print(paths)
+    #print(paths)
     
     for path in paths:
-        print("Path:")
-        print(path)
+        #print("Path:")
+        #print(path)
         print(convertPathToNames(path))
         
     
     output = {"Articles":convertPathToNames(paths[0]),
               "ArticlesIDs":paths[0]}
     
-    print(f"Search duration: {time.time() - start_time}")
+    #print(f"Search duration: {time.time() - start_time}")
     
     
     return output
