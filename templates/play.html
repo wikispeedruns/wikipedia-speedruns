@@ -11,50 +11,50 @@
 
 <div id="app">
 
-    <div v-show="started && !finished" class="HUDwrapper">
-        <div class="card" style="flex-direction: row; border: 2px solid #000000 !important;">
-            <div class="HUDblock">
+    <div v-show="started && !finished" class="HUDwrapper container">
+        <div class="row flex-row">
+            <div class="col-sm-4 text-nowrap px-4 py-2">
                 Start Article<br><strong>[[startArticle]]</strong>
             </div>
-            <div class="HUDblock">
+            <div class="col-sm-4 text-nowrap px-4 py-2">
                 End Article<br><strong>[[endArticle]]</strong>
             </div>
-            <div class="HUDblock">
+            <div class="col-sm-4 text-nowrap px-4 py-2">
                 Time Elapsed<br><strong>[[timer]] s</strong>
             </div>
         </div>
     </div>
 
     <div v-show="!started">
-        <div class="start">
+        <div class="text-center text-size-1">
             <p>Starting Article: <strong>[[startArticle]]</strong></p>
             <p>Goal Article: <strong>[[endArticle]]</strong></p>
             <p>Good Luck!</p>
         </div>
-        <div v-if="gunShow" id="mirroredimgblock" class="mirroredimgblock hide-on-mobile">
+        <div id="mirroredimgblock" class="mirroredimgblock">
             <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun">
             <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun invgif">
         </div>
 
         <div>
-            <p id="countdown" class="countdown">[[countdown]]</p>
+            <p id="countdown" class="countdown text-center mx-auto my-auto pb-5">[[countdown]]</p>
         </div>
 
-        <p id="tips" class="tips">[[activeTip]]</p>
+        <h6 id="tips" class="text-center">[[activeTip]]</h6>
     </div>  
 
-    <div v-if="finished" class="finish">
+    <div v-if="finished" class="text-left">
         <p><h4>You found it!</h4></p>
         <p>Your run was submitted to the leaderboard.</p>
         <p><h4>Here's how you did:</h4></p>
         <div class="card md">
             <div class="card-body">
-                <p><h4><strong class="italics">"[[startArticle]]"</strong> to <strong class="italics">"[[endArticle]]"</strong></h4></p>
+                <p><h4><strong class="font-italic">"[[startArticle]]"</strong> to <strong class="font-italic">"[[endArticle]]"</strong></h4></p>
                 <p>Time: <strong>[[finalTime]] </strong>Seconds</p>
                 <p>Number of links visited: <strong>[[path.length-1]]</strong></p>
                 <p>The path you took: <br>[[path]]</p>
-                <div><button v-on:click="finishPrompt" class="finishButton">See the leaderboard</button></div>
-                <div><button v-on:click="home" class="finishButton">Return to home page</button></div>
+                <div><button v-on:click="finishPrompt" class="btn btn-outline-secondary">See the leaderboard</button></div>
+                <div><button v-on:click="home" class="btn btn-outline-secondary">Return to home page</button></div>
             </div>
         </div>
     </div>
