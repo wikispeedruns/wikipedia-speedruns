@@ -3,7 +3,7 @@
 {% block head %}
 
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
-<script type="module" src="{{url_for('static', filename='js/play.js')}}"></script>
+<script type="module" src="{{url_for('static', filename='js/marathon.js')}}"></script>
 
 {% endblock %}
 
@@ -12,15 +12,21 @@
 <div id="app">
 
     <div v-show="started && !finished" class="HUDwrapper container">
-        <div class="row flex-row">
-            <div class="col-sm-4 text-nowrap px-4 py-2">
+        <div class="row flex-row flex-nowrap">
+            <div class="col px-4 py-2">
                 Start Article<br><strong>[[startArticle]]</strong>
             </div>
-            <div class="col-sm-4 text-nowrap px-4 py-2">
-                End Article<br><strong>[[endArticle]]</strong>
+            <div class="col px-4 py-2">
+                Checkpoints<br><strong v-html="formatActiveCheckpoints()"></strong>
             </div>
-            <div class="col-sm-4 text-nowrap px-4 py-2">
-                Time Elapsed<br><strong>[[timer]] s</strong>
+            <div class="col px-4 py-2">
+                Clicks Remaining<br><strong class="text-size-3" v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
+            </div>
+            <div class="col px-4 py-2">
+                Checkpoints Visited<br>[[numCheckpointsVisited]]
+            </div>
+            <div class="col px-4 py-2">
+                Unique Articles Visited<br>[[numVisitedUnique]]
             </div>
         </div>
     </div>
@@ -28,7 +34,7 @@
     <div v-show="!started">
         <div class="text-center text-size-1">
             <p>Starting Article: <strong>[[startArticle]]</strong></p>
-            <p>Goal Article: <strong>[[endArticle]]</strong></p>
+            <p>Starting Checkpoints: <strong>[[activeCheckpoints]]</strong></p>
             <p>Good Luck!</p>
         </div>
         <div id="mirroredimgblock" class="mirroredimgblock">
@@ -44,14 +50,15 @@
     </div>  
 
     <div v-if="finished" class="text-left">
-        <p><h4>You found it!</h4></p>
+        <p><h4>Game Over!</h4></p>
         <p>Your run was submitted to the leaderboard.</p>
         <p><h4>Here's how you did:</h4></p>
         <div class="card md">
             <div class="card-body">
-                <p><h4><strong class="font-italic">"[[startArticle]]"</strong> to <strong class="font-italic">"[[endArticle]]"</strong></h4></p>
+                <p><h4><strong class="font-italic">"[[startArticle]]"</strong></h4></p>
                 <p>Time: <strong>[[finalTime]] </strong>Seconds</p>
-                <p>Number of links visited: <strong>[[path.length-1]]</strong></p>
+                <p>Number of unique articles visited: <strong>[[numVisitedUnique]]</strong></p>
+                <p>Number of checkpoints visited: <strong>[[numCheckpointsVisited]]</strong></p>
                 <p>The path you took: <br>[[path]]</p>
                 <div><button v-on:click="finishPrompt" class="btn btn-outline-secondary">See the leaderboard</button></div>
                 <div><button v-on:click="home" class="btn btn-outline-secondary">Return to home page</button></div>

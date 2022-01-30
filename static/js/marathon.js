@@ -1,5 +1,6 @@
-import { getRandTip } from "./modules/tooltips.js";
 import { serverData } from "./modules/serverData.js"
+import { fetchJson } from "./modules/fetch.js";
+import { getRandTip } from "./modules/tooltips.js";
 
 const prompt_id = serverData["prompt_id"];
 
@@ -8,7 +9,6 @@ let app = new Vue({
     el: '#app',
     data: {
         startArticle: "",
-        endArticle: "",
         timer: "",
         countdown: 8,
         finished: false,
@@ -17,6 +17,18 @@ let app = new Vue({
         path:[],
         finalTime:"",
         prompt_id: 0,
+        run_id: "",
+        
+        checkpoints:[],
+        activeCheckpoints: [],
+        visitedCheckpoints: [],
+        numVisitedUnique: 0,
+        clicksRemaining: 11,
+    },
+    computed: {
+        numCheckpointsVisited : function () {
+            return this.visitedCheckpoints.length
+        },
     },
     methods : {
         formatPath: function (pathArr) {
@@ -30,28 +42,34 @@ let app = new Vue({
         }, 
 
         finishPrompt: function (event) {
-            window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
+            window.location.replace("/marathonprompt/" + prompt_id + "?run_id=" + this.run_id);
         }, 
 
         home: function (event) {
             window.location.replace("/");
+        },
+
+        formatActiveCheckpoints: function () {
+            let output = ""
+            for (let i = 0; i < this.activeCheckpoints.length-1; i++) {
+                output += this.activeCheckpoints[i]
+                output += "<br>"
+            }
+            output+=this.activeCheckpoints[this.activeCheckpoints.length-1]
+
+            return output
         }
 
     }
 })
 
+var timerInterval = null;
 
+var keyMap = {};
 
-let goalPage = "";
-let timerInterval = null;
-let startTime = 0;
-let path = [];
-let endTime = 0;
+const clicksPerCheckpoint = 5;
 
-let run_id = -1;
-
-let seconds;
-let keyMap = {};
+var startTime = 0;
 
 function handleWikipediaLink(e) 
 {
@@ -83,6 +101,8 @@ function handleWikipediaLink(e)
 
 async function loadPage(page) {
 
+    
+
     const resp = await fetch(
         `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${page}`,
         {
@@ -101,38 +121,43 @@ async function loadPage(page) {
         }).join('') + '</div>'
     });
 
+    app.$data.clicksRemaining -= 1;
+
     document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
     
+    if (!app.$data.path.includes(title)) {
+        app.$data.numVisitedUnique += 1;
+    }
 
     // Start timer if we are at the start
-    if (path.length == 0) {
+    if (app.$data.path.length == 0) {
         startTime = Date.now()
         timerInterval = setInterval(displayTimer, 20);    
-
-        const reqBody = {
-            "start_time": startTime,
-            "prompt_id": prompt_id,
-        }
-
-        try {
-            const response = await fetch("/api/runs", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(reqBody)
-            })
-    
-            run_id = await response.json();
-
-        } catch(e) {
-            console.log(e);
-        }
     }
     
-    path.push(title)
+    app.$data.path.push(title)
 
-    if (formatStr(title) === formatStr(goalPage)) {
+    var hitcheckpoint = false;
+    var checkpointindex = -1;
+
+    for (let i = 0; i < app.$data.activeCheckpoints.length; i++) {
+
+        if (formatStr(title) === formatStr(app.$data.activeCheckpoints[i])) {
+            app.$data.clicksRemaining += clicksPerCheckpoint;
+
+            //query for new checkpoint
+
+            checkpointindex = i;
+            hitcheckpoint = true;
+
+            app.$data.visitedCheckpoints.push(title);
+
+        }
+        
+    }
+
+
+    if (app.$data.clicksRemaining === 0) {
         await finish();
     }
 
@@ -142,38 +167,51 @@ async function loadPage(page) {
 
     hideElements();
     window.scrollTo(0, 0)
+
+    
+    if (hitcheckpoint) {
+        //console.log("hit checkpoint, getting new checkpoint")
+
+        //console.log(app.$data.activeCheckpoints[checkpointindex])
+
+        let got = false
+
+        app.$data.checkpoints.forEach(bucket => {
+            if (bucket.length> 0 && !got) {
+                let el = bucket.pop()
+                app.$data.activeCheckpoints[checkpointindex] = el['a']
+                console.log(el['a'])
+                got = true
+            }
+        })
+    }
+
+    console.log(app.$data)
 }
 
 async function finish() {
 
     app.$data.finished = true;
-    app.$data.path = path;
     app.$data.finalTime = app.$data.timer;
 
     // Stop timer
-    endTime = Date.now();
     clearInterval(timerInterval);
-    //document.getElementById("timer").innerHTML="";
 
     // Prevent are you sure you want to leave prompt
     window.onbeforeunload = null;
 
-    const reqBody = {
-        "end_time": endTime,
-        "path": path,
-    }
-
     // Send results to API
     try {
-        const response = await fetch(`/api/runs/${run_id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(reqBody)
-        })
+        const response = await fetchJson(`/api/marathon/runs/`, "POST", {
+            path: JSON.stringify(app.$data.path),
+            checkpoints: JSON.stringify(app.$data.visitedCheckpoints),
+            prompt_id: String(app.$data.prompt_id)
+        }
+        )
 
-        //window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
+        app.$data.run_id = await response.json()
+
+        //console.log("run saved")
 
     } catch(e) {
         console.log(e);
@@ -238,8 +276,6 @@ function hideElements() {
     
 }
 
-
-
 function formatStr(string) {
     return string.replace("_", " ").toLowerCase()
 }
@@ -247,16 +283,9 @@ function formatStr(string) {
 function displayTimer() {
     const seconds = (Date.now() - startTime) / 1000;
     app.$data.timer = seconds;
-    //document.getElementById("timer").innerHTML = "Elapsed Time<br/><strong>"+seconds + "s</strong>";
 }
 
-
-
-function countdownOnLoad(start, end) {
-
-
-    app.$data.startArticle = start;
-    app.$data.endArticle = end;
+function countdownOnLoad() {
 
     app.$data.activeTip = getRandTip();
 
@@ -274,16 +303,17 @@ function countdownOnLoad(start, end) {
 
         if (distance < -1000) {
             clearInterval(x);
+
             app.$data.started = true;
             
+
             startTime = Date.now();
         }
         if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {
             //app.$data.gunShow = true;
-            
             document.getElementById("mirroredimgblock").classList.toggle("invisible")
 
-            console.log("guns should show")
+            //console.log("guns should show")
         }
       }, 50);
 
@@ -300,7 +330,7 @@ function disableFind(e) {
 }
 
 window.addEventListener("load", async function() {
-    const response = await fetch("/api/prompts/" + prompt_id);
+    const response = await fetch("/api/marathon/prompt/" + prompt_id);
 
     app.$data.prompt_id = prompt_id;
 
@@ -314,20 +344,21 @@ window.addEventListener("load", async function() {
     }
 
     const prompt = await response.json();
-    const article = prompt["start"];
 
-    goalPage = prompt["end"];
+    //console.log(prompt)
 
-    await countdownOnLoad(article, goalPage);
+    app.$data.startArticle = prompt['start'];
+    app.$data.activeCheckpoints = JSON.parse(prompt['initcheckpoints']);
+    app.$data.checkpoints = JSON.parse(prompt['checkpoints']);
 
-    loadPage(article);
+    await countdownOnLoad();
+
+    loadPage(app.$data.startArticle);
 });
 
 window.onbeforeunload = function() {
     return true;
 };
-
-
 
 window.addEventListener("keydown", function(e) {
     disableFind(e);

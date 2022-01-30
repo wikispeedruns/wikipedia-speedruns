@@ -1,56 +1,6 @@
-
-import random
-
-from db import get_db
-from pymysql.cursors import DictCursor
-
 import time
 
-#from multiprocessing import Pool, TimeoutError
-
-SCRAPER_DB = "scraper_graph"
-ARTICLE_TABLE = SCRAPER_DB + ".articleid"
-EDGE_TABLE = SCRAPER_DB + ".edgeidarticleid"
-
-def batchQuery(queryString, arr, cur):
-    format_strings = ','.join(['%s'] * len(arr))
-    cur.execute(queryString % format_strings,tuple(arr))
-    return cur.fetchall()
-
-
-def getLinks(pages, forward = True):
-
-    output = {}
-    
-    with get_db().cursor(cursor=DictCursor) as cur:
-        if forward:
-            queryString = "SELECT * FROM " + EDGE_TABLE + " WHERE src IN (%s)"
-            #queryString = "SELECT * FROM edges WHERE src IN (%s)"
-            queryResults = batchQuery(queryString, list(pages.keys()), cur)
-            
-            for queryEntry in queryResults:
-                title = queryEntry['src']
-                if title in pages:
-                    
-                    if title not in output:
-                        output[title] = [queryEntry['dest']]
-                    else:
-                        output[title].append(queryEntry['dest'])
-                        
-        else:
-            queryString = "SELECT * FROM " + EDGE_TABLE + " WHERE dest IN (%s)"
-            queryResults = batchQuery(queryString, list(pages.keys()), cur)
-            
-            for queryEntry in queryResults:
-                title = queryEntry['dest']
-                if title in pages:
-                    
-                    if title not in output:
-                        output[title] = [queryEntry['src']]
-                    else:
-                        output[title].append(queryEntry['src'])
-            
-        return output
+from wikispeedruns.scraper_graph_utils import getLinks, convertToID, convertToArticleName
 
 
 
@@ -100,7 +50,7 @@ def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
     #print(queue)
 
     if not queue:
-        raise RuntimeError('No Path')
+        raise RuntimeError(f'No Path in forward for {start}, {end}')
     
     while queue and c < batchSize:
         pageTitle = queue.pop(0)
@@ -152,7 +102,7 @@ def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
     startingDepth = 0
 
     if not queue:
-        raise RuntimeError('No Path')
+        raise RuntimeError(f'No Path in reverse for {start}, {end}')
     
     
     while queue and c < batchSize:
@@ -212,29 +162,6 @@ def Reverse(lst):
     return [ele for ele in reversed(lst)]      
 
 
-def convertToID(name):
-    with get_db().cursor(cursor=DictCursor) as cur: 
-        queryString = "SELECT articleID from " + ARTICLE_TABLE + " where name=%s"
-        cur.execute(queryString, str(name))
-        output = cur.fetchall()
-
-        if len(output) > 0:
-            return output[0]['articleID']
-        else:
-            raise ValueError(f"Could not find article with name: {name}")
-    
-    
-def convertToArticleName(id):
-    
-    with get_db().cursor(cursor=DictCursor) as cur: 
-        queryString = "SELECT * from " + ARTICLE_TABLE + " where articleID=%s"
-        cur.execute(queryString, str(id))
-        output = cur.fetchall()
-
-        if len(output)>0:
-            return output[0]['name']
-        else:
-            raise ValueError(f"Could not find article with id: {id}")
     
 def convertPathToNames(idpath):
     output = []
@@ -243,179 +170,38 @@ def convertPathToNames(idpath):
         
     return output
 
-def findPaths(startTitle, endTitle):
-    
+def findPaths(startTitle, endTitle, id=False):
       
     start_time = time.time()
     
-    startID = int(convertToID(startTitle))
-    endID = int(convertToID(endTitle))
+    if startTitle == endTitle:
+        return {"Articles":[convertToArticleName(startTitle)],
+              "ArticlesIDs":[endTitle]}
+    
+    startID = startTitle
+    endID = endTitle
+    if not id:
+        startID = int(convertToID(startTitle))
+        endID = int(convertToID(endTitle))
     
     
     #try:
     paths = bidirectionalSearcher(startID, endID)
     
-    print(paths)
+    #print(paths)
     
     for path in paths:
-        print("Path:")
-        print(path)
+        #print("Path:")
+        #print(path)
         print(convertPathToNames(path))
         
     
     output = {"Articles":convertPathToNames(paths[0]),
               "ArticlesIDs":paths[0]}
     
-    print(f"Search duration: {time.time() - start_time}")
+    #print(f"Search duration: {time.time() - start_time}")
     
     
     return output
 
 
-
-def randStart(thresholdStart):
-    
-    with get_db().cursor() as cur:
-        query = "SELECT max(articleID) FROM " + ARTICLE_TABLE + ";"
-        cur.execute(query)
-        (maxID, ) = cur.fetchone()
-        
-        while True:
-            start  = random.randint(1, maxID)
-            if checkStart(start, thresholdStart):
-                yield start
-        
-        
-def checkStart(start, thresholdStart):
-    
-    title = convertToArticleName(start)
-    
-    if len(title) > 7:
-        if title[0:7] == "List of":
-            return False
-    
-    x = countWords(title)
-    
-    if randomFilter(True, 0.0047 *x*x*x - 0.0777*x*x + 0.2244*x + 1.226):
-        #print("Random filtered:",start)
-        return False
-    
-    if randomFilter(checkSports(title), 0.1):
-        #print("Sports filtered:",start)
-        return False
-    
-    if numLinksOnArticle(start) < thresholdStart:
-        return False
-    
-    return True
-
-def countWords(string):
-    counter = 1
-    for i in string:
-        if i == ' ' or i == '-':
-            counter += 1
-    return counter
-
-def checkEnd(end, thresholdEnd):
-    
-    title = convertToArticleName(end)
-    
-    if len(title) > 7:
-        if title[0:7] == "List of":
-            return False
-    
-    x = countWords(title)
-    
-    if randomFilter(True, 0.0047 *x*x*x - 0.0777*x*x + 0.2244*x + 1.226):
-        #print("Random filtered:",end)
-        return False
-    
-    if randomFilter(checkSports(title), 0.05):
-        #print("Sports filtered:",end)
-        return False
-    
-    if numLinksOnArticle(end) < thresholdEnd:
-        return False
-    
-    return True
-
-def randomFilter(bln, chance):
-    if bln:
-        if random.random() > chance:
-            return True
-    return False
-
-def checkSports(title):
-        
-    sportsKeywords = ["League", "season", "football", "rugby", "Championship", "baseball", "basketball", "Season", "Athletics", "Series", "Olympics", "Tennis", "Grand Prix"]
-    
-    try:
-        year = int(title[0:4])
-        if year > 1900:
-            for word in sportsKeywords:
-                if word in title:
-                    return True
-    except ValueError:
-        return False
-
-    return False
-
-def numLinksOnArticle(title):
-        
-    links = getLinks({title:True}, forward=True)
-        
-    if title in links:
-        links = links[title]
-        
-        return len(links)
-        
-    return 0
-
-def traceFromStart(startTitle, dist):
-
-    path = []
-    
-    currentTitle = startTitle
-    while dist > 0:
-        
-        path.append(currentTitle)
-        
-        links = getLinks({currentTitle:True}, forward=True)
-        
-        if currentTitle in links:
-            links = links[currentTitle]
-        else:
-            break
-        
-        randIndex = random.randint(0, len(links) - 1)
-        
-        currentTitle = links[randIndex]
-        
-        dist -= 1
-    
-    return path + [currentTitle]
-
-
-def generatePrompts(thresholdStart=100, thresholdEnd=100, n=20, dist=15):
-    
-    generatedPromptPaths = []    
-    
-    print("Generating " + str(n) + " prompts")
-    
-    
-    startGenerator = randStart(thresholdStart)
-    endGenerator = randStart(thresholdEnd)
-    
-    while len(generatedPromptPaths) < n:
-        
-        sample = traceFromStart(startGenerator.__next__(), dist)
-        
-        if checkEnd(sample[-1], thresholdEnd) and len(sample) == dist + 1:
-            generatedPromptPaths.append(sample)
-            print(sample)
-        
-        #generatedPromptPaths.append([startGenerator.__next__(), endGenerator.__next__()])
-        
-    print("Finished generating prompts: \n")
-    
-    return generatedPromptPaths

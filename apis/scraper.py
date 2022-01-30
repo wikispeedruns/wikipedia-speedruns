@@ -1,6 +1,8 @@
 from flask import session, request, abort, Blueprint, jsonify, current_app
 
-from wikispeedruns.scraper import generatePrompts, convertToArticleName, findPaths
+from wikispeedruns.scraper import findPaths
+from wikispeedruns.scraper_graph_utils import convertToArticleName
+from wikispeedruns.prompt_generator import generatePrompts
 
 from util.timeout import timer
 

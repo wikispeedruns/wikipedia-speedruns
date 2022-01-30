@@ -79,6 +79,30 @@
             </div>
         </div>
     </div>
+    <div class="row py-4">
+        <div class="col px-0">
+            <div class="card">
+                <div class="card-body">
+                    <h4><b>NEW</b> Marathon prompts:</h4>
+
+                    <table class="table table-hover">
+                    <thead>
+                        <th scope="col">Prompt #</th>
+                        <th scope="col">Starting Article</th>
+                        <th scope="col">Starting Checkpoints</th>
+                    </thead>
+                    <tbody>
+                        <tr v-for="prompt in marathonPrompts" v-cloak>
+                            <td>[[prompt.prompt_id]] (<a v-bind:href="'/play/marathon/' + prompt.prompt_id">play</a>)</td>
+                            <td>[[prompt.start]]  </td>
+                            <td>[[prompt.initcheckpoints]]  </td>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
     </div>
 
@@ -105,6 +129,8 @@
         </div>
     </div>
 
+    
+
     <hr>
 
     <div>
@@ -126,10 +152,12 @@
 
     <hr>
 
-    <div class="smm-footer">
-        <a href="https://twitter.com/WikiSpeedruns">
+    <div class="container text-center mt-5 mx-auto">
+        <div class="row">
+        <a href="https://twitter.com/WikiSpeedruns" class="col">
             <img src="/static/assets/twitter_icon.png" width="75" height="75">
         </a>
+        </div>
     </div>
 </div>
 {% endblock %}

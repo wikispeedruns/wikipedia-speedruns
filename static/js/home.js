@@ -20,6 +20,12 @@ async function getTopUsers()
     return ratings;
 }
 
+async function getMarathonPrompts()
+{
+    const response = await fetch("/api/marathon/all");
+    return await response.json();
+}
+
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
@@ -28,11 +34,13 @@ var app = new Vue({
         publicPrompts: [],
         dailyPrompts: [],
         topUsers: [],
+        marathonPrompts: [],
     },
 
     created: async function() {
         this.topUsers = await getTopUsers();
         this.publicPrompts = await getPromptsPublic(); 
-        this.dailyPrompts = await getDailyPrompts(); 
+        this.dailyPrompts = await getDailyPrompts();
+        this.marathonPrompts = await getMarathonPrompts(); 
     }
 })

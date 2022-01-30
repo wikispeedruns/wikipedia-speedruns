@@ -45,6 +45,33 @@ Vue.component('prompt-item', {
     )
 });
 
+Vue.component('marathon-item', {
+    props: ['prompt'],
+
+    methods: {
+
+        async deletePrompt() {
+            const resp = await fetchJson("/api/marathon/delete/" + this.prompt.prompt_id, "DELETE");
+            
+            if (resp.status == 200) this.$emit('delete-prompt')
+            else alert(await resp.text())
+
+            app.getPrompts();
+        },
+    },
+
+    template: (`
+    <li>
+        <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}} 
+        <div>{{prompt.initcheckpoints}}</div>
+        <div>{{prompt.checkpoints}}</div>
+        <button v-on:click="deletePrompt" type="button" class="btn btn-default" >
+            <i class="bi bi-trash"></i>
+        </button>
+    </li>`
+    )
+});
+
 
 // TODO maybe these should load the date stuff themselves (At least on update)
 Vue.component('daily-item', {
@@ -190,6 +217,93 @@ Vue.component('path-generator', {
 
 
 
+Vue.component('marathon-generator', {
+    data: function() {
+        return {
+            start: "China",
+            cp1: "United States",
+            cp2: "Nickle",
+            cp3: "Road",
+            cp4: "DNA",
+            cp5: "Clay",
+            seed: "123456",
+            nbucket: "3",
+            nbatch: "2",
+            nperbatch: "3"
+        }
+    },
+
+
+    methods: {
+        genMarathonPrompt: async function () {
+            try {
+                console.log(this.$data)
+
+                const response = await fetchJson("/api/marathon/add/", 'POST', this.$data)
+        
+                if (response.status != 200) {
+                    // For user facing interface, do something other than this
+                    alert(await response.text());
+                    return;
+                }
+
+                const resp = await response.json()
+
+                console.log(resp)
+                
+            } catch(e) {
+                console.log(e);
+            }
+        }
+    },
+
+    template: (`
+        <div>
+            <div class="input-group">
+                <label class="input-group-text" for="startField">Start Article:</label>
+                <input class="form-control" type="text" name="startField" v-model="start">
+            </div>
+            <div class="input-group">
+                <label class="input-group-text" for="cp1Field">1st CP:</label>
+                <input class="form-control" type="text" name="cp1Field" v-model="cp1">
+            </div>
+            <div class="input-group">
+                <label class="input-group-text" for="cp2Field">2nd CP:</label>
+                <input class="form-control" type="text" name="cp2Field" v-model="cp2">
+            </div>
+            <div class="input-group">
+                <label class="input-group-text" for="cp3Field">3rd CP:</label>
+                <input class="form-control" type="text" name="cp3Field" v-model="cp3">
+            </div>
+            <div class="input-group">
+                <label class="input-group-text" for="cp4Field">4th CP:</label>
+                <input class="form-control" type="text" name="cp4Field" v-model="cp4">
+            </div>
+            <div class="input-group">
+                <label class="input-group-text" for="cp5Field">5th CP:</label>
+                <input class="form-control" type="text" name="cp5Field" v-model="cp5">
+            </div>
+            <div class="input-group">
+                <label class="input-group-text" for="seedField">Seed:</label>
+                <input class="form-control" type="text" name="seedField" v-model="seed">
+            </div>
+            <div class="input-group">
+                <label class="input-group-text form-control" for="nbatch">N-Bucket:</label>
+                <input class="form-control" type="text" name="nbatch" v-model="nbatch">
+                <label class="input-group-text form-control" for="nbucket">N-Batch:</label>
+                <input class="form-control" type="text" name="nbucket" v-model="nbucket">
+                <label class="input-group-text form-control" for="nperbatch">N-PerBatch:</label>
+                <input class="form-control" type="text" name="nperbatch" v-model="nperbatch">
+            </div>
+            <button id="genMarathonPromptButton" v-on:click="genMarathonPrompt">Click to generate and submit a random marathon prompt</button>
+        </div>
+        <hr>
+    `)
+
+});
+
+
+
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
@@ -198,6 +312,7 @@ var app = new Vue({
         unused: [],
         public: [],
         weeks: [],
+        marathon: [],
 
         toMakePublic: 0,
     },
@@ -247,6 +362,10 @@ var app = new Vue({
                     cur.setDate(cur.getDate() + 1);
                 }
             }
+
+            const marathonprompts = await (await fetchJson("/api/marathon/all")).json();
+
+            this.marathon = marathonprompts;
         },
 
 

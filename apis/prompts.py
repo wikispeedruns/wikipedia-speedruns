@@ -234,3 +234,46 @@ def get_prompt_leaderboard(id, run_id):
             run['path'] = json.loads(run['path'])
 
         return jsonify(results)
+    
+    
+    
+    
+
+@prompt_api.get('/marathon/<id>')
+def get_marathon_prompt(id):
+    # TODO this could probably return details as well
+    query = "SELECT * FROM marathonprompts WHERE prompt_id=%s"
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (id,))
+        results = cursor.fetchone()
+
+        if (not results["public"] and "user_id" not in session):
+            return "User account required to see this", 401
+
+        return jsonify(results)
+    
+    
+    
+    
+@prompt_api.get('/marathon')
+def get_all_marathon_prompts():
+    # TODO this should probably be paginated
+    query = "SELECT * FROM marathonprompts"
+
+    if (request.args.get("public") == "true"):
+        query += " WHERE public=TRUE"
+    else:
+        # user needs to be logged in to see ranked prompts
+        if ("user_id" not in session):
+            return "User account required to see this", 401
+
+        if (request.args.get("public") == "false"):
+            query += " WHERE public=FALSE"
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query)
+        results = cursor.fetchall()
+        return jsonify(results)
