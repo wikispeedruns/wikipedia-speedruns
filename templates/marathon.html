@@ -17,7 +17,7 @@
                 Start Article<br><strong>[[startArticle]]</strong>
             </div>
             <div class="col px-4 py-2">
-                Checkpoints<br><strong v-html="formatActiveCheckpoints()"></strong>
+                Checkpoints<br><span v-html="formatActiveCheckpoints()"></span>
             </div>
             <div class="col px-4 py-2">
                 Clicks Remaining<br><strong class="text-size-3" v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>

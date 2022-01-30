@@ -52,10 +52,13 @@ let app = new Vue({
         formatActiveCheckpoints: function () {
             let output = ""
             for (let i = 0; i < this.activeCheckpoints.length-1; i++) {
+                output += String(i) + ": <strong>"
                 output += this.activeCheckpoints[i]
-                output += "<br>"
+                output += "</strong><br>"
             }
+            output += String(this.activeCheckpoints.length-1) + ": <strong>"
             output+=this.activeCheckpoints[this.activeCheckpoints.length-1]
+            output += "</strong>"
 
             return output
         }
