@@ -134,3 +134,41 @@ def get_marathon_prompt(id):
                 return "You do not have permission to view this prompt", 401
                     
         return jsonify(prompt)
+
+
+@marathon_api.get('/prompt/<id>/leaderboard/', defaults={'run_id' : None})
+@marathon_api.get('/prompt/<id>/leaderboard/<run_id>')
+def get_marathon_prompt_leaderboard(id, run_id):
+    
+    # TODO this could probably return details as well
+    query = '''
+    SELECT * FROM marathonruns
+    LEFT JOIN users
+    ON marathonruns.user_id=users.user_id
+    WHERE marathonruns.prompt_id=%s
+    '''
+
+    args = [id]
+
+    specificRunQuery = '''
+    SELECT * FROM marathonruns
+    LEFT JOIN users
+    ON marathonruns.user_id=users.user_id
+    WHERE marathonruns.run_id=%s
+    '''
+
+    if run_id:
+        query = f'({query}) UNION ({specificRunQuery})'
+        args.append(run_id)
+    
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        # print(cursor.mogrify(query, tuple(args)))         # debug
+        cursor.execute(query, tuple(args))
+        results = cursor.fetchall()
+
+        for run in results:
+            run['path'] = json.loads(run['path'])
+            run['checkpoints'] = json.loads(run['checkpoints'])
+
+        return jsonify(results)

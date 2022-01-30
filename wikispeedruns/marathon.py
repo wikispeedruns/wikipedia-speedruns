@@ -100,8 +100,8 @@ def split(a, n):
 
 def genPrompts(initBatch, batches=5, nPerBatch=10, buckets=5):
         
-    mi = 100
-    mo = 100
+    mi = 95
+    mo = 95
     
     batchesArr = []
     
@@ -112,7 +112,7 @@ def genPrompts(initBatch, batches=5, nPerBatch=10, buckets=5):
         
     batchesArr = [j for i in batchesArr for j in i]
         
-    batchesArr.sort(key = lambda x: x["s"])
+    batchesArr.sort(key = lambda x: -x["s"])
     
     for item in batchesArr:
         print(f"{item['a']}: {item['s']}")

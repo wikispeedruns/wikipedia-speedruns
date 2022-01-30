@@ -1,5 +1,6 @@
 import { serverData } from "./modules/serverData.js"
 import { fetchJson } from "./modules/fetch.js";
+import { getRandTip } from "./modules/tooltips.js";
 
 const prompt_id = serverData["prompt_id"];
 
@@ -12,17 +13,17 @@ let app = new Vue({
         countdown: 8,
         finished: false,
         started: false,
-        gunShow: false,
         activeTip: "",
         path:[],
         finalTime:"",
         prompt_id: 0,
+        run_id: "",
         
         checkpoints:[],
         activeCheckpoints: [],
         visitedCheckpoints: [],
         numVisitedUnique: 0,
-        clicksRemaining: 3,
+        clicksRemaining: 11,
     },
     computed: {
         numCheckpointsVisited : function () {
@@ -41,11 +42,22 @@ let app = new Vue({
         }, 
 
         finishPrompt: function (event) {
-            window.location.replace("/marathonprompt/" + prompt_id);
+            window.location.replace("/marathonprompt/" + prompt_id + "?run_id=" + this.run_id);
         }, 
 
         home: function (event) {
             window.location.replace("/");
+        },
+
+        formatActiveCheckpoints: function () {
+            let output = ""
+            for (let i = 0; i < this.activeCheckpoints.length-1; i++) {
+                output += this.activeCheckpoints[i]
+                output += "<br>"
+            }
+            output+=this.activeCheckpoints[this.activeCheckpoints.length-1]
+
+            return output
         }
 
     }
@@ -89,7 +101,7 @@ function handleWikipediaLink(e)
 
 async function loadPage(page) {
 
-    app.$data.clicksRemaining -= 1;
+    
 
     const resp = await fetch(
         `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${page}`,
@@ -108,6 +120,8 @@ async function loadPage(page) {
             return '<div style="display:inline-block">' + character.replace(/\s/g, '&nbsp;') + '</div>'
         }).join('') + '</div>'
     });
+
+    app.$data.clicksRemaining -= 1;
 
     document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
     
@@ -156,9 +170,9 @@ async function loadPage(page) {
 
     
     if (hitcheckpoint) {
-        console.log("hit checkpoint, getting new checkpoint")
+        //console.log("hit checkpoint, getting new checkpoint")
 
-        console.log(app.$data.activeCheckpoints[checkpointindex])
+        //console.log(app.$data.activeCheckpoints[checkpointindex])
 
         let got = false
 
@@ -195,7 +209,9 @@ async function finish() {
         }
         )
 
-        console.log("run saved")
+        app.$data.run_id = await response.json()
+
+        //console.log("run saved")
 
     } catch(e) {
         console.log(e);
@@ -269,22 +285,6 @@ function displayTimer() {
     app.$data.timer = seconds;
 }
 
-function getRandTip() {
-    const tips = [
-        "There are five permanent members of the UN security council: China, France, Russia, United Kingdom, and the United States.",
-        "The Fortune magazine has a list for top 500 United States companies (“Fortune 500”), as well as a list for top 500 global companies (“Fortune Global 500”).",
-        "Brazil is currently the world’s largest producer of sugarcane, and by a lot!",
-        "Buddhism originated in ancient India sometime between the 6th and 4th centuries BCE.",
-        "Pressing the back button will forfeit your attempt!",
-        "Infoboxes on the right often give very quick and useful links, especially for biographical and geographical pages.",
-        "Plan ahead, but be flexible! If you foresee a better route than what you had planned, go for it!",
-        "Use the Table of Contents to your advantage!",
-        "Some article subsections have an associated main article, usually linked under the subsection title."
-    ];
-
-    return tips[Math.floor(Math.random() * tips.length)];
-}
-
 function countdownOnLoad() {
 
     app.$data.activeTip = getRandTip();
@@ -309,12 +309,15 @@ function countdownOnLoad() {
 
             startTime = Date.now();
         }
-        if (distance < 700 && distance > 610) {
-            app.$data.gunShow = true;
+        if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {
+            //app.$data.gunShow = true;
+            document.getElementById("mirroredimgblock").classList.toggle("invisible")
+
+            //console.log("guns should show")
         }
       }, 50);
 
-      app.$data.gunShow = false;
+      document.getElementById("mirroredimgblock").classList.toggle("invisible")
 
 }
 
@@ -342,7 +345,7 @@ window.addEventListener("load", async function() {
 
     const prompt = await response.json();
 
-    console.log(prompt)
+    //console.log(prompt)
 
     app.$data.startArticle = prompt['start'];
     app.$data.activeCheckpoints = JSON.parse(prompt['initcheckpoints']);

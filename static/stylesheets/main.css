@@ -30,6 +30,10 @@
     font-size: 20px;
 }
 
+.text-size-3 {
+    font-size: 40px;
+}
+
 .thumbcaption {
     margin: 5px 5px;
 }
@@ -86,4 +90,8 @@ a:hover, a:hover * {
     #springydemo {
         visibility:hidden !important;
     }
+}
+
+.bold {
+    font-weight: bold !important;
 }

@@ -11,57 +11,57 @@
 
 <div id="app">
 
-    <div v-show="started && !finished" class="HUDwrapper">
-        <div class="card" style="flex-direction: row; border: 2px solid #000000 !important;">
-            <div class="HUDblock">
+    <div v-show="started && !finished" class="HUDwrapper container">
+        <div class="row flex-row flex-nowrap">
+            <div class="col px-4 py-2">
                 Start Article<br><strong>[[startArticle]]</strong>
             </div>
-            <div class="HUDblock">
-                Checkpoints<br><strong>[[activeCheckpoints]]</strong>
+            <div class="col px-4 py-2">
+                Checkpoints<br><strong v-html="formatActiveCheckpoints()"></strong>
             </div>
-            <div class="HUDblock">
-                Clicks Remaining<br><strong>[[clicksRemaining]]</strong>
+            <div class="col px-4 py-2">
+                Clicks Remaining<br><strong class="text-size-3" v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
             </div>
-            <div class="HUDblock">
+            <div class="col px-4 py-2">
                 Checkpoints Visited<br>[[numCheckpointsVisited]]
             </div>
-            <div class="HUDblock">
+            <div class="col px-4 py-2">
                 Unique Articles Visited<br>[[numVisitedUnique]]
             </div>
         </div>
     </div>
 
     <div v-show="!started">
-        <div class="start">
+        <div class="text-center text-size-1">
             <p>Starting Article: <strong>[[startArticle]]</strong></p>
-            <p>Sarting Checkpoints: <strong>[[activeCheckpoints]]</strong></p>
+            <p>Starting Checkpoints: <strong>[[activeCheckpoints]]</strong></p>
             <p>Good Luck!</p>
         </div>
-        <div v-if="gunShow" id="mirroredimgblock" class="mirroredimgblock hide-on-mobile">
+        <div id="mirroredimgblock" class="mirroredimgblock">
             <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun">
             <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun invgif">
         </div>
 
         <div>
-            <p id="countdown" class="countdown">[[countdown]]</p>
+            <p id="countdown" class="countdown text-center mx-auto my-auto pb-5">[[countdown]]</p>
         </div>
 
-        <p id="tips" class="tips">[[activeTip]]</p>
+        <h6 id="tips" class="text-center">[[activeTip]]</h6>
     </div>  
 
-    <div v-if="finished" class="finish">
+    <div v-if="finished" class="text-left">
         <p><h4>Game Over!</h4></p>
         <p>Your run was submitted to the leaderboard.</p>
         <p><h4>Here's how you did:</h4></p>
         <div class="card md">
             <div class="card-body">
-                <p><h4><strong class="italics">"[[startArticle]]"</strong></h4></p>
+                <p><h4><strong class="font-italic">"[[startArticle]]"</strong></h4></p>
                 <p>Time: <strong>[[finalTime]] </strong>Seconds</p>
                 <p>Number of unique articles visited: <strong>[[numVisitedUnique]]</strong></p>
                 <p>Number of checkpoints visited: <strong>[[numCheckpointsVisited]]</strong></p>
                 <p>The path you took: <br>[[path]]</p>
-                <div><button v-on:click="finishPrompt" class="finishButton">See the leaderboard</button></div>
-                <div><button v-on:click="home" class="finishButton">Return to home page</button></div>
+                <div><button v-on:click="finishPrompt" class="btn btn-outline-secondary">See the leaderboard</button></div>
+                <div><button v-on:click="home" class="btn btn-outline-secondary">Return to home page</button></div>
             </div>
         </div>
     </div>
