@@ -65,8 +65,10 @@ function handleWikipediaLink(e)
 
     } else {
 
-        // Ignore external links
-        if (linkEl.getAttribute("href").substring(0, 6) !== "/wiki/") return;
+        // Ignore external links and internal file links
+        if (!linkEl.getAttribute("href").startsWith("/wiki/") || linkEl.getAttribute("href").startsWith("/wiki/File:")) {
+            return;
+        }
 
         // Disable the other links, otherwise we might load multiple links
         document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
@@ -95,10 +97,18 @@ async function loadPage(page) {
 
     let frameBody = document.getElementById("wikipedia-frame")
     frameBody.innerHTML = body["parse"]["text"]["*"]
+
     frameBody.querySelectorAll("a").forEach(function(a) {
-        a.innerHTML = '<div style="display:inline-block">' + a.text.split('').map(function(character) {
-            return '<div style="display:inline-block">' + character.replace(/\s/g, '&nbsp;') + '</div>'
-        }).join('') + '</div>'
+        let iter = document.createNodeIterator(a, NodeFilter.SHOW_TEXT), textNode;
+
+        while (textNode = iter.nextNode()) {
+            let replacementNode = document.createElement('div');
+            replacementNode.innerHTML = '<div style="display:inline-block">' + textNode.textContent.split('').map(function(character) {
+                return '<div style="display:inline-block">' + character.replace(/\s/g, '&nbsp;') + '</div>'
+            }).join('') + '</div>'
+            textNode.parentNode.insertBefore(replacementNode.firstChild, textNode);
+            textNode.parentNode.removeChild(textNode);
+        }
     });
 
     document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
