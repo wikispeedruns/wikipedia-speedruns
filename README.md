@@ -16,9 +16,9 @@ for running the server.
 python -m venv env
 ```
 
-For Windows:
+For Windows Powershell:
 ```
-.\env\scripts\activate.bat
+./env/Scripts/Activate.ps1
 ```
 
 For Linux
