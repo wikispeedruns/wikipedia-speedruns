@@ -30,6 +30,8 @@
             <p>Starting Article: <strong>[[startArticle]]</strong></p>
             <p>Goal Article: <strong>[[endArticle]]</strong></p>
             <p>Good Luck!</p>
+
+            <div><button v-on:click="startNow" class="btn btn-outline-secondary">(Don't want to wait? Start immediately!)</button></div>
         </div>
         <div id="mirroredimgblock" class="mirroredimgblock">
             <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun">
