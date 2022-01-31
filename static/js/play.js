@@ -99,8 +99,8 @@ async function loadPage(page) {
     frameBody.innerHTML = body["parse"]["text"]["*"]
 
     frameBody.querySelectorAll("a").forEach(function(a) {
-        let iter = document.createNodeIterator(a, NodeFilter.SHOW_TEXT), textNode;
-
+        let iter = document.createNodeIterator(a, NodeFilter.SHOW_TEXT);
+        let textNode;
         while (textNode = iter.nextNode()) {
             let replacementNode = document.createElement('div');
             replacementNode.innerHTML = '<div style="display:inline-block">' + textNode.textContent.split('').map(function(character) {
