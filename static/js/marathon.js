@@ -1,6 +1,8 @@
 import { serverData } from "./modules/serverData.js"
 import { fetchJson } from "./modules/fetch.js";
 import { getRandTip } from "./modules/tooltips.js";
+//create and import modules for loading/parsing wikipedia pages
+
 
 const prompt_id = serverData["prompt_id"];
 
