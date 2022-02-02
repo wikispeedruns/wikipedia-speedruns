@@ -2,8 +2,6 @@ from flask import session, request, abort, Blueprint, jsonify, current_app
 
 from wikispeedruns.scraper import generatePrompts, convertToArticleName, findPaths
 
-from util.timeout import timer
-
 scraper_api = Blueprint("scraper", __name__, url_prefix="/api/scraper")
 
 SCRAPER_TIMEOUT = 20
@@ -14,7 +12,7 @@ def get_path():
     start = request.json['start']
     end = request.json['end']
         
-    output = timer(SCRAPER_TIMEOUT, findPaths, start, end)
+    output = findPaths(start, end)
     
     return jsonify(output)
     
