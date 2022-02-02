@@ -6,6 +6,17 @@ import tokens
 
 import json
 
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+
+sentry_sdk.init(
+    dsn="https://3fcc7c6b479248c8ac9839aad0440cba@o1133616.ingest.sentry.io/6180332",
+    integrations=[FlaskIntegration()],
+
+    # Set percent of things that are traced
+    traces_sample_rate=1.0
+)
 
 def create_app(test_config=None):
 
@@ -33,7 +44,6 @@ def create_app(test_config=None):
     from apis.scraper import scraper_api
     from apis.ratings import ratings_api
     from views import views
-
 
     app.register_blueprint(prompt_api)
     app.register_blueprint(run_api)
