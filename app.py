@@ -15,7 +15,7 @@ sentry_sdk.init(
     integrations=[FlaskIntegration()],
 
     # Set percent of things that are traced
-    traces_sample_rate=1.0
+    traces_sample_rate=0
 )
 
 def create_app(test_config=None):
