@@ -62,6 +62,7 @@ let keyMap = {};
 function handleWikipediaLink(e) 
 {
     e.preventDefault();
+
     const linkEl = e.currentTarget;
 
     if (linkEl.getAttribute("href").substring(0, 1) === "#") {
@@ -76,8 +77,8 @@ function handleWikipediaLink(e)
             return;
         }
 
-        // Disable the other links, otherwise we might load multiple links
-        document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
+        // Disable the other linksto prevent multiple clicks
+        document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
             el.onclick = (e) => {
                 e.preventDefault();
                 console.log("prevent multiple click");
@@ -85,7 +86,18 @@ function handleWikipediaLink(e)
         });
 
         // Remove "/wiki/" from string
-        loadPage(linkEl.getAttribute("href").substring(6))
+        loadPageWrapper(linkEl.getAttribute("href").substring(6))
+    }
+}
+
+async function loadPageWrapper(page) {
+    try {
+        await loadPage(page)
+    } catch (error) {
+        // Reenable all links if loadPage fails
+        document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
+            el.onclick = handleWikipediaLink;
+        });
     }
 }
 
@@ -152,7 +164,7 @@ async function loadPage(page) {
         await finish();
     }
 
-    document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
+    document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
         el.onclick = handleWikipediaLink;
     });
 
