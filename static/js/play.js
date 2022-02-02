@@ -13,6 +13,7 @@ let app = new Vue({
         countdown: 8,
         finished: false,
         started: false,
+        immediateStart: false,
         activeTip: "",
         path:[],
         finalTime:"",
@@ -35,6 +36,11 @@ let app = new Vue({
 
         home: function (event) {
             window.location.replace("/");
+        },
+
+        startNow: function (event) {
+            app.$data.started = true;
+            app.$data.immediateStart = true;
         }
 
     }
@@ -285,8 +291,9 @@ function countdownOnLoad(start, end) {
         if (distance < -1000) {
             clearInterval(x);
             app.$data.started = true;
-            
-            startTime = Date.now();
+            if (!app.$data.immediateStart) {
+                startTime = Date.now();
+            }
         }
         if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {
             //app.$data.gunShow = true;
