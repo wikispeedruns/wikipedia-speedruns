@@ -53,9 +53,18 @@ let run_id = -1;
 let seconds;
 let keyMap = {};
 
+let clicked = false;
+
 function handleWikipediaLink(e) 
 {
     e.preventDefault();
+
+    if (clicked) return;
+    clicked = true;
+    setTimeout(function() {
+        clicked = false;
+    }, 2000);
+
     const linkEl = e.currentTarget;
 
     if (linkEl.getAttribute("href").substring(0, 1) === "#") {
@@ -69,14 +78,6 @@ function handleWikipediaLink(e)
         if (!linkEl.getAttribute("href").startsWith("/wiki/") || linkEl.getAttribute("href").startsWith("/wiki/File:")) {
             return;
         }
-
-        // Disable the other links, otherwise we might load multiple links
-        document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
-            el.onclick = (e) => {
-                e.preventDefault();
-                console.log("prevent multiple click");
-            };
-        });
 
         // Remove "/wiki/" from string
         loadPage(linkEl.getAttribute("href").substring(6))
@@ -146,7 +147,7 @@ async function loadPage(page) {
         await finish();
     }
 
-    document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
+    document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
         el.onclick = handleWikipediaLink;
     });
 
