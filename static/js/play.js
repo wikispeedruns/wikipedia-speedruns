@@ -53,17 +53,9 @@ let run_id = -1;
 let seconds;
 let keyMap = {};
 
-let clicked = false;
-
 function handleWikipediaLink(e) 
 {
     e.preventDefault();
-
-    if (clicked) return;
-    clicked = true;
-    setTimeout(function() {
-        clicked = false;
-    }, 2000);
 
     const linkEl = e.currentTarget;
 
@@ -79,8 +71,27 @@ function handleWikipediaLink(e)
             return;
         }
 
+        // Disable the other linksto prevent multiple clicks
+        document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
+            el.onclick = (e) => {
+                e.preventDefault();
+                console.log("prevent multiple click");
+            };
+        });
+
         // Remove "/wiki/" from string
-        loadPage(linkEl.getAttribute("href").substring(6))
+        loadPageWrapper(linkEl.getAttribute("href").substring(6))
+    }
+}
+
+async function loadPageWrapper(page) {
+    try {
+        await loadPage(page)
+    } catch (error) {
+        // Reenable all links if loadPage fails
+        document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
+            el.onclick = handleWikipediaLink;
+        });
     }
 }
 
