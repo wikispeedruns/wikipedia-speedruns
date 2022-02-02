@@ -14,7 +14,7 @@ def create_reset_token(id, hash):
 def verify_reset_token(token, hash):
     try:
         return ts.loads(token, max_age=86400, salt="reset-" + hash)
-    except (SignatureExpired, BadSignature):
+    except (SignatureExpired, BadSignature) as e:
         return None
 
 def create_confirm_token(id):
