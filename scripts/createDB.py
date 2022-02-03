@@ -41,43 +41,32 @@ CREATE TABLE IF NOT EXISTS `ratings` (
 
 
 # `type` column defines in what contexts the prompt is available
-TABLES['prompts']=(
+TABLES['sprint_prompts']=(
 '''
-CREATE TABLE IF NOT EXISTS `prompts` (
+CREATE TABLE IF NOT EXISTS `sprint_prompts` (
     `prompt_id` INT NOT NULL AUTO_INCREMENT,
     `start` VARCHAR(255) NOT NULL,
     `end` VARCHAR(255) NOT NULL,
-    `type` ENUM ('unused', 'public', 'daily') NOT NULL DEFAULT 'unused',
-    PRIMARY KEY (`prompt_id`)
+    `rated` BOOLEAN NOT NULL DEFAULT 0,
+    `active_start` DATETIME NULL,
+    `active_end` DATETIME NULL,
+    PRIMARY KEY (`prompt_id`),
+    INDEX (`active_begin`, `active_end`)
 );
 ''')
 
 
-# Prompts of the day
-TABLES['daily_prompts']=(
+TABLES['sprint_runs']=(
 '''
-CREATE TABLE IF NOT EXISTS `daily_prompts` (
-    `date` DATE NOT NULL,
-    `prompt_id` INT NOT NULL,
-    `rated` BOOLEAN NOT NULL DEFAULT 0,
-    PRIMARY KEY (`date`, `prompt_id`),
-    FOREIGN KEY (`prompt_id`) REFERENCES `prompts`(`prompt_id`) ON DELETE CASCADE
-);
-'''
-)
-
-
-TABLES['runs']=(
-'''
-CREATE TABLE IF NOT EXISTS `runs` (
+CREATE TABLE IF NOT EXISTS `sprint_runs` (
     `run_id` INT NOT NULL AUTO_INCREMENT,
     `start_time` TIMESTAMP(3) NOT NULL,
     `end_time` TIMESTAMP(3) NULL,
-    `path` TEXT NULL,
+    `path` JSON NULL,
     `prompt_id` INT NOT NULL,
     `user_id` INT,
     PRIMARY KEY (`run_id`),
-    FOREIGN KEY (`prompt_id`) REFERENCES `prompts`(`prompt_id`),
+    FOREIGN KEY (`prompt_id`) REFERENCES `sprint_prompts`(`prompt_id`),
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
 );
 ''')
