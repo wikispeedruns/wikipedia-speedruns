@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `ratings` (
 )
 
 
-# `type` column defines in what contexts the prompt is available
+# Generated columns allow for easier handling of permissions
 TABLES['sprint_prompts']=(
 '''
 CREATE TABLE IF NOT EXISTS `sprint_prompts` (
@@ -50,8 +50,9 @@ CREATE TABLE IF NOT EXISTS `sprint_prompts` (
     `rated` BOOLEAN NOT NULL DEFAULT 0,
     `active_start` DATETIME NULL,
     `active_end` DATETIME NULL,
+    `used` BOOLEAN AS (NOT (active_start IS NULL OR active_end IS NULL)) VIRTUAL,
     PRIMARY KEY (`prompt_id`),
-    INDEX (`active_begin`, `active_end`)
+    INDEX (`active_start`, `active_end`)
 );
 ''')
 
