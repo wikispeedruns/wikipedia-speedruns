@@ -13,7 +13,6 @@ let app = new Vue({
         countdown: 8,
         finished: false,
         started: false,
-        immediateStart: false,
         activeTip: "",
         path:[],
         finalTime:"",
@@ -36,11 +35,6 @@ let app = new Vue({
 
         home: function (event) {
             window.location.replace("/");
-        },
-
-        startNow: function (event) {
-            app.$data.started = true;
-            app.$data.immediateStart = true;
         }
 
     }
@@ -131,33 +125,6 @@ async function loadPage(page) {
 
     document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
     
-
-    // Start timer if we are at the start
-    if (path.length == 0) {
-        startTime = Date.now()
-        timerInterval = setInterval(displayTimer, 20);    
-
-        const reqBody = {
-            "start_time": startTime,
-            "prompt_id": prompt_id,
-        }
-
-        try {
-            const response = await fetch("/api/runs", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(reqBody)
-            })
-    
-            run_id = await response.json();
-
-        } catch(e) {
-            console.log(e);
-        }
-    }
-    
     path.push(title)
 
     if (formatStr(title) === formatStr(goalPage)) {
@@ -169,6 +136,7 @@ async function loadPage(page) {
     });
 
     hideElements();
+    setMargin();
     window.scrollTo(0, 0)
 }
 
@@ -179,9 +147,8 @@ async function finish() {
     app.$data.finalTime = app.$data.timer;
 
     // Stop timer
-    endTime = Date.now();
     clearInterval(timerInterval);
-    //document.getElementById("timer").innerHTML="";
+    endTime = startTime + app.$data.finalTime*1000;
 
     // Prevent are you sure you want to leave prompt
     window.onbeforeunload = null;
@@ -266,6 +233,10 @@ function hideElements() {
     
 }
 
+function setMargin() {
+    const element = document.getElementById("time-box");
+    document.getElementById("wikipedia-frame").firstChild.style.paddingBottom = (element.offsetHeight + 25) +"px";
+}
 
 
 function formatStr(string) {
@@ -280,8 +251,7 @@ function displayTimer() {
 
 
 
-function countdownOnLoad(start, end) {
-
+async function countdownOnLoad(start, end) {
 
     app.$data.startArticle = start;
     app.$data.endArticle = end;
@@ -291,37 +261,61 @@ function countdownOnLoad(start, end) {
     let countDownStart = Date.now();
     let countDownTime = app.$data.countdown * 1000;
 
-    let x = setInterval(function() {
+    document.getElementById("mirroredimgblock").classList.toggle("invisible");
 
-        let now = Date.now()
-      
-        // Find the distance between now and the count down date
-        let distance = countDownStart + countDownTime - now;
+    const promise1 = new Promise(resolve => {
+        const x = setInterval(function() {
 
-        app.$data.countdown = Math.floor(distance/1000)+1;
+            const now = Date.now()
+          
+            // Find the distance between now and the count down date
+            let distance = countDownStart + countDownTime - now;
 
-        if (distance < -1000) {
-            clearInterval(x);
-            app.$data.started = true;
-            if (!app.$data.immediateStart) {
-                startTime = Date.now();
+            app.$data.countdown = Math.floor(distance/1000)+1;
+
+            if (distance <= 0) {
+                resolve();
+                clearInterval(x);
             }
-        }
-        if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {
-            //app.$data.gunShow = true;
-            
-            document.getElementById("mirroredimgblock").classList.toggle("invisible")
+            if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {
+                //app.$data.gunShow = true;
+                
+                document.getElementById("mirroredimgblock").classList.toggle("invisible")
 
-            console.log("guns should show")
-        }
-      }, 50);
+                // console.log("guns should show")
+            }
+        }, 50);
+    });
+    const promise2 = new Promise(r =>
+        document.getElementById("start-btn").addEventListener("click", r, {once: true})
+    )
+    await Promise.any([promise1, promise2]);
+}
 
-      document.getElementById("mirroredimgblock").classList.toggle("invisible")
+async function saveRun() {
+    const reqBody = {
+        "start_time": startTime,
+        "prompt_id": prompt_id,
+    }
 
+    try {
+        const response = await fetch("/api/runs", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(reqBody)
+        })
+
+        run_id = await response.json();
+
+    } catch(e) {
+        console.log(e);
+    }
 }
 
 function disableFind(e) {
-    console.log(e);
+    // console.log(e);
     if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) { 
         e.preventDefault();
         this.alert("WARNING: Attempt to Find in page. This will be recorded.")
@@ -347,9 +341,15 @@ window.addEventListener("load", async function() {
 
     goalPage = prompt["end"];
 
-    await countdownOnLoad(article, goalPage);
+    await Promise.all([countdownOnLoad(article, goalPage), loadPage(article)]);
 
-    loadPage(article);
+    app.$data.started = true;
+    startTime = Date.now()
+    timerInterval = setInterval(displayTimer, 20);
+    saveRun();
+    
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setMargin();
 });
 
 window.onbeforeunload = function() {
