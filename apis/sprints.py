@@ -47,44 +47,29 @@ def set_prompt_active_time(id):
     {
 
         "date": "2020-10-20"      // <---- ISO Date
+        "endDate": "2020-10-20"
         "rated": true
     }
 
+    {
+        "startDate": "2020-10-20"      // <---- ISO Date
+        "endDate": "2020-10-27"
+        "rated": false
+    }
+
     '''
-    query = "UPDATE prompts SET `type`=%s WHERE `prompt_id`=%s"
-    db = get_db()
 
-    prompt_type = request.json.get("type")
+    try:
+        start_date = datetime.date.fromisoformat(request.json.get("date", ""))
+        end_date = request.json.get("endDate")
+        rated = request.json.get("rated")
+    except (KeyError, ValueError) as e:
+        return f"Invalid input", 400
 
-    if prompt_type == "public" or prompt_type == "unused":
-
-        with db.cursor(cursor=DictCursor) as cursor:
-            res = cursor.execute(query, (prompt_type, id))
-            if (res == 0): return "Prompt not found", 404  # TODO this also is true if it's not changed
-            db.commit()
-            return f"Changed prompt to {prompt_type}", 200
-
-    elif prompt_type == "daily":
-
-        try:
-            date = datetime.date.fromisoformat(request.json.get("date", "")) # "" to raise ValueError
-            rated = request.json.get("rated", False)
-        except (KeyError, ValueError) as e:
-            return f"Invalid input", 400
-
-        daily_query = "REPLACE INTO daily_prompts (date, prompt_id, rated) VALUES (%s, %s, %s)"
-
-        with db.cursor(cursor=DictCursor) as cursor:
-
-            # TODO Error check for non existent prompt
-            res = cursor.execute(query, (prompt_type, id)) 
-            cursor.execute(daily_query, (date, id, rated))
-            db.commit()
-            return f"Changed prompt to {prompt_type} for {date} (rated: {rated}", 200
-
+    if (rated):
+        prompts.set_ranked_daily_prompt(id, start_date)
     else:
-        return "Invalid input", 400
-
+        prompts.set_ranked_daily_prompt(id, end_date)
 
 ### Prompt Search Endpoints
 @sprint_api.get('/managed')
@@ -105,33 +90,21 @@ def get_active_prompts():
 
 @sprint_api.get('/<id>')
 def get_prompt(id):
-    query = "SELECT prompt_id, start, end, type FROM prompts WHERE prompt_id=%s"
+    prompt = get_prompt(id, "sprint")
 
-    db = get_db()
-    with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query, (id,))
-        prompt = cursor.fetchone()
+    if (prompt is None):
+        return "Prompt does not exist", 404
 
-        # Check permissions for users
-        if (not session.get("admin")):
-            if (prompt["type"] == "unused"):
-                return "You do not have permission to view this prompt", 401
+    if (session.get("admin")):
+        return prompt
 
-            if (prompt["type"] == "daily"):
+    if not prompt["used"]:
+        return "Prompt does not exist", 404
 
-                # TODO move this logic into separate logic that maybe returns a dict?
-                daily_query = "SELECT date, rated FROM daily_prompts WHERE prompt_id=%s"
-                cursor.execute(daily_query, (id,))                
-                daily_prompt = cursor.fetchone()
+    if not prompt["available"]:
+        return "Prompt not yet available", 401
 
-                today = datetime.date.today()
-                if (today < daily_prompt["date"]):
-                    return "This prompt is not avaiable yet", 401
-
-                if ("user_id" not in session and daily_prompt["rated"] and daily_prompt["date"] == today):
-                    return "Login to see this rated prompt", 401
-                    
-        return jsonify(prompt)
+    return prompt
 
 
 
@@ -139,12 +112,13 @@ def get_prompt(id):
 @sprint_api.get('/<id>/leaderboard/<run_id>')
 def get_prompt_leaderboard(id, run_id):
     # TODO this could probably return details as well
+    # TODO this should restrict viewing to those who have already played, especially for ranked
     query = '''
     SELECT run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
-    FROM runs
+    FROM sprint_runs AS runs
     JOIN (
             SELECT users.user_id, username, MIN(start_time) AS first_run 
-            FROM runs
+            FROM sprint_runs AS runs
             JOIN users ON users.user_id=runs.user_id
             WHERE prompt_id=%s AND end_time IS NOT NULL
             GROUP BY user_id
@@ -156,7 +130,7 @@ def get_prompt_leaderboard(id, run_id):
 
     specificRunQuery = '''
     SELECT runs.run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
-    FROM runs
+    FROM sprint_runs AS runs
     LEFT JOIN users
     ON runs.user_id=users.user_id
     WHERE runs.run_id=%s

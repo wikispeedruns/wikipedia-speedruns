@@ -20,13 +20,15 @@ class Prompt(TypedDict):
     start: str
     active_start: datetime.datetime
     active_end: datetime.datetime
+
+    used: bool
+    available: bool
+    active: bool
     # played: bool # TODO
 
 class SprintPrompt(Prompt):
     start: str
     end: Optional[str]
-
-    currentlyRated: bool
 
 
 class MarathonPrompt(Prompt):
@@ -34,6 +36,13 @@ class MarathonPrompt(Prompt):
     start: str
 
     # TODO
+
+
+def compute_visibility(prompt: Prompt) -> None:
+    now = datetime.datetime.now()
+    prompt["used"] = not (prompt["active_start"] is None or prompt["active_end"] is None)
+    prompt["available"] = now >= prompt["active_start"]
+    prompt["active"] = now >= prompt["active_start"] and now <= prompt["active_end"]
 
 
 def add_sprint_prompt(start: str, end: str) -> Optional[int]:
@@ -102,8 +111,14 @@ def get_prompt(prompt_id: int, prompt_type: PromptType) -> Optional[Prompt]:
     db = get_db()
     with db.cursor(cursor=DictCursor) as cur:
         cur.execute(query, (prompt_id,))
-        return cur.fetchone()
+        
+        prompt = cur.fetchone()
 
+        if (prompt is None):
+            return prompt
+
+        compute_visibility(prompt)
+        return prompt
         
 
 
