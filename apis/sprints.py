@@ -82,7 +82,7 @@ def get_active_prompts():
     return jsonify(prompts.get_archive_prompts("sprint"))
 
 @sprint_api.get('/archive')
-def get_active_prompts():
+def get_archive_prompts():
     return jsonify(prompts.get_active_prompts("sprint"))
 
 

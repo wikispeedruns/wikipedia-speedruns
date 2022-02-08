@@ -1,5 +1,4 @@
 
-from pickle import TRUE
 from typing import List, Literal, TypedDict, Optional
 
 from db import get_db
@@ -41,6 +40,9 @@ class MarathonPrompt(Prompt):
 def compute_visibility(prompt: Prompt) -> None:
     now = datetime.datetime.now()
     prompt["used"] = not (prompt["active_start"] is None or prompt["active_end"] is None)
+
+    if (not prompt["used"]): return
+
     prompt["available"] = now >= prompt["active_start"]
     prompt["active"] = now >= prompt["active_start"] and now <= prompt["active_end"]
 
@@ -67,7 +69,7 @@ def delete_prompt(prompt_id: int, prompt_type: PromptType) -> bool:
     db = get_db()
     with db.cursor() as cursor:
         try:
-            cursor.execute(query, (id))
+            cursor.execute(query, (prompt_id))
             db.commit()
             return True
         
@@ -105,7 +107,7 @@ def get_prompt(prompt_id: int, prompt_type: PromptType) -> Optional[Prompt]:
     Get a specific prompt
     '''
     if (prompt_type == "sprint"):
-        query = "SELECT start, end, rated, active_start, active_end FROM sprint_prompts WHERE prompt_id=%s"
+        query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts WHERE prompt_id=%s"
     # elif (prompt_type == "marathon")
 
     db = get_db()
@@ -127,7 +129,7 @@ def get_active_prompts(prompt_type: PromptType) -> List[Prompt]:
     Get all prompts for display on front page (only show start)
     '''
     if (prompt_type == "sprint"):
-        query = "SELECT start, NULL as end, rated, active_start, active_end FROM sprint_prompts"
+        query = "SELECT prompt_id, start, NULL as end, rated, active_start, active_end FROM sprint_prompts"
     # elif (prompt_type == "marathon")
 
     query += " WHERE used = 1 AND active_start <= NOW() AND NOW() < active_end"
@@ -144,7 +146,7 @@ def get_archive_prompts(prompt_type: PromptType) -> List[Prompt]:
     TODO paginate
     '''
     if (prompt_type == "sprint"):
-        query = "SELECT start, rated, active_start, active_end FROM sprint_prompts"
+        query = "SELECT prompt_id, start, rated, active_start, active_end FROM sprint_prompts"
     # elif (prompt_type == "marathon")
 
     query += " WHERE used = 1 AND active_start <= NOW()"
@@ -160,7 +162,7 @@ def get_managed_prompts(prompt_type: PromptType) -> List[Prompt]:
     Get all prompts for admins, all active, unused, and upcoming prompts
     '''
     if (prompt_type == "sprint"):
-        query = "SELECT start, end, rated, active_start, active_end FROM sprint_prompts"
+        query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts"
     # elif (prompt_type == "marathon")
 
     query += " WHERE used = 0 OR active_end <= NOW()"

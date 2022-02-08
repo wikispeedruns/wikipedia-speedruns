@@ -33,11 +33,12 @@
     <div class="row justify-content-md-center">
 
     <div class="col-sm-6">
+
         <div class="card">
             <div class="card-body">
-
-                <h4> Prompts of the Day</h4>
+                <h4>Prompt of the Day</h4>
                 <h6><span v-cloak v-once>([[new Date().toDateString()]])</span></h6>
+
                 <table class="table table-hover">
                     <thead>
                         <th scope="col">Prompt #</th>
@@ -51,7 +52,29 @@
                         </tr>
                     </tbody>
                 </table>
-                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-sm-6">
+        <div class="card">
+            <div class="card-body">
+
+                <h4> Try some other Prompts </h4>
+                <table class="table table-hover">
+                    <thead>
+                        <th scope="col">Prompt #</th>
+                        <th scope="col">Starting Article</th>
+                    </thead>
+                    <tbody>
+                        <tr v-for="prompt in activePrompts" v-cloak>
+                            <td>[[prompt.prompt_id]]<span v-if="prompt.rated">*</span> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
+
+                            <td>[[prompt.start]]</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <div class="card-footer text-muted">
@@ -59,29 +82,7 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-6">
-        <div class="card">
-            <div class="card-body">
-                <h4>Try some prompts:</h4>
-
-                <table class="table table-hover">
-                <thead>
-                    <th scope="col">Prompt #</th>
-                    <th scope="col">Starting Article</th>
-                </thead>
-                <tbody>
-                    <tr v-for="prompt in publicPrompts" v-cloak>
-                        <td>[[prompt.prompt_id]] (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
-                        <td>[[prompt.start]]  </td>
-                    </tr>
-                </tbody>
-                </table>
-            </div>
-        </div>
     </div>
-
-    </div>
-
 
     <hr>
     <h4> Top 10 rated players:</h4> Note the <a href="/about#ratings">rating system</a> is still experimental </p>

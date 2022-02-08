@@ -1,15 +1,9 @@
-async function getPromptsPublic()
+async function getPrompts()
 {
-    const response = await fetch("/api/prompts/public");
+    const response = await fetch("/api/sprints/active");
     const prompts = await response.json();
 
     return prompts;
-}
-
-async function getDailyPrompts()
-{
-    const response = await fetch("/api/prompts/daily");
-    return await response.json();
 }
 
 async function getTopUsers()
@@ -25,14 +19,16 @@ var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     data: {
-        publicPrompts: [],
         dailyPrompts: [],
+        activePrompts: [],
         topUsers: [],
     },
 
     created: async function() {
         this.topUsers = await getTopUsers();
-        this.publicPrompts = await getPromptsPublic(); 
-        this.dailyPrompts = await getDailyPrompts(); 
+
+        const prompts = await getPrompts();
+        this.activePrompts = prompts.filter(p => p.rated)
+        this.activePrompts = prompts.filter(p => !p.rated)
     }
 })
