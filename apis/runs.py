@@ -19,9 +19,10 @@ def create_run():
     Returns the user ID of the run created.
     '''
 
-    query = "INSERT INTO `runs` (`prompt_id`,`user_id`) VALUES (%s, %s)"
+    query = "INSERT INTO `runs` (`start_time`,`prompt_id`,`user_id`) VALUES (%s, %s, %s)"
     sel_query = "SELECT LAST_INSERT_ID()"
 
+    start_time = datetime.fromtimestamp(request.json['start_time']/1000)
     prompt_id = request.json['prompt_id']
 
     if ('user_id' in session):
@@ -33,8 +34,8 @@ def create_run():
 
     db = get_db()
     with db.cursor() as cursor:
-        print(cursor.mogrify(query, (prompt_id, user_id)))
-        result = cursor.execute(query, (prompt_id, user_id))
+        print(cursor.mogrify(query, (start_time, prompt_id, user_id)))
+        result = cursor.execute(query, (start_time, prompt_id, user_id))
         
         cursor.execute(sel_query)
         id = cursor.fetchone()[0]
