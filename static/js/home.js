@@ -28,7 +28,7 @@ var app = new Vue({
         this.topUsers = await getTopUsers();
 
         const prompts = await getPrompts();
-        this.activePrompts = prompts.filter(p => p.rated)
+        this.dailyPrompts = prompts.filter(p => p.rated)
         this.activePrompts = prompts.filter(p => !p.rated)
     }
 })

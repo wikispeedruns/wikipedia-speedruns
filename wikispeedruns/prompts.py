@@ -37,21 +37,21 @@ class MarathonPrompt(Prompt):
     # TODO
 
 
-def compute_visibility(prompt: Prompt) -> None:
+def compute_visibility(prompt: Prompt) -> Prompt:
     now = datetime.datetime.now()
     prompt["used"] = not (prompt["active_start"] is None or prompt["active_end"] is None)
 
-    if (not prompt["used"]): return
+    if (not prompt["used"]): return prompt
 
     prompt["available"] = now >= prompt["active_start"]
     prompt["active"] = now >= prompt["active_start"] and now <= prompt["active_end"]
-
+    return prompt
 
 def add_sprint_prompt(start: str, end: str) -> Optional[int]:
     ''' 
     Add a prompt
     '''
-    query = "INSERT INTO prompts (start, end) VALUES (%s, %s);"
+    query = "INSERT INTO sprint_prompts (start, end) VALUES (%s, %s);"
     sel_query = "SELECT LAST_INSERT_ID()"
 
     db = get_db()
@@ -82,22 +82,22 @@ def set_ranked_daily_prompt(prompt_id: int, day: datetime.date) -> bool:
     '''
     Given a currently unused prompt, set it as one of the the ranked daily for 'day'
     '''
-    query = f"UPDATE sprint_prompts SET active_begin=%s, active_end=%s, rated=1 WHERE prompt_id=%s"
+    query = f"UPDATE sprint_prompts SET active_start=%s, active_end=%s, rated=1 WHERE prompt_id=%s"
 
     db = get_db()
     with db.cursor() as cur:
-        res = cur.execute(query, (day, day + datetime.timedelta(days=1, seconds=-1), prompt_id))
+        res = cur.execute(query, (day, day + datetime.timedelta(days=1), prompt_id))
         db.commit()
         return res == 1
 
-def set_prompt_time(prompt_id: int, prompt_type: PromptType, active_begin: datetime.date, active_end: datetime.date) -> bool:
+def set_prompt_time(prompt_id: int, prompt_type: PromptType, active_start: datetime.date, active_end: datetime.date) -> bool:
     '''
     Given a currently unused prompt, set the active period to [start_day, end_day)
     '''
-    query = f"UPDATE {prompt_type}_prompts SET active_begin=%s, active_end=%s WHERE prompt_id=%s"
+    query = f"UPDATE {prompt_type}_prompts SET active_start=%s, active_end=%s WHERE prompt_id=%s"
     db = get_db()
     with db.cursor() as cur:
-        res = cur.execute(query, (active_begin, active_end - datetime.timedelta(seconds=1), prompt_id))
+        res = cur.execute(query, (active_start, active_end, prompt_id))
         db.commit()
         return res == 1
 
@@ -119,7 +119,7 @@ def get_prompt(prompt_id: int, prompt_type: PromptType) -> Optional[Prompt]:
         if (prompt is None):
             return prompt
 
-        compute_visibility(prompt)
+        prompt = compute_visibility(prompt)
         return prompt
         
 
@@ -165,8 +165,9 @@ def get_managed_prompts(prompt_type: PromptType) -> List[Prompt]:
         query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts"
     # elif (prompt_type == "marathon")
 
-    query += " WHERE used = 0 OR active_end <= NOW()"
+    # Minus 7 to see more recently active prompts
+    query += " WHERE used = 0 OR active_end >= DATE_ADD(NOW(), INTERVAL -7 DAY)"
     db = get_db()
     with db.cursor(cursor=DictCursor) as cur:
         cur.execute(query)
-        return cur.fetchall()
+        return [compute_visibility(p) for p in cur.fetchall()]

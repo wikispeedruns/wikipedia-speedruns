@@ -1,3 +1,4 @@
+from tracemalloc import start
 import pymysql
 from flask import Flask, jsonify, request, Blueprint, session
 
@@ -31,7 +32,7 @@ def create_prompt():
 @sprint_api.delete('/<id>')
 @check_admin
 def delete_prompt(id):
-    if prompts.delete_prompt(id):
+    if prompts.delete_prompt(id, "sprint"):
         return "Prompt deleted!", 200
     else:
         return "Could not delete prompt,  may already have run(s)", 400
@@ -45,8 +46,7 @@ def set_prompt_active_time(id):
 
     Example json inputs
     {
-
-        "date": "2020-10-20"      // <---- ISO Date
+        "startDate": "2020-10-20"      // <---- ISO Date
         "endDate": "2020-10-20"
         "rated": true
     }
@@ -60,16 +60,19 @@ def set_prompt_active_time(id):
     '''
 
     try:
-        start_date = datetime.date.fromisoformat(request.json.get("date", ""))
-        end_date = request.json.get("endDate")
+        start_date = datetime.date.fromisoformat(request.json.get("startDate", ""))
+        end_date = datetime.date.fromisoformat(request.json.get("endDate", ""))
         rated = request.json.get("rated")
     except (KeyError, ValueError) as e:
         return f"Invalid input", 400
 
     if (rated):
         prompts.set_ranked_daily_prompt(id, start_date)
+        return f"Set prompt {id} as daily ranked for {start_date}", 200
+
     else:
-        prompts.set_ranked_daily_prompt(id, end_date)
+        prompts.set_prompt_time(id, "sprint", start_date, end_date)
+        return f"Set prompt {id} active from {start_date} to {end_date}", 200
 
 ### Prompt Search Endpoints
 @sprint_api.get('/managed')
@@ -79,7 +82,7 @@ def get_managed_prompts():
 
 @sprint_api.get('/active')
 def get_active_prompts():
-    return jsonify(prompts.get_archive_prompts("sprint"))
+    return jsonify(prompts.get_active_prompts("sprint"))
 
 @sprint_api.get('/archive')
 def get_archive_prompts():
