@@ -1,8 +1,10 @@
 
+from pickle import TRUE
 from typing import List, Literal, TypedDict, Optional
 
 from db import get_db
 
+import pymysql
 from pymysql.cursors import DictCursor
 
 import datetime
@@ -48,6 +50,21 @@ def add_sprint_prompt(start: str, end: str) -> Optional[int]:
         id = cursor.fetchone()[0]
         db.commit()
         return id
+
+
+def delete_prompt(prompt_id: int, prompt_type: PromptType) -> bool:
+    query = f"DELETE FROM {prompt_type}_prompts WHERE prompt_id=%s"
+
+    db = get_db()
+    with db.cursor() as cursor:
+        try:
+            cursor.execute(query, (id))
+            db.commit()
+            return True
+        
+        except pymysql.IntegrityError:
+            return False
+
 
 
 def set_ranked_daily_prompt(prompt_id: int, day: datetime.date) -> bool:

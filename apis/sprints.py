@@ -1,5 +1,4 @@
 import pymysql
-from util.decorators import check_admin
 from flask import Flask, jsonify, request, Blueprint, session
 
 import json
@@ -8,58 +7,45 @@ import datetime
 from db import get_db
 from pymysql.cursors import DictCursor
 
-prompt_api = Blueprint('prompts', __name__, url_prefix='/api/prompts')
+from util.decorators import check_admin, check_request_json
+from wikispeedruns import prompts
+
+sprint_api = Blueprint('sprints', __name__, url_prefix='/api/sprints')
 
 
 ### Prompt Management Endpoints
-@prompt_api.post('/')
+@sprint_api.post('/')
 @check_admin
+@check_request_json({"start": str, "end": str})
 def create_prompt():
-    query = "INSERT INTO prompts (start, end) VALUES (%s, %s);"
+    print(request.json)
+    start = request.json.get('start')
+    end = request.json.get('end')
 
-    start = request.json['start']
-    end = request.json['end']
+    if (start is None or end is None): return "Invalid Request", 400
 
-    db = get_db()
-    with db.cursor() as cursor:
-        result = cursor.execute(query, (start, end))
-        db.commit()
-        return "Prompt added!"
+    id = prompts.add_sprint_prompt(start, end)
+    return f"Created prompt {id}", 200
 
 
-@prompt_api.delete('/<id>')
+@sprint_api.delete('/<id>')
 @check_admin
 def delete_prompt(id):
-    query = "DELETE FROM prompts WHERE prompt_id=%s"
-
-    db = get_db()
-    with db.cursor() as cursor:
-        try:
-            cursor.execute(query, (id))
-            db.commit()
-            return "Prompt deleted!", 200
-        
-        except pymysql.IntegrityError:
-            return "Integrity error, prompt may already have run(s)", 400
+    if prompts.delete_prompt(id):
+        return "Prompt deleted!", 200
+    else:
+        return "Could not delete prompt,  may already have run(s)", 400
 
 
-@prompt_api.patch('/<id>/type')
+@sprint_api.patch('/<id>')
 @check_admin
-def set_prompt_type(id):
+def set_prompt_active_time(id):
     '''
     Change whether a prompt is public, daily, or unsued
 
     Example json inputs
     {
-        "type": "public"
-    }
-    ...
-    {
-        "type: "unused"
-    }
-    ...
-    {
-        "type": "daily"
+
         "date": "2020-10-20"      // <---- ISO Date
         "rated": true
     }
@@ -101,63 +87,23 @@ def set_prompt_type(id):
 
 
 ### Prompt Search Endpoints
-@prompt_api.get('/all')
+@sprint_api.get('/managed')
 @check_admin
-def get_all_prompts():
-    query = """
-    SELECT p.prompt_id, start, end, type, d.date, d.rated
-    FROM prompts AS p
-    LEFT JOIN daily_prompts as d ON p.prompt_id = d.prompt_id
-    """
+def get_managed_prompts():
+    return jsonify(prompts.get_managed_prompts("sprint"))
 
-    db = get_db()
-    with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query)
-        results = cursor.fetchall()
+@sprint_api.get('/active')
+def get_active_prompts():
+    return jsonify(prompts.get_archive_prompts("sprint"))
 
-        for p in results:
-            if (p["date"]): p["date"] = p["date"].isoformat()
-
-        return jsonify(results)
-
-
-
-@prompt_api.get('/public')
-def get_public_prompts():
-    query = "SELECT prompt_id, start FROM prompts WHERE type='PUBLIC'"
-
-    db = get_db()
-    with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query)
-        results = cursor.fetchall()
-        return jsonify(results)
-
-
-@prompt_api.get('/daily')
-def get_daily_prompts():
-    query = """
-    SELECT p.prompt_id, start, d.date, d.rated 
-    FROM prompts as p
-    JOIN daily_prompts as d ON p.prompt_id = d.prompt_id
-    WHERE type='DAILY' 
-	    AND d.date <= CURDATE()
-        AND d.date > CURDATE() - %s;
-    """
-
-    # how many days to look back for daily prompts, defaults to 1
-    # TODO add more of these params
-    count = request.args.get('count', 1)
-
-    db = get_db()
-    with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query, (count, ))
-        results = cursor.fetchall()
-        return jsonify(results)
+@sprint_api.get('/archive')
+def get_active_prompts():
+    return jsonify(prompts.get_active_prompts("sprint"))
 
 
 ### Specific prompt endpoints
 
-@prompt_api.get('/<id>')
+@sprint_api.get('/<id>')
 def get_prompt(id):
     query = "SELECT prompt_id, start, end, type FROM prompts WHERE prompt_id=%s"
 
@@ -189,8 +135,8 @@ def get_prompt(id):
 
 
 
-@prompt_api.get('/<id>/leaderboard/', defaults={'run_id' : None})
-@prompt_api.get('/<id>/leaderboard/<run_id>')
+@sprint_api.get('/<id>/leaderboard/', defaults={'run_id' : None})
+@sprint_api.get('/<id>/leaderboard/<run_id>')
 def get_prompt_leaderboard(id, run_id):
     # TODO this could probably return details as well
     query = '''
