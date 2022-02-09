@@ -35,8 +35,16 @@ let app = new Vue({
 
         home: function (event) {
             window.location.replace("/");
-        }
+        },
 
+        copyResults: function(event) {
+            let results = generateResultText();
+            document.getElementById("custom-tooltip").style.display = "inline";
+            navigator.clipboard.writeText(results);
+            setTimeout(function() {
+                document.getElementById("custom-tooltip").style.display = "none";
+            }, 1500);
+        },
     }
 })
 
@@ -321,6 +329,15 @@ function startGame() {
     app.$data.started = true;
     startTime = Date.now();
     timerInterval = setInterval(displayTimer, 20);
+}
+
+function generateResultText() {
+    return `
+    Wiki Speedruns ${prompt_id}
+    ${app.$data.startArticle}
+    ${path.length - 1} 🖱️
+    ${(endTime - startTime) / 1000} ⏱️
+    `
 }
 
 window.addEventListener("load", async function() {
