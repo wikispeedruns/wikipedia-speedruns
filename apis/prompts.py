@@ -197,13 +197,14 @@ def get_prompt_leaderboard(id, run_id):
     SELECT run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
     FROM runs
     JOIN (
-            SELECT users.user_id, username, MIN(start_time) AS first_run 
+            SELECT users.user_id, username, MIN(run_id) AS first_run 
             FROM runs
             JOIN users ON users.user_id=runs.user_id
-            WHERE prompt_id=%s AND end_time IS NOT NULL
+            WHERE prompt_id=%s 
             GROUP BY user_id
     ) firsts
-    ON firsts.user_id=runs.user_id AND first_run=start_time
+    ON firsts.user_id=runs.user_id AND first_run=run_id
+    WHERE end_time IS NOT NULL
     '''
 
     args = [id]

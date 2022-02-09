@@ -287,10 +287,7 @@ async function countdownOnLoad(start, end) {
 }
 
 async function saveRun() {
-    startTime = Date.now();
-    
     const reqBody = {
-        "start_time": startTime,
         "prompt_id": prompt_id,
     }
 
