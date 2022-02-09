@@ -26,12 +26,11 @@ class Prompt(TypedDict):
     # played: bool # TODO
 
 class SprintPrompt(Prompt):
-    start: str
     end: Optional[str]
+    rated: bool
 
 
 class MarathonPrompt(Prompt):
-    prompt_id: int
     start: str
 
     # TODO
@@ -102,7 +101,7 @@ def set_prompt_time(prompt_id: int, prompt_type: PromptType, active_start: datet
         return res == 1
 
 
-def get_prompt(prompt_id: int, prompt_type: PromptType) -> Optional[Prompt]:
+def get_prompt(prompt_id: int, prompt_type: PromptType, user_id: Optional[int]=None) -> Optional[Prompt]:
     ''' 
     Get a specific prompt
     '''
@@ -113,11 +112,14 @@ def get_prompt(prompt_id: int, prompt_type: PromptType) -> Optional[Prompt]:
     db = get_db()
     with db.cursor(cursor=DictCursor) as cur:
         cur.execute(query, (prompt_id,))
-        
         prompt = cur.fetchone()
 
         if (prompt is None):
-            return prompt
+            return None
+
+        if (user_id is not None):
+            cur.execute(f"SELECT COUNT(*) as count FROM {prompt_type}_runs WHERE prompt_id=%s AND user_id=%s", (prompt_id, user_id))
+            prompt["played"] = cur.fetchone()["count"] > 0
 
         prompt = compute_visibility(prompt)
         return prompt
@@ -127,6 +129,7 @@ def get_prompt(prompt_id: int, prompt_type: PromptType) -> Optional[Prompt]:
 def get_active_prompts(prompt_type: PromptType) -> List[Prompt]:
     '''
     Get all prompts for display on front page (only show start)
+    TODO user id?
     '''
     if (prompt_type == "sprint"):
         query = "SELECT prompt_id, start, NULL as end, rated, active_start, active_end FROM sprint_prompts"
@@ -143,7 +146,7 @@ def get_active_prompts(prompt_type: PromptType) -> List[Prompt]:
 def get_archive_prompts(prompt_type: PromptType) -> List[Prompt]:
     '''
     Get all prompts for archive, including currently active
-    TODO paginate
+    TODO paginate, user id?
     '''
     if (prompt_type == "sprint"):
         query = "SELECT prompt_id, start, rated, active_start, active_end FROM sprint_prompts"

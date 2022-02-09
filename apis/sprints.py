@@ -19,7 +19,6 @@ sprint_api = Blueprint('sprints', __name__, url_prefix='/api/sprints')
 @check_admin
 @check_request_json({"start": str, "end": str})
 def create_prompt():
-    print(request.json)
     start = request.json.get('start')
     end = request.json.get('end')
 
@@ -86,14 +85,14 @@ def get_active_prompts():
 
 @sprint_api.get('/archive')
 def get_archive_prompts():
-    return jsonify(prompts.get_active_prompts("sprint"))
+    return jsonify(prompts.get_archive_prompts("sprint"))
 
 
 ### Specific prompt endpoints
 
-@sprint_api.get('/<id>')
+@sprint_api.get('/<int:id>')
 def get_prompt(id):
-    prompt = get_prompt(id, "sprint")
+    prompt = prompts.get_prompt(id, "sprint", session.get("user_id"))
 
     if (prompt is None):
         return "Prompt does not exist", 404
@@ -107,15 +106,27 @@ def get_prompt(id):
     if not prompt["available"]:
         return "Prompt not yet available", 401
 
+    if prompt["rated"] and prompt["active"] and "user_id" not in session:
+        return "You must be logged in to play this rated prompt", 401
+
     return prompt
 
 
 
-@sprint_api.get('/<id>/leaderboard/', defaults={'run_id' : None})
-@sprint_api.get('/<id>/leaderboard/<run_id>')
+@sprint_api.get('/<int:id>/leaderboard/', defaults={'run_id' : None})
+@sprint_api.get('/<int:id>/leaderboard/<int:run_id>')
 def get_prompt_leaderboard(id, run_id):
-    # TODO this could probably return details as well
-    # TODO this should restrict viewing to those who have already played, especially for ranked
+    # First get the prompt details, and the string
+    prompt = prompts.get_prompt(id, "sprint", user_id=session.get("user_id"))
+
+    if (prompt["active"] and prompt["rated"] and not prompt.get("played", False)):
+        return "Cannot view leaderboard of currently rated prompt until played", 401
+
+    resp = {
+        "prompt": prompt
+    }
+
+    # Then query the leaderboard (ew)
     query = '''
     SELECT run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
     FROM sprint_runs AS runs
@@ -149,10 +160,13 @@ def get_prompt_leaderboard(id, run_id):
     
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        # print(cursor.mogrify(query, tuple(args)))         # debug
         cursor.execute(query, tuple(args))
         results = cursor.fetchall()
 
         for run in results:
             run['path'] = json.loads(run['path'])
-        return jsonify(results)
+
+        
+        resp["leaderboard"] = results
+
+        return jsonify(resp)

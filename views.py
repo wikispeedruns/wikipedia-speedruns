@@ -43,16 +43,6 @@ def get_random_prompt():
         rand_prompt = random.choice(results)[0]
         return redirect("/play/" + str(rand_prompt), code=302)
 
-@views.route('/latest', methods=['GET'])
-def get_latest_prompt():
-    # TODO its a little messy to do this here
-    query = ("SELECT MAX(prompt_id) FROM prompts WHERE public=TRUE;")
-
-    with db.get_db().cursor() as cursor:
-        cursor.execute(query)
-        results = cursor.fetchone()
-        return redirect("/play/" + str(results[0]), code=302)
-
 @views.route('/register', methods=['GET'])
 def get_register_page():
     return render_with_data('users/register.html')
