@@ -332,12 +332,10 @@ function startGame() {
 }
 
 function generateResultText() {
-    return `
-    Wiki Speedruns ${prompt_id}
-    ${app.$data.startArticle}
-    ${path.length - 1} 🖱️
-    ${(endTime - startTime) / 1000} ⏱️
-    `
+    return `Wiki Speedruns ${prompt_id}
+${app.$data.startArticle}
+${path.length - 1} 🖱️
+${(endTime - startTime) / 1000} ⏱️`
 }
 
 window.addEventListener("load", async function() {
