@@ -3,6 +3,8 @@
 {% block head %}
 <script defer type=text/javascript src="{{url_for('static', filename='js/home.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+<link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/home.css')}}">
 <style>
     [v-cloak] { display: none }
 </style>
@@ -108,7 +110,11 @@
     <hr>
 
     <div>
-        <p> Questions or Feedback? Email us at <a href="mailto:support@wikispeedruns.com">support@wikispeedruns.com</a></p>
+        <p>
+            Questions or Feedback? Email us at <a href="mailto:support@wikispeedruns.com">support@wikispeedruns.com</a>,
+            <a href="https://twitter.com/intent/tweet?screen_name=WikiSpeedruns" target="_blank">tweet</a> at us,
+            or join our <a href="https://discord.gg/mNYeB9c9db" target="_blank">Discord</a> server!
+        </p>
 
         <p>
             Created by <a href="https://danqian.net">Daniel Qian</a>,
@@ -121,17 +127,13 @@
         </p>
     </div>
 
-
-
-
     <hr>
 
-    <div class="container text-center mt-5 mx-auto">
-        <div class="row">
-        <a href="https://twitter.com/WikiSpeedruns" class="col">
-            <img src="/static/assets/twitter_icon.png" width="75" height="75">
-        </a>
-        </div>
-    </div>
+    <ul class="social-menu center">
+        <li><a href="https://twitter.com/WikiSpeedruns" target="_blank"><i class="fab fa-twitter"></i></a></li>
+        <li><a href="https://discord.gg/mNYeB9c9db" target="_blank"><i class="fab fa-discord"></i></a></li>
+        <li><a href="https://github.com/wikispeedruns/wikipedia-speedruns" target="_blank"><i class="fab fa-github"></i></a></li>
+    </ul>
+
 </div>
 {% endblock %}
