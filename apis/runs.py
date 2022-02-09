@@ -14,15 +14,14 @@ run_api = Blueprint('runs', __name__, url_prefix='/api/runs')
 @run_api.post('')
 def create_run():
     '''
-    Creates a new run given a start time and a prompt.
+    Creates a new run given a prompt.
 
     Returns the user ID of the run created.
     '''
 
-    query = "INSERT INTO `runs` (`start_time`, `prompt_id`,`user_id`) VALUES (%s, %s, %s)"
+    query = "INSERT INTO `runs` (`start_time`,`prompt_id`,`user_id`) VALUES (%s, %s, %s)"
     sel_query = "SELECT LAST_INSERT_ID()"
 
-    # datetime wants timestamp in seconds since epoch
     start_time = datetime.fromtimestamp(request.json['start_time']/1000)
     prompt_id = request.json['prompt_id']
 
@@ -50,18 +49,19 @@ def create_run():
 @run_api.patch('/<id>')
 def finish_run(id):
     '''
-    Updates an existing run given a run, an end time, and a path.
+    Updates an existing run given a run, start time, end time, and a path.
 
     Returns the user ID of the run updated.
     '''
-    query = 'UPDATE `runs` SET `end_time`=%s, `path`=%s WHERE `run_id`=%s'
+    query = 'UPDATE `runs` SET `start_time`=%s, `end_time`=%s, `path`=%s WHERE `run_id`=%s'
     
+    start_time = datetime.fromtimestamp(request.json['start_time']/1000)
     end_time = datetime.fromtimestamp(request.json['end_time']/1000)
     path = json.dumps(request.json['path'])
 
     db = get_db()
     with db.cursor() as cursor:
-        cursor.execute(query, (end_time, path, id))
+        cursor.execute(query, (start_time, end_time, path, id))
         db.commit()
 
         return f'Updated run {id}', 200

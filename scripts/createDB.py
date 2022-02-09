@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     `hash` CHAR(60),
     `email` VARCHAR(255) NOT NULL UNIQUE,
     `email_confirmed` BOOLEAN NOT NULL DEFAULT 0,
-    `join_date` DATE NOT NULL,
+    `join_date` DATE NOT NULL DEFAULT (CURRENT_DATE()),
     `admin` BOOLEAN NOT NULL DEFAULT 0,
     PRIMARY KEY (`user_id`)
 );
@@ -61,7 +61,7 @@ TABLES['sprint_runs']=(
 '''
 CREATE TABLE IF NOT EXISTS `sprint_runs` (
     `run_id` INT NOT NULL AUTO_INCREMENT,
-    `start_time` TIMESTAMP(3) NOT NULL,
+    `start_time` TIMESTAMP(3) NULL,
     `end_time` TIMESTAMP(3) NULL,
     `path` JSON NULL,
     `prompt_id` INT NOT NULL,
