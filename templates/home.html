@@ -3,7 +3,6 @@
 {% block head %}
 <script defer type=text/javascript src="{{url_for('static', filename='js/home.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/home.css')}}">
 <style>
     [v-cloak] { display: none }
@@ -129,11 +128,25 @@
 
     <hr>
 
-    <ul class="social-menu center">
-        <li><a href="https://twitter.com/WikiSpeedruns" target="_blank"><i class="fab fa-twitter"></i></a></li>
-        <li><a href="https://discord.gg/mNYeB9c9db" target="_blank"><i class="fab fa-discord"></i></a></li>
-        <li><a href="https://github.com/wikispeedruns/wikipedia-speedruns" target="_blank"><i class="fab fa-github"></i></a></li>
-    </ul>
+    <div class="social-menu center">
+        <a href="https://twitter.com/WikiSpeedruns" target="_blank">
+            <button type="button" class="btn">
+                <i class="bi bi-twitter"></i>
+            </button>
+        </a>
+
+        <a href="https://discord.gg/mNYeB9c9db" target="_blank">
+            <button type="button" class="btn">
+                <i class="bi bi-discord"></i>
+            </button>
+        </a>
+
+        <a href="https://github.com/wikispeedruns/wikipedia-speedruns" target="_blank">
+            <button type="button" class="btn">
+                <i class="bi bi-github"></i>
+            </button>
+        </a>
+    </div>
 
 </div>
 {% endblock %}

@@ -25,18 +25,17 @@
 	text-decoration: none;
 }
 
-.fa-twitter {
+.bi-twitter {
 	background:#1DA1F2
 }
 
-.fa-discord {
+.bi-discord {
 	background:#7289DA
 }
 
-.fa-github {
+.bi-github {
 	background:#333
 }
-
 
 .social-menu i:hover {
 	opacity: .7;
