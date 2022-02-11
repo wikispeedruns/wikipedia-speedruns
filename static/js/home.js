@@ -22,13 +22,39 @@ var app = new Vue({
         dailyPrompts: [],
         activePrompts: [],
         topUsers: [],
+        timeLeft: "",
     },
 
     created: async function() {
         this.topUsers = await getTopUsers();
 
         const prompts = await getPrompts();
-        this.dailyPrompts = prompts.filter(p => p.rated)
-        this.activePrompts = prompts.filter(p => !p.rated)
+        this.dailyPrompts = prompts.filter(p => p.rated);
+        this.activePrompts = prompts.filter(p => !p.rated);
+
+
+        if (this.dailyPrompts.length > 0) {
+            // Add Z to indicate UTC format
+            const endTime = new Date(this.dailyPrompts[0]["active_end"] + "Z");
+
+            const timerInterval = setInterval(() => {
+                const now = new Date();
+
+                let diff = (endTime - now) / 1000;
+
+                const s = Math.round(diff % 60).toString().padStart(2, "0");
+                diff /= 60;
+                diff = Math.floor(diff);
+                
+                const m = Math.round(diff % 60).toString().padStart(2, "0");
+                diff /= 60;
+
+                const h = Math.floor(diff).toString().padStart(2, "0");
+                
+                this.timeLeft = `${h}:${m}:${s}`;         
+            }, 1000);
+
+        }
+
     }
 })
