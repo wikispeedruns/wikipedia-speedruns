@@ -4,3 +4,5 @@ PyMySQL>=1.0.2
 bcrypt>=3.2.0
 Flask-Dance>=5.0.0
 itsdangerous==2.0.0
+pytest==6.2.5
+sentry-sdk[flask]

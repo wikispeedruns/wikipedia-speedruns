@@ -39,7 +39,7 @@ def send_reset_email(id, email, username, hashed, url_root):
     token = create_reset_token(id, hashed)
     link = f"{url_root}reset/{id}/{token}"
 
-    msg = Message("Reset Your Password - wikispeedruns.com",
+    msg = Message("Reset Your Password - Wikispeedruns.com",
       recipients=[email])
 
     msg.body = f"Hello {username},\n\n You are receiving this email because we received a request to reset your password. If this wasn't you, you can ignore this email. Otherwise, please follow this link: {link}"
@@ -128,8 +128,8 @@ def create_user():
     """
     Example json input
     {
-        "username" : "echoingsins"
-        "email" : "echoingsins@gmail.com    
+        "username" : "echoingsins",
+        "email" : "echoingsins@gmail.com",
         "password" : "lmao"
     }
     """
@@ -167,9 +167,8 @@ def create_user():
             db.commit()
 
         except pymysql.IntegrityError:
-            return (f'User {username} already exists', 409)
+            return (f'User {username} already exists, or email {email} in use', 409)
         except pymysql.Error as e:
-            print(e)
             return ("Unknown error", 500) 
 
     return (f'User {username} ({id}) added', 201)
@@ -236,13 +235,13 @@ def login():
         result = cursor.execute(query, (login, ))
 
         if (result == 0):
-            return "Bad username or password", 401
+            return "Incorrect username or password", 401
 
         user = cursor.fetchone()
         hash = user["hash"].encode()
 
         if not bcrypt.checkpw(hashlib.sha256(password).digest(), hash):
-            return "Bad username or password", 401
+            return "Incorrect username or password", 401
 
     # Add session
     login_session(user)
@@ -347,9 +346,9 @@ def reset_password_request():
     db = get_db()
     with db.cursor() as cursor:
         res = cursor.execute(query, (email, ))
-        (id, username, hash) = cursor.fetchone()
 
         if (res != 0):
+            (id, username, hash) = cursor.fetchone()
             send_reset_email(id, email, username, hash, request.url_root)
 
     return f"If the account for {email} exists, an email has been sent with a reset link", 200
@@ -366,6 +365,9 @@ def reset_password():
 
     if not all([field in request.json for field in ["user_id", "password", "token"]]):
         return "Invalid request", 400
+    
+    if type(request.json["user_id"]) != int:
+        return "`user_id` should be an int"
     
     id = request.json["user_id"]
     password = request.json["password"].encode()

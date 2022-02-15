@@ -56,6 +56,7 @@ let keyMap = {};
 function handleWikipediaLink(e) 
 {
     e.preventDefault();
+
     const linkEl = e.currentTarget;
 
     if (linkEl.getAttribute("href").substring(0, 1) === "#") {
@@ -65,11 +66,13 @@ function handleWikipediaLink(e)
 
     } else {
 
-        // Ignore external links
-        if (linkEl.getAttribute("href").substring(0, 6) !== "/wiki/") return;
+        // Ignore external links and internal file links
+        if (!linkEl.getAttribute("href").startsWith("/wiki/") || linkEl.getAttribute("href").startsWith("/wiki/File:")) {
+            return;
+        }
 
-        // Disable the other links, otherwise we might load multiple links
-        document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
+        // Disable the other linksto prevent multiple clicks
+        document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
             el.onclick = (e) => {
                 e.preventDefault();
                 console.log("prevent multiple click");
@@ -77,7 +80,18 @@ function handleWikipediaLink(e)
         });
 
         // Remove "/wiki/" from string
-        loadPage(linkEl.getAttribute("href").substring(6))
+        loadPageWrapper(linkEl.getAttribute("href").substring(6))
+    }
+}
+
+async function loadPageWrapper(page) {
+    try {
+        await loadPage(page)
+    } catch (error) {
+        // Reenable all links if loadPage fails
+        document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
+            el.onclick = handleWikipediaLink;
+        });
     }
 }
 
@@ -95,40 +109,21 @@ async function loadPage(page) {
 
     let frameBody = document.getElementById("wikipedia-frame")
     frameBody.innerHTML = body["parse"]["text"]["*"]
+
     frameBody.querySelectorAll("a").forEach(function(a) {
-        a.innerHTML = '<div style="display:inline-block">' + a.text.split('').map(function(character) {
-            return '<div style="display:inline-block">' + character.replace(/\s/g, '&nbsp;') + '</div>'
-        }).join('') + '</div>'
+        let iter = document.createNodeIterator(a, NodeFilter.SHOW_TEXT);
+        let textNode;
+        while (textNode = iter.nextNode()) {
+            let replacementNode = document.createElement('div');
+            replacementNode.innerHTML = '<div style="display:inline-block">' + textNode.textContent.split('').map(function(character) {
+                return '<div style="display:inline-block">' + character.replace(/\s/g, '&nbsp;') + '</div>'
+            }).join('') + '</div>'
+            textNode.parentNode.insertBefore(replacementNode.firstChild, textNode);
+            textNode.parentNode.removeChild(textNode);
+        }
     });
 
     document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
-    
-
-    // Start timer if we are at the start
-    if (path.length == 0) {
-        startTime = Date.now()
-        timerInterval = setInterval(displayTimer, 20);    
-
-        const reqBody = {
-            "start_time": startTime,
-            "prompt_id": prompt_id,
-        }
-
-        try {
-            const response = await fetch("/api/runs", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(reqBody)
-            })
-    
-            run_id = await response.json();
-
-        } catch(e) {
-            console.log(e);
-        }
-    }
     
     path.push(title)
 
@@ -136,11 +131,12 @@ async function loadPage(page) {
         await finish();
     }
 
-    document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
+    document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
         el.onclick = handleWikipediaLink;
     });
 
     hideElements();
+    setMargin();
     window.scrollTo(0, 0)
 }
 
@@ -151,14 +147,14 @@ async function finish() {
     app.$data.finalTime = app.$data.timer;
 
     // Stop timer
-    endTime = Date.now();
     clearInterval(timerInterval);
-    //document.getElementById("timer").innerHTML="";
+    endTime = startTime + app.$data.finalTime*1000;
 
     // Prevent are you sure you want to leave prompt
     window.onbeforeunload = null;
 
     const reqBody = {
+        "start_time": startTime,
         "end_time": endTime,
         "path": path,
     }
@@ -172,8 +168,6 @@ async function finish() {
             },
             body: JSON.stringify(reqBody)
         })
-
-        //window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
 
     } catch(e) {
         console.log(e);
@@ -205,14 +199,11 @@ function hideElements() {
     let elements = document.getElementsByClassName("hatnote");
     for (let i=0; i < elements.length; i++) {
         let a = elements[i].getElementsByClassName("mw-disambig");
-        //console.log(a)
         if (a.length !== 0) {
             elements[i].style.display = "none";
         }
-        //mw-disambig
     }
 
-    //let all = document.getElementsByClassName("mw-parser-output")[0].querySelectorAll("h2", "div", "ul", "p");
     let all = document.getElementById("wikipedia-frame").querySelectorAll("h2, div, ul, p, h3");
     let flip = false
     for (let i = 0; i < all.length; i++) {
@@ -238,7 +229,10 @@ function hideElements() {
     
 }
 
-
+function setMargin() {
+    const element = document.getElementById("time-box");
+    document.getElementById("wikipedia-frame").firstChild.style.paddingBottom = (element.offsetHeight + 25) +"px";
+}
 
 function formatStr(string) {
     return string.replace("_", " ").toLowerCase()
@@ -247,13 +241,11 @@ function formatStr(string) {
 function displayTimer() {
     const seconds = (Date.now() - startTime) / 1000;
     app.$data.timer = seconds;
-    //document.getElementById("timer").innerHTML = "Elapsed Time<br/><strong>"+seconds + "s</strong>";
 }
 
-
-
-function countdownOnLoad(start, end) {
-
+// Race condition between countdown timer and "immediate start" button click
+// Resolves when either condition resolves
+async function countdownOnLoad(start, end) {
 
     app.$data.startArticle = start;
     app.$data.endArticle = end;
@@ -263,45 +255,76 @@ function countdownOnLoad(start, end) {
     let countDownStart = Date.now();
     let countDownTime = app.$data.countdown * 1000;
 
-    let x = setInterval(function() {
+    document.getElementById("mirroredimgblock").classList.toggle("invisible");
 
-        let now = Date.now()
-      
-        // Find the distance between now and the count down date
-        let distance = countDownStart + countDownTime - now;
+    // Condition 1: countdown timer
+    const promise1 = new Promise(resolve => {
+        const x = setInterval(function() {
+            const now = Date.now()
+          
+            // Find the distance between now and the count down date
+            let distance = countDownStart + countDownTime - now;
+            app.$data.countdown = Math.floor(distance/1000)+1;
 
-        app.$data.countdown = Math.floor(distance/1000)+1;
+            if (distance <= 0) {
+                resolve();
+                clearInterval(x);
+            }
 
-        if (distance < -1000) {
-            clearInterval(x);
-            app.$data.started = true;
-            
-            startTime = Date.now();
-        }
-        if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {
-            //app.$data.gunShow = true;
-            
-            document.getElementById("mirroredimgblock").classList.toggle("invisible")
+            if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {                
+                document.getElementById("mirroredimgblock").classList.toggle("invisible")
+            }
 
-            console.log("guns should show")
-        }
-      }, 50);
+        }, 50);
+    });
 
-      document.getElementById("mirroredimgblock").classList.toggle("invisible")
+    // Condition 2: "immediate start" button click
+    const promise2 = new Promise(r =>
+        document.getElementById("start-btn").addEventListener("click", r, {once: true})
+    )
 
+    await Promise.any([promise1, promise2]);
+}
+
+async function saveRun() {
+    startTime = Date.now();
+    
+    const reqBody = {
+        "start_time": startTime,
+        "prompt_id": prompt_id,
+    }
+
+    try {
+        const response = await fetch("/api/runs", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(reqBody)
+        })
+
+        run_id = await response.json();
+
+    } catch(e) {
+        console.log(e);
+    }
 }
 
 function disableFind(e) {
-    console.log(e);
     if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) { 
         e.preventDefault();
-        this.alert("WARNING: Attempt to Find in page. This will be recorded.")
+        this.alert("WARNING: Attempt to Find in page. This will be recorded.");
     }
+}
+
+function startGame() {
+    app.$data.started = true;
+    startTime = Date.now();
+    timerInterval = setInterval(displayTimer, 20);
 }
 
 window.addEventListener("load", async function() {
     const response = await fetch("/api/prompts/" + prompt_id);
-
     app.$data.prompt_id = prompt_id;
 
     if (response.status != 200) {
@@ -315,19 +338,21 @@ window.addEventListener("load", async function() {
 
     const prompt = await response.json();
     const article = prompt["start"];
-
     goalPage = prompt["end"];
+    saveRun(); // Save run on clicking "play" when `prompt_id` is valid
 
-    await countdownOnLoad(article, goalPage);
+    // Wait for countdown to expire AND the start article elements to load before starting the timer and displaying the page
+    await Promise.all([countdownOnLoad(article, goalPage), loadPage(article)]);
 
-    loadPage(article);
+    startGame();
+    
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setMargin();
 });
 
 window.onbeforeunload = function() {
     return true;
 };
-
-
 
 window.addEventListener("keydown", function(e) {
     disableFind(e);

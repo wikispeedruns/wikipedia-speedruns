@@ -4,8 +4,6 @@ from wikispeedruns.scraper import findPaths
 from wikispeedruns.scraper_graph_utils import convertToArticleName
 from wikispeedruns.prompt_generator import generatePrompts
 
-from util.timeout import timer
-
 scraper_api = Blueprint("scraper", __name__, url_prefix="/api/scraper")
 
 SCRAPER_TIMEOUT = 20
@@ -16,22 +14,7 @@ def get_path():
     start = request.json['start']
     end = request.json['end']
         
-    output = timer(SCRAPER_TIMEOUT, findPaths, start, end)
-    
-    """
-    pool = Pool(processes=1)
-    result = pool.apply_async(findPaths, (start, end))
-    
-    try:
-        output = result.get(timeout=scraper_timeout)
-    except TimeoutError:
-        msg = f"Scraper search exceeded {scraper_timeout} seconds"
-        print(msg)
-        return msg, 500
-    except Exception as err:
-        print(f"ERROR {str(err)}")
-        return str(err), 500
-    """
+    output = findPaths(start, end)
     
     return jsonify(output)
     

@@ -11,7 +11,7 @@
 
 <div id="app">
 
-    <div v-show="started && !finished" class="HUDwrapper container">
+    <div v-show="started && !finished" id="time-box" class="HUDwrapper container">
         <div class="row flex-row">
             <div class="col-sm-4 text-nowrap px-4 py-2">
                 Start Article<br><strong>[[startArticle]]</strong>
@@ -30,6 +30,8 @@
             <p>Starting Article: <strong>[[startArticle]]</strong></p>
             <p>Goal Article: <strong>[[endArticle]]</strong></p>
             <p>Good Luck!</p>
+
+            <div><button id="start-btn" class="btn btn-outline-secondary">(Don't want to wait? Start immediately!)</button></div>
         </div>
         <div id="mirroredimgblock" class="mirroredimgblock">
             <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun">
