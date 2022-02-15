@@ -111,11 +111,11 @@ def get_gen_error_page():
 
 
 
-@app.route('/play/marathon/<id>', methods=['GET'])
+@views.route('/play/marathon/<id>', methods=['GET'])
 def get_marathon_play_page(id):
     return render_with_data('marathon.html', prompt_id=id)
 
-@app.route('/marathonprompt/<id>', methods=['GET'])
+@views.route('/marathonprompt/<id>', methods=['GET'])
 def get_marathon_prompt_page(id):
     run_id = request.args.get('run_id', '')
     page = request.args.get('page', 1)
