@@ -69,3 +69,10 @@ def user(user_base):
 def session(client, user):
     client.post("/api/users/login", json=user)
     yield user
+
+@pytest.fixture()
+def admin_session(client):
+    with client.session_transaction() as session:
+        session["user_id"] = 0
+        session["username"] = "testadmin"
+        session["admin"] = 1

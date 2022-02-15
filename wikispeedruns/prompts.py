@@ -13,6 +13,9 @@ import datetime
 
 PromptType = Literal["marathon", "sprint"]
 
+class PromptNotFoundError(Exception):
+    pass
+
 
 class Prompt(TypedDict):
     prompt_id: int
@@ -63,14 +66,20 @@ def add_sprint_prompt(start: str, end: str) -> Optional[int]:
 
 
 def delete_prompt(prompt_id: int, prompt_type: PromptType) -> bool:
+    '''
+    Delete a prompt, returning whether it could be deleted. Raises exception on not found
+    '''
+
     query = f"DELETE FROM {prompt_type}_prompts WHERE prompt_id=%s"
 
     db = get_db()
     with db.cursor() as cursor:
         try:
-            cursor.execute(query, (prompt_id))
+            res = cursor.execute(query, (prompt_id))
+            if (res == 0): raise PromptNotFoundError()
+
             db.commit()
-            return True
+            return res == 1
         
         except pymysql.IntegrityError:
             return False
@@ -98,6 +107,8 @@ def set_prompt_time(prompt_id: int, prompt_type: PromptType, active_start: datet
     with db.cursor() as cur:
         res = cur.execute(query, (active_start, active_end, prompt_id))
         db.commit()
+
+        if (res == 0): raise PromptNotFoundError()
         return res == 1
 
 

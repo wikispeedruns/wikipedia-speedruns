@@ -31,11 +31,13 @@ def create_prompt():
 @sprint_api.delete('/<id>')
 @check_admin
 def delete_prompt(id):
-    if prompts.delete_prompt(id, "sprint"):
-        return "Prompt deleted!", 200
-    else:
-        return "Could not delete prompt,  may already have run(s)", 400
-
+    try:
+        if prompts.delete_prompt(id, "sprint"):
+            return "Prompt deleted!", 200
+        else:
+            return "Could not delete prompt, may already have run(s)", 400
+    except prompts.PromptNotFoundError:
+        return "Prompt {id} not found!", 404
 
 @sprint_api.patch('/<id>')
 @check_admin
@@ -65,13 +67,20 @@ def set_prompt_active_time(id):
     except (KeyError, ValueError) as e:
         return f"Invalid input", 400
 
-    if (rated):
-        prompts.set_ranked_daily_prompt(id, start_date)
-        return f"Set prompt {id} as daily ranked for {start_date}", 200
 
-    else:
-        prompts.set_prompt_time(id, "sprint", start_date, end_date)
-        return f"Set prompt {id} active from {start_date} to {end_date}", 200
+    try:
+
+        if (rated):
+            prompts.set_ranked_daily_prompt(id, start_date)
+            return f"Set prompt {id} as daily ranked for {start_date}", 200
+
+        else:
+            prompts.set_prompt_time(id, "sprint", start_date, end_date)
+            return f"Set prompt {id} active from {start_date} to {end_date}", 200
+
+    except prompts.PromptNotFoundError:
+        return "Prompt {id} not found!", 404
+
 
 ### Prompt Search Endpoints
 @sprint_api.get('/managed')
