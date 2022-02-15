@@ -29,6 +29,17 @@ def get_home_page():
 def get_about_page():    
     return render_with_data('about.html')
 
+
+@views.route('/archive', methods=['GET'])
+def get_archive_page():    
+
+    try:
+        limit = int(request.args.get('limit', 20))
+        offset = int(request.args.get('offset', 0))
+        return render_with_data('archive.html', limit=limit, offset=offset)
+    except ValueError:
+        return "Page Not Found", 404
+
 @views.route('/random', methods=['GET'])
 def get_random_prompt():
     query = ("""
@@ -42,6 +53,7 @@ def get_random_prompt():
         results = cursor.fetchall()
         rand_prompt = random.choice(results)[0]
         return redirect("/play/" + str(rand_prompt), code=302)
+
 
 @views.route('/register', methods=['GET'])
 def get_register_page():

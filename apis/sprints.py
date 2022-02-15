@@ -85,7 +85,19 @@ def get_active_prompts():
 
 @sprint_api.get('/archive')
 def get_archive_prompts():
-    return jsonify(prompts.get_archive_prompts("sprint"))
+    try:
+        limit = int(request.args.get('limit', 20))
+        offset = int(request.args.get('offset', 0))
+        
+        sprints, num_prompts = prompts.get_archive_prompts("sprint", offset=offset, limit=limit)
+
+        return jsonify({
+            "prompts": sprints,
+            "numPrompts": num_prompts
+        })
+
+    except ValueError:
+        return "Invalid limit or offset", 400
 
 
 ### Specific prompt endpoints

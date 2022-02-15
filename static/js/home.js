@@ -6,6 +6,15 @@ async function getPrompts()
     return prompts;
 }
 
+async function getBackupPrompts()
+{
+    const response = await fetch("/api/sprints/archive?limit=10");
+    const resp = await response.json();
+
+    return resp["prompts"];
+}
+
+
 async function getTopUsers()
 {
     const response = await fetch("/api/ratings");
@@ -32,6 +41,10 @@ var app = new Vue({
         this.dailyPrompts = prompts.filter(p => p.rated);
         this.activePrompts = prompts.filter(p => !p.rated);
 
+
+        if (this.activePrompts.length === 0) {
+            this.activePrompts = await getBackupPrompts();
+        }
 
         if (this.dailyPrompts.length > 0) {
             // Add Z to indicate UTC format

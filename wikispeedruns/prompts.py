@@ -1,5 +1,5 @@
 
-from typing import List, Literal, TypedDict, Optional
+from typing import List, Literal, Tuple, TypedDict, Optional
 
 from db import get_db
 
@@ -93,7 +93,7 @@ def set_prompt_time(prompt_id: int, prompt_type: PromptType, active_start: datet
     '''
     Given a currently unused prompt, set the active period to [start_day, end_day)
     '''
-    query = f"UPDATE {prompt_type}_prompts SET active_start=%s, active_end=%s WHERE prompt_id=%s"
+    query = f"UPDATE {prompt_type}_prompts SET active_start=%s, active_end=%s, rated=0 WHERE prompt_id=%s"
     db = get_db()
     with db.cursor() as cur:
         res = cur.execute(query, (active_start, active_end, prompt_id))
@@ -143,21 +143,33 @@ def get_active_prompts(prompt_type: PromptType) -> List[Prompt]:
         return cur.fetchall()
 
 
-def get_archive_prompts(prompt_type: PromptType) -> List[Prompt]:
+def get_archive_prompts(prompt_type: PromptType, offset: int=0, limit: int=20 ) -> Tuple[List[Prompt], int]:
     '''
     Get all prompts for archive, including currently active
     TODO paginate, user id?
     '''
     if (prompt_type == "sprint"):
-        query = "SELECT prompt_id, start, rated, active_start, active_end FROM sprint_prompts"
+        query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts"
     # elif (prompt_type == "marathon")
 
-    query += " WHERE used = 1 AND active_start <= NOW()"
+    query += " WHERE used = 1 AND active_start <= NOW() ORDER BY active_start DESC LIMIT %s, %s"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cur:
-        cur.execute(query)
-        return cur.fetchall()
+        cur.execute(query, (offset, limit))
+
+        prompts = cur.fetchall()
+
+        # remove end prompt from currently active prompts
+        for p in prompts:
+            compute_visibility(p)
+            if (p['active']): p['end'] = None
+
+        # get the total number of prompts
+        cur.execute("SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW()")
+        n = cur.fetchone()['n']
+        
+        return prompts, n
 
 
 def get_managed_prompts(prompt_type: PromptType) -> List[Prompt]:

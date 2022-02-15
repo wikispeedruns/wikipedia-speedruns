@@ -28,7 +28,6 @@
 
     <hr>
 
-    <p>Click <a href="/random">here</a> to try a random prompt, starts immediately after click!</p>
 
     <div class="row justify-content-md-center">
 
@@ -47,7 +46,7 @@
                         </thead>
                         <tbody>
                             <tr v-for="prompt in dailyPrompts" v-cloak>
-                                <td>[[prompt.prompt_id]]<span v-if="prompt.rated">*</span> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
+                                <td>[[prompt.prompt_id]]</span> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
 
                                 <td>[[prompt.start]]</td>
                             </tr>
@@ -60,9 +59,13 @@
                 </template>
 
             </div>
+
+            <div class="card-footer text-muted">
+                These prompts are <a href="/about#ratings">rated</a>.
+            </div>
         </div>
 
-    </div>
+    </div>    
 
     <div class="col-sm-6">
         <div class="card">
@@ -76,7 +79,7 @@
                     </thead>
                     <tbody>
                         <tr v-for="prompt in activePrompts" v-cloak>
-                            <td>[[prompt.prompt_id]]<span v-if="prompt.rated">*</span> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
+                            <td>[[prompt.prompt_id]] (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
 
                             <td>[[prompt.start]]</td>
                         </tr>
@@ -84,12 +87,11 @@
                 </table>
             </div>
 
-            <div class="card-footer text-muted">
-                *rated prompt, must be logged in to play (<a href="/about#ratings">about</a>)
-            </div>
+
         </div>
     </div>
     </div>
+    <p> Still want more? Checkout our <a href="/archive">archive</a> or click <a href="/random">here</a> to try a random prompt.</p>
 
     <hr>
     <h4> Top 10 rated players:</h4> Note the <a href="/about#ratings">rating system</a> is still experimental </p>
