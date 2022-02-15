@@ -1,4 +1,3 @@
-from tracemalloc import start
 import pymysql
 from flask import Flask, jsonify, request, Blueprint, session
 
@@ -41,6 +40,7 @@ def delete_prompt(id):
 
 @sprint_api.patch('/<id>')
 @check_admin
+@check_request_json({"startDate": str, "endDate": str, "rated": bool})
 def set_prompt_active_time(id):
     '''
     Change whether a prompt is public, daily, or unsued
