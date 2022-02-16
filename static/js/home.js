@@ -11,7 +11,7 @@ async function getBackupPrompts()
     const response = await fetch("/api/sprints/archive?limit=10");
     const resp = await response.json();
 
-    return resp["prompts"];
+    return resp["prompts"].filter(p => !p["active"]);
 }
 
 
