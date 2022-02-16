@@ -35,7 +35,7 @@ google_bp = oauth_google.make_google_blueprint(redirect_url="/api/users/auth/goo
 user_api.register_blueprint(google_bp, url_prefix="/api/users/auth")
 
 
-def send_reset_email(id, email, username, hashed, url_root):
+def _send_reset_email(id, email, username, hashed, url_root):
     token = create_reset_token(id, hashed)
     link = f"{url_root}reset/{id}/{token}"
 
@@ -47,7 +47,7 @@ def send_reset_email(id, email, username, hashed, url_root):
     mail.send(msg)
 
 
-def send_confirmation_email(id, email, username, url_root, on_signup=False):
+def _send_confirmation_email(id, email, username, url_root, on_signup=False):
     token = create_confirm_token(id)
     link = url_root + "confirm/" + token
 
@@ -59,12 +59,12 @@ def send_confirmation_email(id, email, username, url_root, on_signup=False):
     mail.send(msg)
 
 
-def valid_username(username):
+def _valid_username(username):
     valid_char = lambda c: (c.isalnum() or c == '-' or c == '_' or c == '.')
     return all(map(valid_char, username))
 
 
-def login_session(user):
+def _login_session(user):
     session.clear()
     session["user_id"] = user["user_id"]
     session["username"] = user["username"]
@@ -104,7 +104,7 @@ def create_user_oauth():
     username = request.json["username"]
 
     # Validate username
-    if (not valid_username(username)):
+    if (not _valid_username(username)):
         return "Invalid username", 400
 
     query = "INSERT INTO `users` (`username`, `email`, `email_confirmed`, `join_date`) VALUES (%s, %s, %s, %s)"
@@ -142,7 +142,7 @@ def create_user():
     password = request.json["password"].encode() # TODO ensure charset is good
 
     # Validate username
-    if (not valid_username(username)):
+    if (not _valid_username(username)):
         return "Invalid username", 400
 
     # Use SHA256 to allow for arbitrary length passwords
@@ -162,7 +162,7 @@ def create_user():
             cursor.execute(get_id_query)
             (id,) = cursor.fetchone()
             
-            send_confirmation_email(id, email, username, request.url_root, on_signup=True)
+            _send_confirmation_email(id, email, username, request.url_root, on_signup=True)
 
             db.commit()
 
@@ -192,7 +192,7 @@ def check_google_auth():
             session["pending_oauth_creation"] = email
         else:
             user = cursor.fetchone()
-            login_session(user)
+            _login_session(user)
 
     return redirect("/pending")
 
@@ -244,7 +244,7 @@ def login():
             return "Incorrect username or password", 401
 
     # Add session
-    login_session(user)
+    _login_session(user)
 
     return "Logged in", 200
 
@@ -308,7 +308,7 @@ def confirm_email_request():
         (email, username) = cursor.fetchone()
         # TODO throw error?
 
-    send_confirmation_email(id, email, username, request.url_root)
+    _send_confirmation_email(id, email, username, request.url_root)
 
     return "New confirmation email sent", 200
 
@@ -349,7 +349,7 @@ def reset_password_request():
 
         if (res != 0):
             (id, username, hash) = cursor.fetchone()
-            send_reset_email(id, email, username, hash, request.url_root)
+            _send_reset_email(id, email, username, hash, request.url_root)
 
     return f"If the account for {email} exists, an email has been sent with a reset link", 200
 

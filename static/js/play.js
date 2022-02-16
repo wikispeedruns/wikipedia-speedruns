@@ -324,7 +324,8 @@ function startGame() {
 }
 
 window.addEventListener("load", async function() {
-    const response = await fetch("/api/prompts/" + prompt_id);
+    const response = await fetch("/api/sprints/" + prompt_id);
+
     app.$data.prompt_id = prompt_id;
 
     if (response.status != 200) {
@@ -332,7 +333,7 @@ window.addEventListener("load", async function() {
         this.alert(error)
         // Prevent are your sure you want to leave prompt
         window.onbeforeunload = null;
-        window.location.href = "/"   // TODO error page
+        window.location.replace("/");   // TODO error page
 
     }
 
