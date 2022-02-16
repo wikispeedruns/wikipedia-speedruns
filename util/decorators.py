@@ -1,4 +1,5 @@
 from flask import request, Response, jsonify, session
+from typing import Dict
 
 # Decorators that checks for admin (or returns 401)
 # Needs to be preceded by a route
@@ -28,7 +29,7 @@ class RequestJsonError(Exception):
      pass
 
 
-def check_request_json(expected: dict[str, type]):
+def check_request_json(expected: Dict[str, type]):
     
     def check(expected, reqjson):
         for k in expected:
