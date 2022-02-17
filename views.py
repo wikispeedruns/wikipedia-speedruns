@@ -44,8 +44,8 @@ def get_archive_page():
 def get_random_prompt():
     query = ("""
     SELECT prompt_id
-    FROM prompts
-    WHERE type='public';
+    FROM sprint_prompts
+    WHERE used = 1 AND active_end <= NOW();
     """)
 
     with db.get_db().cursor() as cursor:
