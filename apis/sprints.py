@@ -140,7 +140,7 @@ def get_prompt_leaderboard(id, run_id):
     # First get the prompt details, and the string
     prompt = prompts.get_prompt(id, "sprint", user_id=session.get("user_id"))
 
-    if (prompt["active"] and prompt["rated"] and not prompt.get("played", False)):
+    if not session.get("admin", False) and (prompt["active"] and prompt["rated"] and not prompt.get("played", False)):
         return "Cannot view leaderboard of currently rated prompt until played", 401
 
     resp = {
