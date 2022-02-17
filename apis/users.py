@@ -18,8 +18,7 @@ from tokens import (
 
 from pymysql.cursors import DictCursor
 
-import bcrypt
-import hashlib
+from wikispeedruns.auth import passwords
 
 user_api = Blueprint("users", __name__, url_prefix="/api/users")
 
@@ -71,7 +70,7 @@ def _login_session(user):
     session["admin"] = user["admin"] != 0
 
 
-def logout_session():
+def _logout_session():
     # Logout from oauth if there is oauth
     if (google_bp.token):
         token = google_bp.token["access_token"]
@@ -139,14 +138,14 @@ def create_user():
 
     username = request.json["username"]
     email = request.json["email"]
-    password = request.json["password"].encode() # TODO ensure charset is good
+    password = request.json["password"]
 
     # Validate username
     if (not _valid_username(username)):
         return "Invalid username", 400
 
     # Use SHA256 to allow for arbitrary length passwords
-    hash = bcrypt.hashpw(hashlib.sha256(password).digest(), bcrypt.gensalt())
+    hash = passwords.hash_password(password)
     query = "INSERT INTO `users` (`username`, `hash`, `email`, `email_confirmed`, `join_date`) VALUES (%s, %s, %s, %s, %s)"
     get_id_query = "SELECT LAST_INSERT_ID()"
 
@@ -227,7 +226,7 @@ def login():
     if ("password" not in request.json):
         return ("Password not in request", 400)
     
-    password = request.json["password"].encode()
+    password = request.json["password"]
 
     db = get_db()
     with db.cursor(DictCursor) as cursor:
@@ -238,9 +237,8 @@ def login():
             return "Incorrect username or password", 401
 
         user = cursor.fetchone()
-        hash = user["hash"].encode()
 
-        if not bcrypt.checkpw(hashlib.sha256(password).digest(), hash):
+        if not passwords.check_password(user, password):
             return "Incorrect username or password", 401
 
     # Add session
@@ -251,7 +249,7 @@ def login():
 
 @user_api.post("/logout")
 def logout():
-    logout_session()
+    _logout_session()
     return "Logged out", 200
 
 
@@ -261,30 +259,29 @@ def change_password():
     '''
     Given the old password and a new one, change the password
     '''
-    get_query = "SELECT hash FROM `users` WHERE `user_id`=%s"
+    get_query = "SELECT * FROM `users` WHERE `user_id`=%s"
     update_query = "UPDATE `users` SET `hash`=%s WHERE `user_id`=%s"
 
     if ("old_password" not in request.json or "new_password" not in request.json):
         return ("Password(s) not in request", 400)
     
     id = session["user_id"]
-    old_password = request.json["old_password"].encode()
-    new_password = request.json["new_password"].encode()
+    old_password = request.json["old_password"]
+    new_password = request.json["new_password"]
 
     db = get_db()
-    with db.cursor() as cursor:
+    with db.cursor(cursor=DictCursor) as cursor:
         # Query for user and check password
         result = cursor.execute(get_query, (id, ))
 
         # TODO , should be found
 
-        (old_hash,) = cursor.fetchone()
-        old_hash = old_hash.encode()
+        user = cursor.fetchone()
         
-        if not bcrypt.checkpw(hashlib.sha256(old_password).digest(), old_hash):
+        if not passwords.check_password(user, old_password):
             return "Incorrect password", 401
 
-        new_hash = bcrypt.hashpw(hashlib.sha256(new_password).digest(), bcrypt.gensalt())
+        new_hash = passwords.hash_password(new_password)
 
         cursor.execute(update_query, (new_hash, id))
         db.commit()
@@ -370,7 +367,7 @@ def reset_password():
         return "`user_id` should be an int"
     
     id = request.json["user_id"]
-    password = request.json["password"].encode()
+    password = request.json["password"]
     token = request.json["token"]
 
 
@@ -387,7 +384,7 @@ def reset_password():
         if (id != verify_reset_token(token, old_hash)):
             return "Invalid token", 400
 
-        new_hash = bcrypt.hashpw(hashlib.sha256(password).digest(), bcrypt.gensalt())
+        new_hash = passwords.hash_password(password)
         cursor.execute(update_query, (new_hash, id))
         # TODO check
 
