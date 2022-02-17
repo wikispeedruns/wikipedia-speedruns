@@ -12,12 +12,14 @@ USE_DB_QUERY = 'USE {}'.format(DB_NAME)
 
 TABLES={}
 
+## TODO eventually remove is_old_hash
 TABLES['users']=(
 '''
 CREATE TABLE IF NOT EXISTS `users` (
     `user_id` INT NOT NULL AUTO_INCREMENT,
     `username` VARCHAR(20) NOT NULL UNIQUE,
     `hash` CHAR(60),
+    `is_old_hash` BOOLEAN DEFAULT 0, 
     `email` VARCHAR(255) NOT NULL UNIQUE,
     `email_confirmed` BOOLEAN NOT NULL DEFAULT 0,
     `join_date` DATE NOT NULL DEFAULT (CURRENT_DATE()),
