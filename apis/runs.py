@@ -19,7 +19,11 @@ def create_run():
     Returns the user ID of the run created.
     '''
 
+<<<<<<< HEAD
     query = "INSERT INTO `runs` (`prompt_id`,`user_id`) VALUES (%s, %s)"
+=======
+    query = "INSERT INTO `sprint_runs` (`start_time`,`prompt_id`,`user_id`) VALUES (%s, %s, %s)"
+>>>>>>> main
     sel_query = "SELECT LAST_INSERT_ID()"
 
     prompt_id = request.json['prompt_id']
@@ -51,7 +55,7 @@ def finish_run(id):
 
     Returns the user ID of the run updated.
     '''
-    query = 'UPDATE `runs` SET `start_time`=%s, `end_time`=%s, `path`=%s WHERE `run_id`=%s'
+    query = 'UPDATE `sprint_runs` SET `start_time`=%s, `end_time`=%s, `path`=%s WHERE `run_id`=%s'
     
     start_time = datetime.fromtimestamp(request.json['start_time']/1000)
     end_time = datetime.fromtimestamp(request.json['end_time']/1000)
@@ -70,7 +74,7 @@ def finish_run(id):
 @run_api.get('')
 def get_all_runs():
     # TODO this should probably be paginated, and return just ids
-    query = "SELECT run_id FROM `runs`"
+    query = "SELECT run_id FROM `sprint_runs`"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:

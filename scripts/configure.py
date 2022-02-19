@@ -4,12 +4,12 @@ Script that generates configuration for server, as well as adds admin account
 
 import json
 import secrets
-import hashlib
-import bcrypt
+
 from getpass import getpass
 
 import pymysql
 
+from wikispeedruns.auth import passwords
 
 def create_prod_conf():
     config = {}
@@ -49,8 +49,7 @@ def create_admin_account():
         if password == getpass("Reenter password: "): break
         print("Passwords do not match!")
 
-    password = password.encode()
-    hash = bcrypt.hashpw(hashlib.sha256(password).digest(), bcrypt.gensalt())
+    hash = passwords.hash_password(password)
 
 
     query = "INSERT INTO `users` (`username`, `hash`, `email`, `email_confirmed`, `admin`) VALUES (%s, %s, %s, %s, %s)"

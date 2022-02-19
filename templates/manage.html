@@ -21,7 +21,7 @@
 
     <div class="row">
 
-        <div class="col-sm-6"> <div class="card"> <div class="card-body">
+        <div class="col-sm-6"> <div class="card mb-5"> <div class="card-body">
            
             <h4> Unused: </h4>
             
@@ -34,61 +34,65 @@
                 >
                 </prompt-item>
             </ul>
-        </div></div></div>  
+        </div></div></div>
 
-        <div class="col-sm-6"> <div class="card"> <div class="card-body">
 
-            <h4> Public: </h4>
-            <form v-on:submit.prevent="makePublic">
-                <p>Move prompt # to public</p>
-                <input v-model="toMakePublic">
-                <button type="submit">Submit</button>
-            </form>
-            <ul>
-                <prompt-item
-                    v-for="p in public"
-                    v-bind:prompt="p"
-                    v-bind:key="p.prompt_id"
-                    v-on:delete-prompt="getPrompts"
-                >
-                </prompt-item>
-            </ul>
-
-        </div></div></div>  
     </div>
 
     <div class="row">
-        <div class="col-sm-12"> <div class="card"> <div class="card-body">
+        <div class="col-sm-12">
 
-            <h4> Prompts of the Day: </h4>
-            <p><input type="checkbox" checked> = rated</p>
-            <table class="table table-bordered" style="table-layout: fixed;">
-                <thead>
-                    <th>Su</th>
-                    <th>M</th>
-                    <th>T</th>
-                    <th>W</th>
-                    <th>Th</th>
-                    <th>F</th>
-                    <th>Sa</th>
-                </thead>
+            <template v-for="(week, index) in weeks">
 
-                <tbody style="font-size:x-small">
-                    <tr v-for="week in weeks">
-                        <td v-for="day in week">
-                            <daily-item 
-                                v-bind:day="day"
-                                v-bind:key="day.dateIso"
-                                v-on:delete-prompt="getPrompts"
-                                v-on:move-prompt="getPrompts"
-                            >
-                            </daily-item>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                <div class="card mb-5"> <div class="card-body">
+                <h3> 
+                    Week: [[week.start.substring(5)]] through [[week.end.substring(5)]] 
+                    <template v-if="index === 0">(Current) </template>
+                </h3>
 
-        </div></div></div>  
+                <h6>Weekly Prompts:</h6>
+                <prompt-set style="width: 50%;"
+                    v-bind:prompts="week.prompts"
+                    v-bind:start="week.start"
+                    v-bind:end="week.end"
+                    v-bind:rated="false"
+                    v-on:delete-prompt="getPrompts"
+                    v-on:move-prompt="getPrompts"
+                >
+                </prompt-set>   
+
+                <h6>Daily Prompts: </h6>
+                <table class="table table-bordered" style="table-layout: fixed;">
+                    <thead>
+                        <th>Su</th>
+                        <th>M</th>
+                        <th>T</th>
+                        <th>W</th>
+                        <th>Th</th>
+                        <th>F</th>
+                        <th>Sa</th>
+                    </thead>
+                    <tbody style="font-size:x-small">
+                        <tr> 
+                            <td v-for="day in week.days">
+                                <prompt-set 
+                                    v-bind:prompts="day.prompts"
+                                    v-bind:start="day.date"
+                                    v-bind:end="day.date"
+                                    v-bind:rated="true"
+                                    v-on:delete-prompt="getPrompts"
+                                    v-on:move-prompt="getPrompts"
+                                >
+                                </prompt-set>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                </div></div>
+            </template>
+
+        </div>
     </div>        
 </div>
 

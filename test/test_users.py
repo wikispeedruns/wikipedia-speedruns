@@ -4,6 +4,9 @@ import datetime
 import pytest
 import re
 
+import bcrypt
+import hashlib
+
 def test_create_user(cursor, user):
     cursor.execute("SELECT * FROM users WHERE username=%s", (user["username"],))
     result = cursor.fetchone()
@@ -29,6 +32,36 @@ def test_create_existing_user(client, cursor, user):
 
     cursor.execute("SELECT COUNT(*) as num_users FROM users")
     assert cursor.fetchone()["num_users"] == 1
+
+
+def test_old_hash_login(cursor, client):
+    """
+    Test our logic that converts our old buggy password hashes into new ones upon login
+    """
+    query = """
+    INSERT INTO users (`username`, `hash`, `email`, `email_confirmed`, `is_old_hash`) 
+    VALUES ('test', %s, 'test@test.com', 0, 1)
+    """
+    password = "test"
+    hash = bcrypt.hashpw(hashlib.sha256(password.encode()).digest(), bcrypt.gensalt())
+
+    try:
+        cursor.execute(query, (hash,))
+
+        # abc is a password that used to generate null bytes
+        response = client.post("/api/users/login", json={"username": "test", "password": "abc"})
+        assert response.status_code == 401
+
+        response =  client.post("/api/users/login", json={"username": "test", "password": password})
+        assert response.status_code == 200
+
+        cursor.execute("SELECT * FROM users WHERE username='test'")
+        user = cursor.fetchone()
+        assert user is not None and not user["is_old_hash"]
+
+    finally:
+        cursor.execute("DELETE FROM users")
+
 
 
 def test_login_logout(client, user):

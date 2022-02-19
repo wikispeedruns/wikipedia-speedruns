@@ -17,12 +17,12 @@ USER_QUERY = 'SELECT user_id, username from users'
 RUNS_QUERY = ('''
 SELECT runs.run_id, runs.prompt_id, runs.user_id, users.username,
         TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
-FROM runs 
+FROM sprint_runs AS runs 
 INNER JOIN daily_prompts AS d ON d.prompt_id=runs.prompt_id
 RIGHT JOIN users ON runs.user_id=users.user_id 
 INNER JOIN (
     SELECT user_id, MIN(start_time) as start_time
-    FROM runs
+    FROM sprint_runs AS runs
     GROUP BY runs.prompt_id, runs.user_id
 ) t ON runs.user_id = t.user_id AND runs.start_time = t.start_time
 WHERE d.rated = 1 AND runs.end_time IS NOT NULL AND d.date < CURDATE()

@@ -18,8 +18,7 @@ from tokens import (
 
 from pymysql.cursors import DictCursor
 
-import bcrypt
-import hashlib
+from wikispeedruns.auth import passwords
 
 user_api = Blueprint("users", __name__, url_prefix="/api/users")
 
@@ -35,7 +34,7 @@ google_bp = oauth_google.make_google_blueprint(redirect_url="/api/users/auth/goo
 user_api.register_blueprint(google_bp, url_prefix="/api/users/auth")
 
 
-def send_reset_email(id, email, username, hashed, url_root):
+def _send_reset_email(id, email, username, hashed, url_root):
     token = create_reset_token(id, hashed)
     link = f"{url_root}reset/{id}/{token}"
 
@@ -47,7 +46,7 @@ def send_reset_email(id, email, username, hashed, url_root):
     mail.send(msg)
 
 
-def send_confirmation_email(id, email, username, url_root, on_signup=False):
+def _send_confirmation_email(id, email, username, url_root, on_signup=False):
     token = create_confirm_token(id)
     link = url_root + "confirm/" + token
 
@@ -59,19 +58,19 @@ def send_confirmation_email(id, email, username, url_root, on_signup=False):
     mail.send(msg)
 
 
-def valid_username(username):
+def _valid_username(username):
     valid_char = lambda c: (c.isalnum() or c == '-' or c == '_' or c == '.')
     return all(map(valid_char, username))
 
 
-def login_session(user):
+def _login_session(user):
     session.clear()
     session["user_id"] = user["user_id"]
     session["username"] = user["username"]
     session["admin"] = user["admin"] != 0
 
 
-def logout_session():
+def _logout_session():
     # Logout from oauth if there is oauth
     if (google_bp.token):
         token = google_bp.token["access_token"]
@@ -104,7 +103,7 @@ def create_user_oauth():
     username = request.json["username"]
 
     # Validate username
-    if (not valid_username(username)):
+    if (not _valid_username(username)):
         return "Invalid username", 400
 
     query = "INSERT INTO `users` (`username`, `email`, `email_confirmed`, `join_date`) VALUES (%s, %s, %s, %s)"
@@ -113,14 +112,14 @@ def create_user_oauth():
 
     db = get_db()
     with get_db().cursor() as cursor:
-        result = cursor.execute(query, (username, email, True, date))
+        try:
+            result = cursor.execute(query, (username, email, True, date))
+            db.commit()
 
-        if (result == 0):
-            return ("User {} already exists".format(username), 409)
+        except pymysql.IntegrityError:
+            return (f'User {username} already exists', 409)
 
-        db.commit()
-
-    return ("User {} added".format(username), 201)
+    return f"User {username} added".format(username), 201
 
 
 @user_api.post("/create/email")
@@ -139,14 +138,14 @@ def create_user():
 
     username = request.json["username"]
     email = request.json["email"]
-    password = request.json["password"].encode() # TODO ensure charset is good
+    password = request.json["password"]
 
     # Validate username
-    if (not valid_username(username)):
+    if (not _valid_username(username)):
         return "Invalid username", 400
 
     # Use SHA256 to allow for arbitrary length passwords
-    hash = bcrypt.hashpw(hashlib.sha256(password).digest(), bcrypt.gensalt())
+    hash = passwords.hash_password(password)
     query = "INSERT INTO `users` (`username`, `hash`, `email`, `email_confirmed`, `join_date`) VALUES (%s, %s, %s, %s, %s)"
     get_id_query = "SELECT LAST_INSERT_ID()"
 
@@ -162,7 +161,7 @@ def create_user():
             cursor.execute(get_id_query)
             (id,) = cursor.fetchone()
             
-            send_confirmation_email(id, email, username, request.url_root, on_signup=True)
+            _send_confirmation_email(id, email, username, request.url_root, on_signup=True)
 
             db.commit()
 
@@ -192,7 +191,7 @@ def check_google_auth():
             session["pending_oauth_creation"] = email
         else:
             user = cursor.fetchone()
-            login_session(user)
+            _login_session(user)
 
     return redirect("/pending")
 
@@ -227,7 +226,7 @@ def login():
     if ("password" not in request.json):
         return ("Password not in request", 400)
     
-    password = request.json["password"].encode()
+    password = request.json["password"]
 
     db = get_db()
     with db.cursor(DictCursor) as cursor:
@@ -238,20 +237,19 @@ def login():
             return "Incorrect username or password", 401
 
         user = cursor.fetchone()
-        hash = user["hash"].encode()
 
-        if not bcrypt.checkpw(hashlib.sha256(password).digest(), hash):
+        if not passwords.check_password(user, password):
             return "Incorrect username or password", 401
 
     # Add session
-    login_session(user)
+    _login_session(user)
 
     return "Logged in", 200
 
 
 @user_api.post("/logout")
 def logout():
-    logout_session()
+    _logout_session()
     return "Logged out", 200
 
 
@@ -261,30 +259,29 @@ def change_password():
     '''
     Given the old password and a new one, change the password
     '''
-    get_query = "SELECT hash FROM `users` WHERE `user_id`=%s"
+    get_query = "SELECT * FROM `users` WHERE `user_id`=%s"
     update_query = "UPDATE `users` SET `hash`=%s WHERE `user_id`=%s"
 
     if ("old_password" not in request.json or "new_password" not in request.json):
         return ("Password(s) not in request", 400)
     
     id = session["user_id"]
-    old_password = request.json["old_password"].encode()
-    new_password = request.json["new_password"].encode()
+    old_password = request.json["old_password"]
+    new_password = request.json["new_password"]
 
     db = get_db()
-    with db.cursor() as cursor:
+    with db.cursor(cursor=DictCursor) as cursor:
         # Query for user and check password
         result = cursor.execute(get_query, (id, ))
 
         # TODO , should be found
 
-        (old_hash,) = cursor.fetchone()
-        old_hash = old_hash.encode()
+        user = cursor.fetchone()
         
-        if not bcrypt.checkpw(hashlib.sha256(old_password).digest(), old_hash):
+        if not passwords.check_password(user, old_password):
             return "Incorrect password", 401
 
-        new_hash = bcrypt.hashpw(hashlib.sha256(new_password).digest(), bcrypt.gensalt())
+        new_hash = passwords.hash_password(new_password)
 
         cursor.execute(update_query, (new_hash, id))
         db.commit()
@@ -308,7 +305,7 @@ def confirm_email_request():
         (email, username) = cursor.fetchone()
         # TODO throw error?
 
-    send_confirmation_email(id, email, username, request.url_root)
+    _send_confirmation_email(id, email, username, request.url_root)
 
     return "New confirmation email sent", 200
 
@@ -349,7 +346,7 @@ def reset_password_request():
 
         if (res != 0):
             (id, username, hash) = cursor.fetchone()
-            send_reset_email(id, email, username, hash, request.url_root)
+            _send_reset_email(id, email, username, hash, request.url_root)
 
     return f"If the account for {email} exists, an email has been sent with a reset link", 200
 
@@ -370,7 +367,7 @@ def reset_password():
         return "`user_id` should be an int"
     
     id = request.json["user_id"]
-    password = request.json["password"].encode()
+    password = request.json["password"]
     token = request.json["token"]
 
 
@@ -387,7 +384,7 @@ def reset_password():
         if (id != verify_reset_token(token, old_hash)):
             return "Invalid token", 400
 
-        new_hash = bcrypt.hashpw(hashlib.sha256(password).digest(), bcrypt.gensalt())
+        new_hash = passwords.hash_password(password)
         cursor.execute(update_query, (new_hash, id))
         # TODO check
 
