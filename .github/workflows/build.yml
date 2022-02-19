@@ -21,8 +21,7 @@ jobs:
         env:
           MYSQL_DATABASE: test
           MYSQL_USER: user
-          MYSQL_PASSWORD: yes
-
+          MYSQL_PASSWORD: null
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_ROOT_PASSWORD: rootpassword
         ports: ['3306:3306']
