@@ -150,16 +150,15 @@ def get_prompt_leaderboard(id, run_id):
     # Then query the leaderboard (ew)
     query = '''
     SELECT run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
-    FROM runs
+    FROM sprint_runs AS runs
     JOIN (
-            SELECT users.user_id, username, MIN(run_id) AS first_run 
-            FROM runs
+            SELECT users.user_id, username, MIN(start_time) AS first_run 
+            FROM sprint_runs AS runs
             JOIN users ON users.user_id=runs.user_id
-            WHERE prompt_id=%s 
+            WHERE prompt_id=%s AND end_time IS NOT NULL
             GROUP BY user_id
     ) firsts
-    ON firsts.user_id=runs.user_id AND first_run=run_id
-    WHERE end_time IS NOT NULL
+    ON firsts.user_id=runs.user_id AND first_run=start_time
     '''
 
     args = [id]
