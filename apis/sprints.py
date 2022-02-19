@@ -153,7 +153,7 @@ def get_prompt_leaderboard(id, run_id):
     FROM sprint_runs AS runs
     JOIN (
             SELECT users.user_id, username, MIN(run_id) AS first_run 
-            FROM runs
+            FROM sprint_runs AS runs
             JOIN users ON users.user_id=runs.user_id
             WHERE prompt_id=%s 
             GROUP BY user_id
