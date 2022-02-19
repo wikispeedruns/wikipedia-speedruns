@@ -1,102 +1,53 @@
 import pymysql
 import json
 
-# TODO Probably want to do this at some point
-# http://jan.kneschke.de/projects/mysql/order-by-rand/
-# TODO add indexes
+import argparse
+import os
 
-DB_NAME='wikipedia_speedruns'
-
-CREATE_DB_QUERY = 'CREATE DATABASE IF NOT EXISTS {}'.format(DB_NAME)
-USE_DB_QUERY = 'USE {}'.format(DB_NAME)
-
-TABLES={}
-
-## TODO eventually remove is_old_hash
-TABLES['users']=(
-'''
-CREATE TABLE IF NOT EXISTS `users` (
-    `user_id` INT NOT NULL AUTO_INCREMENT,
-    `username` VARCHAR(20) NOT NULL UNIQUE,
-    `hash` CHAR(60),
-    `is_old_hash` BOOLEAN DEFAULT 0, 
-    `email` VARCHAR(255) NOT NULL UNIQUE,
-    `email_confirmed` BOOLEAN NOT NULL DEFAULT 0,
-    `join_date` DATE NOT NULL DEFAULT (CURRENT_DATE()),
-    `admin` BOOLEAN NOT NULL DEFAULT 0,
-    PRIMARY KEY (`user_id`)
-);
-''')
-
-# TODO: Add info for better calculations
-TABLES['ratings']=(
-'''
-CREATE TABLE IF NOT EXISTS `ratings` (
-    `user_id` INT NOT NULL,
-    `rating` INT NOT NULL,
-    `num_rounds` INT NOT NULL,
-    PRIMARY KEY (`user_id`),
-    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
-);
-'''
-)
+DEFAULT_DB_NAME='wikipedia_speedruns'
 
 
-# Generated columns allow for easier handling of permissions
-TABLES['sprint_prompts']=(
-'''
-CREATE TABLE IF NOT EXISTS `sprint_prompts` (
-    `prompt_id` INT NOT NULL AUTO_INCREMENT,
-    `start` VARCHAR(255) NOT NULL,
-    `end` VARCHAR(255) NOT NULL,
-    `rated` BOOLEAN NOT NULL DEFAULT 0,
-    `active_start` DATETIME NULL,
-    `active_end` DATETIME NULL,
-    `used` BOOLEAN AS (NOT (active_start IS NULL OR active_end IS NULL)) VIRTUAL,
-    PRIMARY KEY (`prompt_id`),
-    INDEX (`active_start`, `active_end`)
-);
-''')
+def create_database(db_name, recreate=False):
+    # Load database settings
+    config = json.load(open("../config/default.json"))
+    try:
+        config.update(json.load(open("../config/prod.json")))
+    except FileNotFoundError:
+        pass
+
+    conn = pymysql.connect(
+        user=config["MYSQL_USER"], 
+        host=config["MYSQL_HOST"],
+        password=config["MYSQL_PASSWORD"],
+    )
+
+    with conn.cursor() as cursor:
+        if (recreate):
+            drop_db_query = f'DROP DATABASE {db_name}'
+            cursor.execute(drop_db_query)
+
+        create_db_query = f'CREATE DATABASE IF NOT EXISTS {db_name}'
+        cursor.execute(create_db_query)
+        use_db_query = f'USE {db_name}'
+        cursor.execute(use_db_query)
+
+        with open(os.path.join(os.path.dirname(__file__), 'schema.sql'), 'r') as f:
+            sql = f.read()
+
+            for query in sql.split(';'):
+                if len(query.strip()) == 0: continue
+                cursor.execute(query)
+
+        conn.commit()
+        conn.close()
 
 
-TABLES['sprint_runs']=(
-'''
-CREATE TABLE IF NOT EXISTS `sprint_runs` (
-    `run_id` INT NOT NULL AUTO_INCREMENT,
-    `start_time` TIMESTAMP(3) NULL,
-    `end_time` TIMESTAMP(3) NULL,
-    `path` JSON NULL,
-    `prompt_id` INT NOT NULL,
-    `user_id` INT,
-    PRIMARY KEY (`run_id`),
-    FOREIGN KEY (`prompt_id`) REFERENCES `sprint_prompts`(`prompt_id`),
-    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
-);
-''')
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Create the db for wikispeedruns.')
+    parser.add_argument('--db_name', default=DEFAULT_DB_NAME)
+    parser.add_argument('--recreate', action='store_true')
 
-def create_tables(cursor):
-    for table in TABLES:
-        cursor.execute(TABLES[table])
-
-# Load database settings
-config = json.load(open("../config/default.json"))
-try:
-    config.update(json.load(open("../config/prod.json")))
-except FileNotFoundError:
-    pass
-
-conn = pymysql.connect(
-    user=config["MYSQL_USER"], 
-    host=config["MYSQL_HOST"],
-    password=config["MYSQL_PASSWORD"]
-)
-
-with conn.cursor() as cursor:
-    cursor.execute(CREATE_DB_QUERY)
-    cursor.execute(USE_DB_QUERY)
-    create_tables(cursor)
-    
-    conn.commit()
-    conn.close()
+    args = parser.parse_args()
+    create_database(args.db_name, recreate=args.recreate)
 
