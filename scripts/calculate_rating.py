@@ -3,30 +3,29 @@ Implementation of following rating algorithm
 https://codeforces.com/blog/entry/20762
 '''
 
-import datetime
 import pymysql
 import json
-from pymysql.cursors import DictCursor
-
 import itertools
 import pprint
+from pymysql.cursors import DictCursor
+
 
 USER_QUERY = 'SELECT user_id, username from users'
 
 # TODO technically if a user has the same start time, they'll show up twice, this could be an issue
 RUNS_QUERY = ('''
-SELECT runs.run_id, runs.prompt_id, runs.user_id, users.username,
-        TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
-FROM sprint_runs AS runs 
-INNER JOIN daily_prompts AS d ON d.prompt_id=runs.prompt_id
-RIGHT JOIN users ON runs.user_id=users.user_id 
+SELECT r.run_id, r.prompt_id, r.user_id, u.username,
+        TIMESTAMPDIFF(MICROSECOND, r.start_time, r.end_time) AS run_time
+FROM sprint_runs AS r
+INNER JOIN sprint_prompts AS p ON p.prompt_id=r.prompt_id
+RIGHT JOIN users AS u ON r.user_id=u.user_id 
 INNER JOIN (
-    SELECT user_id, MIN(start_time) as start_time
+    SELECT user_id, MIN(run_id) as run_id
     FROM sprint_runs AS runs
     GROUP BY runs.prompt_id, runs.user_id
-) t ON runs.user_id = t.user_id AND runs.start_time = t.start_time
-WHERE d.rated = 1 AND runs.end_time IS NOT NULL AND d.date < CURDATE()
-ORDER BY runs.prompt_id, run_time;
+) t ON r.user_id = t.user_id AND r.run_id = t.run_id
+WHERE p.rated = 1 AND r.end_time IS NOT NULL AND p.used AND p.active_end <= NOW()
+ORDER BY p.active_start, run_time;
 ''')
 
 STORE_RATINGS_QUERY = (
@@ -35,9 +34,20 @@ REPLACE INTO ratings (user_id, rating, num_rounds) VALUES (%s, %s, %s);
 '''
 )
 
-INITIAL_RATING = 1500
+STORE_HISTORICAL_RATINGS_QUERY = (
+'''
+REPLACE INTO historical_ratings (user_id, prompt_id, prompt_date, rating) VALUES 
+(
+    %(user_id)s, 
+    %(prompt_id)s, 
+    (SELECT active_start FROM sprint_prompts where prompt_id=%(prompt_id)s), 
+    %(rating)s
+);
+'''
+)
 
-pp = pprint.PrettyPrinter(indent=4)
+
+INITIAL_RATING = 1500
 
 def _elo_prob(ri, rj):
     return 1 / (1 + 10 ** ((rj - ri) / 400 ))
@@ -133,21 +143,38 @@ def calculate_ratings():
         # Assert to catch case where RUNS_QUERY has duplicates
         assert(len(runs) == len(set((r["prompt_id"], r["user_id"]) for r in runs)))
 
-    for k, round in itertools.groupby(runs, lambda r: r['prompt_id']):
-        print(f"Processing Round {k}")
+    for prompt_id, round in itertools.groupby(runs, lambda r: r['prompt_id']):
+        print(f"Processing Prompt {prompt_id}")
 
-        # Only take the first run for each
+        # Simply rank the rounds
         round = [run["user_id"] for run in round]        
         _update(users, round)
+
+        # Store historical data
+        with conn.cursor(cursor=DictCursor) as cursor:
+            cursor.executemany(STORE_HISTORICAL_RATINGS_QUERY, 
+                [
+                    {
+                        "user_id": user_id,
+                        "prompt_id": prompt_id,
+                        "rating": users[user_id]["rating"],
+                    } 
+                    for user_id in round
+                ]
+            )
+            conn.commit()
+
+
+    # Store current ratings
+    with conn.cursor(cursor=DictCursor) as cursor:
+        cursor.executemany(STORE_RATINGS_QUERY, [(k, v["rating"], v["num_rounds"]) for k, v in users.items()])
+        conn.commit()
+
 
     ratings = sorted([(v["rating"], v["num_rounds"], v["username"]) for k, v in users.items()])
     for (rating, num_rounds, username) in ratings:
         print(f"{username}: {rating} ({num_rounds})")
 
-    # Update database
-    with conn.cursor(cursor=DictCursor) as cursor:
-        cursor.executemany(STORE_RATINGS_QUERY, [(k, v["rating"], v["num_rounds"]) for k, v in users.items()])
-        conn.commit()
 
 if __name__ == "__main__":
     calculate_ratings()

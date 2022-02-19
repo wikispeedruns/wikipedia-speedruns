@@ -14,14 +14,6 @@ CREATE TABLE IF NOT EXISTS `users` (
     PRIMARY KEY (`user_id`)
 );
 
-CREATE TABLE IF NOT EXISTS `ratings` (
-    `user_id` INT NOT NULL,
-    `rating` INT NOT NULL,
-    `num_rounds` INT NOT NULL,
-    PRIMARY KEY (`user_id`),
-    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
-);
-
 CREATE TABLE IF NOT EXISTS `sprint_prompts` (
     `prompt_id` INT NOT NULL AUTO_INCREMENT,
     `start` VARCHAR(255) NOT NULL,
@@ -44,4 +36,24 @@ CREATE TABLE IF NOT EXISTS `sprint_runs` (
     PRIMARY KEY (`run_id`),
     FOREIGN KEY (`prompt_id`) REFERENCES `sprint_prompts`(`prompt_id`),
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
+);
+
+CREATE TABLE IF NOT EXISTS `ratings` (
+    `user_id` INT NOT NULL,
+    `rating` INT NOT NULL,
+    `num_rounds` INT NOT NULL,
+    PRIMARY KEY (`user_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
+);
+
+
+CREATE TABLE IF NOT EXISTS `historical_ratings` (
+    `user_id` INT NOT NULL,
+    `prompt_id` INT NOT NULL,
+    `prompt_date` DATE NOT NULL,
+    `rating` INT NOT NULL,
+    PRIMARY KEY (`user_id`, `prompt_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`),
+    FOREIGN KEY (`prompt_id`) REFERENCES `sprint_prompts`(`prompt_id`),
+    INDEX (`prompt_id`, `rating`)
 );
