@@ -21,7 +21,9 @@ jobs:
         env:
           MYSQL_DATABASE: test
           MYSQL_USER: user
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_PASSWORD: yes
+
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_ROOT_PASSWORD: rootpassword
         ports: ['3306:3306']
 
@@ -38,7 +40,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pylint
         pip install -r requirements.txt
-        
+
     - name: Run pytest
       run: |
         cd test
