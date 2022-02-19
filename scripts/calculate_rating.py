@@ -3,10 +3,10 @@ Implementation of following rating algorithm
 https://codeforces.com/blog/entry/20762
 '''
 
-import pymysql
-import json
 import itertools
-import pprint
+import json
+import pymysql
+
 from pymysql.cursors import DictCursor
 
 
@@ -18,7 +18,7 @@ SELECT r.run_id, r.prompt_id, r.user_id, u.username,
         TIMESTAMPDIFF(MICROSECOND, r.start_time, r.end_time) AS run_time
 FROM sprint_runs AS r
 INNER JOIN sprint_prompts AS p ON p.prompt_id=r.prompt_id
-RIGHT JOIN users AS u ON r.user_id=u.user_id 
+RIGHT JOIN users AS u ON r.user_id=u.user_id
 INNER JOIN (
     SELECT user_id, MIN(run_id) as run_id
     FROM sprint_runs AS runs
@@ -36,11 +36,11 @@ REPLACE INTO ratings (user_id, rating, num_rounds) VALUES (%s, %s, %s);
 
 STORE_HISTORICAL_RATINGS_QUERY = (
 '''
-REPLACE INTO historical_ratings (user_id, prompt_id, prompt_date, rating) VALUES 
+REPLACE INTO historical_ratings (user_id, prompt_id, prompt_date, rating) VALUES
 (
-    %(user_id)s, 
-    %(prompt_id)s, 
-    (SELECT active_start FROM sprint_prompts where prompt_id=%(prompt_id)s), 
+    %(user_id)s,
+    %(prompt_id)s,
+    (SELECT active_start FROM sprint_prompts where prompt_id=%(prompt_id)s),
     %(rating)s
 );
 '''
@@ -56,7 +56,7 @@ def _calculate_seed(users, round):
     for u in round:
         users[u]["seed"] = 1
         for v in round:
-            if (u == v): continue
+            if u == v: continue
             users[u]["seed"] += _elo_prob(users[v]["rating"], users[u]["rating"])
 
 
@@ -67,7 +67,7 @@ def _calculate_place(users, round):
 def _calculate_desired_seed(users):
     for u in users:
         user = users[u]
-        if ("seed" not in user or "place" not in user): continue
+        if "seed" not in user or "place" not in user: continue
 
         user["desired_seed"] = (user["seed"] * user["place"]) ** 0.5
 
@@ -75,17 +75,17 @@ def _rating_for_seed(users, round, u, desired_seed):
     lo = 1
     hi = 8000
 
-    while (lo < hi):
+    while lo < hi:
         mid = (lo + hi) // 2
 
         mid_seed = 1
 
         # TODO should we exclude ourselves?
         for v in round:
-            if (u == v): continue
+            if u == v: continue
             mid_seed += _elo_prob(users[v]["rating"], mid)
 
-        if (mid_seed > desired_seed):
+        if mid_seed > desired_seed:
             lo = mid + 1
         else:
             hi = mid
@@ -96,14 +96,14 @@ def _rating_for_seed(users, round, u, desired_seed):
 def _calculate_new_ratings(users, round):
     for u in round:
         users[u]["target"] = _rating_for_seed(users, round, u, users[u]["desired_seed"])
-    
+
     # if we change it in the loop above, it will affect things
     for u in round:
         users[u]["rating"] = (users[u]["target"] + users[u]["rating"]) // 2
 
 
 def _update(users, round):
-    if (len(round) == 1): return
+    if len(round) == 1: return
 
     for u in round: users[u]["num_rounds"] += 1
 
@@ -120,7 +120,7 @@ def calculate_ratings():
         pass
 
     conn = pymysql.connect(
-        user=config["MYSQL_USER"], 
+        user=config["MYSQL_USER"],
         host=config["MYSQL_HOST"],
         password=config["MYSQL_PASSWORD"],
         database=config['DATABASE']
@@ -128,11 +128,11 @@ def calculate_ratings():
 
     with conn.cursor(cursor=DictCursor) as cursor:
         cursor.execute(USER_QUERY)
-        
+
         users = {
             u['user_id']: {
-                "rating": INITIAL_RATING, 
-                "num_rounds": 0, 
+                "rating": INITIAL_RATING,
+                "num_rounds": 0,
                 "username": u["username"]
             } for u in cursor.fetchall()
         }
@@ -147,18 +147,18 @@ def calculate_ratings():
         print(f"Processing Prompt {prompt_id}")
 
         # Simply rank the rounds
-        round = [run["user_id"] for run in round]        
+        round = [run["user_id"] for run in round]
         _update(users, round)
 
         # Store historical data
         with conn.cursor(cursor=DictCursor) as cursor:
-            cursor.executemany(STORE_HISTORICAL_RATINGS_QUERY, 
+            cursor.executemany(STORE_HISTORICAL_RATINGS_QUERY,
                 [
                     {
                         "user_id": user_id,
                         "prompt_id": prompt_id,
                         "rating": users[user_id]["rating"],
-                    } 
+                    }
                     for user_id in round
                 ]
             )
@@ -167,7 +167,12 @@ def calculate_ratings():
 
     # Store current ratings
     with conn.cursor(cursor=DictCursor) as cursor:
-        cursor.executemany(STORE_RATINGS_QUERY, [(k, v["rating"], v["num_rounds"]) for k, v in users.items()])
+        cursor.executemany(STORE_RATINGS_QUERY,
+            [
+                (k, v["rating"], v["num_rounds"])
+                for k, v in users.items()
+            ]
+        )
         conn.commit()
 
 
