@@ -36,11 +36,12 @@ REPLACE INTO ratings (user_id, rating, num_rounds) VALUES (%s, %s, %s);
 
 STORE_HISTORICAL_RATINGS_QUERY = (
 '''
-REPLACE INTO historical_ratings (user_id, prompt_id, prompt_date, rating) VALUES
+REPLACE INTO historical_ratings (user_id, prompt_id, prompt_date, rank, rating) VALUES
 (
     %(user_id)s,
     %(prompt_id)s,
     (SELECT active_start FROM sprint_prompts where prompt_id=%(prompt_id)s),
+    %(rank)s,
     %(rating)s
 );
 '''
@@ -146,7 +147,7 @@ def calculate_ratings():
     for prompt_id, round in itertools.groupby(runs, lambda r: r['prompt_id']):
         print(f"Processing Prompt {prompt_id}")
 
-        # Simply rank the rounds
+        # Since we order by run time in our query, this is in order of ranking
         round = [run["user_id"] for run in round]
         _update(users, round)
 
@@ -157,9 +158,10 @@ def calculate_ratings():
                     {
                         "user_id": user_id,
                         "prompt_id": prompt_id,
+                        "rank": i + 1,
                         "rating": users[user_id]["rating"],
                     }
-                    for user_id in round
+                    for i, user_id in enumerate(round)
                 ]
             )
             conn.commit()
