@@ -1,24 +1,33 @@
 import pytest
 import sys
 
+from pymysql.cursors import DictCursor
+
 sys.path.append('..')
 from app import create_app
+from scripts.createDB import create_database
 
 from db import get_db
 from mail import mail
 
-from pymysql.cursors import DictCursor
 
-@pytest.fixture
-def app():
+TEST_DB_NAME="test"
+
+@pytest.fixture(scope="session")
+def test_db():
+    create_database(TEST_DB_NAME, recreate=True)
+    
+
+@pytest.fixture(scope="session")
+def app(test_db):
     yield create_app({
         'TESTING': True, 
-        'DATABASE': 'test', 
+        'DATABASE': TEST_DB_NAME, 
         'MAIL_DEFAULT_SENDER': 'no-reply@wikispeedruns.com'
     })
 
 
-@pytest.fixture
+@pytest.fixture()
 def client(app):
     with app.test_client() as client:
         yield client
@@ -69,3 +78,10 @@ def user(user_base):
 def session(client, user):
     client.post("/api/users/login", json=user)
     yield user
+
+@pytest.fixture()
+def admin_session(client):
+    with client.session_transaction() as session:
+        session["user_id"] = 0
+        session["username"] = "testadmin"
+        session["admin"] = 1

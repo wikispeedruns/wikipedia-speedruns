@@ -35,8 +35,16 @@ let app = new Vue({
 
         home: function (event) {
             window.location.replace("/");
-        }
+        },
 
+        copyResults: function(event) {
+            let results = generateResultText();
+            document.getElementById("custom-tooltip").style.display = "inline";
+            navigator.clipboard.writeText(results);
+            setTimeout(function() {
+                document.getElementById("custom-tooltip").style.display = "none";
+            }, 1500);
+        },
     }
 })
 
@@ -320,8 +328,16 @@ function startGame() {
     timerInterval = setInterval(displayTimer, 20);
 }
 
+function generateResultText() {
+    return `Wiki Speedruns ${prompt_id}
+${app.$data.startArticle}
+${path.length - 1} 🖱️
+${(endTime - startTime) / 1000} ⏱️`
+}
+
 window.addEventListener("load", async function() {
-    const response = await fetch("/api/prompts/" + prompt_id);
+    const response = await fetch("/api/sprints/" + prompt_id);
+
     app.$data.prompt_id = prompt_id;
 
     if (response.status != 200) {
@@ -329,7 +345,7 @@ window.addEventListener("load", async function() {
         this.alert(error)
         // Prevent are your sure you want to leave prompt
         window.onbeforeunload = null;
-        window.location.href = "/"   // TODO error page
+        window.location.replace("/");   // TODO error page
 
     }
 
