@@ -1,4 +1,6 @@
-name: Pylint
+# This is a basic workflow to help you get started with Actions
+
+name: build
 
 on:
   pull_request:
@@ -11,8 +13,8 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10"]
-        
-    
+
+
     services:
       mysql:
         image: mysql:5.7
@@ -21,10 +23,10 @@ jobs:
           MYSQL_USER: user
           MYSQL_ROOT_PASSWORD: rootpassword
         ports: ['3306:3306']
-    
+
     steps:
     - uses: actions/checkout@v2
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
@@ -36,10 +38,6 @@ jobs:
         pip install pylint
         pip install -r requirements.txt
         
-    - name: Analysing the code with pylint
-      run: |
-        pylint $(git ls-files '*.py')
-
     - name: Run pytest
       run: |
         cd test
