@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `historical_ratings` (
     `user_id` INT NOT NULL,
     `prompt_id` INT NOT NULL,
     `prompt_date` DATE NOT NULL,
-    `rank` INT NOT NULL,
+    `prompt_rank` INT NOT NULL,
     `rating` INT NOT NULL,
     PRIMARY KEY (`user_id`, `prompt_id`),
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`),

@@ -36,7 +36,7 @@ REPLACE INTO ratings (user_id, rating, num_rounds) VALUES (%s, %s, %s);
 
 STORE_HISTORICAL_RATINGS_QUERY = (
 '''
-REPLACE INTO historical_ratings (user_id, prompt_id, prompt_date, rank, rating) VALUES
+REPLACE INTO historical_ratings (user_id, prompt_id, prompt_date, `prompt_rank`, rating) VALUES
 (
     %(user_id)s,
     %(prompt_id)s,
