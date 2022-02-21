@@ -1,5 +1,5 @@
 
-import { parseAndCleanPage } from "./modules/wikipediapageparse.js"
+import { parseAndCleanPage } from "./wikipediapageparse.js"
 
 let vueContainer = null;
 let timerInterval = null;
