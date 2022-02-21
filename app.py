@@ -1,26 +1,29 @@
 from flask import Flask
 
+import json
+
 import db
 import mail
 import tokens
-
-import json
+from util.flaskjson import ISODateJSONEncoder
 
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 
-sentry_sdk.init(
-    dsn="https://3fcc7c6b479248c8ac9839aad0440cba@o1133616.ingest.sentry.io/6180332",
-    integrations=[FlaskIntegration()],
+# sentry_sdk.init(
+#     dsn="https://3fcc7c6b479248c8ac9839aad0440cba@o1133616.ingest.sentry.io/6180332",
+#     integrations=[FlaskIntegration()],
 
-    # Set percent of things that are traced
-    traces_sample_rate=0
-)
+#     # Set percent of things that are traced
+#     traces_sample_rate=0
+# )
 
 def create_app(test_config=None):
 
     app = Flask(__name__)
+
+    app.json_encoder = ISODateJSONEncoder
 
     app.config.from_file('config/default.json', json.load)
 
@@ -33,11 +36,12 @@ def create_app(test_config=None):
     else:
         app.config.update(test_config)
 
+
     db.init_app(app)
     mail.init_app(app)
     tokens.init_app(app)
 
-    from apis.prompts import prompt_api
+    from apis.sprints import sprint_api
     from apis.runs import run_api
     from apis.users import user_api
     from apis.profiles import profile_api
@@ -46,7 +50,7 @@ def create_app(test_config=None):
     from apis.marathon import marathon_api
     from views import views
 
-    app.register_blueprint(prompt_api)
+    app.register_blueprint(sprint_api)
     app.register_blueprint(run_api)
     app.register_blueprint(user_api)
     app.register_blueprint(profile_api)

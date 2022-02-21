@@ -37,7 +37,7 @@ def get_total_stats(username):
 
     query = """
     SELECT users.user_id, COUNT(run_id) AS total_runs, COUNT(DISTINCT prompt_id) as total_prompts FROM users 
-    LEFT JOIN runs ON runs.user_id=users.user_id 
+    LEFT JOIN sprint_runs ON sprint_runs.user_id=users.user_id 
     WHERE users.username=%s
     """
     

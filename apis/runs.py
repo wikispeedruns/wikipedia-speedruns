@@ -19,10 +19,9 @@ def create_run():
     Returns the user ID of the run created.
     '''
 
-    query = "INSERT INTO `runs` (`start_time`,`prompt_id`,`user_id`) VALUES (%s, %s, %s)"
+    query = "INSERT INTO `sprint_runs` (`prompt_id`,`user_id`) VALUES (%s, %s)"
     sel_query = "SELECT LAST_INSERT_ID()"
 
-    start_time = datetime.fromtimestamp(request.json['start_time']/1000)
     prompt_id = request.json['prompt_id']
 
     if ('user_id' in session):
@@ -34,9 +33,8 @@ def create_run():
 
     db = get_db()
     with db.cursor() as cursor:
-        print(cursor.mogrify(query, (start_time, prompt_id, user_id)))
-        result = cursor.execute(query, (start_time, prompt_id, user_id))
-        
+        print(cursor.mogrify(query, (prompt_id, user_id)))
+        cursor.execute(query, (prompt_id, user_id))
         cursor.execute(sel_query)
         id = cursor.fetchone()[0]
         db.commit()
@@ -53,7 +51,7 @@ def finish_run(id):
 
     Returns the user ID of the run updated.
     '''
-    query = 'UPDATE `runs` SET `start_time`=%s, `end_time`=%s, `path`=%s WHERE `run_id`=%s'
+    query = 'UPDATE `sprint_runs` SET `start_time`=%s, `end_time`=%s, `path`=%s WHERE `run_id`=%s'
     
     start_time = datetime.fromtimestamp(request.json['start_time']/1000)
     end_time = datetime.fromtimestamp(request.json['end_time']/1000)
@@ -72,7 +70,7 @@ def finish_run(id):
 @run_api.get('')
 def get_all_runs():
     # TODO this should probably be paginated, and return just ids
-    query = "SELECT run_id FROM `runs`"
+    query = "SELECT run_id FROM `sprint_runs`"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:

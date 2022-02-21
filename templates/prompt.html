@@ -29,7 +29,7 @@
                     <tbody>
                         <tr v-if="currentRunPosition === -1">
                             <td>[[currentRunRank]]</td>
-                            <td v-if="currentRun.username">[[currentRun.username]]</td>
+                            <td v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td>[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
                             <td>[[currentRun.path]]</td>
@@ -42,7 +42,7 @@
                         </tr>
                         <tr v-for="(run, index) in renderedRuns">
                             <td>[[getRenderedRank(index)]]</td>
-                            <td v-if="run.username">[[run.username]]</td>
+                            <td v-if="run.username"><strong>[[run.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td>[[(run.run_time/1000000).toFixed(3)]] s</td>
                             <td>[[run.path]]</td>
@@ -55,7 +55,7 @@
                         </tr>
                         <tr v-if="currentRunPosition === 1">
                             <td>[[currentRunRank]]</td>
-                            <td v-if="currentRun.username">[[currentRun.username]]</td>
+                            <td v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td>[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
                             <td>[[currentRun.path]]</td>

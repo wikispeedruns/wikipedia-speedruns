@@ -1,6 +1,4 @@
 import { fetchJson } from "./modules/fetch.js";
-import { dateToIso } from "./modules/date.js";
-
 import { getPath } from "./modules/scraper.js";
 
 Vue.component('prompt-item', {
@@ -15,28 +13,20 @@ Vue.component('prompt-item', {
     methods: {
 
         async deletePrompt() {
-            const resp = await fetchJson("/api/prompts/" + this.prompt.prompt_id, "DELETE");
+            const resp = await fetchJson("/api/sprints/" + this.prompt.prompt_id, "DELETE");
             
             if (resp.status == 200) this.$emit('delete-prompt')
             else alert(await resp.text())
         },
-
-        async changeRated() {
-            const resp = await fetchJson("/api/prompts/" + this.prompt.prompt_id + "/type", "PATCH", {
-                "type": "daily",
-                "date": this.prompt.date,
-                "rated": this.ratedChecked,
-            });
-
-            if (resp.status != 200) alert(await resp.text())
-        }
     },
 
     template: (`
     <li>
         <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}} -> {{prompt.end}} 
 
-        <input type="checkbox" v-if="prompt.type==='daily'" v-model="ratedChecked" v-on:change="changeRated">
+        <span v-if="prompt.used && !prompt.rated"> 
+            {{prompt.active_start}} - {{prompt.active_end}}
+        </span>
 
         <button v-on:click="deletePrompt" type="button" class="btn btn-default">
             <i class="bi bi-trash"></i>
@@ -74,15 +64,15 @@ Vue.component('marathon-item', {
 
 
 // TODO maybe these should load the date stuff themselves (At least on update)
-Vue.component('daily-item', {
-    props: ['day'],
+Vue.component('prompt-set', {
+    props: ['start', 'end', 'rated', 'prompts'],
 
     methods: {
         async moveToDay() {
-            const response = await fetchJson("/api/prompts/" + this.promptToAdd + "/type", "PATCH", {
-                "type": "daily",
-                "date": this.day.dateIso,
-                "rated": false,
+            const response = await fetchJson("/api/sprints/" + this.promptToAdd, "PATCH", {
+                "startDate": this.start,
+                "endDate": this.end,
+                "rated": this.rated,
             });
 
             if (response.status != 200) {
@@ -91,7 +81,6 @@ Vue.component('daily-item', {
                 this.$emit('move-prompt')  // TODO reload just this box instead of triggering a full realead
             }
         },
-        dateToIso,
     },
 
     data: function () {
@@ -102,15 +91,11 @@ Vue.component('daily-item', {
 
     template: (`
     <div>
-        <strong v-if="day.dateIso === dateToIso(new Date())">
-            <p>{{day.dateIso.substring(5)}}</p>
-        </strong>
-        <p v-else>{{day.dateIso.substring(5)}}</p>
-
+        <p v-if="start === end">{{start.substring(5)}}</p>
 
         <ul class="ps-3 my-0">
             <prompt-item 
-                v-for="p in day.prompts"
+                v-for="p in prompts"
                 v-bind:prompt="p"
                 v-bind:key="p.prompt_id"
                 v-on="$listeners"
@@ -353,7 +338,6 @@ var app = new Vue({
     el: '#app',
     data: {
         unused: [],
-        public: [],
         weeks: [],
         marathon: [],
 
@@ -365,41 +349,63 @@ var app = new Vue({
     },
     
     methods: {
+        toISODate(date) {
+            return date.toISOString().substring(0, 10);
+        },
         async getPrompts() {
-            const prompts = await (await fetchJson("/api/prompts/all")).json();
+            const prompts = await (await fetchJson("/api/sprints/managed")).json();
             
-            this.unused = prompts.filter(p => p["type"] === "unused");
-            this.public = prompts.filter(p => p["type"] === "public");
+            this.unused = prompts.filter(p => !p["used"]);
             
+            const used = prompts.filter(p => p["used"]);
+
+            let daily = used.filter(p => p["rated"]);
+            let weeklys = used.filter(p => !p["rated"]);
             
-            let daily = prompts.filter(p =>  p["type"] === "daily");
-            
-            let daysToPrompts = {};
+            let nextDailys = {};
+            let nextWeeklys = {};
 
             daily.forEach((p) => {
-                if (!daysToPrompts[p["date"]]) {
-                    daysToPrompts[p["date"]] = [];
+                // Get iso date (yyyy-mm-dd)
+                const key = p["active_start"].substring(0, 10);
+                if (!nextDailys[key]) {
+                    nextDailys[key] = [];
                 }
-                daysToPrompts[p["date"]].push(p);
+                nextDailys[key].push(p);
             });
 
+            weeklys.forEach((p) => {
+                const key = p["active_start"].substring(0, 10);
+                if (!nextWeeklys[key]) {
+                    nextWeeklys[key] = [];
+                }                
+                nextWeeklys[key].push(p);
+            })
 
-            let today = new Date();
-            let cur = new Date(today);
+            let cur = new Date();
 
             // Change cur to first day of this week
-            cur.setDate(cur.getDate() - cur.getDay());
+            cur.setUTCDate(cur.getUTCDate() - cur.getUTCDay());
 
             this.weeks = [];
-            for (let i = 0; i < 3; i++) {
-                this.weeks.push([]);
+            for (let i = 0; i < 2; i++) {
+                let end = new Date(cur)
+                end.setDate(cur.getDate() + 7);
+
+                this.weeks.push({
+                    start: this.toISODate(cur),
+                    end: this.toISODate(end),
+                    days: [],
+                    prompts: nextWeeklys[this.toISODate(cur)]
+                });
+
+
                 for (let j = 0; j < 7; j++) {
 
                     const day =  new Date(cur);
-                    this.weeks[i].push( {
-                        "date": day,
-                        "dateIso": dateToIso(day),
-                        "prompts": daysToPrompts[dateToIso(day)] || []
+                    this.weeks[i].days.push( {
+                        "date": this.toISODate(day),
+                        "prompts": nextDailys[this.toISODate(day)] || []
                     });
 
                     cur.setDate(cur.getDate() + 1);
@@ -410,21 +416,6 @@ var app = new Vue({
 
             this.marathon = marathonprompts;
         },
-
-
-        async makePublic() {
-            const response = await fetchJson("/api/prompts/" + this.toMakePublic + "/type", "PATCH", {
-                "type": "public"
-            });
-
-            if (response.status != 200) {
-                alert(await response.text());
-            } else {
-                this.getPrompts();
-            }
-
-        },
-
 
         async newPrompt(event) {
     
@@ -452,7 +443,7 @@ var app = new Vue({
             reqBody["end"] = body1["parse"]["title"];
         
             try {
-                const response = await fetch("/api/prompts/", {
+                const response = await fetch("/api/sprints/", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
