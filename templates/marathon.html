@@ -25,8 +25,15 @@
             <div class="col px-4 py-2">
                 Checkpoints Visited<br>[[numCheckpointsVisited]]
             </div>
-            <div class="col px-4 py-2">
+            <div class="col px-4 py-2 d-flex flex-column">
+                <div>
                 Unique Articles Visited<br>[[numVisitedUnique]]
+                </div>
+                <div class="align-self-end mt-auto">
+                    <div>
+                        <button v-on:click="forfeitRun" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">End my suffering</button>
+                    </div>
+                </div>   
             </div>
         </div>
     </div>
@@ -50,7 +57,7 @@
     </div>  
 
     <div v-if="finished" class="text-left">
-        <p><h4>Game Over!</h4></p>
+        <p><h4>Game Over! <span v-if="forfeited">You chose the easy way out.</span></h4></p>
         <p>Your run was submitted to the leaderboard.</p>
         <p><h4>Here's how you did:</h4></p>
         <div class="card md">

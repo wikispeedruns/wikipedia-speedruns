@@ -12,9 +12,10 @@ let app = new Vue({
     data: {
         startArticle: "",
         timer: "",
-        countdown: 8,
+        countdown: 2,
         finished: false,
         started: false,
+        forfeited: false,
         activeTip: "",
         path:[],
         finalTime:"",
@@ -63,6 +64,11 @@ let app = new Vue({
             output += "</strong>"
 
             return output
+        },
+
+        forfeitRun: function () {
+            this.forfeited = true;
+            finish();
         }
 
     }
