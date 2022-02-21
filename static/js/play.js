@@ -11,29 +11,19 @@ let app = new Vue({
         gameType: "sprint",
         startArticle: "",
         endArticle: "",
+        prompt_id: 0,
+        run_id: -1,
+        path:[],
         timer: "",
         countdown: 8,
+        startTime: null,
+        finalTime:"",
+        endTime: null,
         finished: false,
         started: false,
         activeTip: "",
-        path:[],
-        finalTime:"",
-        endTime: null,
-        prompt_id: 0,
-        run_id: -1,
-        startTime: null,
     },
     methods : {
-        formatPath: function (pathArr) {
-            let output = "";
-            for(let i=0; i<pathArr.length - 1;i++) {
-                output = output.concat(pathArr[i])
-                output = output.concat(" -> ")
-            }
-            output = output.concat(pathArr[pathArr.length - 1])
-            return output;
-        }, 
-
         finishPrompt: function (event) {
             window.location.replace("/prompt/" + this.prompt_id + "?run_id=" + this.run_id);
         }, 
@@ -43,7 +33,7 @@ let app = new Vue({
         },
 
         copyResults: function(event) {
-            let results = this.generateSprintResults();
+            let results = this.generateResults();
             document.getElementById("custom-tooltip").style.display = "inline";
             navigator.clipboard.writeText(results);
             setTimeout(function() {
@@ -51,20 +41,23 @@ let app = new Vue({
             }, 1500);
         },
 
-        generateSprintResults: function(event) {
-            return `Wiki Speedruns ${this.prompt_id}
-            ${this.startArticle}
-            ${this.path.length - 1} 🖱️
-            ${(this.endTime - this.startTime) / 1000} ⏱️`
+        generateResults: function(event) {
+            if (this.gameType === "sprint") {
+                return `Wiki Speedruns ${this.prompt_id}
+                ${this.startArticle}
+                ${this.path.length - 1} 🖱️
+                ${(this.endTime - this.startTime) / 1000} ⏱️`
+            } else {
+                return "";
+            }
         }
     }
 })
 
-async function saveRun() {
+async function saveEmptyRun() {
     const reqBody = {
         "prompt_id": prompt_id,
     }
-
     try {
         const response = await fetch("/api/runs", {
             method: 'POST',
@@ -73,9 +66,7 @@ async function saveRun() {
             },
             body: JSON.stringify(reqBody)
         })
-
         return await response.json();
-
     } catch(e) {
         console.log(e);
     }
@@ -98,7 +89,7 @@ window.addEventListener("load", async function() {
     app.$data.prompt_id = prompt_id;
     app.$data.startArticle = prompt["start"];
     app.$data.endArticle = prompt["end"];
-    app.$data.run_id = await saveRun(); // Save run on clicking "play" when `prompt_id` is valid
+    app.$data.run_id = await saveEmptyRun(); // Save run on clicking "play" when `prompt_id` is valid
     app.$data.activeTip = getRandTip();
 
     playGame(app)

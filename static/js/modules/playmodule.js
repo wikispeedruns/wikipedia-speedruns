@@ -15,7 +15,7 @@ async function playGame(app) {
     timerInterval = setInterval(function() {
         const seconds = (Date.now() - vueContainer.$data.startTime) / 1000;
         vueContainer.$data.timer = seconds;
-    }, 20);
+    }, 50);
 
     //await new Promise(resolve => setTimeout(resolve, 1000));
 }
@@ -34,9 +34,9 @@ async function loadPage(page) {
     let frameBody = document.getElementById("wikipedia-frame")
     frameBody.innerHTML = body["parse"]["text"]["*"]
 
-    parseAndCleanPage(frameBody, title);
-    
     await processGameLogic(title);
+    
+    parseAndCleanPage(frameBody, title);
 
     document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
         el.onclick = handleWikipediaLink;
@@ -159,7 +159,7 @@ async function countdown() {
             let distance = countDownStart + countDownTime - now;
             vueContainer.$data.countdown = Math.floor(distance/1000)+1;
 
-            if (distance <= 0) {
+            if (distance <= -500) { //Allow timer to reach 0
                 resolve();
                 clearInterval(x);
             }
