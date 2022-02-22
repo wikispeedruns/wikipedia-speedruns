@@ -239,6 +239,7 @@ function hideElements() {
 
 function setMargin() {
     const element = document.getElementById("time-box");
+    console.log(element.offsetHeight + 25)
     document.getElementById("wikipedia-frame").firstChild.style.paddingBottom = (element.offsetHeight + 25) +"px";
 }
 

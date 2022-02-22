@@ -16,6 +16,7 @@ let app = new Vue({
         finished: false,
         started: false,
         forfeited: false,
+        showHelp: false,
         activeTip: "",
         path:[],
         finalTime:"",
@@ -110,6 +111,14 @@ function handleWikipediaLink(e)
     }
 }
 
+function setMargin() {
+    const element = document.getElementById("time-box");
+    document.getElementById("wikipedia-frame").firstChild.style.paddingBottom = (element.offsetHeight + 25) +"px";
+    console.log(element.offsetHeight + 25);
+    document.getElementById("help-box").style.bottom = (element.offsetHeight + 25);
+}
+
+
 async function loadPage(page) {
 
     
@@ -177,6 +186,7 @@ async function loadPage(page) {
     });
 
     hideElements();
+    setMargin();
     window.scrollTo(0, 0)
 
     
@@ -196,8 +206,6 @@ async function loadPage(page) {
             }
         })
     }
-
-    console.log(app.$data)
 }
 
 async function finish() {
@@ -296,40 +304,37 @@ function displayTimer() {
     app.$data.timer = seconds;
 }
 
-function countdownOnLoad() {
+async function countdownOnLoad() {
 
     app.$data.activeTip = getRandTip();
 
     let countDownStart = Date.now();
     let countDownTime = app.$data.countdown * 1000;
 
-    let x = setInterval(function() {
+    document.getElementById("mirroredimgblock").classList.toggle("invisible");
 
-        let now = Date.now()
-      
-        // Find the distance between now and the count down date
-        let distance = countDownStart + countDownTime - now;
+    // Condition 1: countdown timer
+    const promise1 = new Promise(resolve => {
+        const x = setInterval(function() {
+            const now = Date.now()
+          
+            // Find the distance between now and the count down date
+            let distance = countDownStart + countDownTime - now;
+            app.$data.countdown = Math.floor(distance/1000)+1;
 
-        app.$data.countdown = Math.floor(distance/1000)+1;
+            if (distance <= 0) {
+                resolve();
+                clearInterval(x);
+            }
 
-        if (distance < -1000) {
-            clearInterval(x);
+            if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {                
+                document.getElementById("mirroredimgblock").classList.toggle("invisible")
+            }
 
-            app.$data.started = true;
-            
+        }, 50);
+    });
 
-            startTime = Date.now();
-        }
-        if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {
-            //app.$data.gunShow = true;
-            document.getElementById("mirroredimgblock").classList.toggle("invisible")
-
-            //console.log("guns should show")
-        }
-      }, 50);
-
-      document.getElementById("mirroredimgblock").classList.toggle("invisible")
-
+    await Promise.any([promise1]);
 }
 
 function disableFind(e) {
@@ -338,6 +343,12 @@ function disableFind(e) {
         e.preventDefault();
         this.alert("WARNING: Attempt to Find in page. This will be recorded.")
     }
+}
+
+function startGame() {
+    app.$data.started = true;
+    startTime = Date.now();
+    timerInterval = setInterval(displayTimer, 20);
 }
 
 window.addEventListener("load", async function() {
@@ -362,9 +373,14 @@ window.addEventListener("load", async function() {
     app.$data.activeCheckpoints = JSON.parse(prompt['initcheckpoints']);
     app.$data.checkpoints = JSON.parse(prompt['checkpoints']);
 
-    await countdownOnLoad();
+    //await countdownOnLoad();
 
-    loadPage(app.$data.startArticle);
+    await Promise.all([loadPage(app.$data.startArticle), countdownOnLoad()]);
+    startGame();
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    //await loadPage(app.$data.startArticle);
+    setMargin();
 });
 
 window.onbeforeunload = function() {
