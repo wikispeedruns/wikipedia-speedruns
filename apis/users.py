@@ -20,6 +20,8 @@ from pymysql.cursors import DictCursor
 
 from wikispeedruns.auth import passwords
 
+from wikispeedruns.filter import fernet
+
 user_api = Blueprint("users", __name__, url_prefix="/api/users")
 
 # Setup OAuth
@@ -60,7 +62,7 @@ def _send_confirmation_email(id, email, username, url_root, on_signup=False):
 
 def _valid_username(username):
     valid_char = lambda c: (c.isalnum() or c == '-' or c == '_' or c == '.')
-    return all(map(valid_char, username))
+    return all(map(valid_char, username)) and fernet.checkUsername(username)
 
 
 def _login_session(user):
