@@ -28,6 +28,8 @@ let app = new Vue({
         visitedCheckpoints: [],
         numVisitedUnique: 0,
         clicksRemaining: 11,
+
+        pathToLastCheckpoints: "Finding paths...",
     },
     computed: {
         numCheckpointsVisited: function() {
@@ -70,6 +72,14 @@ let app = new Vue({
         forfeitRun: function() {
             this.forfeited = true;
             finish();
+        },
+
+        genPathsToCheckpoints: function() {
+            let el = document.getElementById("genPathsToCheckpoints");
+            let newEl = document.createElement("p");
+            newEl.innerHTML = this.pathToLastCheckpoints;
+
+            el.parentNode.replaceChild(newEl, el);
         }
 
     }
@@ -176,7 +186,7 @@ async function loadPage(page) {
 
 
     if (app.$data.clicksRemaining === 0) {
-        await finish();
+        await finish(title);
     }
 
     document.querySelectorAll("#wikipedia-frame a").forEach((el) => {
@@ -206,7 +216,7 @@ async function loadPage(page) {
     }
 }
 
-async function finish() {
+async function finish(title) {
 
     app.$data.finished = true;
     app.$data.finalTime = app.$data.timer;
@@ -233,6 +243,23 @@ async function finish() {
     } catch (e) {
         console.log(e);
     }
+
+    let finalStr = ""
+    for (let i = 0; i < app.$data.activeCheckpoints.length; i++) {
+        //TODO
+
+        //const response = await fetchJson(`/api/scraper/path`, "POST", {
+        //    start: title,
+        //    end: app.$data.activeCheckpoints[i]
+        //})
+
+        //const resp = await response.json()
+
+        //finalStr += String(resp) += "\n"
+    }
+    app.$data.pathToLastCheckpoints = finalStr;
+
+
 }
 
 

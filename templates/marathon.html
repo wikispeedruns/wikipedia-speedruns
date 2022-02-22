@@ -97,6 +97,14 @@
                 <p>Number of unique articles visited: <strong>[[numVisitedUnique]]</strong></p>
                 <p>Number of checkpoints visited: <strong>[[numCheckpointsVisited]]</strong></p>
                 <p>The path you took: <br>[[path]]</p>
+                <div class="container">
+                    <div class="row">
+                        <div class="col"><p>Unfortunately, you weren't able to reach these checkpoints:</p>[[activeCheckpoints]]</div>
+                        <div class="col">
+                            <button id="genPathsToCheckpoints" v-on:click="genPathsToCheckpoints" class="btn btn-outline-secondary">See how you could've reached these</button>
+                        </div>
+                    </div>
+                </div>
                 <div><button v-on:click="finishPrompt" class="btn btn-outline-secondary">See the leaderboard</button></div>
                 <div><button v-on:click="home" class="btn btn-outline-secondary">Return to home page</button></div>
             </div>
