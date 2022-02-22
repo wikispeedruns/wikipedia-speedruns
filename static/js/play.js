@@ -75,7 +75,10 @@ function handleWikipediaLink(e)
     } else {
 
         // Ignore external links and internal file links
-        if (!linkEl.getAttribute("href").startsWith("/wiki/") || linkEl.getAttribute("href").startsWith("/wiki/File:")) {
+        if (!linkEl.getAttribute("href").startsWith("/wiki/") || 
+            linkEl.getAttribute("href").startsWith("/wiki/File:") || 
+            linkEl.getAttribute("href").startsWith("/wiki/Wikipedia:") || 
+            linkEl.getAttribute("href").startsWith("/wiki/Category:")) {
             return;
         }
 
