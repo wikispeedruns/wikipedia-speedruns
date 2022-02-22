@@ -14,7 +14,7 @@ Vue.component('prompt-item', {
 
         async deletePrompt() {
             const resp = await fetchJson("/api/sprints/" + this.prompt.prompt_id, "DELETE");
-            
+
             if (resp.status == 200) this.$emit('delete-prompt')
             else alert(await resp.text())
         },
@@ -31,8 +31,7 @@ Vue.component('prompt-item', {
         <button v-on:click="deletePrompt" type="button" class="btn btn-default">
             <i class="bi bi-trash"></i>
         </button>
-    </li>`
-    )
+    </li>`)
 });
 
 Vue.component('marathon-item', {
@@ -42,7 +41,7 @@ Vue.component('marathon-item', {
 
         async deletePrompt() {
             const resp = await fetchJson("/api/marathon/delete/" + this.prompt.prompt_id, "DELETE");
-            
+
             if (resp.status == 200) this.$emit('delete-prompt')
             else alert(await resp.text())
 
@@ -58,8 +57,7 @@ Vue.component('marathon-item', {
         <button v-on:click="deletePrompt" type="button" class="btn btn-default" >
             <i class="bi bi-trash"></i>
         </button>
-    </li>`
-    )
+    </li>`)
 });
 
 
@@ -78,12 +76,12 @@ Vue.component('prompt-set', {
             if (response.status != 200) {
                 alert(await response.text());
             } else {
-                this.$emit('move-prompt')  // TODO reload just this box instead of triggering a full realead
+                this.$emit('move-prompt') // TODO reload just this box instead of triggering a full realead
             }
         },
     },
 
-    data: function () {
+    data: function() {
         return {
             promptToAdd: 0
         }
@@ -165,7 +163,7 @@ Vue.component('path-generator', {
                 const response = await fetchJson("/api/scraper/gen_prompts", 'POST', {
                     'N': 1
                 })
-        
+
                 if (response.status != 200) {
                     // For user facing interface, do something other than this
                     alert(await response.text());
@@ -173,15 +171,15 @@ Vue.component('path-generator', {
                 }
 
                 const resp = await response.json()
-                
+
                 let prompt = {};
 
                 prompt.start = resp['Prompts'][0][0];
                 prompt.end = resp['Prompts'][0][1];
-                prompt.path = await getPath(prompt.start, prompt.end);    
-            
+                prompt.path = await getPath(prompt.start, prompt.end);
+
                 this.prompts.push(prompt);
-            } catch(e) {
+            } catch (e) {
                 console.log(e);
             }
         }
@@ -221,11 +219,11 @@ Vue.component('marathon-generator', {
 
 
     methods: {
-        submitMarathonPrompt: async function () {
+        submitMarathonPrompt: async function() {
             try {
 
-                const response = await fetchJson("/api/marathon/add/", 'POST', {'data':this.promptinput})
-        
+                const response = await fetchJson("/api/marathon/add/", 'POST', { 'data': this.promptinput })
+
                 if (response.status != 200) {
                     // For user facing interface, do something other than this
                     alert(await response.text());
@@ -235,13 +233,13 @@ Vue.component('marathon-generator', {
                 //const resp = await response.json()
 
                 console.log(await response.text())
-                
-            } catch(e) {
+
+            } catch (e) {
                 console.log(e);
             }
-        }, 
+        },
 
-        displayGenerated: async function () {
+        displayGenerated: async function() {
 
             console.log("generating")
             document.getElementById("generatedMarathonText").innerHTML = "Generating... Please give up to 3 minutes"
@@ -249,7 +247,7 @@ Vue.component('marathon-generator', {
             try {
 
                 const response = await fetchJson("/api/marathon/gen/", 'POST', this.$data)
-        
+
                 if (response.status != 200) {
                     // For user facing interface, do something other than this
                     alert(await response.text());
@@ -263,8 +261,8 @@ Vue.component('marathon-generator', {
                 //const resp = await response.json()
 
                 //console.log(await response.text())
-                
-            } catch(e) {
+
+            } catch (e) {
                 console.log(e);
                 document.getElementById("generatedMarathonText").innerHTML = e
             }
@@ -347,21 +345,27 @@ var app = new Vue({
     created: async function() {
         await this.getPrompts();
     },
-    
+
     methods: {
         toISODate(date) {
             return date.toISOString().substring(0, 10);
         },
         async getPrompts() {
             const prompts = await (await fetchJson("/api/sprints/managed")).json();
-            
+
+            console.log(prompts)
+
             this.unused = prompts.filter(p => !p["used"]);
-            
+
+            console.log(this.unused)
+
             const used = prompts.filter(p => p["used"]);
+
+            console.log(used)
 
             let daily = used.filter(p => p["rated"]);
             let weeklys = used.filter(p => !p["rated"]);
-            
+
             let nextDailys = {};
             let nextWeeklys = {};
 
@@ -378,11 +382,12 @@ var app = new Vue({
                 const key = p["active_start"].substring(0, 10);
                 if (!nextWeeklys[key]) {
                     nextWeeklys[key] = [];
-                }                
+                }
                 nextWeeklys[key].push(p);
             })
 
             let cur = new Date();
+            console.log(cur)
 
             // Change cur to first day of this week
             cur.setUTCDate(cur.getUTCDate() - cur.getUTCDay());
@@ -391,7 +396,7 @@ var app = new Vue({
             for (let i = 0; i < 2; i++) {
                 let end = new Date(cur)
                 end.setDate(cur.getDate() + 7);
-
+                console.log(end)
                 this.weeks.push({
                     start: this.toISODate(cur),
                     end: this.toISODate(end),
@@ -402,8 +407,8 @@ var app = new Vue({
 
                 for (let j = 0; j < 7; j++) {
 
-                    const day =  new Date(cur);
-                    this.weeks[i].days.push( {
+                    const day = new Date(cur);
+                    this.weeks[i].days.push({
                         "date": this.toISODate(day),
                         "prompts": nextDailys[this.toISODate(day)] || []
                     });
@@ -418,30 +423,28 @@ var app = new Vue({
         },
 
         async newPrompt(event) {
-    
+
             let reqBody = {};
-        
+
             const resp = await fetch(
-                `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("start").value}`,
-                {
+                `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("start").value}`, {
                     mode: "cors"
                 }
             )
             const body = await resp.json()
-        
+
             reqBody["start"] = body["parse"]["title"];
-        
-        
+
+
             const resp1 = await fetch(
-                `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("end").value}`,
-                {
+                `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("end").value}`, {
                     mode: "cors"
                 }
             )
             const body1 = await resp1.json()
-        
+
             reqBody["end"] = body1["parse"]["title"];
-        
+
             try {
                 const response = await fetch("/api/sprints/", {
                     method: 'POST',
@@ -450,16 +453,13 @@ var app = new Vue({
                     },
                     body: JSON.stringify(reqBody)
                 })
-        
-            } catch(e) {
+
+            } catch (e) {
                 console.log(e);
             }
-        
+
             this.getPrompts();
         }
 
     } // End methods
 }); // End vue
-
-
-
