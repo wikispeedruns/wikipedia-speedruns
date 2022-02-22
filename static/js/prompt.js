@@ -231,6 +231,9 @@ var app = new Vue({
         },
 
         getPageNo: function () {
+            if (this.runs.length === 0) {
+                return 0;
+            }
             return parseInt(pg)
         },
 
