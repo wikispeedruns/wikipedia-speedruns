@@ -19,18 +19,18 @@ var app = new Vue({
         run_id: run_id,
     },
 
-    methods : {
-        getPrompt: async function () {
+    methods: {
+        getPrompt: async function() {
             var response = await fetch("/api/marathon/prompt/" + prompt_id);
             return await response.json();
-        }, 
+        },
 
-        getRuns: async function () {
+        getRuns: async function() {
             var response = await fetch("/api/marathon/prompt/" + prompt_id + "/leaderboard/" + run_id);
-            return await response.json(); 
-        }, 
+            return await response.json();
+        },
 
-        getPageNo: function () {
+        getPageNo: function() {
             return parseInt(pg)
         },
 
@@ -42,8 +42,8 @@ var app = new Vue({
             return run_id;
         },
 
-        paginate: function () {
-            const first = (pg-1) * runsPerPage
+        paginate: function() {
+            const first = (pg - 1) * runsPerPage
             const last = pg * runsPerPage
             for (let i = 0; i < this.runs.length; i++) {
                 let run = this.runs[i]
@@ -63,20 +63,20 @@ var app = new Vue({
             }
         },
 
-        nextPage: function () {
+        nextPage: function() {
             //TODO: look into ways to use JS methods to update/insert new args
             if (run_id) {
-                window.location.replace("/marathonprompt/" + prompt_id + "?page=" + String(parseInt(pg)+1) + "&run_id=" + run_id);
+                window.location.replace("/marathonprompt/" + prompt_id + "?page=" + String(parseInt(pg) + 1) + "&run_id=" + run_id);
             } else {
-                window.location.replace("/marathonprompt/" + prompt_id + "?page=" + String(parseInt(pg)+1));
+                window.location.replace("/marathonprompt/" + prompt_id + "?page=" + String(parseInt(pg) + 1));
             }
-        }, 
+        },
 
         prevPage: function() {
             if (run_id) {
-                window.location.replace("/marathonprompt/" + prompt_id + "?page=" + String(parseInt(pg)-1) + "&run_id=" + run_id);
+                window.location.replace("/marathonprompt/" + prompt_id + "?page=" + String(parseInt(pg) - 1) + "&run_id=" + run_id);
             } else {
-                window.location.replace("/marathonprompt/" + prompt_id + "?page=" + String(parseInt(pg)-1));
+                window.location.replace("/marathonprompt/" + prompt_id + "?page=" + String(parseInt(pg) - 1));
             }
         }
     },
@@ -85,14 +85,16 @@ var app = new Vue({
         this.prompt = await this.getPrompt();
         this.runs = await this.getRuns();
 
+        console.log(this.runs)
+
         this.runs.forEach(function(run) {
             run.checkpoints = JSON.parse(run.checkpoints)
             run.path = JSON.parse(run.path)
         })
 
-        this.paginate(); 
+        this.paginate();
 
         //console.log(this.runs);
-        
+
     }
 })

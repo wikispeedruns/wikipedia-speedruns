@@ -29,14 +29,14 @@
                     <tbody>
                         <tr v-for="(run, index) in renderedRuns">
                             <td v-if="run.username" v-bind:class="run_id && run.run_id === parseInt(run_id) ? 'bold': ''" >[[run.username]]</td>
-                            <td v-else><strong>Your most recent run</strong></td>
-                            <td>[[(run.run_time/1000000).toFixed(3)]] s</td>
+                            <td v-else>null</td>
+                            <td>[[(run.total_time).toFixed(3)]] s</td>
                             <td>[[run.path.length]]</td>
                             <td>[[run.checkpoints.length]]</td>
                         </tr>
                         <tr v-if="currentRunPosition === 1">
                             <td><strong>Your most recent run</strong></td>
-                            <td>[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
+                            <td>[[(currentRun.total_time).toFixed(3)]] s</td>
                             <td>[[currentRun.path.length]]</td>
                             <td>[[currentRun.checkpoints.length]]</td>
                         </tr>

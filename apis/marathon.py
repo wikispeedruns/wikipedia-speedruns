@@ -13,7 +13,7 @@ marathon_api = Blueprint('marathon', __name__, url_prefix='/api/marathon')
 
 @marathon_api.post('/runs/')
 def create_run():
-    query = "INSERT INTO `marathonruns` (`path`, `prompt_id`, `user_id`, `checkpoints`) VALUES (%s, %s, %s, %s)"
+    query = "INSERT INTO `marathonruns` (`path`, `prompt_id`, `user_id`, `checkpoints`, `total_time`) VALUES (%s, %s, %s, %s, %s)"
     sel_query = "SELECT LAST_INSERT_ID()"
 
     # datetime wants timestamp in seconds since epoch
@@ -23,6 +23,7 @@ def create_run():
     print(checkpoints)
     
     prompt_id = request.json['prompt_id']
+    time = str(request.json['time'])
 
     if ('user_id' in session):
         user_id = session['user_id']
@@ -33,8 +34,8 @@ def create_run():
 
     db = get_db()
     with db.cursor() as cursor:
-        print(cursor.mogrify(query, (path, prompt_id, user_id, checkpoints)))
-        result = cursor.execute(query, (path, prompt_id, user_id, checkpoints))
+        print(cursor.mogrify(query, (path, prompt_id, user_id, checkpoints, time)))
+        result = cursor.execute(query, (path, prompt_id, user_id, checkpoints, time))
         
         cursor.execute(sel_query)
         id = cursor.fetchone()[0]
@@ -193,5 +194,7 @@ def get_marathon_prompt_leaderboard(id, run_id):
         for run in results:
             run['path'] = json.loads(run['path'])
             run['checkpoints'] = json.loads(run['checkpoints'])
+            if run['total_time'] is None:
+                run['total_time'] = 9999.99
 
         return jsonify(results)

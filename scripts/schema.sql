@@ -64,5 +64,6 @@ CREATE TABLE IF NOT EXISTS `marathonruns` (
     `checkpoints` TEXT NOT NULL,
     `prompt_id` INT NOT NULL,
     `user_id` INT,
+    `total_time` FLOAT(10) NOT NULL,
     PRIMARY KEY (`run_id`)
 );

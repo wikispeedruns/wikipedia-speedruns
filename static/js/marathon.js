@@ -18,56 +18,56 @@ let app = new Vue({
         forfeited: false,
         showHelp: false,
         activeTip: "",
-        path:[],
-        finalTime:"",
+        path: [],
+        finalTime: "",
         prompt_id: 0,
         run_id: "",
-        
-        checkpoints:[],
+
+        checkpoints: [],
         activeCheckpoints: [],
         visitedCheckpoints: [],
         numVisitedUnique: 0,
         clicksRemaining: 11,
     },
     computed: {
-        numCheckpointsVisited : function () {
+        numCheckpointsVisited: function() {
             return this.visitedCheckpoints.length
         },
     },
-    methods : {
-        formatPath: function (pathArr) {
+    methods: {
+        formatPath: function(pathArr) {
             let output = "";
-            for(let i=0; i<pathArr.length - 1;i++) {
+            for (let i = 0; i < pathArr.length - 1; i++) {
                 output = output.concat(pathArr[i])
                 output = output.concat(" -> ")
             }
             output = output.concat(pathArr[pathArr.length - 1])
             return output;
-        }, 
+        },
 
-        finishPrompt: function (event) {
+        finishPrompt: function(event) {
             window.location.replace("/marathonprompt/" + prompt_id + "?run_id=" + this.run_id);
-        }, 
+        },
 
-        home: function (event) {
+        home: function(event) {
             window.location.replace("/");
         },
 
-        formatActiveCheckpoints: function () {
+        formatActiveCheckpoints: function() {
             let output = ""
-            for (let i = 0; i < this.activeCheckpoints.length-1; i++) {
+            for (let i = 0; i < this.activeCheckpoints.length - 1; i++) {
                 output += String(i) + ": <strong>"
                 output += this.activeCheckpoints[i]
                 output += "</strong><br>"
             }
-            output += String(this.activeCheckpoints.length-1) + ": <strong>"
-            output+=this.activeCheckpoints[this.activeCheckpoints.length-1]
+            output += String(this.activeCheckpoints.length - 1) + ": <strong>"
+            output += this.activeCheckpoints[this.activeCheckpoints.length - 1]
             output += "</strong>"
 
             return output
         },
 
-        forfeitRun: function () {
+        forfeitRun: function() {
             this.forfeited = true;
             finish();
         }
@@ -83,8 +83,7 @@ const clicksPerCheckpoint = 5;
 
 var startTime = 0;
 
-function handleWikipediaLink(e) 
-{
+function handleWikipediaLink(e) {
     e.preventDefault();
     const linkEl = e.currentTarget;
 
@@ -99,7 +98,7 @@ function handleWikipediaLink(e)
         if (linkEl.getAttribute("href").substring(0, 6) !== "/wiki/") return;
 
         // Disable the other links, otherwise we might load multiple links
-        document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
+        document.querySelectorAll("#wikipedia-frame a").forEach((el) => {
             el.onclick = (e) => {
                 e.preventDefault();
                 console.log("prevent multiple click");
@@ -113,7 +112,7 @@ function handleWikipediaLink(e)
 
 function setMargin() {
     const element = document.getElementById("time-box");
-    document.getElementById("wikipedia-frame").firstChild.style.paddingBottom = (element.offsetHeight + 25) +"px";
+    document.getElementById("wikipedia-frame").firstChild.style.paddingBottom = (element.offsetHeight + 25) + "px";
     console.log(element.offsetHeight + 25);
     document.getElementById("help-box").style.bottom = (element.offsetHeight + 25);
 }
@@ -121,11 +120,10 @@ function setMargin() {
 
 async function loadPage(page) {
 
-    
+
 
     const resp = await fetch(
-        `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${page}`,
-        {
+        `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${page}`, {
             mode: "cors"
         }
     )
@@ -143,8 +141,8 @@ async function loadPage(page) {
 
     app.$data.clicksRemaining -= 1;
 
-    document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
-    
+    document.getElementById("title").innerHTML = "<h1><i>" + title + "</i></h1>"
+
     if (!app.$data.path.includes(title)) {
         app.$data.numVisitedUnique += 1;
     }
@@ -152,9 +150,9 @@ async function loadPage(page) {
     // Start timer if we are at the start
     if (app.$data.path.length == 0) {
         startTime = Date.now()
-        timerInterval = setInterval(displayTimer, 20);    
+        timerInterval = setInterval(displayTimer, 20);
     }
-    
+
     app.$data.path.push(title)
 
     var hitcheckpoint = false;
@@ -173,7 +171,7 @@ async function loadPage(page) {
             app.$data.visitedCheckpoints.push(title);
 
         }
-        
+
     }
 
 
@@ -181,7 +179,7 @@ async function loadPage(page) {
         await finish();
     }
 
-    document.querySelectorAll("#wikipedia-frame a").forEach((el) =>{
+    document.querySelectorAll("#wikipedia-frame a").forEach((el) => {
         el.onclick = handleWikipediaLink;
     });
 
@@ -189,7 +187,7 @@ async function loadPage(page) {
     setMargin();
     window.scrollTo(0, 0)
 
-    
+
     if (hitcheckpoint) {
         //console.log("hit checkpoint, getting new checkpoint")
 
@@ -198,7 +196,7 @@ async function loadPage(page) {
         let got = false
 
         app.$data.checkpoints.forEach(bucket => {
-            if (bucket.length> 0 && !got) {
+            if (bucket.length > 0 && !got) {
                 let el = bucket.pop()
                 app.$data.activeCheckpoints[checkpointindex] = el['a']
                 console.log(el['a'])
@@ -224,33 +222,33 @@ async function finish() {
         const response = await fetchJson(`/api/marathon/runs/`, "POST", {
             path: JSON.stringify(app.$data.path),
             checkpoints: JSON.stringify(app.$data.visitedCheckpoints),
-            prompt_id: String(app.$data.prompt_id)
-        }
-        )
+            prompt_id: String(app.$data.prompt_id),
+            time: app.$data.finalTime,
+        })
 
         app.$data.run_id = await response.json()
 
         //console.log("run saved")
 
-    } catch(e) {
+    } catch (e) {
         console.log(e);
     }
 }
 
 
 function hideElements() {
-    
-    const hide = ["reference","mw-editsection","reflist","portal","refbegin", "sidebar", "authority-control", "external", "sistersitebox"]
-    for(let i=0; i<hide.length; i++) {
+
+    const hide = ["reference", "mw-editsection", "reflist", "portal", "refbegin", "sidebar", "authority-control", "external", "sistersitebox"]
+    for (let i = 0; i < hide.length; i++) {
         let elements = document.getElementsByClassName(hide[i])
-        //console.log("found: " + hide[i] + elements.length)
-        for(let j=0; j<elements.length; j++) {
+            //console.log("found: " + hide[i] + elements.length)
+        for (let j = 0; j < elements.length; j++) {
             elements[j].style.display = "none";
         }
     }
-    
+
     const idS = ["See_also", "Notes_and_references", "Further_reading", "External_links", "References", "Notes", "Citations", "Explanatory_notes"];
-    for(let i=0; i<idS.length; i++) {
+    for (let i = 0; i < idS.length; i++) {
         let e = document.getElementById(idS[i]);
         if (e !== null) {
             e.style.display = "none";
@@ -258,9 +256,9 @@ function hideElements() {
     }
 
     //hide Disambig
-    
+
     let elements = document.getElementsByClassName("hatnote");
-    for (let i=0; i < elements.length; i++) {
+    for (let i = 0; i < elements.length; i++) {
         let a = elements[i].getElementsByClassName("mw-disambig");
         //console.log(a)
         if (a.length !== 0) {
@@ -292,7 +290,7 @@ function hideElements() {
             all[i].style.display = "none";
         }
     }
-    
+
 }
 
 function formatStr(string) {
@@ -317,17 +315,17 @@ async function countdownOnLoad() {
     const promise1 = new Promise(resolve => {
         const x = setInterval(function() {
             const now = Date.now()
-          
+
             // Find the distance between now and the count down date
             let distance = countDownStart + countDownTime - now;
-            app.$data.countdown = Math.floor(distance/1000)+1;
+            app.$data.countdown = Math.floor(distance / 1000) + 1;
 
             if (distance <= 0) {
                 resolve();
                 clearInterval(x);
             }
 
-            if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {                
+            if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {
                 document.getElementById("mirroredimgblock").classList.toggle("invisible")
             }
 
@@ -339,7 +337,7 @@ async function countdownOnLoad() {
 
 function disableFind(e) {
     console.log(e);
-    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) { 
+    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) {
         e.preventDefault();
         this.alert("WARNING: Attempt to Find in page. This will be recorded.")
     }
@@ -359,9 +357,9 @@ window.addEventListener("load", async function() {
     if (response.status != 200) {
         const error = await response.text();
         this.alert(error)
-        // Prevent are your sure you want to leave prompt
+            // Prevent are your sure you want to leave prompt
         window.onbeforeunload = null;
-        window.location.href = "/"   // TODO error page
+        window.location.href = "/" // TODO error page
 
     }
 
