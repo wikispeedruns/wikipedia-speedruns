@@ -78,7 +78,8 @@ function handleWikipediaLink(e)
         if (!linkEl.getAttribute("href").startsWith("/wiki/") || 
             linkEl.getAttribute("href").startsWith("/wiki/File:") || 
             linkEl.getAttribute("href").startsWith("/wiki/Wikipedia:") || 
-            linkEl.getAttribute("href").startsWith("/wiki/Category:")) {
+            linkEl.getAttribute("href").startsWith("/wiki/Category:") ||
+            linkEl.getAttribute("href").startsWith("/wiki/Help:")) {
             return;
         }
 
@@ -93,6 +94,38 @@ function handleWikipediaLink(e)
         // Remove "/wiki/" from string
         loadPageWrapper(linkEl.getAttribute("href").substring(6))
     }
+}
+
+
+function stripNamespaceLinks() {
+    let frameBody = document.getElementById("wikipedia-frame")
+    frameBody.querySelectorAll("a").forEach((linkEl) => {
+        
+        if (linkEl.hasAttribute("href")) {
+            if (linkEl.getAttribute("href").startsWith("/wiki/File:") || 
+                linkEl.getAttribute("href").startsWith("/wiki/Wikipedia:") || 
+                linkEl.getAttribute("href").startsWith("/wiki/Category:") ||
+                linkEl.getAttribute("href").startsWith("/wiki/Help:")) {
+                let newEl = document.createElement("span");
+                newEl.innerHTML = linkEl.innerHTML
+                linkEl.parentNode.replaceChild(newEl, linkEl)
+                //linkEl.setAttribute("href", null)
+            }
+        }
+    });
+
+    frameBody.querySelectorAll("a").forEach(function(a) {
+        let iter = document.createNodeIterator(a, NodeFilter.SHOW_TEXT);
+        let textNode;
+        while (textNode = iter.nextNode()) {
+            let replacementNode = document.createElement('div');
+            replacementNode.innerHTML = '<div style="display:inline-block">' + textNode.textContent.split('').map(function(character) {
+                return '<div style="display:inline-block">' + character.replace(/\s/g, '&nbsp;') + '</div>'
+            }).join('') + '</div>'
+            textNode.parentNode.insertBefore(replacementNode.firstChild, textNode);
+            textNode.parentNode.removeChild(textNode);
+        }
+    });
 }
 
 async function loadPageWrapper(page) {
@@ -121,7 +154,7 @@ async function loadPage(page) {
     let frameBody = document.getElementById("wikipedia-frame")
     frameBody.innerHTML = body["parse"]["text"]["*"]
 
-    frameBody.querySelectorAll("a").forEach(function(a) {
+    /*frameBody.querySelectorAll("a").forEach(function(a) {
         let iter = document.createNodeIterator(a, NodeFilter.SHOW_TEXT);
         let textNode;
         while (textNode = iter.nextNode()) {
@@ -132,7 +165,7 @@ async function loadPage(page) {
             textNode.parentNode.insertBefore(replacementNode.firstChild, textNode);
             textNode.parentNode.removeChild(textNode);
         }
-    });
+    });*/
 
     document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
     
@@ -142,11 +175,11 @@ async function loadPage(page) {
         await finish();
     }
 
+    hideElements();
+    stripNamespaceLinks();
     document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
         el.onclick = handleWikipediaLink;
     });
-
-    hideElements();
     setMargin();
     window.scrollTo(0, 0)
 }
