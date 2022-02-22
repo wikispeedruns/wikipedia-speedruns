@@ -204,7 +204,8 @@ var app = new Vue({
         currentRun: null,
         currentRunPosition: 0,
         currentRunRank: 0,
-        runsPerPage: runsPerPage
+        runsPerPage: runsPerPage,
+        available: false,
     },
 
     methods : {
@@ -294,6 +295,8 @@ var app = new Vue({
 
     created: async function() {
         const resp = await this.getLeaderboard();
+
+        this.available = resp['prompt']['available'];
 
         this.prompt = resp["prompt"];
         this.runs = resp["leaderboard"];

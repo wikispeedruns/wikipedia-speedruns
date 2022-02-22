@@ -16,7 +16,11 @@
             <div class="card-body">
     
                 <h4>Prompt #[[getPromptID()]]</h4>
-                <p><h6><strong>[[prompt.start]]</strong> to <strong>[[prompt.end]]</strong></h6></p>
+                <p>
+                    <h6 v-if="available">
+                        <strong>[[prompt.start]]</strong> to <strong v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>
+                    </h6>
+                </p>
                 <p>[[runs.length]] total runs</p>
 
                 <table v-if="runs.length > 0" class="table table-hover">
@@ -63,7 +67,7 @@
                     </tbody>
                 </table>
 
-                <p class="my-4" v-else>This prompt currently doesn't have any runs, be the first to play it! <a v-bind:href="'/play/' + getPromptID()">Play</a></p>
+                <p class="my-4" v-else>This prompt currently doesn't have any runs. <span v-if="available">Be the first to play it! <a v-bind:href="'/play/' + getPromptID()">Play</a></span></p>
 
             </div>  
             <div class="card-footer text-center">
