@@ -7,16 +7,19 @@ import os
 DEFAULT_DB_NAME='wikipedia_speedruns'
 
 
-def create_database(db_name, recreate=False):
-    # Load database settings
+def create_database(db_name, recreate=False, test_config=None):
+    # Load database settings from
     config = json.load(open("../config/default.json"))
     try:
         config.update(json.load(open("../config/prod.json")))
     except FileNotFoundError:
         pass
 
+    if test_config:
+        config.update(test_config)
+
     conn = pymysql.connect(
-        user=config["MYSQL_USER"], 
+        user=config["MYSQL_USER"],
         host=config["MYSQL_HOST"],
         password=config["MYSQL_PASSWORD"],
     )
