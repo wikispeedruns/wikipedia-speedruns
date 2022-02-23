@@ -2,7 +2,28 @@ function parseAndCleanPage(mainFrameEl, title) {
     
     document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
 
-    mainFrameEl.querySelectorAll("a").forEach(function(a) {
+    stripNamespaceLinks(mainFrameEl)
+    hideElements(mainFrameEl);
+    setMargin();
+}
+
+function stripNamespaceLinks(frameBody) {
+
+    frameBody.querySelectorAll("a").forEach((linkEl) => {
+        
+        if (linkEl.hasAttribute("href")) {
+            if (linkEl.getAttribute("href").startsWith("/wiki/File:") || 
+                linkEl.getAttribute("href").startsWith("/wiki/Wikipedia:") || 
+                linkEl.getAttribute("href").startsWith("/wiki/Category:") ||
+                linkEl.getAttribute("href").startsWith("/wiki/Help:")) {
+                let newEl = document.createElement("span");
+                newEl.innerHTML = linkEl.innerHTML
+                linkEl.parentNode.replaceChild(newEl, linkEl)
+            }
+        }
+    });
+
+    frameBody.querySelectorAll("a").forEach(function(a) {
         let iter = document.createNodeIterator(a, NodeFilter.SHOW_TEXT);
         let textNode;
         while (textNode = iter.nextNode()) {
@@ -14,9 +35,6 @@ function parseAndCleanPage(mainFrameEl, title) {
             textNode.parentNode.removeChild(textNode);
         }
     });
-
-    hideElements(mainFrameEl);
-    setMargin();
 }
 
 function hideElements(mainFrameEl) {
