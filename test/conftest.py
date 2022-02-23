@@ -16,14 +16,18 @@ TEST_DB_NAME="test"
 @pytest.fixture(scope="session")
 def test_db():
     create_database(TEST_DB_NAME, recreate=True)
-    
+
 
 @pytest.fixture(scope="session")
 def app(test_db):
     yield create_app({
-        'TESTING': True, 
-        'DATABASE': TEST_DB_NAME, 
-        'MAIL_DEFAULT_SENDER': 'no-reply@wikispeedruns.com'
+        'TESTING': True,
+        'MAIL_DEFAULT_SENDER': 'no-reply@wikispeedruns.com',
+        'DATABASE': TEST_DB_NAME,
+        # Same as in build.yml
+        'MYSQL_USER': 'testuser',
+        'MYSQL_PASSWORD': 'testpassword',
+
     })
 
 
@@ -58,7 +62,7 @@ def user_base(client, mail, cursor):
     '''
     user = {
         "username" : "echoingsins",
-        "email" : "echoingsins@gmail.com", 
+        "email" : "echoingsins@gmail.com",
         "password" : "lmao"
     }
 
