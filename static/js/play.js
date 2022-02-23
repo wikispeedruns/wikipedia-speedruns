@@ -1,37 +1,51 @@
+/* play.js is core of processing gameplay. This includes everything from retrieving information about a prompt, 
+countdown to start, loading of each wikipedia page, parsing and filtering wikipedia links, processing game logic, 
+and submitting runs.
+
+With the new Marathon game mode, many of these components are being reused with different game logic. So many of 
+these components should be as modular/generic as possible. 
+*/
+
+//JS module imports
 import { serverData } from "./modules/serverData.js";
 import { playGame } from "./modules/playmodule.js";
 import { getRandTip } from "./modules/tooltips.js";
 
+//retrieve the unique prompt_id of the prompt to load
 const prompt_id = serverData["prompt_id"];
 
+//Vue container. This contains data, rendering flags, and functions tied to game logic and rendering. See play.html
 let app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     data: {
-        gameType: "sprint",
-        startArticle: "",
-        endArticle: "",
-        prompt_id: 0,
-        run_id: -1,
-        path:[],
-        timer: "",
-        countdown: 8,
-        startTime: null,
-        finalTime:"",
-        endTime: null,
-        finished: false,
-        started: false,
-        activeTip: "",
+        gameType: "sprint",  //'sprint' or 'marathon'
+        startArticle: "",    //For all game modes, this is the first article to load
+        endArticle: "",      //For sprint games. Reaching this article will trigger game finishing sequence
+        prompt_id: 0,        //Unique prompt id to load, this should be identical to 'const prompt_id', but is mostly used for display
+        run_id: -1,          //unique ID for the current run. This gets populated upon start of run
+        path:[],             //array to store the user's current path so far, submitted with run
+        timer: "",           //string for displaying of the timer in seconds.
+        countdown: 8,        //The countdown duration in seconds
+        startTime: null,     //For all game modes, the start time of run (mm elapsed since January 1, 1970)
+        finalTime:"",        //For all game modes, totla runtime, only used for rendering. 
+        endTime: null,       //For all game modes, the end time of run (mm elapsed since January 1, 1970)
+        finished: false,     //Flag for whether a game has finished, used for rendering
+        started: false,      //Flag for whether a game has started (countdown finished), used for rendering
+        activeTip: "",       //variable used to store the game tip displayed on the countdown screen
     },
     methods : {
+        //redirect to the corresponding prompt page
         finishPrompt: function (event) {
             window.location.replace("/prompt/" + this.prompt_id + "?run_id=" + this.run_id);
         }, 
 
+        //go back to home page
         home: function (event) {
             window.location.replace("/");
         },
 
+        //copy sharable result
         copyResults: function(event) {
             let results = this.generateResults();
             document.getElementById("custom-tooltip").style.display = "inline";
@@ -54,6 +68,8 @@ let app = new Vue({
     }
 })
 
+
+//send request to create an empty run, returns the run_id
 async function saveEmptyRun() {
     const reqBody = {
         "prompt_id": prompt_id,
@@ -72,10 +88,10 @@ async function saveEmptyRun() {
     }
 }
 
-
+//Upon load
 window.addEventListener("load", async function() {
+    //get prompt information
     const response = await fetch("/api/sprints/" + prompt_id);
-
     if (response.status != 200) {
         const error = await response.text();
         this.alert(error)
@@ -88,6 +104,7 @@ window.addEventListener("load", async function() {
 
     const prompt = await response.json();
     
+    //check if the retrieved prompt is available to play. If not, redirect user to home
     if (!prompt['available']) {
         this.alert("This prompt is not yet available! Redirecting back to home");
         window.onbeforeunload = null;
@@ -95,19 +112,23 @@ window.addEventListener("load", async function() {
         return;
     }
 
+    //populate vue data
     app.$data.prompt_id = prompt_id;
     app.$data.startArticle = prompt["start"];
     app.$data.endArticle = prompt["end"];
     app.$data.run_id = await saveEmptyRun(); // Save run on clicking "play" when `prompt_id` is valid
     app.$data.activeTip = getRandTip();
 
+    //pass the vue object to module function for page loading, game logic processing, and finishing
     playGame(app)
 });
 
+//prevent accidental leaves
 window.onbeforeunload = function() {
     return true;
 };
 
+//Disable find hotkeys, players will be given a warning
 window.addEventListener("keydown", function(e) {
     //disable find
     if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) { 

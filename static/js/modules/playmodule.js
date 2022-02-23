@@ -1,4 +1,3 @@
-
 import { parseAndCleanPage } from "./wikipediapageparse.js"
 
 let vueContainer = null;
@@ -6,23 +5,28 @@ let timerInterval = null;
 
 async function playGame(app) {
 
+    //get the vue object passed from play.js. It will contain prompt and run information
     vueContainer = app;
+    //start the countdown, and preload the starting article
     await Promise.all([countdown(), loadPage(vueContainer.$data.startArticle)]);
 
+    //once above conditions are met, toggle the `started` render flag, which will hide all other elements, and display the rendered wikipage
     vueContainer.$data.started = true;
+    //start timer
     vueContainer.$data.startTime = Date.now();
 
+    //set the timer update interval
     timerInterval = setInterval(function() {
         const seconds = (Date.now() - vueContainer.$data.startTime) / 1000;
         vueContainer.$data.timer = seconds;
     }, 50);
 
-    //await new Promise(resolve => setTimeout(resolve, 1000));
 }
 
+//Load a page given its article title
 async function loadPage(page) {
 
-    const resp = await fetch(
+    const resp = await fetch( //Note: wikipedia will also process any redirects in this API call, so the response will always be a valid page
         `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${page}`,
         {
             mode: "cors"
@@ -31,17 +35,26 @@ async function loadPage(page) {
     const body = await resp.json()
     const title = body["parse"]["title"]
 
+    //load our main wikipedia page DOM element with the body of the API response
     let frameBody = document.getElementById("wikipedia-frame")
     frameBody.innerHTML = body["parse"]["text"]["*"]
 
+    //process the next step in game logic, given that we reached a new page. This function should be dependent on gamemode.
     await processGameLogic(title);
     
+    /*clean up page's links and formatting, including:
+        hide elements on the wikipedia page that players should not use
+        strip hyperlinks that lead to wikipedia namespaced pages
+        setting the bottom padding of the main element (prevents the HUD from blocking text at the bottom)
+    */
     parseAndCleanPage(frameBody, title);
 
+    //Set the click event of all links on page
     document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
         el.onclick = handleWikipediaLink;
     });
 
+    //After rendering is complete, scroll to top of page
     window.scrollTo(0, 0)
 }
 
@@ -49,8 +62,11 @@ async function loadPage(page) {
 
 async function processGameLogic(title) {
 
+    //add newest page visited to the array storing path
     vueContainer.$data.path.push(title);
 
+    //Game logic for sprint mode:
+        //if the page's title matches that of the end article, finish the game, and submit the run
     if (vueContainer.$data.gameType === "sprint") {
     
         if (title.replace("_", " ").toLowerCase() === vueContainer.$data.endArticle.replace("_", " ").toLowerCase()) {
@@ -58,13 +74,11 @@ async function processGameLogic(title) {
             await submitSprint();
         }
 
-    } else {
-        console.log(vueContainer.$data.gameType)
     }
 }
 
 
-
+//click event handling for each link
 function handleWikipediaLink(e) 
 {
     e.preventDefault();
@@ -108,6 +122,7 @@ async function loadPageWrapper(page) {
 }
 
 async function genericFinish() {
+    //toggle the finished render flag. This will hide the main page block and show the finishing stats
     vueContainer.$data.finished = true;
     vueContainer.$data.finalTime = vueContainer.$data.timer;
     // Stop timer
@@ -118,6 +133,7 @@ async function genericFinish() {
 }
 
 
+//Submit run information to endpoint as an update of the previously generated empty run 
 async function submitSprint() {
 
     const reqBody = {
