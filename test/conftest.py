@@ -5,26 +5,31 @@ from pymysql.cursors import DictCursor
 
 sys.path.append('..')
 from app import create_app
-from scripts.createDB import create_database
+from scripts.create_db import create_database
 
 from db import get_db
 from mail import mail
 
 
 TEST_DB_NAME="test"
+TEST_CONFIG={
+    'TESTING': True,
+    'MAIL_DEFAULT_SENDER': 'no-reply@wikispeedruns.com',
+    'DATABASE': TEST_DB_NAME,
+    # Same as in .github/workflows/build.yml
+    'MYSQL_USER': 'testuser',
+    'MYSQL_PASSWORD': 'testpassword',
+}
+
 
 @pytest.fixture(scope="session")
 def test_db():
-    create_database(TEST_DB_NAME, recreate=True)
-    
+    create_database(TEST_DB_NAME, recreate=True, test_config=TEST_CONFIG)
+
 
 @pytest.fixture(scope="session")
 def app(test_db):
-    yield create_app({
-        'TESTING': True, 
-        'DATABASE': TEST_DB_NAME, 
-        'MAIL_DEFAULT_SENDER': 'no-reply@wikispeedruns.com'
-    })
+    yield create_app(test_config=TEST_CONFIG)
 
 
 @pytest.fixture()
@@ -58,7 +63,7 @@ def user_base(client, mail, cursor):
     '''
     user = {
         "username" : "echoingsins",
-        "email" : "echoingsins@gmail.com", 
+        "email" : "echoingsins@gmail.com",
         "password" : "lmao"
     }
 
