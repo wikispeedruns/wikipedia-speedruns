@@ -41,3 +41,9 @@
 	opacity: .7;
 	border-radius: 25%;
 }
+
+.beta {
+	color:red;
+	vertical-align: super;
+	font-size: small;
+}
