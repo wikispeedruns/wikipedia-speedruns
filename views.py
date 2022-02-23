@@ -85,6 +85,9 @@ def get_prompt_page(id):
     run_id = request.args.get('run_id', '')
     page = request.args.get('page', 1)
     
+    if int(page) < 1:
+        page = 1
+    
     if len(run_id) != 0:
         return render_with_data('prompt.html', prompt_id=id, run_id=run_id, pg = page)
     else:

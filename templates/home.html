@@ -3,6 +3,7 @@
 {% block head %}
 <script defer type=text/javascript src="{{url_for('static', filename='js/home.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/home.css')}}">
 <style>
     [v-cloak] { display: none }
 </style>
@@ -12,7 +13,7 @@
 
 <div id="app">
 
-    <h3>Welcome to Wikipedia Speedruns!</h3>
+    <h3>Welcome to Wikipedia Speedruns! <a href="/about#beta"><span class="beta">BETA*</span></a></h3>
 
 
     <p>The goal of this game is simple. Try to get from one wikipedia page to another as fast as possible by clicking on the links in the page. </p>
@@ -91,7 +92,7 @@
         </div>
     </div>
     </div>
-    <p> Still want more? Checkout our <a href="/archive">archive</a> or click <a href="/random">here</a> to try a random prompt.</p>
+    <p class="my-4"> Still want more? Checkout our <a href="/archive">archive</a> or click <a href="/random">here</a> to try a random prompt.</p>
 
     <hr>
     <h4> Top 10 rated players:</h4> Note the <a href="/about#ratings">rating system</a> is still experimental </p>
@@ -118,30 +119,47 @@
     <hr>
 
     <div>
-        <p> Questions or Feedback? Email us at <a href="mailto:support@wikispeedruns.com">support@wikispeedruns.com</a></p>
+        <p>
+            Questions or Feedback? Email us at <a href="mailto:support@wikispeedruns.com">support@wikispeedruns.com</a>,
+            <a href="https://twitter.com/intent/tweet?screen_name=WikiSpeedruns" target="_blank">tweet</a> at us,
+            or join our <a href="https://discord.gg/mNYeB9c9db" target="_blank">Discord</a> server!
+        </p>
 
         <p>
             Created by <a href="https://danqian.net">Daniel Qian</a>,
             <a href="https://mliu59.github.io/">Miles Liu</a>,
             <a href="https://bricehalder.com/">Brice Halder</a>,
-            and <a href="https://xablexa.com/">Axel Bax</a>
+            <a href="https://xablexa.com/">Axel Bax</a>, 
+            <a href="https://www.omfgdogs.com/#">Manan Aggarwal</a>,
+            and <a href="https://en.wikipedia.org/wiki/Melody">Melody</a> 
+            <a href="https://en.wikipedia.org/wiki/Xu_(surname_%E5%BE%90)"> Hsu</a>.
         </p>
         <p>
             <a href="/about#acknowledgements">Special Thanks and Acknowledgements</a>
         </p>
     </div>
 
-
-
-
     <hr>
 
-    <div class="container text-center mt-5 mx-auto">
-        <div class="row">
-        <a href="https://twitter.com/WikiSpeedruns" class="col">
-            <img src="/static/assets/twitter_icon.png" width="75" height="75">
+    <div class="social-menu center">
+        <a href="https://twitter.com/WikiSpeedruns" target="_blank">
+            <button type="button" class="btn">
+                <i class="bi bi-twitter"></i>
+            </button>
         </a>
-        </div>
+
+        <a href="https://discord.gg/mNYeB9c9db" target="_blank">
+            <button type="button" class="btn">
+                <i class="bi bi-discord"></i>
+            </button>
+        </a>
+
+        <a href="https://github.com/wikispeedruns/wikipedia-speedruns" target="_blank">
+            <button type="button" class="btn">
+                <i class="bi bi-github"></i>
+            </button>
+        </a>
     </div>
+
 </div>
 {% endblock %}
