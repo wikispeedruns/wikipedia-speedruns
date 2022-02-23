@@ -82,9 +82,18 @@ window.addEventListener("load", async function() {
         // Prevent are your sure you want to leave prompt
         window.onbeforeunload = null;
         window.location.replace("/");   // TODO error page
+        return;
+
     }
 
     const prompt = await response.json();
+    
+    if (!prompt['available']) {
+        this.alert("This prompt is not yet available! Redirecting back to home");
+        window.onbeforeunload = null;
+        window.location.replace("/");
+        return;
+    }
 
     app.$data.prompt_id = prompt_id;
     app.$data.startArticle = prompt["start"];
