@@ -3,11 +3,9 @@ import { serverData } from "./modules/serverData.js";
 const profile_name = serverData["profile_name"];
 
 function update_data(runs, user) {
-            
     try {
         vm.totalratedruns.val = runs['total_prompts'];
         vm.emailverified.val = user['email_confirmed'] ? "Yes" : "No";
-        
         vm.user_name.val = user['username'];
     } catch (error) {
         console.error(error);
@@ -15,20 +13,14 @@ function update_data(runs, user) {
     }
 }
 
-async function get_data(usern) {
-    
-    response = await fetch("/api/profiles/" + usern + "/totals");
+async function get_data(username) {
+    let response = await fetch("/api/profiles/" + username + "/stats");
     const runs = await response.json(); 
 
-    //console.log(runs);
-
-    response = await fetch("/api/profiles/" + usern);
+    response = await fetch("/api/profiles/" + username);
     const user = await response.json(); 
 
-    //console.log(user);
-
     update_data(runs, user);
-    
 }
 
 let vm = new Vue({
@@ -44,15 +36,15 @@ let vm = new Vue({
             val: "test2"
         },
         totalratedruns: {
-            field: "Total runs",
+            field: "Total Runs",
             val: "test3"
         },
         emailverified: {
-            field: "Email Verification Status",
+            field: "Email Verified",
             val: "test4"
         },
         profileage: {
-            field: "Profile Age",
+            field: "Member Since",
             val: "test5"
         },
     },

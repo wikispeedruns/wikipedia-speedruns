@@ -28,10 +28,10 @@ def get_user_info(username):
     return result, 200
 
 
-@profile_api.get("/<username>/totals")
+@profile_api.get("/<username>/stats")
 def get_total_stats(username):
     '''
-    Get the total number of prompts for a user
+    Get aggregate statistics for a user
     TODO cache this?
     '''
 
