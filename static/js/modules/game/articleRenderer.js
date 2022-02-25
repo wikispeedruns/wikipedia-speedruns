@@ -1,13 +1,12 @@
 
-
-class ArtcileRenderer {
+export class ArticleRenderer {
 
     /* frame: DOM element (i.e. through getElementById) to render article in
-     * linkCallback: Called upon clicking on a valid link
+     * pageCallback: Called upon loading an article, should expect new page and load time
      */
-    constructor(frame, linkCallback) {
+    constructor(frame, pageCallback) {
         this.frame = frame;
-        this.linkCallback = linkCallback;
+        this.pageCallback = pageCallback;
     }
 
     async loadPage(page) {
@@ -17,33 +16,37 @@ class ArtcileRenderer {
                 mode: "cors"
             }
         )
-        const body = await resp.json()
-        const title = body["parse"]["title"]
+        const body = await resp.json();
 
+        console.log(`title: ${body["parse"]["title"]}`);
         this.frame.innerHTML = body["parse"]["text"]["*"]
 
-        hideElements(frame);
-        disbleFindableLinks(frame);
+        hideElements(this.frame);
+        disbleFindableLinks(this.frame);
 
-        frame.querySelectorAll("a, area").forEach((el) =>{
-            el.onclick = this.handleWikipediaLink;
+        this.frame.querySelectorAll("a, area").forEach((el) => {
+            // Arrow function to prevent this from being overwritten
+            el.onclick = (e) => this.handleWikipediaLink(e);
         });
 
         window.scrollTo(0, 0)
     }
 
 
-
-
     async loadPageWrapper(page) {
         try {
-            await loadPage(page);
-            this.linkCallback(page);
+            console.log(page);
+
+            const startTime = Date.now();
+            await this.loadPage(page);
+
+            this.pageCallback(page, Date.now() - startTime);
 
         } catch (error) {
             // Reenable all links if loadPage fails
-            document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
-                el.onclick = this.handleWikipediaLink;
+            this.frame.querySelectorAll("a, area").forEach((el) => {
+                // Arrow function to prevent this from being overwritten
+                el.onclick = (e) => this.handleWikipediaLink(e);
             });
         }
     }
@@ -54,6 +57,7 @@ class ArtcileRenderer {
         e.preventDefault();
 
         const linkEl = e.currentTarget;
+        console.log(linkEl);
 
         if (linkEl.getAttribute("href").substring(0, 1) === "#") {
             let a = linkEl.getAttribute("href").substring(1);
@@ -61,14 +65,13 @@ class ArtcileRenderer {
             document.getElementById(a).scrollIntoView();
 
         } else {
-
             // Ignore external links and internal file links
             if (!linkEl.getAttribute("href").startsWith("/wiki/") || linkEl.getAttribute("href").startsWith("/wiki/File:")) {
                 return;
             }
 
             // Disable the other linksto prevent multiple clicks
-            document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
+            this.frame.querySelectorAll("a, area").forEach((el) =>{
                 el.onclick = (e) => {
                     e.preventDefault();
                     console.log("prevent multiple click");
@@ -76,7 +79,7 @@ class ArtcileRenderer {
             });
 
             // Remove "/wiki/" from string
-            loadPageWrapper(linkEl.getAttribute("href").substring(6))
+            this.loadPageWrapper(linkEl.getAttribute("href").substring(6))
         }
     }
 }
