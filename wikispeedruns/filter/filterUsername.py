@@ -48,3 +48,4 @@ if __name__ == '__main__':
     #key = write_key()
     #encrypt('l.txt', key)
     print(checkUsername("thisshouldntcauseissues"))
+    print(checkUsername("thisshould"))
