@@ -39,16 +39,6 @@ async function loadPage(page) {
     let frameBody = document.getElementById("wikipedia-frame")
     frameBody.innerHTML = body["parse"]["text"]["*"]
 
-    //process the next step in game logic, given that we reached a new page. This function should be dependent on gamemode.
-    await processGameLogic(title);
-    
-    /*clean up page's links and formatting, including:
-        hide elements on the wikipedia page that players should not use
-        strip hyperlinks that lead to wikipedia namespaced pages
-        setting the bottom padding of the main element (prevents the HUD from blocking text at the bottom)
-    */
-    parseAndCleanPage(frameBody, title);
-
     //Set the click event of all links on page
     document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
         el.onclick = handleWikipediaLink;
@@ -56,6 +46,16 @@ async function loadPage(page) {
 
     //After rendering is complete, scroll to top of page
     window.scrollTo(0, 0)
+
+    //process the next step in game logic, given that we reached a new page. This function should be dependent on gamemode.
+    await processGameLogic(title);
+
+    /*clean up page's links and formatting, including:
+        hide elements on the wikipedia page that players should not use
+        strip hyperlinks that lead to wikipedia namespaced pages
+        setting the bottom padding of the main element (prevents the HUD from blocking text at the bottom)
+    */
+    parseAndCleanPage(frameBody, title);
 }
 
 
@@ -67,13 +67,12 @@ async function processGameLogic(title) {
 
     //Game logic for sprint mode:
         //if the page's title matches that of the end article, finish the game, and submit the run
-    if (vueContainer.$data.gameType === "sprint") {
-    
-        if (title.replace("_", " ").toLowerCase() === vueContainer.$data.endArticle.replace("_", " ").toLowerCase()) {
-            await genericFinish();
-            await submitSprint();
-        }
+    if (vueContainer.checkFinishingCondition(title)) {
+        await renderFinish();
 
+        if (vueContainer.gameType === "sprint") {
+            await vueContainer.submitRun();
+        }
     }
 }
 
@@ -121,7 +120,7 @@ async function loadPageWrapper(page) {
     }
 }
 
-async function genericFinish() {
+async function renderFinish() {
     //toggle the finished render flag. This will hide the main page block and show the finishing stats
     vueContainer.$data.finished = true;
     vueContainer.$data.finalTime = vueContainer.$data.timer;
@@ -130,31 +129,6 @@ async function genericFinish() {
     vueContainer.$data.endTime = vueContainer.$data.startTime + vueContainer.$data.finalTime*1000;
     // Prevent are you sure you want to leave prompt
     window.onbeforeunload = null;
-}
-
-
-//Submit run information to endpoint as an update of the previously generated empty run 
-async function submitSprint() {
-
-    const reqBody = {
-        "start_time": vueContainer.$data.startTime,
-        "end_time": vueContainer.$data.endTime,
-        "path": vueContainer.$data.path,
-    }
-
-    // Send results to API
-    try {
-        const response = await fetch(`/api/runs/${vueContainer.$data.run_id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(reqBody)
-        })
-
-    } catch(e) {
-        console.log(e);
-    }
 }
 
 // Race condition between countdown timer and "immediate start" button click

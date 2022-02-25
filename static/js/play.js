@@ -64,6 +64,32 @@ let app = new Vue({
             } else {
                 return "";
             }
+        },
+
+        checkFinishingCondition: function(title) {
+            return title.replace("_", " ").toLowerCase() === this.endArticle.replace("_", " ").toLowerCase()
+        }, 
+
+        async submitRun() {
+            const reqBody = {
+                "start_time": this.startTime,
+                "end_time": this.endTime,
+                "path": this.path,
+            }
+        
+            // Send results to API
+            try {
+                const response = await fetch(`/api/runs/${this.run_id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(reqBody)
+                })
+        
+            } catch(e) {
+                console.log(e);
+            }
         }
     }
 })
