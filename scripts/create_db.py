@@ -26,7 +26,7 @@ def create_database(db_name, recreate=False, test_config=None):
 
     with conn.cursor() as cursor:
         if (recreate):
-            drop_db_query = f'DROP DATABASE {db_name}'
+            drop_db_query = f'DROP DATABASE IF EXISTS {db_name}'
             cursor.execute(drop_db_query)
 
         create_db_query = f'CREATE DATABASE IF NOT EXISTS {db_name}'
