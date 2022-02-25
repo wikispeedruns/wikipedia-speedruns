@@ -23,7 +23,7 @@ export class ArticleRenderer {
 
         hideElements(this.frame);
         disbleFindableLinks(this.frame);
-
+        stripNamespaceLinks(this.frame);
         this.frame.querySelectorAll("a, area").forEach((el) => {
             // Arrow function to prevent this from being overwritten
             el.onclick = (e) => this.handleWikipediaLink(e);
@@ -136,6 +136,25 @@ function hideElements(frame) {
         }
     }
 
+}
+
+
+function stripNamespaceLinks(frame) {
+
+    frame.querySelectorAll("a").forEach((linkEl) => {
+
+        if (linkEl.hasAttribute("href")) {
+            if (linkEl.getAttribute("href").startsWith("/wiki/File:") ||
+                linkEl.getAttribute("href").startsWith("/wiki/Wikipedia:") ||
+                linkEl.getAttribute("href").startsWith("/wiki/Category:") ||
+                linkEl.getAttribute("href").startsWith("/wiki/Help:") ||
+                linkEl.getAttribute("href").endsWith("&redlink=1")) {
+                let newEl = document.createElement("span");
+                newEl.innerHTML = linkEl.innerHTML
+                linkEl.parentNode.replaceChild(newEl, linkEl)
+            }
+        }
+    });
 }
 
 function disbleFindableLinks(frame) {
