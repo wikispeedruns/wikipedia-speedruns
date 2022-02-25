@@ -14,12 +14,12 @@ def get_user_info(username):
     TODO cache this?
     '''
 
-    admin_query_string = 'admin, email,' if session.get("username") == username or session.get("admin") else ''
     query = f'''
     SELECT
         username,
         email_confirmed,
-        {admin_query_string}
+        {'email,' if session.get("username") == username or session.get("admin") else ''}
+        {'admin,' if session.get("admin") else ''}
         join_date,
         ratings.rating
     FROM users
