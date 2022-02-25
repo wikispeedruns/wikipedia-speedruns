@@ -7,6 +7,8 @@ function update_data(runs, user) {
         vm.totalratedruns.val = runs['total_prompts'];
         vm.emailverified.val = user['email_confirmed'] ? "Yes" : "No";
         vm.user_name.val = user['username'];
+        vm.skillrating.val = user['rating'];
+        vm.profileage.val = user['join_date'];
     } catch (error) {
         console.error(error);
         window.location.href = "/error";
