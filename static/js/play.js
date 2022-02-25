@@ -28,12 +28,13 @@ let app = new Vue({
         timer: "",           //string for displaying of the timer in seconds.
         countdown: 8,        //The countdown duration in seconds
         startTime: null,     //For all game modes, the start time of run (mm elapsed since January 1, 1970)
-        finalTime:"",        //For all game modes, totla runtime, only used for rendering. 
+        finalTime:"",        //For all game modes, total runtime, only used for rendering. 
         endTime: null,       //For all game modes, the end time of run (mm elapsed since January 1, 1970)
         finished: false,     //Flag for whether a game has finished, used for rendering
         started: false,      //Flag for whether a game has started (countdown finished), used for rendering
         activeTip: "",       //variable used to store the game tip displayed on the countdown screen
     },
+    
     methods : {
         //redirect to the corresponding prompt page
         finishPrompt: function (event) {

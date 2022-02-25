@@ -15,7 +15,8 @@ function stripNamespaceLinks(frameBody) {
             if (linkEl.getAttribute("href").startsWith("/wiki/File:") || 
                 linkEl.getAttribute("href").startsWith("/wiki/Wikipedia:") || 
                 linkEl.getAttribute("href").startsWith("/wiki/Category:") ||
-                linkEl.getAttribute("href").startsWith("/wiki/Help:")) {
+                linkEl.getAttribute("href").startsWith("/wiki/Help:") || 
+                linkEl.getAttribute("href").endsWith("&redlink=1")) {
                 let newEl = document.createElement("span");
                 newEl.innerHTML = linkEl.innerHTML
                 linkEl.parentNode.replaceChild(newEl, linkEl)
