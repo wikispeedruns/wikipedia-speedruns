@@ -26,25 +26,11 @@
         </div>
     </div>
 
-    <div v-show="!started">
-        <div class="text-center text-size-1">
-            <p>Starting Article: <strong>[[startArticle]]</strong></p>
-            <p>Goal Article: <strong>[[endArticle]]</strong></p>
-            <p>Good Luck!</p>
-
-            <div><button id="start-btn" class="btn btn-outline-secondary">(Don't want to wait? Start immediately!)</button></div>
-        </div>
-        <div id="mirroredimgblock" class="mirroredimgblock">
-            <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun">
-            <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun invgif">
-        </div>
-
-        <div>
-            <p id="countdown" class="countdown text-center mx-auto my-auto pb-5">[[countdown]]</p>
-        </div>
-
-        <h6 id="tips" class="text-center">[[activeTip]]</h6>
-    </div>  
+    <countdown-timer
+        v-bind:start-article="startArticle"
+        v-bind:end-article="endArticle"
+        v-on:start-game="startRun"
+    ></countdown-timer>
 
     <div v-if="finished" class="text-left">
         <p><h4>You found it!</h4></p>

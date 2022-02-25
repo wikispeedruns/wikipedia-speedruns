@@ -24,6 +24,7 @@ export class ArticleRenderer {
         hideElements(this.frame);
         disbleFindableLinks(this.frame);
         stripNamespaceLinks(this.frame);
+
         this.frame.querySelectorAll("a, area").forEach((el) => {
             // Arrow function to prevent this from being overwritten
             el.onclick = (e) => this.handleWikipediaLink(e);

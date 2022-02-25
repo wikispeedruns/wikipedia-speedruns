@@ -8,7 +8,7 @@ async function playGame(app) {
     //get the vue object passed from play.js. It will contain prompt and run information
     vueContainer = app;
     //start the countdown, and preload the starting article
-    await Promise.all([countdown(), loadPage(vueContainer.$data.startArticle)]);
+    await Promise.all([loadPage(vueContainer.$data.startArticle)]);
 
     //once above conditions are met, toggle the `started` render flag, which will hide all other elements, and display the rendered wikipage
     vueContainer.$data.started = true;
@@ -77,8 +77,8 @@ async function processGameLogic(title) {
 }
 
 
-//click event handling for each link
-function handleWikipediaLink(e) 
+//click event handling for eac h link
+function handleWikipediaLink(e)
 {
     e.preventDefault();
 
@@ -131,42 +131,5 @@ async function renderFinish() {
     window.onbeforeunload = null;
 }
 
-// Race condition between countdown timer and "immediate start" button click
-// Resolves when either condition resolves
-async function countdown() {
-
-    let countDownStart = Date.now();
-    let countDownTime = vueContainer.$data.countdown * 1000;
-
-    document.getElementById("mirroredimgblock").classList.toggle("invisible");
-
-    // Condition 1: countdown timer
-    const promise1 = new Promise(resolve => {
-        const x = setInterval(function() {
-            const now = Date.now()
-          
-            // Find the distance between now and the count down date
-            let distance = countDownStart + countDownTime - now;
-            vueContainer.$data.countdown = Math.floor(distance/1000)+1;
-
-            if (distance <= -500) { //Allow timer to reach 0
-                resolve();
-                clearInterval(x);
-            }
-
-            if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {                
-                document.getElementById("mirroredimgblock").classList.toggle("invisible")
-            }
-
-        }, 50);
-    });
-
-    // Condition 2: "immediate start" button click
-    const promise2 = new Promise(r =>
-        document.getElementById("start-btn").addEventListener("click", r, {once: true})
-    )
-
-    await Promise.any([promise1, promise2]);
-}
 
 export {playGame};
