@@ -3,6 +3,7 @@
 {% block head %}
 
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
+<link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/play.css')}}">
 <script type="module" src="{{url_for('static', filename='js/play.js')}}"></script>
 
 {% endblock %}
@@ -11,15 +12,15 @@
 
 <div id="app">
 
-    <div v-show="started && !finished" class="HUDwrapper container">
+    <div v-show="started && !finished" id="time-box" class="HUDwrapper container">
         <div class="row flex-row">
-            <div class="col-sm-4 text-nowrap px-4 py-2">
+            <div class="col-sm-auto text-nowrap px-4 py-2">
                 Start Article<br><strong>[[startArticle]]</strong>
             </div>
-            <div class="col-sm-4 text-nowrap px-4 py-2">
+            <div class="col-sm-auto text-nowrap px-4 py-2">
                 End Article<br><strong>[[endArticle]]</strong>
             </div>
-            <div class="col-sm-4 text-nowrap px-4 py-2">
+            <div class="col-sm-auto text-nowrap px-4 py-2">
                 Time Elapsed<br><strong>[[timer]] s</strong>
             </div>
         </div>
@@ -31,7 +32,7 @@
             <p>Goal Article: <strong>[[endArticle]]</strong></p>
             <p>Good Luck!</p>
 
-            <div><button v-on:click="startNow" class="btn btn-outline-secondary">(Don't want to wait? Start immediately!)</button></div>
+            <div><button id="start-btn" class="btn btn-outline-secondary">(Don't want to wait? Start immediately!)</button></div>
         </div>
         <div id="mirroredimgblock" class="mirroredimgblock">
             <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun">
@@ -55,8 +56,13 @@
                 <p>Time: <strong>[[finalTime]] </strong>Seconds</p>
                 <p>Number of links visited: <strong>[[path.length-1]]</strong></p>
                 <p>The path you took: <br>[[path]]</p>
-                <div><button v-on:click="finishPrompt" class="btn btn-outline-secondary">See the leaderboard</button></div>
-                <div><button v-on:click="home" class="btn btn-outline-secondary">Return to home page</button></div>
+                <div class="button-tooltip-container">
+                    <button @click="copyResults" class="share-btn btn-1 btn-1c"><i class="bi bi-share"></i> Share</button>
+                    <span id="custom-tooltip" ref="shareTooltip">Copied results to clipboard!</span>
+                </div>
+                <div><button @click="finishPrompt" class="btn btn-outline-secondary">See the leaderboard</button></div>
+                <br/>
+                <div><button @click="home" class="btn btn-outline-secondary">Return to home page</button></div>
             </div>
         </div>
     </div>

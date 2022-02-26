@@ -1,24 +1,38 @@
 import pytest
 import sys
 
+from pymysql.cursors import DictCursor
+
 sys.path.append('..')
 from app import create_app
+from scripts.create_db import create_database
 
 from db import get_db
 from mail import mail
 
-from pymysql.cursors import DictCursor
 
-@pytest.fixture
-def app():
-    yield create_app({
-        'TESTING': True, 
-        'DATABASE': 'test', 
-        'MAIL_DEFAULT_SENDER': 'no-reply@wikispeedruns.com'
-    })
+TEST_DB_NAME="test"
+TEST_CONFIG={
+    'TESTING': True,
+    'MAIL_DEFAULT_SENDER': 'no-reply@wikispeedruns.com',
+    'DATABASE': TEST_DB_NAME,
+    # Same as in .github/workflows/build.yml
+    'MYSQL_USER': 'testuser',
+    'MYSQL_PASSWORD': 'testpassword',
+}
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
+def test_db():
+    create_database(TEST_DB_NAME, recreate=True, test_config=TEST_CONFIG)
+
+
+@pytest.fixture(scope="session")
+def app(test_db):
+    yield create_app(test_config=TEST_CONFIG)
+
+
+@pytest.fixture()
 def client(app):
     with app.test_client() as client:
         yield client
@@ -49,7 +63,7 @@ def user_base(client, mail, cursor):
     '''
     user = {
         "username" : "echoingsins",
-        "email" : "echoingsins@gmail.com", 
+        "email" : "echoingsins@gmail.com",
         "password" : "lmao"
     }
 
@@ -69,3 +83,10 @@ def user(user_base):
 def session(client, user):
     client.post("/api/users/login", json=user)
     yield user
+
+@pytest.fixture()
+def admin_session(client):
+    with client.session_transaction() as session:
+        session["user_id"] = 0
+        session["username"] = "testadmin"
+        session["admin"] = 1

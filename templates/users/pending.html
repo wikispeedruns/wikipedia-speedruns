@@ -26,7 +26,7 @@ async function handleRegister(event)
         document.getElementById("registerForm").reset();
         document.getElementById("message").innerText = "Successfully Registered!"
         setTimeout(() => {
-            window.location.href = "/profile"; 
+            window.location.href = "/"; 
         }, 2000);       
     } else if (response.status == 409) {
         document.getElementById("message").innerText = "User already exists";

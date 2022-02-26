@@ -29,12 +29,23 @@ def get_home_page():
 def get_about_page():    
     return render_with_data('about.html')
 
+
+@views.route('/archive', methods=['GET'])
+def get_archive_page():    
+
+    try:
+        limit = int(request.args.get('limit', 20))
+        offset = int(request.args.get('offset', 0))
+        return render_with_data('archive.html', limit=limit, offset=offset)
+    except ValueError:
+        return "Page Not Found", 404
+
 @views.route('/random', methods=['GET'])
 def get_random_prompt():
     query = ("""
     SELECT prompt_id
-    FROM prompts
-    WHERE type='public';
+    FROM sprint_prompts
+    WHERE used = 1 AND active_end <= NOW();
     """)
 
     with db.get_db().cursor() as cursor:
@@ -43,15 +54,6 @@ def get_random_prompt():
         rand_prompt = random.choice(results)[0]
         return redirect("/play/" + str(rand_prompt), code=302)
 
-@views.route('/latest', methods=['GET'])
-def get_latest_prompt():
-    # TODO its a little messy to do this here
-    query = ("SELECT MAX(prompt_id) FROM prompts WHERE public=TRUE;")
-
-    with db.get_db().cursor() as cursor:
-        cursor.execute(query)
-        results = cursor.fetchone()
-        return redirect("/play/" + str(results[0]), code=302)
 
 @views.route('/register', methods=['GET'])
 def get_register_page():
@@ -82,6 +84,9 @@ def get_manage_page():
 def get_prompt_page(id):
     run_id = request.args.get('run_id', '')
     page = request.args.get('page', 1)
+    
+    if int(page) < 1:
+        page = 1
     
     if len(run_id) != 0:
         return render_with_data('prompt.html', prompt_id=id, run_id=run_id, pg = page)

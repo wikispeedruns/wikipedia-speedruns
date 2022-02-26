@@ -1,31 +1,13 @@
-'''
-Script that generates configuration for server, as well as adds admin account
-'''
 
 import json
-import secrets
-import hashlib
-import bcrypt
-from getpass import getpass
-
 import pymysql
 
+import base64
+import hashlib
 
-def create_prod_conf():
-    config = {}
-    config["SECRET_KEY"] = str(secrets.token_urlsafe(20))
-    config["GOOGLE_OAUTH_CLIENT_ID"] = input("Google Client ID for Oauth: ")
-    config["GOOGLE_OAUTH_CLIENT_SECRET"] = input("Google Secret for Oath: ")
-    # TODO more here
+from getpass import getpass
 
-    config["MAIL_SERVER"] = input("Mail Server URL: ")
-    config["MAIL_PORT"] = input("Mail Server Port: ")
-    config["MAIL_USERNAME"] = input("SMTP Username: ")
-    config["MAIL_PASSWORD"] = input("SMTP Password: ")
-    config["MAIL_DEFAULT_SENDER"] = input("Default Sender for mail: ")
-
-
-    json.dump(config, open('../config/prod.json', 'w'), indent=4)
+import bcrypt
 
 def create_admin_account():
     config = json.load(open('../config/default.json'))
@@ -49,16 +31,16 @@ def create_admin_account():
         if password == getpass("Reenter password: "): break
         print("Passwords do not match!")
 
-    password = password.encode()
-    hash = bcrypt.hashpw(hashlib.sha256(password).digest(), bcrypt.gensalt())
+    hash = bcrypt.hashpw(base64.b64encode(hashlib.sha256(password.encode()).digest()), bcrypt.gensalt())
+
 
 
     query = "INSERT INTO `users` (`username`, `hash`, `email`, `email_confirmed`, `admin`) VALUES (%s, %s, %s, %s, %s)"
 
     db = pymysql.connect(
-            user=config["MYSQL_USER"], 
+            user=config["MYSQL_USER"],
             host=config["MYSQL_HOST"],
-            password=config["MYSQL_PASSWORD"], 
+            password=config["MYSQL_PASSWORD"],
             database=config['DATABASE']
     )
 
@@ -73,12 +55,7 @@ def create_admin_account():
     db.close()
 
 
-ans = input("Would you like to setup configuration for production? (y/n): ")
-if (ans == "y"):
-    create_prod_conf()
-
-ans = input("Would you like to setup an admin account? (y/n): ")
-
+ans = "y"
 while (ans == "y"):
     create_admin_account()
     ans = input("Would you like to setup another admin account? (y/n): ")

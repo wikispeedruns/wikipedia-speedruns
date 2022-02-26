@@ -1,7 +1,7 @@
 import { serverData } from "./modules/serverData.js"
 
 const prompt_id = serverData["prompt_id"];
-const run_id = serverData["run_id"];
+const run_id = serverData["run_id"] || "";
 const pg = serverData["pg"];
 
 const runsPerPage = 10;
@@ -204,17 +204,21 @@ var app = new Vue({
         currentRun: null,
         currentRunPosition: 0,
         currentRunRank: 0,
-        runsPerPage: runsPerPage
+        runsPerPage: runsPerPage,
+        available: false,
     },
 
     methods : {
-        getPrompt: async function () {
-            var response = await fetch("/api/prompts/" + prompt_id);
-            return await response.json();
-        }, 
+        getLeaderboard: async function () {
 
-        getRuns: async function () {
-            var response = await fetch("/api/prompts/" + prompt_id + "/leaderboard/" + run_id);
+            var response = await fetch("/api/sprints/" + prompt_id + "/leaderboard/" + run_id);
+
+            if (response.status == 401) {
+                alert(await response.text());
+                window.location.replace("/");   // TODO error page
+            }
+
+
             return await response.json(); 
         }, 
 
@@ -228,6 +232,9 @@ var app = new Vue({
         },
 
         getPageNo: function () {
+            if (this.runs.length === 0) {
+                return 0;
+            }
             return parseInt(pg)
         },
 
@@ -287,8 +294,12 @@ var app = new Vue({
     },
 
     created: async function() {
-        this.prompt = await this.getPrompt();
-        this.runs = await this.getRuns();
+        const resp = await this.getLeaderboard();
+
+        this.available = resp['prompt']['available'];
+
+        this.prompt = resp["prompt"];
+        this.runs = resp["leaderboard"];
 
         this.paginate();      
         this.genGraph();

@@ -63,8 +63,10 @@ a:hover, a:hover * {
     position:relative;
 }
 
-.mw-parser-output {
-    padding-bottom: 150px !important;
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .HUDwrapper {
