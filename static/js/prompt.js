@@ -206,6 +206,8 @@ var app = new Vue({
         currentRunRank: 0,
         runsPerPage: runsPerPage,
         available: false,
+        page: 0,
+        totalpages: 0,
     },
 
     methods : {
@@ -290,6 +292,20 @@ var app = new Vue({
             } else {
                 window.location.replace("/prompt/" + prompt_id + "?page=" + String(parseInt(pg)-1));
             }
+        }, 
+        firstPage: function() {
+            if (run_id) {
+                window.location.replace("/prompt/" + prompt_id + "?page=1&run_id=" + run_id);
+            } else {
+                window.location.replace("/prompt/" + prompt_id + "?page=1");
+            }
+        }, 
+        lastPage: function() {
+            if (run_id) {
+                window.location.replace("/prompt/" + prompt_id + "?page=" + String(totalpages) + "&run_id=" + run_id);
+            } else {
+                window.location.replace("/prompt/" + prompt_id + "?page=" + String(totalpages));
+            }
         }
     },
 
@@ -301,7 +317,9 @@ var app = new Vue({
         this.prompt = resp["prompt"];
         this.runs = resp["leaderboard"];
 
-        this.paginate();      
+        this.paginate();
+        
+        this.totalpages = Math.ceil(this.runs.length/this.runsPerPage);
         this.genGraph();
     }
 })

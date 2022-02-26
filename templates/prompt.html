@@ -70,11 +70,44 @@
                 <p class="my-4" v-else>This prompt currently doesn't have any runs. <span v-if="available">Be the first to play it! <a v-bind:href="'/play/' + getPromptID()">Play</a></span></p>
 
             </div>  
+            <div v-cloak class="card-footer text-center">
+                <button class="btn btn-outline-secondary"
+                    v-on:click="firstPage" 
+                    v-bind:class="{invisible: getPageNo() === 1 || getPageNo()===0}">
+                        
+                    <i class="bi bi-chevron-double-left"></i>
+                </button>
+
+                <button class="btn btn-outline-secondary"
+                    v-on:click="prevPage"
+                    v-bind:class="{invisible: getPageNo() === 1 || getPageNo()===0}">
+
+                    <i class="bi bi-chevron-left" id="prev-page"></i>
+                </button>    
+                
+                <span>Page <strong>[[getPageNo()]]</strong> of [[totalpages]] </span>
+                
+                <button class="btn btn-outline-secondary"
+                    v-on:click="nextPage" 
+                    v-bind:class="{invisible: getPageNo() === totalpages}">
+                        
+                    <i class="bi bi-chevron-right"></i>
+                </button>         
+                
+                <button class="btn btn-outline-secondary"
+                    v-on:click="lastPage" 
+                    v-bind:class="{invisible: getPageNo() === totalpages}">
+                        
+                    <i class="bi bi-chevron-double-right"></i>
+                </button>   
+            </div>  
+            <!--
             <div class="card-footer text-center">
                 <button class="btn btn-outline-secondary px-2" v-on:click="prevPage" v-bind:class="{invisible: getPageNo()===1 || getPageNo()===0}"><i class="bi bi-arrow-left" id="prev-page"></i></button>
-                <span><strong>[[getPageNo()]] out of [[Math.ceil(runs.length/runsPerPage)]] pages</span>
-                <button class="btn btn-outline-secondary px-2" v-on:click="nextPage" v-bind:class="{invisible: getPageNo()===Math.ceil(runs.length/runsPerPage)}"><i class="bi bi-arrow-right" id="next-page"></i></button>
-            </div>  
+                <span><strong>[[getPageNo()]] out of [[totalpages]] pages</span>
+                <button class="btn btn-outline-secondary px-2" v-on:click="nextPage" v-bind:class="{invisible: getPageNo()===totalpages}"><i class="bi bi-arrow-right" id="next-page"></i></button>
+            </div>
+            -->  
         </div>
     </div>
 </div>
