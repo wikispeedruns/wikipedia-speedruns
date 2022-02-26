@@ -5,7 +5,9 @@
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/play.css')}}">
 <script type="module" src="{{url_for('static', filename='js/play.js')}}"></script>
-
+<style>
+    [v-cloak] { display: none }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -21,52 +23,29 @@
                 End Article<br><strong>[[endArticle]]</strong>
             </div>
             <div class="col-sm-auto text-nowrap px-4 py-2">
-                Time Elapsed<br><strong>[[timer]] s</strong>
+                Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
             </div>
         </div>
     </div>
 
-    <div v-show="!started">
-        <div class="text-center text-size-1">
-            <p>Starting Article: <strong>[[startArticle]]</strong></p>
-            <p>Goal Article: <strong>[[endArticle]]</strong></p>
-            <p>Good Luck!</p>
+    <countdown-timer
+        v-bind:start-article="startArticle"
+        v-bind:end-article="endArticle"
+        v-on:start-game="start"
+    ></countdown-timer>
 
-            <div><button id="start-btn" class="btn btn-outline-secondary">(Don't want to wait? Start immediately!)</button></div>
-        </div>
-        <div id="mirroredimgblock" class="mirroredimgblock">
-            <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun">
-            <img src="{{url_for('static', filename='assets/startgun.gif')}}" class="startgun invgif">
-        </div>
+    <!-- TODO its a bit ugly passing all these in, should clean this up-->
+    <finish-page
+        v-bind:prompt-id="promptId"
+        v-bind:run-id="runId"
 
-        <div>
-            <p id="countdown" class="countdown text-center mx-auto my-auto pb-5">[[countdown]]</p>
-        </div>
+        v-bind:start-article="startArticle"
+        v-bind:end-article="endArticle"
+        v-bind:final-time="endTime - startTime"
+        v-bind:path="path"
 
-        <h6 id="tips" class="text-center">[[activeTip]]</h6>
-    </div>  
-
-    <div v-if="finished" class="text-left">
-        <p><h4>You found it!</h4></p>
-        <p>Your run was submitted to the leaderboard.</p>
-        <p><h4>Here's how you did:</h4></p>
-        <div class="card md">
-            <div class="card-body">
-                <p><h4><strong class="font-italic">"[[startArticle]]"</strong> to <strong class="font-italic">"[[endArticle]]"</strong></h4></p>
-                <p>Time: <strong>[[finalTime]] </strong>Seconds</p>
-                <p>Number of links visited: <strong>[[path.length-1]]</strong></p>
-                <p>The path you took: <br>[[path]]</p>
-                <div class="button-tooltip-container">
-                    <button @click="copyResults" class="share-btn btn-1 btn-1c"><i class="bi bi-share"></i> Share</button>
-                    <span id="custom-tooltip" ref="shareTooltip">Copied results to clipboard!</span>
-                </div>
-                <div><button @click="finishPrompt" class="btn btn-outline-secondary">See the leaderboard</button></div>
-                <br/>
-                <div><button @click="home" class="btn btn-outline-secondary">Return to home page</button></div>
-            </div>
-        </div>
-    </div>
-
+        v-show="finished"
+    ></finish-page>
 
     <div v-show="started && !finished" id="main">
         <div id="title"></div>

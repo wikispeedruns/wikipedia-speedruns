@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+<link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
+<link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/play.css')}}">
+
+{% block head %}
+
+<script type="module">
+import { ArticleRenderer } from "/static/js/modules/game/articleRenderer.js";
+
+var app = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    data: {
+        article: "",
+        message: "",
+        renderer: null,
+    },
+
+    methods: {
+        async loadArticle() {
+            this.renderer.loadPage(this.article);
+        },
+
+        pageCallback(article, loadTime) {
+            this.message = (`'${article}' took ${loadTime/1000} seconds to load`);
+            console.log(message);
+        }
+    },
+
+    mounted: function() {
+        let frame = document.getElementById("testFrame");
+        this.renderer = new ArticleRenderer(frame, this.pageCallback);
+    }
+});
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div id="app">
+    <form v-on:submit.prevent="loadArticle">
+        <label for="article"> Article:</label>
+        <input type="text" v-model="article" name="article">
+        <button type="submit" class="btn btn-light">Submit</button>
+    </form>
+
+
+    <p>[[message]]</p>
+
+    <div id="testFrame"></div>
+</div>
+{% endblock %}

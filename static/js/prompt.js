@@ -64,7 +64,7 @@ function populateGraph(runs) {
                     node.type = 2;
                     endNode = node;
                 } 
-                else {
+                else if (node.label !== startNode.label){
                     node.type = 0;
                     nodes.push(node);
                 }
