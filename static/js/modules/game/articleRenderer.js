@@ -17,7 +17,14 @@ export class ArticleRenderer {
             }
         )
         const body = await resp.json();
-        this.frame.innerHTML = body["parse"]["text"]["*"]
+
+        this.frame.innerHTML = body["parse"]["text"]["*"];
+
+        // Create title
+        let titleEl = document.createElement("div");
+        titleEl.innerHTML = "<h1><i>" + body["parse"]["title"] + "</i></h1>";
+        this.frame.insertBefore(titleEl, this.frame.firstChild);
+
 
         hideElements(this.frame);
         disbleFindableLinks(this.frame);

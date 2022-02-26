@@ -31,9 +31,10 @@ let app = new Vue({
     data: {
         startArticle: "",    //For all game modes, this is the first article to load
         endArticle: "",      //For sprint games. Reaching this article will trigger game finishing sequence
+        path: [],             //array to store the user's current path so far, submitted with run
+
         promptId: 0,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
         runId: -1,          //unique ID for the current run. This gets populated upon start of run
-        path: [],             //array to store the user's current path so far, submitted with run
 
         startTime: null,     //For all game modes, the start time of run (mm elapsed since January 1, 1970)
         endTime: null,       //For all game modes, the end time of run (mm elapsed since January 1, 1970)
