@@ -15,10 +15,10 @@
         <div class="card-body">
         <table class="table table-striped table-hover col-sm-6">
             <thead>
-                <td colspan=2><h4>[[user_name]]'s Profile</h4></td>
+                <td colspan=2><h4>[[user_name.val]]'s Profile</h4></td>
             </thead>
             <tr v-for="key in Object.keys($data)" v-bind:key="">
-                <td>[[$data[key].field]]</td>
+                <td>[[$data[key].field]]: </td>
                 <td>[[$data[key].val]]</td>
             </tr>
         </table>
