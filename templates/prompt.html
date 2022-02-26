@@ -28,6 +28,7 @@
                         <th scope="col">Rank</th>
                         <th scope="col">Name</th>
                         <th scope="col">Time</th>
+                        <th scope="col">Links</th>
                         <th scope="col">Path</th>
                     </thead>
                     <tbody>
@@ -36,10 +37,12 @@
                             <td style="white-space: nowrap" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td style="white-space: nowrap">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
+                            <td>[[currentRun.path.length]]</td>
                             <td>[[currentRun.path]]</td>
                         </tr>
                         <tr v-if="currentRunPosition === -1">
                             <td>...</td>
+                            <td>[[null]]</td>
                             <td>[[null]]</td>
                             <td>[[null]]</td>
                             <td>...</td>
@@ -49,10 +52,12 @@
                             <td style="white-space: nowrap" v-if="run.username"><strong>[[run.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td style="white-space: nowrap">[[(run.run_time/1000000).toFixed(3)]] s</td>
+                            <td>[[run.path.length]]</td>
                             <td>[[run.path]]</td>
                         </tr>
                         <tr v-if="currentRunPosition === 1">
                             <td>...</td>
+                            <td>[[null]]</td>
                             <td>[[null]]</td>
                             <td>[[null]]</td>
                             <td>...</td>
@@ -62,6 +67,7 @@
                             <td style="white-space: nowrap" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td style="white-space: nowrap">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
+                            <td>[[currentRun.path.length]]</td>
                             <td>[[currentRun.path]]</td>
                         </tr>
                     </tbody>
@@ -111,8 +117,6 @@
         </div>
     </div>
 </div>
-
-<!--<script type=text/javascript src="{{url_for('static', filename='js/prompt.js') }}"></script>-->
 
 <canvas id="springydemo" class="mx-auto d-block mt-5" style="font-size: 10px;" width="1200" height="900"> 
 {% endblock %}
