@@ -8,162 +8,116 @@ these components should be as modular/generic as possible.
 
 //JS module imports
 import { serverData } from "./modules/serverData.js";
-import { playGame } from "./modules/playmodule.js";
+
 import { getRandTip } from "./modules/game/tips.js";
+import { startRun, submitRun } from "./modules/game/runs.js";
 
 import { CountdownTimer } from "./modules/game/countdown.js";
+import { FinishPage } from "./modules/game/finish.js";
+import { ArticleRenderer } from "./modules/game/articleRenderer.js";
+
 
 //retrieve the unique prompt_id of the prompt to load
-const prompt_id = serverData["prompt_id"];
+const PROMPT_ID = serverData["prompt_id"];
 
 //Vue container. This contains data, rendering flags, and functions tied to game logic and rendering. See play.html
 let app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     components: {
-        'countdown-timer': CountdownTimer
+        'countdown-timer': CountdownTimer,
+        'finish-page': FinishPage
     },
     data: {
-        gameType: "sprint",  //'sprint' or 'marathon'
         startArticle: "",    //For all game modes, this is the first article to load
         endArticle: "",      //For sprint games. Reaching this article will trigger game finishing sequence
-        prompt_id: 0,        //Unique prompt id to load, this should be identical to 'const prompt_id', but is mostly used for display
-        run_id: -1,          //unique ID for the current run. This gets populated upon start of run
-        path:[],             //array to store the user's current path so far, submitted with run
-        timer: "",           //string for displaying of the timer in seconds.
-        countdown: 8,        //The countdown duration in seconds
+        promptId: 0,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
+        runId: -1,          //unique ID for the current run. This gets populated upon start of run
+        path: [],             //array to store the user's current path so far, submitted with run
+
         startTime: null,     //For all game modes, the start time of run (mm elapsed since January 1, 1970)
-        finalTime:"",        //For all game modes, total runtime, only used for rendering.
         endTime: null,       //For all game modes, the end time of run (mm elapsed since January 1, 1970)
+        elapsed: 0,
+        timerInterval: null,
+
         finished: false,     //Flag for whether a game has finished, used for rendering
         started: false,      //Flag for whether a game has started (countdown finished), used for rendering
-        activeTip: "",       //variable used to store the game tip displayed on the countdown screen
+
+        renderer: null,
     },
 
-    methods : {
-        //redirect to the corresponding prompt page
-        finishPrompt: function (event) {
-            window.location.replace("/prompt/" + this.prompt_id + "?run_id=" + this.run_id);
-        },
 
-        //go back to home page
-        home: function (event) {
-            window.location.replace("/");
-        },
+    mounted: async function() {
+        this.promptId = PROMPT_ID;
 
-        //copy sharable result
-        copyResults: function(event) {
-            let results = this.generateResults();
-            document.getElementById("custom-tooltip").style.display = "inline";
-            navigator.clipboard.writeText(results);
-            setTimeout(function() {
-                document.getElementById("custom-tooltip").style.display = "none";
-            }, 1500);
-        },
+        const response = await fetch("/api/sprints/" + this.promptId);
+        if (response.status != 200) {
+            const error = await response.text();
+            this.alert(error);
 
-        generateResults: function(event) {
-            if (this.gameType === "sprint") {
-                return `Wiki Speedruns ${this.prompt_id}
-                ${this.startArticle}
-                ${this.path.length - 1} 🖱️
-                ${(this.endTime - this.startTime) / 1000} ⏱️`
-            } else {
-                return "";
-            }
-        },
+            // Prevent are you sure you want to leave prompt
+            window.onbeforeunload = null;
+            window.location.replace("/");   // TODO error page
 
-        checkFinishingCondition: function(title) {
-            return title.replace("_", " ").toLowerCase() === this.endArticle.replace("_", " ").toLowerCase()
-        },
-
-
-        startRun() {
-            playGame(this)
-        },
-
-
-        async submitRun() {
-            const reqBody = {
-                "start_time": this.startTime,
-                "end_time": this.endTime,
-                "path": this.path,
-            }
-
-            // Send results to API
-            try {
-                const response = await fetch(`/api/runs/${this.run_id}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(reqBody)
-                })
-
-            } catch(e) {
-                console.log(e);
-            }
+            return;
         }
+        const prompt = await response.json();
+
+        this.startArticle = prompt["start"];
+        this.endArticle = prompt["end"];
+
+        this.runId = await startRun(this.promptId);
+
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback);
+    },
+
+
+    methods : {
+        async pageCallback(page) {
+            // Game logic for sprint mode:
+            this.path.push(page);
+
+            //if the page's title matches that of the end article, finish the game, and submit the run
+            if (page.replace("_", " ").toLowerCase() === this.endArticle.replace("_", " ").toLowerCase()) {
+
+                this.finished = true;
+
+                // Disable popup
+                window.onbeforeunload = null;
+
+                this.endTime = Date.now();
+                await submitRun(this.runId, this.startTime, this.endTime, this.path);
+            }
+
+        },
+
+        async start() {
+            await this.renderer.loadPage(this.startArticle);
+
+            this.path.push(this.startArticle);
+
+            //once above conditions are met, toggle the `started` render flag, which will hide all other elements, and display the rendered wikipage
+            this.started = true;
+
+            //start timer
+            this.startTime = Date.now();
+
+            //set the timer update interval
+            this.timerInterval = setInterval(() => {
+                const seconds = (Date.now() - this.startTime) / 1000;
+                this.elapsed = seconds;
+            }, 100);
+        },
+
     }
 })
 
-
-//send request to create an empty run, returns the run_id
-async function saveEmptyRun() {
-    const reqBody = {
-        "prompt_id": prompt_id,
-    }
-    try {
-        const response = await fetch("/api/runs", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(reqBody)
-        })
-        return await response.json();
-    } catch(e) {
-        console.log(e);
-    }
-}
-
-//Upon load
-window.addEventListener("load", async function() {
-    //get prompt information
-    const response = await fetch("/api/sprints/" + prompt_id);
-    if (response.status != 200) {
-        const error = await response.text();
-        this.alert(error)
-        // Prevent are your sure you want to leave prompt
-        window.onbeforeunload = null;
-        window.location.replace("/");   // TODO error page
-        return;
-
-    }
-
-    const prompt = await response.json();
-
-    //check if the retrieved prompt is available to play. If not, redirect user to home
-    if (!prompt['available']) {
-        this.alert("This prompt is not yet available! Redirecting back to home");
-        window.onbeforeunload = null;
-        window.location.replace("/");
-        return;
-    }
-
-    //populate vue data
-    app.$data.prompt_id = prompt_id;
-    app.$data.startArticle = prompt["start"];
-    app.$data.endArticle = prompt["end"];
-    app.$data.run_id = await saveEmptyRun(); // Save run on clicking "play" when `prompt_id` is valid
-    app.$data.activeTip = getRandTip();
-});
-
-//prevent accidental leaves
+// Prevent accidental leaves
 window.onbeforeunload = function() {
     return true;
 };
 
-//Disable find hotkeys, players will be given a warning
+// Disable find hotkeys, players will be given a warning
 window.addEventListener("keydown", function(e) {
     //disable find
     if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) {

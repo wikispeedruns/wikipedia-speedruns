@@ -17,8 +17,6 @@ export class ArticleRenderer {
             }
         )
         const body = await resp.json();
-
-        console.log(`title: ${body["parse"]["title"]}`);
         this.frame.innerHTML = body["parse"]["text"]["*"]
 
         hideElements(this.frame);
@@ -30,14 +28,12 @@ export class ArticleRenderer {
             el.onclick = (e) => this.handleWikipediaLink(e);
         });
 
-        window.scrollTo(0, 0)
+        window.scrollTo(0, 0);
     }
 
 
     async loadPageWrapper(page) {
         try {
-            console.log(page);
-
             const startTime = Date.now();
             await this.loadPage(page);
 
@@ -58,7 +54,6 @@ export class ArticleRenderer {
         e.preventDefault();
 
         const linkEl = e.currentTarget;
-        console.log(linkEl);
 
         if (linkEl.getAttribute("href").substring(0, 1) === "#") {
             let a = linkEl.getAttribute("href").substring(1);
@@ -67,6 +62,7 @@ export class ArticleRenderer {
 
         } else {
             // Ignore external links and internal file links
+            // TODO merge this with stripNamespaceLinks
             if (!linkEl.getAttribute("href").startsWith("/wiki/") || linkEl.getAttribute("href").startsWith("/wiki/File:")) {
                 return;
             }
