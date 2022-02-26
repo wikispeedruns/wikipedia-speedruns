@@ -106,7 +106,7 @@ let app = new Vue({
             this.timerInterval = setInterval(() => {
                 const seconds = (Date.now() - this.startTime) / 1000;
                 this.elapsed = seconds;
-            }, 100);
+            }, 50);
         },
 
     }
