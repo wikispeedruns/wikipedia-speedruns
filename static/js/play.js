@@ -54,7 +54,7 @@ let app = new Vue({
         const response = await fetch("/api/sprints/" + this.promptId);
         if (response.status != 200) {
             const error = await response.text();
-            this.alert(error);
+            alert(error);
 
             // Prevent are you sure you want to leave prompt
             window.onbeforeunload = null;
