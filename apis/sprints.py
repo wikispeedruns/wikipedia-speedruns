@@ -90,15 +90,20 @@ def get_managed_prompts():
 
 @sprint_api.get('/active')
 def get_active_prompts():
-    return jsonify(prompts.get_active_prompts("sprint"))
+    return jsonify(prompts.get_active_prompts("sprint", user_id=session.get("user_id")))
 
 @sprint_api.get('/archive')
 def get_archive_prompts():
     try:
         limit = int(request.args.get('limit', 20))
         offset = int(request.args.get('offset', 0))
-        
-        sprints, num_prompts = prompts.get_archive_prompts("sprint", offset=offset, limit=limit)
+
+        sprints, num_prompts = prompts.get_archive_prompts("sprint",
+            offset=offset,
+            limit=limit,
+            user_id=session.get("user_id")
+        )
+
 
         return jsonify({
             "prompts": sprints,
@@ -152,10 +157,10 @@ def get_prompt_leaderboard(id, run_id):
     SELECT run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
     FROM sprint_runs AS runs
     JOIN (
-            SELECT users.user_id, username, MIN(run_id) AS first_run 
+            SELECT users.user_id, username, MIN(run_id) AS first_run
             FROM sprint_runs AS runs
             JOIN users ON users.user_id=runs.user_id
-            WHERE prompt_id=%s 
+            WHERE prompt_id=%s
             GROUP BY user_id
     ) firsts
     ON firsts.user_id=runs.user_id AND first_run=run_id
@@ -179,7 +184,7 @@ def get_prompt_leaderboard(id, run_id):
         args.append(run_id)
 
     query += ordering
-    
+
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, tuple(args))
@@ -188,7 +193,7 @@ def get_prompt_leaderboard(id, run_id):
         for run in results:
             run['path'] = json.loads(run['path'])
 
-        
+
         resp["leaderboard"] = results
 
         return jsonify(resp)

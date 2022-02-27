@@ -42,8 +42,9 @@
 
                     <table class="table table-hover">
                         <thead>
-                            <th scope="col">Prompt #</th>
-                            <th scope="col">Starting Article</th>
+                            <th style="width:100px" scope="col">Prompt #</th>
+                            <th scope="col">Start Article</th>
+                            <th class="text-center"></th>
                         </thead>
                         <tbody>
                             <tr v-for="prompt in dailyPrompts" v-cloak>
@@ -53,7 +54,15 @@
                                 </td>
 
                                 <td>[[prompt.start]]</td>
-                            </tr>
+                                <td class="text-center">
+                                    <template v-if="prompt.played">
+                                        <a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a>
+                                    </template>
+                                    <template v-else>
+                                        <span title="Play this prompt to see the results!">-</span>
+                                    </template>
+                                </td>
+                                </tr>
                         </tbody>
                     </table>
                 </template>
@@ -78,14 +87,25 @@
                 <h4> Try some other Prompts </h4>
                 <table class="table table-hover">
                     <thead>
-                        <th scope="col">Prompt #</th>
-                        <th scope="col">Starting Article</th>
+                        <th style="width:100px" scope="col">Prompt #</th>
+                        <th scope="col">Start Article</th>
+                        <th class="text-center"></th>
                     </thead>
                     <tbody>
                         <tr v-for="prompt in activePrompts" v-cloak>
-                            <td>[[prompt.prompt_id]] (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
-
+                            <td>
+                                [[prompt.prompt_id]] (<a v-if="loggedIn" v-bind:href="'/play/' + prompt.prompt_id">play</a>)
+                            </td>
                             <td>[[prompt.start]]</td>
+                            <td class="text-center">
+                                <template v-if="prompt.played">
+                                    <a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a>
+                                </template>
+                                <template v-else>
+                                    <span title="Play this prompt to see the results!">-</span>
+                                </template>
+                            </td>
+
                         </tr>
                     </tbody>
                 </table>
