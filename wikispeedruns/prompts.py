@@ -154,7 +154,7 @@ def get_active_prompts(prompt_type: PromptType) -> List[Prompt]:
         return cur.fetchall()
 
 
-def get_archive_prompts(prompt_type: PromptType, offset: int=0, limit: int=20 ) -> Tuple[List[Prompt], int]:
+def get_archive_prompts(prompt_type: PromptType, offset: int=0, limit: int=20, user_id=None) -> Tuple[List[Prompt], int]:
     '''
     Get all prompts for archive, including currently active
     TODO paginate, user id?
@@ -165,9 +165,23 @@ def get_archive_prompts(prompt_type: PromptType, offset: int=0, limit: int=20 ) 
 
     query += " WHERE used = 1 AND active_start <= NOW() ORDER BY active_start DESC LIMIT %s, %s"
 
+    if (prompt_type == "sprint" and user_id is not None):
+        query = '''
+            SELECT sprint_prompts.prompt_id, start, end, rated, active_start, active_end, first_run
+            FROM sprint_prompts
+            LEFT JOIN (
+                    SELECT user_id, MIN(run_id) AS first_run, prompt_id
+                    FROM sprint_runs
+                    WHERE user_id=%s AND end_time IS NOT NULL
+                    GROUP BY prompt_id
+            ) firsts
+            ON sprint_prompts.prompt_id=firsts.prompt_id
+            WHERE used = 1 AND active_start <= NOW() ORDER BY active_start DESC LIMIT %s, %s
+        '''
+
     db = get_db()
     with db.cursor(cursor=DictCursor) as cur:
-        cur.execute(query, (offset, limit))
+        cur.execute(query, (offset, limit) if user_id is None else (user_id, offset, limit))
 
         prompts = cur.fetchall()
 
