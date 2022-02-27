@@ -74,9 +74,11 @@ let app = new Vue({
 
 
     methods : {
-        async pageCallback(page) {
+        async pageCallback(page, loadTime) {
             // Game logic for sprint mode:
             this.path.push(page);
+
+            this.startTime += loadTime;
 
             //if the page's title matches that of the end article, finish the game, and submit the run
             if (page.replace("_", " ").toLowerCase() === this.endArticle.replace("_", " ").toLowerCase()) {
