@@ -14,8 +14,8 @@ var app = new Vue({
         page: 0,
         numPages: 0,
 
-        limit: 20,
-        offset: 0,
+        limit: limit,
+        offset: offset,
         sort_desc: sort_desc
     },
 
@@ -36,7 +36,6 @@ var app = new Vue({
             this.page = 1;
             this.offset = 0;
             this.sort_desc = !this.sort_desc;
-            console.log(this.sort_desc);
         },
 
         runReplay: function(event) {
