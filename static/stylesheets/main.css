@@ -67,6 +67,12 @@ a:hover, a:hover * {
     position:relative;
 }
 
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .HUDwrapper {
     position:fixed;
     z-index: 1000000;
@@ -84,7 +90,13 @@ a:hover, a:hover * {
     }
 
     #springydemo {
-        visibility:hidden !important;
+        display:none !important;
+    }
+}
+
+@media (min-width: 500px) {
+    .l-col {
+        white-space: nowrap
     }
 }
 

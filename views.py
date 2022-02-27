@@ -22,16 +22,16 @@ def render_with_data(template, **kwargs):
 
 # Front end pages
 @views.route('/', methods=['GET'])
-def get_home_page():    
+def get_home_page():
     return render_with_data('home.html')
 
 @views.route('/about', methods=['GET'])
-def get_about_page():    
+def get_about_page():
     return render_with_data('about.html')
 
 
 @views.route('/archive', methods=['GET'])
-def get_archive_page():    
+def get_archive_page():
 
     try:
         limit = int(request.args.get('limit', 20))
@@ -75,20 +75,20 @@ def get_login_page():
 def get_profile_page(username):
     return render_with_data('profile.html', profile_name=username)
 
-@views.route('/manage', methods=['GET'])
-@check_admin
-def get_manage_page():
-    return render_with_data('manage.html')
 
 @views.route('/prompt/<id>', methods=['GET'])
 def get_prompt_page(id):
     run_id = request.args.get('run_id', '')
     page = request.args.get('page', 1)
-    
+    sortMode = request.args.get('sort', 'time')
+
+    if int(page) < 1:
+        page = 1
+
     if len(run_id) != 0:
-        return render_with_data('prompt.html', prompt_id=id, run_id=run_id, pg = page)
+        return render_with_data('prompt.html', prompt_id=id, run_id=run_id, pg = page, sortMode=sortMode)
     else:
-        return render_with_data('prompt.html', prompt_id=id, pg = page)
+        return render_with_data('prompt.html', prompt_id=id, pg = page, sortMode=sortMode)
 
 
 @views.route('/play/<id>', methods=['GET'])
@@ -126,3 +126,14 @@ def get_marathon_prompt_page(id):
         return render_with_data('marathon_prompt.html', prompt_id=id, run_id=run_id, pg = page)
     else:
         return render_with_data('marathon_prompt.html', prompt_id=id, pg = page)
+    
+# Admin pages
+@views.route('/manage', methods=['GET'])
+@check_admin
+def get_manage_page():
+    return render_with_data('admin/manage.html')
+
+@views.route('/testarticle', methods=['GET'])
+@check_admin
+def get_test_article_page():
+    return render_with_data('admin/articleTester.html')

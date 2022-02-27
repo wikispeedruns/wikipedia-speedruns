@@ -3,6 +3,7 @@
 {% block head %}
 <script defer type=text/javascript src="{{url_for('static', filename='js/home.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/home.css')}}">
 <style>
     [v-cloak] { display: none }
 </style>
@@ -12,7 +13,7 @@
 
 <div id="app">
 
-    <h3>Welcome to Wikipedia Speedruns!</h3>
+    <h3>Welcome to Wikipedia Speedruns! <a href="/about#beta"><span class="beta">BETA*</span></a></h3>
 
 
     <p>The goal of this game is simple. Try to get from one wikipedia page to another as fast as possible by clicking on the links in the page. </p>
@@ -31,92 +32,93 @@
 
     <div class="row justify-content-md-center">
 
-    <div class="col-sm-6">
+        <div class="col-sm-6">
 
-        <div class="card">
-            <div class="card-body">
-                <h4>Prompt of the Day</h4>
-                <template v-if="dailyPrompts.length > 0">
-                    <h6 >Time Remaining: [[timeLeft]]</h6>
+            <div class="card">
+                <div class="card-body">
+                    <h4>Prompt of the Day</h4>
+                    <template v-if="dailyPrompts.length > 0">
+                        <h6 >Time Remaining: [[timeLeft]]</h6>
 
+                        <table class="table table-hover">
+                            <thead>
+                                <th scope="col">Prompt #</th>
+                                <th scope="col">Starting Article</th>
+                            </thead>
+                            <tbody>
+                                <tr v-for="prompt in dailyPrompts" v-cloak>
+                                    <td>[[prompt.prompt_id]]</span> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
+
+                                    <td>[[prompt.start]]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </template>
+                    <template v-else> 
+                        <hr>
+                        <p>Currently unavailable</p>
+                    </template>
+
+                </div>
+
+                <div class="card-footer text-muted">
+                    These prompts are <a href="/about#ratings">rated</a>.
+                </div>
+            </div>
+
+        </div>    
+
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-body">
+
+                    <h4> Try some other Prompts </h4>
                     <table class="table table-hover">
                         <thead>
                             <th scope="col">Prompt #</th>
                             <th scope="col">Starting Article</th>
                         </thead>
                         <tbody>
-                            <tr v-for="prompt in dailyPrompts" v-cloak>
-                                <td>[[prompt.prompt_id]]</span> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
+                            <tr v-for="prompt in activePrompts" v-cloak>
+                                <td>[[prompt.prompt_id]] (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
 
                                 <td>[[prompt.start]]</td>
                             </tr>
                         </tbody>
                     </table>
-                </template>
-                <template v-else> 
-                    <hr>
-                    <p>Currently unavailable</p>
-                </template>
+                </div>
 
-            </div>
 
-            <div class="card-footer text-muted">
-                These prompts are <a href="/about#ratings">rated</a>.
             </div>
         </div>
 
-    </div>    
+        <p class="my-4"> Still want more? Checkout our <a href="/archive">archive</a> or click <a href="/random">here</a> to try a random prompt.</p>
 
-    <div class="col-sm-6">
-        <div class="card">
-            <div class="card-body">
+        <div class="row py-4">
+            <div class="col px-0">
+                <div class="card">
+                    <div class="card-body">
+                        <h4><b>NEW</b> Marathon prompts:</h4>
+                        <p>Every checkpoint you reach will buy you five more clicks and a new checkpoint, but every click you make on the way will cost one. There is no time limit on marathon mode - see how far you can go!</p>
 
-                <h4> Try some other Prompts </h4>
-                <table class="table table-hover">
-                    <thead>
-                        <th scope="col">Prompt #</th>
-                        <th scope="col">Starting Article</th>
-                    </thead>
-                    <tbody>
-                        <tr v-for="prompt in activePrompts" v-cloak>
-                            <td>[[prompt.prompt_id]] (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
-
-                            <td>[[prompt.start]]</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-
-        </div>
-    </div>
-
-    <p> Still want more? Checkout our <a href="/archive">archive</a> or click <a href="/random">here</a> to try a random prompt.</p>
-    <div class="row py-4">
-        <div class="col px-0">
-            <div class="card">
-                <div class="card-body">
-                    <h4><b>NEW</b> Marathon prompts:</h4>
-                    <p>Every checkpoint you reach will buy you five more clicks and a new checkpoint, but every click you make on the way will cost one. There is no time limit on marathon mode - see how far you can go!</p>
-
-                    <table class="table table-hover">
-                    <thead>
-                        <th scope="col">Prompt #</th>
-                        <th scope="col">Starting Article</th>
-                        <th scope="col">Starting Checkpoints</th>
-                    </thead>
-                    <tbody>
-                        <tr v-for="prompt in marathonPrompts" v-cloak>
-                            <td>[[prompt.prompt_id]] (<a v-bind:href="'/play/marathon/' + prompt.prompt_id">play</a>)</td>
-                            <td>[[prompt.start]]  </td>
-                            <td>[[prompt.initcheckpoints]]  </td>
-                        </tr>
-                    </tbody>
-                    </table>
+                        <table class="table table-hover">
+                        <thead>
+                            <th scope="col">Prompt #</th>
+                            <th scope="col">Starting Article</th>
+                            <th scope="col">Starting Checkpoints</th>
+                        </thead>
+                        <tbody>
+                            <tr v-for="prompt in marathonPrompts" v-cloak>
+                                <td>[[prompt.prompt_id]] (<a v-bind:href="'/play/marathon/' + prompt.prompt_id">play</a>)</td>
+                                <td>[[prompt.start]]  </td>
+                                <td>[[prompt.initcheckpoints]]  </td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
     </div>
     
@@ -148,30 +150,47 @@
     <hr>
 
     <div>
-        <p> Questions or Feedback? Email us at <a href="mailto:support@wikispeedruns.com">support@wikispeedruns.com</a></p>
+        <p>
+            Questions or Feedback? Email us at <a href="mailto:support@wikispeedruns.com">support@wikispeedruns.com</a>,
+            <a href="https://twitter.com/intent/tweet?screen_name=WikiSpeedruns" target="_blank">tweet</a> at us,
+            or join our <a href="https://discord.gg/mNYeB9c9db" target="_blank">Discord</a> server!
+        </p>
 
         <p>
             Created by <a href="https://danqian.net">Daniel Qian</a>,
             <a href="https://mliu59.github.io/">Miles Liu</a>,
             <a href="https://bricehalder.com/">Brice Halder</a>,
-            and <a href="https://xablexa.com/">Axel Bax</a>
+            <a href="https://xablexa.com/">Axel Bax</a>, 
+            <a href="https://www.omfgdogs.com/#">Manan Aggarwal</a>,
+            and <a href="https://en.wikipedia.org/wiki/Melody">Melody</a> 
+            <a href="https://en.wikipedia.org/wiki/Xu_(surname_%E5%BE%90)"> Hsu</a>.
         </p>
         <p>
             <a href="/about#acknowledgements">Special Thanks and Acknowledgements</a>
         </p>
     </div>
 
-
-
-
     <hr>
 
-    <div class="container text-center mt-5 mx-auto">
-        <div class="row">
-        <a href="https://twitter.com/WikiSpeedruns" class="col">
-            <img src="/static/assets/twitter_icon.png" width="75" height="75">
+    <div class="social-menu center">
+        <a href="https://twitter.com/WikiSpeedruns" target="_blank">
+            <button type="button" class="btn">
+                <i class="bi bi-twitter"></i>
+            </button>
         </a>
-        </div>
+
+        <a href="https://discord.gg/mNYeB9c9db" target="_blank">
+            <button type="button" class="btn">
+                <i class="bi bi-discord"></i>
+            </button>
+        </a>
+
+        <a href="https://github.com/wikispeedruns/wikipedia-speedruns" target="_blank">
+            <button type="button" class="btn">
+                <i class="bi bi-github"></i>
+            </button>
+        </a>
     </div>
+
 </div>
 {% endblock %}

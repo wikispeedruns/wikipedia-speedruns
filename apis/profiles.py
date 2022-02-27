@@ -13,11 +13,19 @@ def get_user_info(username):
     Get the basic info for a user
     TODO cache this?
     '''
-    if (session.get("username") == username or session.get("admin")):
-        query = "SELECT `username`, `email`, `email_confirmed`, `admin` FROM `users` WHERE `username`=%s"
-    else:
-        query = "SELECT `username`, `email_confirmed`, `admin` FROM `users` WHERE `username`=%s"
 
+    query = f'''
+    SELECT
+        username,
+        email_confirmed,
+        {'email,' if session.get("username") == username or session.get("admin") else ''}
+        {'admin,' if session.get("admin") else ''}
+        join_date,
+        ratings.rating
+    FROM users
+    LEFT JOIN ratings ON ratings.user_id=users.user_id
+    WHERE users.username=%s
+    '''
 
     with get_db().cursor(cursor=DictCursor) as cursor:
         num = cursor.execute(query, (username, ))
@@ -28,15 +36,19 @@ def get_user_info(username):
     return result, 200
 
 
-@profile_api.get("/<username>/totals")
+@profile_api.get("/<username>/stats")
 def get_total_stats(username):
     '''
-    Get the total number of prompts for a user
+    Get aggregate statistics for a user
     TODO cache this?
     '''
 
     query = """
-    SELECT users.user_id, COUNT(run_id) AS total_runs, COUNT(DISTINCT prompt_id) as total_prompts FROM users 
+    SELECT 
+        users.user_id, 
+        COUNT(run_id) AS total_runs, 
+        COUNT(DISTINCT prompt_id) as total_prompts
+    FROM users
     LEFT JOIN sprint_runs ON sprint_runs.user_id=users.user_id 
     WHERE users.username=%s
     """
