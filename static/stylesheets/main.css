@@ -89,3 +89,9 @@ a:hover, a:hover * {
         display:none !important;
     }
 }
+
+@media (min-width: 500px) {
+    .l-col {
+        white-space: nowrap
+    }
+}

@@ -3,6 +3,7 @@ import { serverData } from "./modules/serverData.js"
 const prompt_id = serverData["prompt_id"];
 const run_id = serverData["run_id"] || "";
 const pg = serverData["pg"];
+const sortMode = serverData["sortMode"];
 
 const runsPerPage = 10;
 
@@ -227,11 +228,12 @@ var app = new Vue({
         available: false,
         page: 0,
         totalpages: 0,
+        sortMode: sortMode,
+
     },
 
     methods : {
-        getLeaderboard: async function () {
-
+        getLeaderboard: async function (mode) {
             var response = await fetch("/api/sprints/" + prompt_id + "/leaderboard/" + run_id);
 
             if (response.status == 401) {
@@ -240,7 +242,15 @@ var app = new Vue({
             }
 
 
-            return await response.json(); 
+            let resp = await response.json(); 
+
+            if (mode === 'path') {
+                let runs = resp.leaderboard
+                runs.sort((a, b) => (a.path.length > b.path.length) ? 1 : ((a.path.length === b.path.length) ? ((a.run_time > b.run_time) ? 1 : -1) : -1))
+                resp.leaderboard = runs
+            }
+            return resp
+
         }, 
 
         genGraph: function () {
@@ -337,11 +347,34 @@ var app = new Vue({
                 row.appendChild(col)
                 event.target.parentElement.parentElement.parentElement.insertBefore(row, event.target.parentElement.parentElement.nextSibling)
             }
+        },
+
+        sortStatus: function(tab) {
+            if (this.sortMode === tab) {
+                return `<i class="bi bi-chevron-down"></i>`
+            }   
+            return `<i class="bi bi-dash-lg"></i>`
+        },
+
+        toggleSort: function(tab) {
+            if (tab === 'time' && this.sortMode === 'path') {
+                if (run_id) {
+                    window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
+                } else {
+                    window.location.replace("/prompt/" + prompt_id);
+                }
+            } else if (tab === 'path' && this.sortMode === 'time') {
+                if (run_id) {
+                    window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id + "&sort=path");
+                } else {
+                    window.location.replace("/prompt/" + prompt_id + "?sort=path");
+                }
+            }
         }
     },
 
     created: async function() {
-        const resp = await this.getLeaderboard();
+        const resp = await this.getLeaderboard(this.sortMode);
 
         this.available = resp['prompt']['available'];
 
