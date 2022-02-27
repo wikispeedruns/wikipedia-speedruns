@@ -97,13 +97,13 @@ def get_archive_prompts():
     try:
         limit = int(request.args.get('limit', 20))
         offset = int(request.args.get('offset', 0))
-
+        sort_desc = request.args.get('sort_desc', "True").lower() == "true"
         sprints, num_prompts = prompts.get_archive_prompts("sprint",
             offset=offset,
             limit=limit,
+            sort_desc=sort_desc,                           
             user_id=session.get("user_id")
         )
-
 
         return jsonify({
             "prompts": sprints,
@@ -112,7 +112,6 @@ def get_archive_prompts():
 
     except ValueError:
         return "Invalid limit or offset", 400
-
 
 ### Specific prompt endpoints
 

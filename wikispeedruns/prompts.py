@@ -135,8 +135,6 @@ def get_prompt(prompt_id: int, prompt_type: PromptType, user_id: Optional[int]=N
         prompt = compute_visibility(prompt)
         return prompt
 
-
-
 def _construct_prompt_user_query(prompt_type: PromptType, user_id: Optional[int]):
 
     # 1. Determine which fields are needed
@@ -188,15 +186,20 @@ def get_active_prompts(prompt_type: PromptType, user_id: Optional[int]=None,) ->
         for p in prompts:
             p['end'] = None
 
-        return prompts
-
-
-def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, offset: int=0, limit: int=20 ) -> Tuple[List[Prompt], int]:
+def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, offset: int=0, limit: int=20, sort_desc: bool=True) -> Tuple[List[Prompt], int]:
     '''
     Get all prompts for archive, including currently active
     '''
+    if sort_desc:
+        sort = 'DESC'
+    else:
+        sort = 'ASC'
+    if (prompt_type == "sprint"):
+        query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts"
+    # elif (prompt_type == "marathon")
+
     query, args = _construct_prompt_user_query(prompt_type, user_id)
-    query += " WHERE used = 1 AND active_start <= NOW() ORDER BY active_start DESC LIMIT %(offset)s, %(limit)s"
+    query += f" WHERE used = 1 AND active_start <= NOW() ORDER BY active_start {sort}, prompt_id {sort} LIMIT %(offset)s, %(limit)s"
 
     args["offset"] = offset
     args["limit"] = limit
