@@ -49,17 +49,12 @@ let app = new Vue({
 
 
     mounted: async function() {
-        if (!("username" in serverData)) {
-            alert("Please register/login before trying to play the prompt of the day.")
-            window.location.href = "/";
-        }
-
         this.promptId = PROMPT_ID;
 
         const response = await fetch("/api/sprints/" + this.promptId);
         if (response.status != 200) {
             const error = await response.text();
-            this.alert(error);
+            alert(error);
 
             // Prevent are you sure you want to leave prompt
             window.onbeforeunload = null;
