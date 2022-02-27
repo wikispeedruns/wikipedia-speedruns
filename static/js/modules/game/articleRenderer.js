@@ -29,6 +29,7 @@ export class ArticleRenderer {
         hideElements(this.frame);
         disableFindableLinks(this.frame);
         stripNamespaceLinks(this.frame);
+        setMargin(this.frame);
 
         this.frame.querySelectorAll("a, area").forEach((el) => {
             // Arrow function to prevent this from being overwritten
@@ -39,7 +40,6 @@ export class ArticleRenderer {
 
         return body["parse"]["title"]
     }
-
 
     async loadPageWrapper(page) {
 
@@ -89,6 +89,12 @@ export class ArticleRenderer {
             this.loadPageWrapper(linkEl.getAttribute("href").substring(6))
         }
     }
+}
+
+function setMargin(frame) {
+    const element = document.getElementById("time-box");
+    let margin = (element.offsetHeight + 25) > 100 ? (element.offsetHeight + 25) : 100
+    frame.lastChild.style.paddingBottom = margin +"px";
 }
 
 function hideElements(frame) {
