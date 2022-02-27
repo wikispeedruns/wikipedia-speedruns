@@ -110,6 +110,10 @@ def get_reset_page(id, token):
 def get_gen_error_page():
     return render_with_data('users/generic_error.html')
 
+@views.route('/replay', methods=['GET'])
+def get_replay_page():
+    run_id = request.args.get('run_id', '')
+    return render_with_data('replay.html', run_id=run_id)
 
 # Admin pages
 
