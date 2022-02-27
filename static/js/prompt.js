@@ -6,6 +6,25 @@ const pg = serverData["pg"];
 
 const runsPerPage = 10;
 
+
+/*
+Vue.component('run-item', {
+    delimiters: ['[[', ']]'],
+    props: ['run', 'rank'],
+
+    template: (`
+    <tr>
+        <td scope="col">[[rank]]</td>
+        <td style="white-space: nowrap" v-if="run.username"  scope="col"><strong>[[run.username]]</strong></td>
+        <td v-else  scope="col"><strong>You</strong></td>
+        <td style="white-space: nowrap"  scope="col">[[(run.run_time/1000000).toFixed(3)]] s</td>
+        <td  scope="col">[[run.path.length]]</td>
+        <td  scope="col"><span class="d-none d-sm-block">[[run.path]]</span><span class="d-block d-sm-none">Test</span></td>
+    </tr>`
+    )
+});*/
+
+
 function populateGraph(runs) {
 
     var graph = new Springy.Graph();
@@ -306,6 +325,18 @@ var app = new Vue({
             } else {
                 window.location.replace("/prompt/" + prompt_id + "?page=" + String(totalpages));
             }
+        },
+
+        showPath: function(event, path) {
+
+            if (!event.target.parentElement.parentElement.nextSibling.firstChild || event.target.parentElement.parentElement.nextSibling.firstChild.colSpan != 5) {
+                let row = document.createElement("tr")
+                let col = document.createElement("td")
+                col.innerHTML = String(path)
+                col.colSpan = 5
+                row.appendChild(col)
+                event.target.parentElement.parentElement.parentElement.insertBefore(row, event.target.parentElement.parentElement.nextSibling)
+            }
         }
     },
 
@@ -318,7 +349,6 @@ var app = new Vue({
         this.runs = resp["leaderboard"];
 
         this.paginate();
-        
         this.totalpages = Math.ceil(this.runs.length/this.runsPerPage);
         this.genGraph();
     }

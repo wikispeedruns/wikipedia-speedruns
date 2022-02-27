@@ -32,20 +32,21 @@
                         <th scope="col">Path</th>
                     </thead>
                     <tbody>
+                        
                         <tr v-if="currentRunPosition === -1">
                             <td>[[currentRunRank]]</td>
                             <td style="white-space: nowrap" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td style="white-space: nowrap">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
                             <td>[[currentRun.path.length]]</td>
-                            <td>[[currentRun.path]]</td>
+                            <td><span class="d-none d-sm-block">[[currentRun.path]]</span><button class="d-block d-sm-none btn btn-outline-secondary btn-sm" v-on:click.stop="showPath($event, currentRun.path)">Show</button></td>
                         </tr>
                         <tr v-if="currentRunPosition === -1">
                             <td>...</td>
                             <td>[[null]]</td>
                             <td>[[null]]</td>
                             <td>[[null]]</td>
-                            <td>...</td>
+                            <td>[[null]]</td>
                         </tr>
                         <tr v-for="(run, index) in renderedRuns">
                             <td>[[getRenderedRank(index)]]</td>
@@ -53,14 +54,14 @@
                             <td v-else><strong>You</strong></td>
                             <td style="white-space: nowrap">[[(run.run_time/1000000).toFixed(3)]] s</td>
                             <td>[[run.path.length]]</td>
-                            <td>[[run.path]]</td>
+                            <td><span class="d-none d-sm-block">[[run.path]]</span><button class="d-block d-sm-none btn btn-outline-secondary btn-sm" v-on:click.stop="showPath($event, run.path)">Show</button></td>
                         </tr>
                         <tr v-if="currentRunPosition === 1">
                             <td>...</td>
                             <td>[[null]]</td>
                             <td>[[null]]</td>
                             <td>[[null]]</td>
-                            <td>...</td>
+                            <td>[[null]]</td>
                         </tr>
                         <tr v-if="currentRunPosition === 1">
                             <td>[[currentRunRank]]</td>
@@ -68,8 +69,10 @@
                             <td v-else><strong>You</strong></td>
                             <td style="white-space: nowrap">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
                             <td>[[currentRun.path.length]]</td>
-                            <td>[[currentRun.path]]</td>
+                            <td><span class="d-none d-sm-block">[[currentRun.path]]</span><button class="d-block d-sm-none btn btn-outline-secondary btn-sm" v-on:click.stop="showPath($event, currentRun.path)">Show</button></td>
                         </tr>
+                        
+                        
                     </tbody>
                 </table>
 
