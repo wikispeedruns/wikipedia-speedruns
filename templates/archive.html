@@ -24,7 +24,8 @@
             <div class="card-body">
                 <table class="table table-hover">
                     <thead>
-                        <th scope="col">Release Date</th>
+                        <th scope="col"><a v-on:click="toggleSort('time')">Release Date <span v-html="sortButton()"></span></a></th>
+                        <!-- <th scope="col">Release Date</th> -->
                         <th scope="col">Prompt #</th>
                         <th scope="col">Starting Article</th>
                         <th scope="col">Ending Article</th>
