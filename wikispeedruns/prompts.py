@@ -50,7 +50,7 @@ def compute_visibility(prompt: Prompt) -> Prompt:
     return prompt
 
 def add_sprint_prompt(start: str, end: str) -> Optional[int]:
-    ''' 
+    '''
     Add a prompt
     '''
     query = "INSERT INTO sprint_prompts (start, end) VALUES (%s, %s);"
@@ -80,7 +80,7 @@ def delete_prompt(prompt_id: int, prompt_type: PromptType) -> bool:
 
             db.commit()
             return res == 1
-        
+
         except pymysql.IntegrityError:
             return False
 
@@ -113,7 +113,7 @@ def set_prompt_time(prompt_id: int, prompt_type: PromptType, active_start: datet
 
 
 def get_prompt(prompt_id: int, prompt_type: PromptType, user_id: Optional[int]=None) -> Optional[Prompt]:
-    ''' 
+    '''
     Get a specific prompt
     '''
     if (prompt_type == "sprint"):
@@ -134,7 +134,7 @@ def get_prompt(prompt_id: int, prompt_type: PromptType, user_id: Optional[int]=N
 
         prompt = compute_visibility(prompt)
         return prompt
-        
+
 
 
 def get_active_prompts(prompt_type: PromptType) -> List[Prompt]:
@@ -154,16 +154,20 @@ def get_active_prompts(prompt_type: PromptType) -> List[Prompt]:
         return cur.fetchall()
 
 
-def get_archive_prompts(prompt_type: PromptType, offset: int=0, limit: int=20 ) -> Tuple[List[Prompt], int]:
+def get_archive_prompts(prompt_type: PromptType, offset: int=0, limit: int=20, sort_desc: bool=True) -> Tuple[List[Prompt], int]:
     '''
     Get all prompts for archive, including currently active
     TODO paginate, user id?
     '''
+    if sort_desc:
+        sort = 'DESC'
+    else:
+        sort = 'ASC'
     if (prompt_type == "sprint"):
         query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts"
     # elif (prompt_type == "marathon")
 
-    query += " WHERE used = 1 AND active_start <= NOW() ORDER BY active_start DESC LIMIT %s, %s"
+    query += f" WHERE used = 1 AND active_start <= NOW() ORDER BY active_start {sort} LIMIT %s, %s"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cur:
@@ -179,7 +183,7 @@ def get_archive_prompts(prompt_type: PromptType, offset: int=0, limit: int=20 ) 
         # get the total number of prompts
         cur.execute("SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW()")
         n = cur.fetchone()['n']
-        
+
         return prompts, n
 
 
