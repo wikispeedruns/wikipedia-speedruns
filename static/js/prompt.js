@@ -213,6 +213,8 @@ function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
+
+
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
@@ -306,35 +308,15 @@ var app = new Vue({
             return this.renderedRunsRank[index];
         },
 
-        nextPage: function () {
-            //TODO: look into ways to use JS methods to update/insert new args
+        buildNewLink: function (page) {
+            let base = "/prompt/" + prompt_id + "?page=" + String(page)
             if (run_id) {
-                window.location.replace("/prompt/" + prompt_id + "?page=" + String(parseInt(pg)+1) + "&run_id=" + run_id);
-            } else {
-                window.location.replace("/prompt/" + prompt_id + "?page=" + String(parseInt(pg)+1));
+                base += "&run_id=" + run_id
+            } 
+            if (this.sortMode === 'path') {
+                base += "&sort=path"
             }
-        }, 
-
-        prevPage: function() {
-            if (run_id) {
-                window.location.replace("/prompt/" + prompt_id + "?page=" + String(parseInt(pg)-1) + "&run_id=" + run_id);
-            } else {
-                window.location.replace("/prompt/" + prompt_id + "?page=" + String(parseInt(pg)-1));
-            }
-        }, 
-        firstPage: function() {
-            if (run_id) {
-                window.location.replace("/prompt/" + prompt_id + "?page=1&run_id=" + run_id);
-            } else {
-                window.location.replace("/prompt/" + prompt_id + "?page=1");
-            }
-        }, 
-        lastPage: function() {
-            if (run_id) {
-                window.location.replace("/prompt/" + prompt_id + "?page=" + String(totalpages) + "&run_id=" + run_id);
-            } else {
-                window.location.replace("/prompt/" + prompt_id + "?page=" + String(totalpages));
-            }
+            window.location.replace(base)
         },
 
         showPath: function(event, path) {
@@ -383,6 +365,7 @@ var app = new Vue({
 
         this.paginate();
         this.totalpages = Math.ceil(this.runs.length/this.runsPerPage);
+        this.page = pg;
         this.genGraph();
     }
 })
