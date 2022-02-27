@@ -1,4 +1,5 @@
 import { serverData } from "./modules/serverData.js"
+import {pathArrowFilter} from "./modules/game/filters.js";
 
 const prompt_id = serverData["prompt_id"];
 const run_id = serverData["run_id"] || "";
@@ -213,7 +214,7 @@ function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
-
+Vue.filter('pathArrow', pathArrowFilter)
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
@@ -352,6 +353,10 @@ var app = new Vue({
                     window.location.replace("/prompt/" + prompt_id + "?sort=path");
                 }
             }
+        },
+
+        runReplay: function(event) {
+            console.log(event)
         }
     },
 

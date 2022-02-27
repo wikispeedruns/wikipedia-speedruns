@@ -6,6 +6,7 @@ from pymysql.cursors import DictCursor
 import json
 
 from datetime import datetime
+from wikispeedruns import prompts
 
 
 run_api = Blueprint('runs', __name__, url_prefix='/api/runs')
@@ -78,3 +79,32 @@ def get_all_runs():
         results = cursor.fetchall()
         return jsonify(results)
     
+@run_api.get('/<id>')
+def get_run(id):
+    '''
+    Returns the run details for a specific run_id if the user has done the corresponding prompt.
+    '''
+
+    query = '''
+    SELECT run_id, start_time, end_time, path, prompt_id, user_id 
+    FROM sprint_runs 
+    WHERE run_id=%s
+    '''
+        
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (id))
+        result = cursor.fetchone()
+        db.commit()
+
+        prompt = prompts.get_prompt(result['prompt_id'], "sprint", user_id=session.get("user_id"))
+        if not session.get("admin", False) and (not prompt.get("played", False)):
+            return "Cannot view run until prompt has been completed", 401
+
+        if result["path"] is None:
+            return f'Run {id} has not been completed', 401
+
+        result['path'] = json.loads(result['path'])
+        return jsonify(result)
+
+    return f'Error fetching run {id}', 500
