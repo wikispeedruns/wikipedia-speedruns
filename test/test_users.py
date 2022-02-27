@@ -15,17 +15,17 @@ def test_create_user(cursor, user):
 
 
 def test_create_existing_user(client, cursor, user):
-    
+
     response = client.post("/api/users/create/email", json={
         "username" : user["username"],
-        "email" : "test@test.com", 
+        "email" : "test@test.com",
         "password" : "test"
     })
     assert response.status_code == 409
 
     response = client.post("/api/users/create/email", json={
         "username" : "test",
-        "email" : user["email"], 
+        "email" : user["email"],
         "password" : "test"
     })
     assert response.status_code == 409
@@ -39,8 +39,8 @@ def test_old_hash_login(cursor, client):
     Test our logic that converts our old buggy password hashes into new ones upon login
     """
     query = """
-    INSERT INTO users (`username`, `hash`, `email`, `email_confirmed`, `is_old_hash`) 
-    VALUES ('test', %s, 'test@test.com', 0, 1)
+    INSERT INTO users (`username`, `hash`, `email`, `email_confirmed`, `is_old_hash`, `join_date`)
+    VALUES ('test', %s, 'test@test.com', 0, 1, CURRENT_DATE())
     """
     password = "test"
     hash = bcrypt.hashpw(hashlib.sha256(password.encode()).digest(), bcrypt.gensalt())
@@ -104,10 +104,10 @@ def test_confirm_email(client, cursor, user_base):
 
     regex = r"confirm/([-_\.\w]+)"  # match alphanumeric characters and '_', '.', '-'
     token = re.search(regex, msg.html).groups()[0]
-    
+
     # make sure token is the same in html and text
     assert token == re.search(regex, msg.body).groups()[0]
-    
+
     # Try fake token
     assert client.post("/api/users/confirm_email", json={"token": "abc"}).status_code == 400
 
@@ -121,7 +121,7 @@ def test_confirm_email(client, cursor, user_base):
 
 def test_change_password_bad(client, user):
     new_password = user["password"] + "2"
-    
+
     # While not logged in, should return 401
     assert client.post("/api/users/change_password", json={
         "old_password": user["password"],
@@ -132,7 +132,7 @@ def test_change_password_bad(client, user):
 def test_change_password(client, user, session):
     new_password = user["password"] + "2"
 
-    # Change for 
+    # Change for
     assert client.post("/api/users/change_password", json={
         "old_password": user["password"],
         "new_password": new_password
@@ -177,7 +177,7 @@ def test_reset_password(client, mail, cursor, user, session):
         request = {"user_id": int(id), "password": new_password, "token": "test"}
         # try bad token, then good token
         assert client.post("/api/users/reset_password", json=request).status_code == 400
-       
+
         # Try real token
         request["token"] = token
         resp = client.post("/api/users/reset_password", json=request)
