@@ -4,6 +4,7 @@ import pymysql
 
 import base64
 import hashlib
+import datetime
 
 from getpass import getpass
 
@@ -35,7 +36,7 @@ def create_admin_account():
 
 
 
-    query = "INSERT INTO `users` (`username`, `hash`, `email`, `email_confirmed`, `admin`) VALUES (%s, %s, %s, %s, %s)"
+    query = "INSERT INTO `users` (`username`, `hash`, `email`, `email_confirmed`, `admin`, `join_date`) VALUES (%s, %s, %s, %s, %s, %s)"
 
     db = pymysql.connect(
             user=config["MYSQL_USER"],
@@ -45,7 +46,7 @@ def create_admin_account():
     )
 
     with db.cursor() as cursor:
-        result = cursor.execute(query, (username, hash, email, True, True))
+        result = cursor.execute(query, (username, hash, email, True, True, datetime.datetime.now()))
 
         if (result == 0):
             print("User {} already exists".format(username))

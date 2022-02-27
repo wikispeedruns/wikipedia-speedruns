@@ -27,7 +27,7 @@ export class ArticleRenderer {
 
 
         hideElements(this.frame);
-        disbleFindableLinks(this.frame);
+        disableFindableLinks(this.frame);
         stripNamespaceLinks(this.frame);
 
         this.frame.querySelectorAll("a, area").forEach((el) => {
@@ -36,15 +36,18 @@ export class ArticleRenderer {
         });
 
         window.scrollTo(0, 0);
+
+        return body["parse"]["title"]
     }
 
 
     async loadPageWrapper(page) {
+
         try {
             const startTime = Date.now();
-            await this.loadPage(page);
+            const title = await this.loadPage(page);
 
-            this.pageCallback(page, Date.now() - startTime);
+            this.pageCallback(title, Date.now() - startTime);
 
         } catch (error) {
             // Reenable all links if loadPage fails
@@ -161,7 +164,7 @@ function stripNamespaceLinks(frame) {
     });
 }
 
-function disbleFindableLinks(frame) {
+function disableFindableLinks(frame) {
 
     // Disable CTRL + F by splitting up link text into different div
     frame.querySelectorAll("a").forEach(function(a) {
