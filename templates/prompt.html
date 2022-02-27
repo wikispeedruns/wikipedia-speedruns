@@ -81,14 +81,14 @@
             </div>  
             <div v-cloak class="card-footer text-center">
                 <button class="btn btn-outline-secondary"
-                    v-on:click="firstPage" 
+                    v-on:click="buildNewLink(1)" 
                     v-bind:class="{invisible: getPageNo() === 1 || getPageNo()===0}">
                         
                     <i class="bi bi-chevron-double-left"></i>
                 </button>
 
                 <button class="btn btn-outline-secondary"
-                    v-on:click="prevPage"
+                    v-on:click="buildNewLink(parseInt(page)-1)"
                     v-bind:class="{invisible: getPageNo() === 1 || getPageNo()===0}">
 
                     <i class="bi bi-chevron-left" id="prev-page"></i>
@@ -97,14 +97,14 @@
                 <span>Page <strong>[[getPageNo()]]</strong> of [[totalpages]] </span>
                 
                 <button class="btn btn-outline-secondary"
-                    v-on:click="nextPage" 
+                    v-on:click="buildNewLink(parseInt(page)+1)" 
                     v-bind:class="{invisible: getPageNo() === totalpages}">
                         
                     <i class="bi bi-chevron-right"></i>
                 </button>         
                 
                 <button class="btn btn-outline-secondary"
-                    v-on:click="lastPage" 
+                    v-on:click="buildNewLink(totalpages)" 
                     v-bind:class="{invisible: getPageNo() === totalpages}">
                         
                     <i class="bi bi-chevron-double-right"></i>
