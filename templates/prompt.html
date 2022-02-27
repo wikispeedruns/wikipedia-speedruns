@@ -36,7 +36,11 @@
                             <td style="white-space: nowrap" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td style="white-space: nowrap">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
-                            <td>[[currentRun.path | pathArrow]]</td>
+                            <td>[[currentRun.path | pathArrow]] 
+                                <a v-bind:href="'/replay?run_id=' + currentRun.run_id" target="_blank" >
+                                    <i class="bi bi-box-arrow-in-up-right"></i>
+                                </a>
+                            </td>
                         </tr>
                         <tr v-if="currentRunPosition === -1">
                             <td>...</td>
@@ -49,7 +53,11 @@
                             <td style="white-space: nowrap" v-if="run.username"><strong>[[run.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td style="white-space: nowrap">[[(run.run_time/1000000).toFixed(3)]] s</td>
-                            <td>[[run.path | pathArrow]]</td>
+                            <td>[[run.path | pathArrow]] 
+                                <a v-bind:href="'/replay?run_id=' + run.run_id" target="_blank" >
+                                    <i class="bi bi-box-arrow-in-up-right"></i>
+                                </a>
+                            </td>
                         </tr>
                         <tr v-if="currentRunPosition === 1">
                             <td>...</td>
@@ -62,7 +70,11 @@
                             <td style="white-space: nowrap" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td style="white-space: nowrap">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
-                            <td>[[currentRun.path | pathArrow]]</td>
+                            <td>[[currentRun.path | pathArrow]] 
+                                <a v-bind:href="'/replay?run_id=' + currentRun.run_id" target="_blank">
+                                    <i class="bi bi-box-arrow-in-up-right"></i>
+                                </a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

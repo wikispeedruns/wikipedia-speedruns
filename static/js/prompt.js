@@ -293,6 +293,10 @@ var app = new Vue({
             } else {
                 window.location.replace("/prompt/" + prompt_id + "?page=" + String(parseInt(pg)-1));
             }
+        },
+
+        runReplay: function(event) {
+            console.log(event)
         }
     },
 
