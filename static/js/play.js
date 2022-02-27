@@ -1,417 +1,128 @@
-import { getRandTip } from "./modules/tooltips.js";
-import { serverData } from "./modules/serverData.js"
+/* play.js is core of processing gameplay. This includes everything from retrieving information about a prompt,
+countdown to start, loading of each wikipedia page, parsing and filtering wikipedia links, processing game logic,
+and submitting runs.
 
-const prompt_id = serverData["prompt_id"];
+With the new Marathon game mode, many of these components are being reused with different game logic. So many of
+these components should be as modular/generic as possible.
+*/
 
+//JS module imports
+import { serverData } from "./modules/serverData.js";
+
+import { getRandTip } from "./modules/game/tips.js";
+import { startRun, submitRun } from "./modules/game/runs.js";
+
+import { CountdownTimer } from "./modules/game/countdown.js";
+import { FinishPage } from "./modules/game/finish.js";
+import { ArticleRenderer } from "./modules/game/articleRenderer.js";
+
+
+//retrieve the unique prompt_id of the prompt to load
+const PROMPT_ID = serverData["prompt_id"];
+
+//Vue container. This contains data, rendering flags, and functions tied to game logic and rendering. See play.html
 let app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
-    data: {
-        startArticle: "",
-        endArticle: "",
-        timer: "",
-        countdown: 8,
-        finished: false,
-        started: false,
-        activeTip: "",
-        path:[],
-        finalTime:"",
-        prompt_id: 0,
+    components: {
+        'countdown-timer': CountdownTimer,
+        'finish-page': FinishPage
     },
+    data: {
+        startArticle: "",    //For all game modes, this is the first article to load
+        endArticle: "",      //For sprint games. Reaching this article will trigger game finishing sequence
+        path: [],             //array to store the user's current path so far, submitted with run
+
+        promptId: 0,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
+        runId: -1,          //unique ID for the current run. This gets populated upon start of run
+
+        startTime: null,     //For all game modes, the start time of run (mm elapsed since January 1, 1970)
+        endTime: null,       //For all game modes, the end time of run (mm elapsed since January 1, 1970)
+        elapsed: 0,
+        timerInterval: null,
+
+        finished: false,     //Flag for whether a game has finished, used for rendering
+        started: false,      //Flag for whether a game has started (countdown finished), used for rendering
+
+        renderer: null,
+    },
+
+
+    mounted: async function() {
+        this.promptId = PROMPT_ID;
+
+        const response = await fetch("/api/sprints/" + this.promptId);
+        if (response.status != 200) {
+            const error = await response.text();
+            this.alert(error);
+
+            // Prevent are you sure you want to leave prompt
+            window.onbeforeunload = null;
+            window.location.replace("/");   // TODO error page
+
+            return;
+        }
+        const prompt = await response.json();
+
+        this.startArticle = prompt["start"];
+        this.endArticle = prompt["end"];
+
+        this.runId = await startRun(this.promptId);
+
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback);
+    },
+
+
     methods : {
-        formatPath: function (pathArr) {
-            let output = "";
-            for(let i=0; i<pathArr.length - 1;i++) {
-                output = output.concat(pathArr[i])
-                output = output.concat(" -> ")
+        async pageCallback(page) {
+            // Game logic for sprint mode:
+            this.path.push(page);
+
+            //if the page's title matches that of the end article, finish the game, and submit the run
+            if (page.replace("_", " ").toLowerCase() === this.endArticle.replace("_", " ").toLowerCase()) {
+
+                this.finished = true;
+
+                // Disable popup
+                window.onbeforeunload = null;
+
+                this.endTime = Date.now();
+                await submitRun(this.runId, this.startTime, this.endTime, this.path);
             }
-            output = output.concat(pathArr[pathArr.length - 1])
-            return output;
-        }, 
 
-        finishPrompt: function (event) {
-            window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
-        }, 
-
-        home: function (event) {
-            window.location.replace("/");
         },
 
-        copyResults: function(event) {
-            let results = generateResultText();
-            document.getElementById("custom-tooltip").style.display = "inline";
-            navigator.clipboard.writeText(results);
-            setTimeout(function() {
-                document.getElementById("custom-tooltip").style.display = "none";
-            }, 1500);
+        async start() {
+            await this.renderer.loadPage(this.startArticle);
+
+            this.path.push(this.startArticle);
+
+            //once above conditions are met, toggle the `started` render flag, which will hide all other elements, and display the rendered wikipage
+            this.started = true;
+
+            //start timer
+            this.startTime = Date.now();
+
+            //set the timer update interval
+            this.timerInterval = setInterval(() => {
+                const seconds = (Date.now() - this.startTime) / 1000;
+                this.elapsed = seconds;
+            }, 50);
         },
+
     }
 })
 
-
-
-let goalPage = "";
-let timerInterval = null;
-let startTime = 0;
-let path = [];
-let endTime = 0;
-
-let run_id = -1;
-
-let seconds;
-let keyMap = {};
-
-function handleWikipediaLink(e) 
-{
-    e.preventDefault();
-
-    const linkEl = e.currentTarget;
-
-    if (linkEl.getAttribute("href").substring(0, 1) === "#") {
-        let a = linkEl.getAttribute("href").substring(1);
-        //console.log(a);
-        document.getElementById(a).scrollIntoView();
-
-    } else {
-
-        // Ignore external links and internal file links
-        if (!linkEl.getAttribute("href").startsWith("/wiki/") || 
-            linkEl.getAttribute("href").startsWith("/wiki/File:") || 
-            linkEl.getAttribute("href").startsWith("/wiki/Wikipedia:") || 
-            linkEl.getAttribute("href").startsWith("/wiki/Category:") ||
-            linkEl.getAttribute("href").startsWith("/wiki/Help:")) {
-            return;
-        }
-
-        // Disable the other linksto prevent multiple clicks
-        document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
-            el.onclick = (e) => {
-                e.preventDefault();
-                console.log("prevent multiple click");
-            };
-        });
-
-        // Remove "/wiki/" from string
-        loadPageWrapper(linkEl.getAttribute("href").substring(6))
-    }
-}
-
-
-function stripNamespaceLinks() {
-    let frameBody = document.getElementById("wikipedia-frame")
-    frameBody.querySelectorAll("a").forEach((linkEl) => {
-        
-        if (linkEl.hasAttribute("href")) {
-            if (linkEl.getAttribute("href").startsWith("/wiki/File:") || 
-                linkEl.getAttribute("href").startsWith("/wiki/Wikipedia:") || 
-                linkEl.getAttribute("href").startsWith("/wiki/Category:") ||
-                linkEl.getAttribute("href").startsWith("/wiki/Help:")) {
-                let newEl = document.createElement("span");
-                newEl.innerHTML = linkEl.innerHTML
-                linkEl.parentNode.replaceChild(newEl, linkEl)
-                //linkEl.setAttribute("href", null)
-            }
-        }
-    });
-
-    frameBody.querySelectorAll("a").forEach(function(a) {
-        let iter = document.createNodeIterator(a, NodeFilter.SHOW_TEXT);
-        let textNode;
-        while (textNode = iter.nextNode()) {
-            let replacementNode = document.createElement('div');
-            replacementNode.innerHTML = '<div style="display:inline-block">' + textNode.textContent.split('').map(function(character) {
-                return '<div style="display:inline-block">' + character.replace(/\s/g, '&nbsp;') + '</div>'
-            }).join('') + '</div>'
-            textNode.parentNode.insertBefore(replacementNode.firstChild, textNode);
-            textNode.parentNode.removeChild(textNode);
-        }
-    });
-}
-
-async function loadPageWrapper(page) {
-    try {
-        await loadPage(page)
-    } catch (error) {
-        // Reenable all links if loadPage fails
-        document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
-            el.onclick = handleWikipediaLink;
-        });
-    }
-}
-
-async function loadPage(page) {
-
-    const resp = await fetch(
-        `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${page}`,
-        {
-            mode: "cors"
-        }
-    )
-    const body = await resp.json()
-
-    const title = body["parse"]["title"]
-
-    let frameBody = document.getElementById("wikipedia-frame")
-    frameBody.innerHTML = body["parse"]["text"]["*"]
-
-    /*frameBody.querySelectorAll("a").forEach(function(a) {
-        let iter = document.createNodeIterator(a, NodeFilter.SHOW_TEXT);
-        let textNode;
-        while (textNode = iter.nextNode()) {
-            let replacementNode = document.createElement('div');
-            replacementNode.innerHTML = '<div style="display:inline-block">' + textNode.textContent.split('').map(function(character) {
-                return '<div style="display:inline-block">' + character.replace(/\s/g, '&nbsp;') + '</div>'
-            }).join('') + '</div>'
-            textNode.parentNode.insertBefore(replacementNode.firstChild, textNode);
-            textNode.parentNode.removeChild(textNode);
-        }
-    });*/
-
-    document.getElementById("title").innerHTML = "<h1><i>"+title+"</i></h1>"
-    
-    path.push(title)
-
-    if (formatStr(title) === formatStr(goalPage)) {
-        await finish();
-    }
-
-    hideElements();
-    stripNamespaceLinks();
-    document.querySelectorAll("#wikipedia-frame a, #wikipedia-frame area").forEach((el) =>{
-        el.onclick = handleWikipediaLink;
-    });
-    setMargin();
-    window.scrollTo(0, 0)
-}
-
-async function finish() {
-
-    app.$data.finished = true;
-    app.$data.path = path;
-    app.$data.finalTime = app.$data.timer;
-
-    // Stop timer
-    clearInterval(timerInterval);
-    endTime = startTime + app.$data.finalTime*1000;
-
-    // Prevent are you sure you want to leave prompt
-    window.onbeforeunload = null;
-
-    const reqBody = {
-        "start_time": startTime,
-        "end_time": endTime,
-        "path": path,
-    }
-
-    // Send results to API
-    try {
-        const response = await fetch(`/api/runs/${run_id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(reqBody)
-        })
-
-    } catch(e) {
-        console.log(e);
-    }
-}
-
-
-function hideElements() {
-    
-    const hide = ["reference","mw-editsection","reflist","portal","refbegin", "sidebar", "authority-control", "external", "sistersitebox"]
-    for(let i=0; i<hide.length; i++) {
-        let elements = document.getElementsByClassName(hide[i])
-        //console.log("found: " + hide[i] + elements.length)
-        for(let j=0; j<elements.length; j++) {
-            elements[j].style.display = "none";
-        }
-    }
-    
-    const idS = ["See_also", "Notes_and_references", "Further_reading", "External_links", "References", "Notes", "Citations", "Explanatory_notes"];
-    for(let i=0; i<idS.length; i++) {
-        let e = document.getElementById(idS[i]);
-        if (e !== null) {
-            e.style.display = "none";
-        }
-    }
-
-    //hide Disambig
-    
-    let elements = document.getElementsByClassName("hatnote");
-    for (let i=0; i < elements.length; i++) {
-        let a = elements[i].getElementsByClassName("mw-disambig");
-        if (a.length !== 0) {
-            elements[i].style.display = "none";
-        }
-    }
-
-    let all = document.getElementById("wikipedia-frame").querySelectorAll("h2, div, ul, p, h3");
-    let flip = false
-    for (let i = 0; i < all.length; i++) {
-        if (!flip) {
-            if (all[i].tagName == "H2") {
-                //console.log("checking h2");
-                let check = all[i].getElementsByClassName("mw-headline")
-                if (check.length !== 0) {
-                    //console.log(check[0].id)
-                    for (let j = 0; j < idS.length; j++) {
-                        if (check[0].id == idS[j]) {
-                            //console.log("found see also at: " + i);
-                            all[i].style.display = "none";
-                            flip = true;
-                        }
-                    }
-                }
-            }
-        } else {
-            all[i].style.display = "none";
-        }
-    }
-    
-}
-
-function setMargin() {
-    const element = document.getElementById("time-box");
-    document.getElementById("wikipedia-frame").firstChild.style.paddingBottom = (element.offsetHeight + 25) +"px";
-}
-
-function formatStr(string) {
-    return string.replace("_", " ").toLowerCase()
-}
-
-function displayTimer() {
-    const seconds = (Date.now() - startTime) / 1000;
-    app.$data.timer = seconds;
-}
-
-// Race condition between countdown timer and "immediate start" button click
-// Resolves when either condition resolves
-async function countdownOnLoad(start, end) {
-
-    app.$data.startArticle = start;
-    app.$data.endArticle = end;
-
-    app.$data.activeTip = getRandTip();
-
-    let countDownStart = Date.now();
-    let countDownTime = app.$data.countdown * 1000;
-
-    document.getElementById("mirroredimgblock").classList.toggle("invisible");
-
-    // Condition 1: countdown timer
-    const promise1 = new Promise(resolve => {
-        const x = setInterval(function() {
-            const now = Date.now()
-          
-            // Find the distance between now and the count down date
-            let distance = countDownStart + countDownTime - now;
-            app.$data.countdown = Math.floor(distance/1000)+1;
-
-            if (distance <= 0) {
-                resolve();
-                clearInterval(x);
-            }
-
-            if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {                
-                document.getElementById("mirroredimgblock").classList.toggle("invisible")
-            }
-
-        }, 50);
-    });
-
-    // Condition 2: "immediate start" button click
-    const promise2 = new Promise(r =>
-        document.getElementById("start-btn").addEventListener("click", r, {once: true})
-    )
-
-    await Promise.any([promise1, promise2]);
-}
-
-async function saveRun() {
-    const reqBody = {
-        "prompt_id": prompt_id,
-    }
-
-    try {
-        const response = await fetch("/api/runs", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(reqBody)
-        })
-
-        run_id = await response.json();
-
-    } catch(e) {
-        console.log(e);
-    }
-}
-
-function disableFind(e) {
-    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) { 
-        e.preventDefault();
-        this.alert("WARNING: Attempt to Find in page. This will be recorded.");
-    }
-}
-
-function startGame() {
-    app.$data.started = true;
-    startTime = Date.now();
-    timerInterval = setInterval(displayTimer, 20);
-}
-
-function generateResultText() {
-    return `Wiki Speedruns ${prompt_id}
-${app.$data.startArticle}
-${path.length - 1} 🖱️
-${(endTime - startTime) / 1000} ⏱️`
-}
-
-window.addEventListener("load", async function() {
-    const response = await fetch("/api/sprints/" + prompt_id);
-
-    app.$data.prompt_id = prompt_id;
-
-    if (response.status != 200) {
-        const error = await response.text();
-        this.alert(error)
-        // Prevent are your sure you want to leave prompt
-        window.onbeforeunload = null;
-        window.location.replace("/");   // TODO error page
-        return;
-
-    }
-
-    const prompt = await response.json();
-    
-    if (!prompt['available']) {
-        this.alert("This prompt is not yet available! Redirecting back to home");
-        window.onbeforeunload = null;
-        window.location.replace("/");
-        return;
-    }
-    
-    const article = prompt["start"];
-    goalPage = prompt["end"];
-    saveRun(); // Save run on clicking "play" when `prompt_id` is valid
-
-    // Wait for countdown to expire AND the start article elements to load before starting the timer and displaying the page
-    await Promise.all([countdownOnLoad(article, goalPage), loadPage(article)]);
-
-    startGame();
-    
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setMargin();
-});
-
+// Prevent accidental leaves
 window.onbeforeunload = function() {
     return true;
 };
 
+// Disable find hotkeys, players will be given a warning
 window.addEventListener("keydown", function(e) {
-    disableFind(e);
+    //disable find
+    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) {
+        e.preventDefault();
+        this.alert("WARNING: Attempt to Find in page. This will be recorded.");
+    }
 });
