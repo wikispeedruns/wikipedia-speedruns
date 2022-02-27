@@ -185,10 +185,15 @@ def get_prompt_leaderboard(id, run_id):
         cursor.execute(query, tuple(args))
         results = cursor.fetchall()
 
-        for run in results:
-            run['path'] = json.loads(run['path'])
+        filtered = [x for x in results if not x['path'] == None]
 
+        for run in filtered:
+            try:
+                run['path'] = json.loads(run['path'])
+            except TypeError as e:
+                print(e)
+                print(run)
         
-        resp["leaderboard"] = results
+        resp["leaderboard"] = filtered
 
         return jsonify(resp)
