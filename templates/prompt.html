@@ -27,59 +27,99 @@
                     <thead>
                         <th scope="col">Rank</th>
                         <th scope="col">Name</th>
-                        <th scope="col">Time</th>
+                        <th class="l-col" scope="col"><a v-on:click="toggleSort('time')">Time <span v-html="sortStatus('time')"></span></a></th>
+                        <th class="l-col" scope="col"><a v-on:click="toggleSort('path')">Links <span v-html="sortStatus('path')"></span></a></th>
                         <th scope="col">Path</th>
                     </thead>
                     <tbody>
+                        
                         <tr v-if="currentRunPosition === -1">
                             <td>[[currentRunRank]]</td>
-                            <td style="white-space: nowrap" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
+                            <td class="l-col" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
-                            <td style="white-space: nowrap">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
-                            <td>[[currentRun.path]]</td>
+                            <td class="l-col">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
+                            <td>[[currentRun.path.length]]</td>
+                            <td><span class="d-none d-sm-block">[[currentRun.path]]</span><button class="d-block d-sm-none btn btn-outline-secondary btn-sm" v-on:click.stop="showPath($event, currentRun.path)">Show</button></td>
                         </tr>
                         <tr v-if="currentRunPosition === -1">
                             <td>...</td>
                             <td>[[null]]</td>
                             <td>[[null]]</td>
-                            <td>...</td>
+                            <td>[[null]]</td>
+                            <td>[[null]]</td>
                         </tr>
                         <tr v-for="(run, index) in renderedRuns">
                             <td>[[getRenderedRank(index)]]</td>
-                            <td style="white-space: nowrap" v-if="run.username"><strong>[[run.username]]</strong></td>
+                            <td class="l-col" v-if="run.username"><strong>[[run.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
-                            <td style="white-space: nowrap">[[(run.run_time/1000000).toFixed(3)]] s</td>
-                            <td>[[run.path]]</td>
+                            <td class="l-col">[[(run.run_time/1000000).toFixed(3)]] s</td>
+                            <td>[[run.path.length]]</td>
+                            <td><span class="d-none d-sm-block">[[run.path]]</span><button class="d-block d-sm-none btn btn-outline-secondary btn-sm" v-on:click.stop="showPath($event, run.path)">Show</button></td>
                         </tr>
                         <tr v-if="currentRunPosition === 1">
                             <td>...</td>
                             <td>[[null]]</td>
                             <td>[[null]]</td>
-                            <td>...</td>
+                            <td>[[null]]</td>
+                            <td>[[null]]</td>
                         </tr>
                         <tr v-if="currentRunPosition === 1">
                             <td>[[currentRunRank]]</td>
-                            <td style="white-space: nowrap" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
+                            <td class="l-col" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
-                            <td style="white-space: nowrap">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
-                            <td>[[currentRun.path]]</td>
+                            <td class="l-col">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
+                            <td>[[currentRun.path.length]]</td>
+                            <td><span class="d-none d-sm-block">[[currentRun.path]]</span><button class="d-block d-sm-none btn btn-outline-secondary btn-sm" v-on:click.stop="showPath($event, currentRun.path)">Show</button></td>
                         </tr>
+                        
+                        
                     </tbody>
                 </table>
 
                 <p class="my-4" v-else>This prompt currently doesn't have any runs. <span v-if="available">Be the first to play it! <a v-bind:href="'/play/' + getPromptID()">Play</a></span></p>
 
             </div>  
+            <div v-cloak class="card-footer text-center">
+                <button class="btn btn-outline-secondary"
+                    v-on:click="firstPage" 
+                    v-bind:class="{invisible: getPageNo() === 1 || getPageNo()===0}">
+                        
+                    <i class="bi bi-chevron-double-left"></i>
+                </button>
+
+                <button class="btn btn-outline-secondary"
+                    v-on:click="prevPage"
+                    v-bind:class="{invisible: getPageNo() === 1 || getPageNo()===0}">
+
+                    <i class="bi bi-chevron-left" id="prev-page"></i>
+                </button>    
+                
+                <span>Page <strong>[[getPageNo()]]</strong> of [[totalpages]] </span>
+                
+                <button class="btn btn-outline-secondary"
+                    v-on:click="nextPage" 
+                    v-bind:class="{invisible: getPageNo() === totalpages}">
+                        
+                    <i class="bi bi-chevron-right"></i>
+                </button>         
+                
+                <button class="btn btn-outline-secondary"
+                    v-on:click="lastPage" 
+                    v-bind:class="{invisible: getPageNo() === totalpages}">
+                        
+                    <i class="bi bi-chevron-double-right"></i>
+                </button>   
+            </div>  
+            <!--
             <div class="card-footer text-center">
                 <button class="btn btn-outline-secondary px-2" v-on:click="prevPage" v-bind:class="{invisible: getPageNo()===1 || getPageNo()===0}"><i class="bi bi-arrow-left" id="prev-page"></i></button>
-                <span><strong>[[getPageNo()]] out of [[Math.ceil(runs.length/runsPerPage)]] pages</span>
-                <button class="btn btn-outline-secondary px-2" v-on:click="nextPage" v-bind:class="{invisible: getPageNo()===Math.ceil(runs.length/runsPerPage)}"><i class="bi bi-arrow-right" id="next-page"></i></button>
-            </div>  
+                <span><strong>[[getPageNo()]] out of [[totalpages]] pages</span>
+                <button class="btn btn-outline-secondary px-2" v-on:click="nextPage" v-bind:class="{invisible: getPageNo()===totalpages}"><i class="bi bi-arrow-right" id="next-page"></i></button>
+            </div>
+            -->  
         </div>
     </div>
 </div>
-
-<!--<script type=text/javascript src="{{url_for('static', filename='js/prompt.js') }}"></script>-->
 
 <canvas id="springydemo" class="mx-auto d-block mt-5" style="font-size: 10px;" width="1200" height="900"> 
 {% endblock %}
