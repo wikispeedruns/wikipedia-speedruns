@@ -167,7 +167,7 @@ def get_archive_prompts(prompt_type: PromptType, offset: int=0, limit: int=20, s
         query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts"
     # elif (prompt_type == "marathon")
 
-    query += f" WHERE used = 1 AND active_start <= NOW() ORDER BY active_start {sort} LIMIT %s, %s"
+    query += f" WHERE used = 1 AND active_start <= NOW() ORDER BY active_start {sort}, prompt_id {sort} LIMIT %s, %s"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cur:
