@@ -152,6 +152,7 @@ def _construct_prompt_user_query(prompt_type: PromptType, user_id: Optional[int]
 
     # 2. Add neccesary join/args for user info (TODO could in the future get best run?)
     if user_id:
+        # TODO returns null on no plays?
         query += '''
         LEFT JOIN  (
             SELECT prompt_id, COUNT(*) AS played
