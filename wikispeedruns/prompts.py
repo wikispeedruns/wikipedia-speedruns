@@ -26,7 +26,7 @@ class Prompt(TypedDict):
     used: bool
     available: bool
     active: bool
-    # played: bool # TODO
+    played: bool # TODO
 
 class SprintPrompt(Prompt):
     end: Optional[str]
@@ -50,7 +50,7 @@ def compute_visibility(prompt: Prompt) -> Prompt:
     return prompt
 
 def add_sprint_prompt(start: str, end: str) -> Optional[int]:
-    ''' 
+    '''
     Add a prompt
     '''
     query = "INSERT INTO sprint_prompts (start, end) VALUES (%s, %s);"
@@ -80,7 +80,7 @@ def delete_prompt(prompt_id: int, prompt_type: PromptType) -> bool:
 
             db.commit()
             return res == 1
-        
+
         except pymysql.IntegrityError:
             return False
 
@@ -113,7 +113,7 @@ def set_prompt_time(prompt_id: int, prompt_type: PromptType, active_start: datet
 
 
 def get_prompt(prompt_id: int, prompt_type: PromptType, user_id: Optional[int]=None) -> Optional[Prompt]:
-    ''' 
+    '''
     Get a specific prompt
     '''
     if (prompt_type == "sprint"):
@@ -134,40 +134,75 @@ def get_prompt(prompt_id: int, prompt_type: PromptType, user_id: Optional[int]=N
 
         prompt = compute_visibility(prompt)
         return prompt
-        
 
 
-def get_active_prompts(prompt_type: PromptType) -> List[Prompt]:
+
+def _construct_prompt_user_query(prompt_type: PromptType, user_id: Optional[int]):
+
+    # 1. Determine which fields are needed
+    # if prompt_type == marathon probably change these fields
+    fields = ['p.prompt_id', 'start', 'end', 'rated', 'active_start', 'active_end']
+    args = {}
+
+    if user_id:
+        fields.append('played')
+
+    query = f"SELECT {','.join(fields)} FROM {prompt_type}_prompts AS p"
+
+
+    # 2. Add neccesary join/args for user info (TODO could in the future get best run?)
+    if user_id:
+        query += '''
+        LEFT JOIN  (
+            SELECT prompt_id, COUNT(*) AS played
+            FROM sprint_runs AS runs
+            WHERE user_id=%(user_id)s
+            GROUP BY prompt_id
+        ) user_runs
+        ON user_runs.prompt_id = p.prompt_id
+        '''
+        args["user_id"] = user_id
+
+
+    return query, args
+
+
+
+def get_active_prompts(prompt_type: PromptType, user_id: Optional[int]=None,) -> List[Prompt]:
     '''
     Get all prompts for display on front page (only show start)
     TODO user id?
     '''
-    if (prompt_type == "sprint"):
-        query = "SELECT prompt_id, start, NULL as end, rated, active_start, active_end FROM sprint_prompts"
-    # elif (prompt_type == "marathon")
 
+    query, args = _construct_prompt_user_query(prompt_type, user_id)
     query += " WHERE used = 1 AND active_start <= NOW() AND NOW() < active_end"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cur:
-        cur.execute(query)
-        return cur.fetchall()
+        cur.execute(query, args)
+
+        prompts = cur.fetchall()
+
+        # Remove end for all active prompts
+        for p in prompts:
+            p['end'] = None
+
+        return prompts
 
 
-def get_archive_prompts(prompt_type: PromptType, offset: int=0, limit: int=20 ) -> Tuple[List[Prompt], int]:
+def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, offset: int=0, limit: int=20 ) -> Tuple[List[Prompt], int]:
     '''
     Get all prompts for archive, including currently active
-    TODO paginate, user id?
     '''
-    if (prompt_type == "sprint"):
-        query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts"
-    # elif (prompt_type == "marathon")
+    query, args = _construct_prompt_user_query(prompt_type, user_id)
+    query += " WHERE used = 1 AND active_start <= NOW() ORDER BY active_start DESC LIMIT %(offset)s, %(limit)s"
 
-    query += " WHERE used = 1 AND active_start <= NOW() ORDER BY active_start DESC LIMIT %s, %s"
+    args["offset"] = offset
+    args["limit"] = limit
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cur:
-        cur.execute(query, (offset, limit))
+        cur.execute(query, args)
 
         prompts = cur.fetchall()
 
@@ -179,7 +214,7 @@ def get_archive_prompts(prompt_type: PromptType, offset: int=0, limit: int=20 ) 
         # get the total number of prompts
         cur.execute("SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW()")
         n = cur.fetchone()['n']
-        
+
         return prompts, n
 
 
