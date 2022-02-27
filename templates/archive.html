@@ -26,7 +26,6 @@
                     <thead>
                         <th scope="col">Release Date</th>
                         <th scope="col">Prompt #</th>
-                        <th v-if="loggedIn" scope="col">Leaderboard</th>
                         <th scope="col">Starting Article</th>
                         <th scope="col">Ending Article</th>
                         <th></th>
@@ -35,9 +34,6 @@
                         <tr v-for="prompt in prompts" v-cloak>
                             <td>[[prompt.active_start.substring(0, 10)]]</td>
                             <td>[[prompt.prompt_id]]<span v-if="prompt.rated">*</span> </td>
-                            <td v-if="loggedIn">
-                                <a v-if="prompt.first_run != null" v-bind:href="'/prompt/' + prompt.prompt_id + '?run_id=' + prompt.first_run">Your Rank</a>
-                            </td>
                             <td>[[prompt.start]]</td>
                             <td>[[prompt.end || '-']]</td>
                             <td><a v-bind:href="'/play/' + prompt.prompt_id">Play</a></td>

@@ -98,7 +98,7 @@ def get_archive_prompts():
         limit = int(request.args.get('limit', 20))
         offset = int(request.args.get('offset', 0))
         
-        sprints, num_prompts = prompts.get_archive_prompts("sprint", offset=offset, limit=limit, user_id=session.get("user_id"))
+        sprints, num_prompts = prompts.get_archive_prompts("sprint", offset=offset, limit=limit)
 
         return jsonify({
             "prompts": sprints,
