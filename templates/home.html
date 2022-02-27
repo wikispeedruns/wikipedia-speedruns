@@ -47,9 +47,9 @@
                         </thead>
                         <tbody>
                             <tr v-for="prompt in dailyPrompts" v-cloak>
-                                <td>[[prompt.prompt_id]]</span> 
-                                    (<a v-if="loggedIn" v-bind:href="'/play/' + prompt.prompt_id">play</a>) 
-                                    (<a v-else v-on:click="alertLogin" v-bind:style="{ color: '#0d6efd' }">play</a>)
+                                <td>[[prompt.prompt_id]]</span>
+                                    (<a v-if="loggedIn" v-bind:href="'/play/' + prompt.prompt_id">play</a>)
+                                    (<a v-else v-on:click="alertLogin" v-bind:href="'/play/' + prompt.prompt_id">play</a>)
                                 </td>
 
                                 <td>[[prompt.start]]</td>
@@ -57,7 +57,7 @@
                         </tbody>
                     </table>
                 </template>
-                <template v-else> 
+                <template v-else>
                     <hr>
                     <p>Currently unavailable</p>
                 </template>
@@ -69,7 +69,7 @@
             </div>
         </div>
 
-    </div>    
+    </div>
 
     <div class="col-sm-6">
         <div class="card">
@@ -132,9 +132,9 @@
             Created by <a href="https://danqian.net">Daniel Qian</a>,
             <a href="https://mliu59.github.io/">Miles Liu</a>,
             <a href="https://bricehalder.com/">Brice Halder</a>,
-            <a href="https://xablexa.com/">Axel Bax</a>, 
+            <a href="https://xablexa.com/">Axel Bax</a>,
             <a href="https://www.omfgdogs.com/#">Manan Aggarwal</a>,
-            and <a href="https://en.wikipedia.org/wiki/Melody">Melody</a> 
+            and <a href="https://en.wikipedia.org/wiki/Melody">Melody</a>
             <a href="https://en.wikipedia.org/wiki/Xu_(surname_%E5%BE%90)"> Hsu</a>.
         </p>
         <p>

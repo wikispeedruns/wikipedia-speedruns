@@ -36,15 +36,14 @@ var app = new Vue({
         loggedIn: false,
     },
     methods: {
-        alertLogin: () => {
+        alertLogin: (e) => {
+            e.preventDefault();
             alert("Please login if you would like to play the prompt of the day!");
         }
     },
 
     created: async function() {
-        if ("username" in serverData) {
-            this.loggedIn = true;
-        }
+        this.loggedIn = "username" in serverData;
 
         this.topUsers = await getTopUsers();
 
@@ -69,13 +68,13 @@ var app = new Vue({
                 const s = Math.round(diff % 60).toString().padStart(2, "0");
                 diff /= 60;
                 diff = Math.floor(diff);
-                
+
                 const m = Math.round(diff % 60).toString().padStart(2, "0");
                 diff /= 60;
 
                 const h = Math.floor(diff).toString().padStart(2, "0");
-                
-                this.timeLeft = `${h}:${m}:${s}`;         
+
+                this.timeLeft = `${h}:${m}:${s}`;
             }, 1000);
 
         }
