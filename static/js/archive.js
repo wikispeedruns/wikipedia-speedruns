@@ -14,10 +14,15 @@ var app = new Vue({
         numPages: 0,
 
         limit: 0,
-        offset: 0
+        offset: 0,
+        loggedIn: false,
     },
 
     created: async function() {
+        if ("username" in serverData) {
+            this.loggedIn = true;
+        }
+        
         const response = await fetch(`/api/sprints/archive?limit=${limit}&offset=${offset}`);
         const resp = await response.json();
 
