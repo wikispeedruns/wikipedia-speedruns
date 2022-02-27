@@ -108,10 +108,6 @@ def get_archive_prompts():
     except ValueError:
         return "Invalid limit or offset", 400
 
-# @sprint_api.get('./archive_asc')
-# def get_rev_archive_prompts():
-#     return _get_archive_prompts(sort_desc=False)
-
 ### Specific prompt endpoints
 
 @sprint_api.get('/<int:id>')
