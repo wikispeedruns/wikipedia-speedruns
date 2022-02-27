@@ -54,7 +54,7 @@ let app = new Vue({
         const response = await fetch("/api/sprints/" + this.promptId);
         if (response.status != 200) {
             const error = await response.text();
-            this.alert(error);
+            alert(error);
 
             // Prevent are you sure you want to leave prompt
             window.onbeforeunload = null;
@@ -95,13 +95,8 @@ let app = new Vue({
         },
 
         async start() {
-            await this.renderer.loadPage(this.startArticle);
-
-            this.path.push(this.startArticle);
-
-            //once above conditions are met, toggle the `started` render flag, which will hide all other elements, and display the rendered wikipage
+            //Toggle the `started` render flag, which will hide all other elements, and display the rendered wikipage
             this.started = true;
-
             //start timer
             this.startTime = Date.now();
 
@@ -110,10 +105,23 @@ let app = new Vue({
                 const seconds = (Date.now() - this.startTime) / 1000;
                 this.elapsed = seconds;
             }, 50);
+
+            await this.renderer.loadPage(this.startArticle);
+
+            setMargin();
+
+            await this.pageCallback(this.startArticle, Date.now() - this.startTime)
         },
 
     }
 })
+
+function setMargin() {
+    const element = document.getElementById("time-box");
+    let margin = (element.offsetHeight + 25) > 100 ? (element.offsetHeight + 25) : 100
+    document.getElementById("wikipedia-frame").lastChild.style.paddingBottom = margin +"px";
+    console.log(margin)
+}
 
 // Prevent accidental leaves
 window.onbeforeunload = function() {

@@ -1,3 +1,5 @@
+import { serverData } from "./modules/serverData.js";
+
 async function getPrompts()
 {
     const response = await fetch("/api/sprints/active");
@@ -13,7 +15,6 @@ async function getBackupPrompts()
 
     return resp["prompts"].filter(p => !p["active"]);
 }
-
 
 async function getTopUsers()
 {
@@ -32,9 +33,18 @@ var app = new Vue({
         activePrompts: [],
         topUsers: [],
         timeLeft: "",
+        loggedIn: false,
+    },
+    methods: {
+        alertLogin: (e) => {
+            e.preventDefault();
+            alert("Please login if you would like to play the prompt of the day!");
+        }
     },
 
     created: async function() {
+        this.loggedIn = "username" in serverData;
+
         this.topUsers = await getTopUsers();
 
         const prompts = await getPrompts();
@@ -58,13 +68,13 @@ var app = new Vue({
                 const s = Math.round(diff % 60).toString().padStart(2, "0");
                 diff /= 60;
                 diff = Math.floor(diff);
-                
+
                 const m = Math.round(diff % 60).toString().padStart(2, "0");
                 diff /= 60;
 
                 const h = Math.floor(diff).toString().padStart(2, "0");
-                
-                this.timeLeft = `${h}:${m}:${s}`;         
+
+                this.timeLeft = `${h}:${m}:${s}`;
             }, 1000);
 
         }

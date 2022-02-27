@@ -26,7 +26,7 @@ class Prompt(TypedDict):
     used: bool
     available: bool
     active: bool
-    # played: bool # TODO
+    played: bool # TODO
 
 class SprintPrompt(Prompt):
     end: Optional[str]
@@ -135,29 +135,60 @@ def get_prompt(prompt_id: int, prompt_type: PromptType, user_id: Optional[int]=N
         prompt = compute_visibility(prompt)
         return prompt
 
+def _construct_prompt_user_query(prompt_type: PromptType, user_id: Optional[int]):
+
+    # 1. Determine which fields are needed
+    # if prompt_type == marathon probably change these fields
+    fields = ['p.prompt_id', 'start', 'end', 'rated', 'active_start', 'active_end']
+    args = {}
+
+    if user_id:
+        fields.append('played')
+
+    query = f"SELECT {','.join(fields)} FROM {prompt_type}_prompts AS p"
 
 
-def get_active_prompts(prompt_type: PromptType) -> List[Prompt]:
+    # 2. Add neccesary join/args for user info (TODO could in the future get best run?)
+    if user_id:
+        # TODO returns null on no plays?
+        query += '''
+        LEFT JOIN  (
+            SELECT prompt_id, COUNT(*) AS played
+            FROM sprint_runs AS runs
+            WHERE user_id=%(user_id)s
+            GROUP BY prompt_id
+        ) user_runs
+        ON user_runs.prompt_id = p.prompt_id
+        '''
+        args["user_id"] = user_id
+
+
+    return query, args
+
+
+
+def get_active_prompts(prompt_type: PromptType, user_id: Optional[int]=None,) -> List[Prompt]:
     '''
     Get all prompts for display on front page (only show start)
     TODO user id?
     '''
-    if (prompt_type == "sprint"):
-        query = "SELECT prompt_id, start, NULL as end, rated, active_start, active_end FROM sprint_prompts"
-    # elif (prompt_type == "marathon")
 
+    query, args = _construct_prompt_user_query(prompt_type, user_id)
     query += " WHERE used = 1 AND active_start <= NOW() AND NOW() < active_end"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cur:
-        cur.execute(query)
-        return cur.fetchall()
+        cur.execute(query, args)
 
+        prompts = cur.fetchall()
 
-def get_archive_prompts(prompt_type: PromptType, offset: int=0, limit: int=20, sort_desc: bool=True) -> Tuple[List[Prompt], int]:
+        # Remove end for all active prompts
+        for p in prompts:
+            p['end'] = None
+
+def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, offset: int=0, limit: int=20, sort_desc: bool=True) -> Tuple[List[Prompt], int]:
     '''
     Get all prompts for archive, including currently active
-    TODO paginate, user id?
     '''
     if sort_desc:
         sort = 'DESC'
@@ -167,11 +198,15 @@ def get_archive_prompts(prompt_type: PromptType, offset: int=0, limit: int=20, s
         query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts"
     # elif (prompt_type == "marathon")
 
-    query += f" WHERE used = 1 AND active_start <= NOW() ORDER BY active_start {sort}, prompt_id {sort} LIMIT %s, %s"
+    query, args = _construct_prompt_user_query(prompt_type, user_id)
+    query += f" WHERE used = 1 AND active_start <= NOW() ORDER BY active_start {sort}, prompt_id {sort} LIMIT %(offset)s, %(limit)s"
+
+    args["offset"] = offset
+    args["limit"] = limit
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cur:
-        cur.execute(query, (offset, limit))
+        cur.execute(query, args)
 
         prompts = cur.fetchall()
 

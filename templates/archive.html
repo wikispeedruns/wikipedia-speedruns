@@ -22,25 +22,31 @@
 
         <div class="card">
             <div class="card-body">
-                <table class="table table-hover">
-                    <thead>
-                        <th scope="col"><a v-on:click="toggleSort('time')">Release Date <span v-html="sortButton()"></span></a></th>
-                        <!-- <th scope="col">Release Date</th> -->
-                        <th scope="col">Prompt #</th>
-                        <th scope="col">Starting Article</th>
-                        <th scope="col">Ending Article</th>
-                        <th></th>
-                    </thead>
-                    <tbody>
-                        <tr v-for="prompt in prompts" v-cloak>
-                            <td>[[prompt.active_start.substring(0, 10)]]</td>
-                            <td>[[prompt.prompt_id]]<span v-if="prompt.rated">*</span> </td>
-                            <td>[[prompt.start]]</td>
-                            <td>[[prompt.end || '-']]</td>
-                            <td><a v-bind:href="'/play/' + prompt.prompt_id">Play</a></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+
+                    <table class="table table-hover">
+                        <thead>
+                            <th scope="col"><a v-on:click="toggleSort('time')">Release Date <span v-html="sortButton()"></span></a></th>
+                            <th scope="col">Prompt #</th>
+                            <th scope="col">Starting Article</th>
+                            <th scope="col">Ending Article</th>
+                            <th class="text-center" scope="col">Played</th>
+                            <th></th>
+                            <th></th>
+                        </thead>
+                        <tbody>
+                            <tr v-for="prompt in prompts" v-cloak>
+                                <td>[[prompt.active_start.substring(0, 10)]]</td>
+                                <td>[[prompt.prompt_id]]<span v-if="prompt.rated">*</span> </td>
+                                <td>[[prompt.start]]</td>
+                                <td>[[prompt.end || '-']]</td>
+                                <td class="text-center"><span v-if="prompt.played"><i class="bi bi-check-lg"></i></span></td>
+                                <td><a v-bind:href="'/play/' + prompt.prompt_id">Play</a></td>
+                                <td><a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
 

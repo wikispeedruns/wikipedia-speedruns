@@ -90,7 +90,7 @@ def get_managed_prompts():
 
 @sprint_api.get('/active')
 def get_active_prompts():
-    return jsonify(prompts.get_active_prompts("sprint"))
+    return jsonify(prompts.get_active_prompts("sprint", user_id=session.get("user_id")))
 
 @sprint_api.get('/archive')
 def get_archive_prompts():
@@ -98,7 +98,12 @@ def get_archive_prompts():
         limit = int(request.args.get('limit', 20))
         offset = int(request.args.get('offset', 0))
         sort_desc = request.args.get('sort_desc', "True").lower() == "true"
-        sprints, num_prompts = prompts.get_archive_prompts("sprint", offset=offset, limit=limit, sort_desc=sort_desc)
+        sprints, num_prompts = prompts.get_archive_prompts("sprint",
+            offset=offset,
+            limit=limit,
+            sort_desc=sort_desc,                           
+            user_id=session.get("user_id")
+        )
 
         return jsonify({
             "prompts": sprints,

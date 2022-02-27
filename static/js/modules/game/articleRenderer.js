@@ -29,6 +29,7 @@ export class ArticleRenderer {
         hideElements(this.frame);
         disableFindableLinks(this.frame);
         stripNamespaceLinks(this.frame);
+        
 
         this.frame.querySelectorAll("a, area").forEach((el) => {
             // Arrow function to prevent this from being overwritten
@@ -39,7 +40,6 @@ export class ArticleRenderer {
 
         return body["parse"]["title"]
     }
-
 
     async loadPageWrapper(page) {
 
@@ -90,6 +90,8 @@ export class ArticleRenderer {
         }
     }
 }
+
+
 
 function hideElements(frame) {
 
