@@ -29,7 +29,7 @@ export class ArticleRenderer {
         hideElements(this.frame);
         disableFindableLinks(this.frame);
         stripNamespaceLinks(this.frame);
-        setMargin(this.frame);
+        
 
         this.frame.querySelectorAll("a, area").forEach((el) => {
             // Arrow function to prevent this from being overwritten
@@ -91,11 +91,7 @@ export class ArticleRenderer {
     }
 }
 
-function setMargin(frame) {
-    const element = document.getElementById("time-box");
-    let margin = (element.offsetHeight + 25) > 100 ? (element.offsetHeight + 25) : 100
-    frame.lastChild.style.paddingBottom = margin +"px";
-}
+
 
 function hideElements(frame) {
 
