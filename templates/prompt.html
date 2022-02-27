@@ -36,7 +36,7 @@
                             <td style="white-space: nowrap" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td style="white-space: nowrap">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
-                            <td>[[currentRun.path]]</td>
+                            <td>[[currentRun.path | pathArrow]]</td>
                         </tr>
                         <tr v-if="currentRunPosition === -1">
                             <td>...</td>
@@ -49,7 +49,7 @@
                             <td style="white-space: nowrap" v-if="run.username"><strong>[[run.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td style="white-space: nowrap">[[(run.run_time/1000000).toFixed(3)]] s</td>
-                            <td>[[run.path]]</td>
+                            <td>[[run.path | pathArrow]]</td>
                         </tr>
                         <tr v-if="currentRunPosition === 1">
                             <td>...</td>
@@ -62,7 +62,7 @@
                             <td style="white-space: nowrap" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td style="white-space: nowrap">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
-                            <td>[[currentRun.path]]</td>
+                            <td>[[currentRun.path | pathArrow]]</td>
                         </tr>
                     </tbody>
                 </table>
