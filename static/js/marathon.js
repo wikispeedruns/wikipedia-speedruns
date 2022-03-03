@@ -4,6 +4,7 @@ import { serverData } from "./modules/serverData.js";
 import { submitRun, saveRun, loadRun, removeSave } from "./modules/game/marathon/runs.js";
 
 import { CountdownTimer } from "./modules/game/marathon/countdown.js";
+import { MarathonHelp } from "./modules/game/marathon/help.js";
 import { FinishPage } from "./modules/game/marathon/finish.js";
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 
@@ -16,7 +17,8 @@ let app = new Vue({
     el: '#app',
     components: {
         'countdown-timer': CountdownTimer,
-        'finish-page': FinishPage
+        'finish-page': FinishPage,
+        'marathon-help': MarathonHelp,
     },
     data: {
 
@@ -24,7 +26,6 @@ let app = new Vue({
         activeCheckpoints: [],
         visitedCheckpoints: [],
         clicksRemaining: 11,
-        clicksPerCheckpoint: 5,
 
         startArticle: "",    //For all game modes, this is the first article to load
         lastArticle: "",
@@ -39,10 +40,15 @@ let app = new Vue({
         elapsed: 0,
         timerInterval: null,
 
+        numCheckpointsToStop: 10,
+        startingNumClicksToAdd: 5,
+
         finished: false,     //Flag for whether a game has finished, used for rendering
         started: false,      //Flag for whether a game has started (countdown finished), used for rendering
         forfeited: false,
         showHelp: false,
+        showStop: false,
+        reachedstop: false,  //This variable only gets flipped once, its to prevent the stop box from showing up everytime the page is loaded
         saved: false,
 
         renderer: null,
@@ -55,7 +61,16 @@ let app = new Vue({
 
         numVisitedUnique: function () {
             return new Set(this.path).size;
-        }
+        },
+
+        clicksPerCheckpoint: function () {
+            let projected = this.startingNumClicksToAdd - parseInt(this.numCheckpointsVisited/this.numCheckpointsToStop)
+            return Math.max(projected, 2)
+        },
+
+        checkpointMarkReached: function () {
+            return this.numCheckpointsVisited >= this.numCheckpointsToStop
+        },
     },
 
 
@@ -85,6 +100,10 @@ let app = new Vue({
             this.path.pop()
             this.visitedCheckpoints = loadedSave.visited_checkpoints
 
+            if (this.checkpointMarkReached) {
+                this.reachedstop = true
+            }
+
             removeSave(PROMPT_ID)
 
         } else {
@@ -111,7 +130,7 @@ let app = new Vue({
             let checkpointindex = -1;
             for (let i = 0; i < this.activeCheckpoints.length; i++) {
                 if (page.replace("_", " ").toLowerCase() === this.activeCheckpoints[i].replace("_", " ").toLowerCase()) {
-                    this.clicksRemaining += this.clicksPerCheckpoint;
+                    this.clicksRemaining += this.clicksPerCheckpoint + 1;
                     //query for new checkpoint
                     checkpointindex = i;
                     hitcheckpoint = true;
@@ -135,6 +154,11 @@ let app = new Vue({
                         got = true
                     }
                 })
+            }
+
+            if (!this.reachedstop && this.checkpointMarkReached) {
+                this.showStop = true
+                this.reachedstop = !this.reachedstop
             }
         },
 
@@ -189,11 +213,11 @@ let app = new Vue({
         formatActiveCheckpoints: function() {
             let output = ""
             for (let i = 0; i < this.activeCheckpoints.length - 1; i++) {
-                output += String(i) + ": <strong>"
+                output += String(i+1) + ": <strong>"
                 output += this.activeCheckpoints[i]
                 output += "</strong><br>"
             }
-            output += String(this.activeCheckpoints.length - 1) + ": <strong>"
+            output += String(this.activeCheckpoints.length) + ": <strong>"
             output += this.activeCheckpoints[this.activeCheckpoints.length - 1]
             output += "</strong>"
 

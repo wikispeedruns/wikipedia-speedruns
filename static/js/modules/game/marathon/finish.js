@@ -12,6 +12,7 @@ var FinishPage = {
         "promptId",
         "runId",
         "saved",
+        "checkpointLimit"
     ],
 
     methods: {
