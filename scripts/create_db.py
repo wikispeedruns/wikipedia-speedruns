@@ -4,7 +4,7 @@ import json
 import argparse
 import os
 
-DEFAULT_DB_NAME='wikipedia_speedruns'
+DEFAULT_DB_NAME='wikipedia_speedruns_beta'
 
 
 def create_database(db_name, recreate=False, test_config=None):
