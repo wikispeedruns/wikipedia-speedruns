@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+<link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
+<link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/play.css')}}">
+<script type="module" src="{{url_for('static', filename='js/marathon.js')}}"></script>
+
+{% endblock %}
+
+{% block content %}
+
+<div id="app">
+
+    <div v-show="started && !finished" id="time-box" class="HUDwrapper container" v-cloak>
+        <div class="row flex-row flex-nowrap py-2">
+            <div class="col-sm-auto px-4">
+                Start Article<br><strong>[[startArticle]]</strong>
+            </div>
+            <div class="col-sm-auto px-4">
+                Clicks Remaining<br><strong class="text-size-3" v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
+            </div>
+            <div class="col-sm px-4">
+                Checkpoints Visited<br>[[numCheckpointsVisited]] <span style="font-size: 0.75rem">(Goal: [[numCheckpointsToStop]])</span>
+                <br>Unique Articles Visited<br>[[numVisitedUnique]]
+                <span v-show="!showStop"><br>Time Elapsed<br>[[parseInt(elapsed/60)]] mins</span>
+            </div>
+            <div class="col-lg-auto px-4">
+                Checkpoints<br><span v-html="formatActiveCheckpoints()"></span>
+            </div>
+        </div>
+        <div v-show="!showStop" class="row flex-row flex-nowrap justify-content-end py-2">
+            <div class="col-sm-auto">
+                <button v-on:click="showHelp = !showHelp" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Help</button>
+            </div>
+            <div class="col-sm-auto">
+                <button v-on:click="saveRun()" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Save and Quit</button>
+            </div>
+            <div class="col-sm-auto">
+                <button v-on:click="finish(0)" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">End my suffering</button>
+            </div> 
+        </div>
+    </div>
+
+    <div v-show="showStop && !finished && !saved" id="stop-box" class="centered" v-cloak>
+        <div class="px-4 py-2">
+            <div><h4>Congrats! You reached [[numCheckpointsToStop]] checkpoints</h4></div>
+            <div><p>You can now consider this prompt complete, but you can continue this run to see how far you can go.</p></div>
+            <div><p>The amount of clicks awarded for each checkpoint will decrease</p></div>
+            <div class="row flex-row flex-nowrap py-2">
+                <div class="col-sm-auto px-4">
+                    Clicks Remaining<br><strong class="text-size-3" v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
+                </div>
+                <div class="col-sm px-4">
+                    Checkpoints Visited<br>[[numCheckpointsVisited]]
+                    <br>Unique Articles Visited<br>[[numVisitedUnique]]
+                </div>
+                <div class="col-lg-auto px-4">
+                    Checkpoints<br><span v-html="formatActiveCheckpoints()"></span>
+                </div>
+            </div>
+            <div class="row flex-row flex-nowrap justify-content-end py-2">
+                <div class="col-sm-auto">
+                    <button v-on:click="saveRun()" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Save and Continue Later</button>
+                </div>
+                <div class="col-sm-auto">
+                    <button v-on:click="finish(0)" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Just end my suffering already</button>
+                </div> 
+                <div class="col-sm-auto">
+                    <button v-on:click="showStop = !showStop" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Continue</button>
+                </div> 
+            </div>
+        </div>
+    </div>
+
+    <marathon-help v-show="started && !finished && showHelp" v-cloak v-on:close-help="showHelp = !showHelp">
+    </marathon-help>
+
+    <countdown-timer
+        v-bind:start-article="startArticle"
+        v-bind:active-checkpoints="activeCheckpoints"
+        v-on:start-game="start"
+    ></countdown-timer>
+
+    <finish-page
+        v-bind:forfeited="forfeited"
+        v-bind:start-article="startArticle"
+        v-bind:final-time="endTime - startTime"
+        v-bind:num-visited-unique="numVisitedUnique"
+        v-bind:num-checkpoints-visited="numCheckpointsVisited"
+        v-bind:active-checkpoints="activeCheckpoints"
+        v-bind:prompt-id="promptId"
+        v-bind:run-id="runId"
+        v-bind:path="path"
+        v-bind:saved="saved"
+        v-bind:checkpoint-limit="numCheckpointsToStop"
+
+        v-show="finished"
+    ></finish-page>
+
+
+    <div v-show="started && !finished" id="main">
+        <div id="wikipedia-frame"></div>
+    </div>
+
+</div>
+{% endblock %}

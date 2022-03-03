@@ -38,6 +38,29 @@ CREATE TABLE IF NOT EXISTS `sprint_runs` (
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
 );
 
+
+
+CREATE TABLE IF NOT EXISTS `marathonprompts` (
+    `prompt_id` INT NOT NULL AUTO_INCREMENT,
+    `start` VARCHAR(255) NOT NULL,
+    `initcheckpoints` TEXT NOT NULL,
+    `checkpoints` TEXT NOT NULL,
+    `public` BOOLEAN NOT NULL DEFAULT 0,
+    `seed` INT NOT NULL, 
+    PRIMARY KEY (`prompt_id`)
+);
+
+CREATE TABLE IF NOT EXISTS `marathonruns` (
+    `run_id` INT NOT NULL AUTO_INCREMENT,
+    `path` TEXT NOT NULL,
+    `checkpoints` TEXT NOT NULL,
+    `prompt_id` INT NOT NULL,
+    `user_id` INT,
+    `finished` BOOLEAN DEFAULT 1,
+    `total_time` FLOAT(10) NOT NULL,
+    PRIMARY KEY (`run_id`)
+);
+
 CREATE TABLE IF NOT EXISTS `ratings` (
     `user_id` INT NOT NULL,
     `rating` INT NOT NULL,

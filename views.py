@@ -112,9 +112,24 @@ def get_gen_error_page():
     return render_with_data('users/generic_error.html')
 
 
+
+@views.route('/play/marathon/<id>', methods=['GET'])
+def get_marathon_play_page(id):
+    loadsave = request.args.get('load_save', 0)
+    print(loadsave)
+    return render_with_data('marathon.html', prompt_id=id, load_save=loadsave)
+
+@views.route('/marathonprompt/<id>', methods=['GET'])
+def get_marathon_prompt_page(id):
+    run_id = request.args.get('run_id', '')
+    page = request.args.get('page', 1)
+        
+    if len(run_id) != 0:
+        return render_with_data('marathon_prompt.html', prompt_id=id, run_id=run_id, pg = page)
+    else:
+        return render_with_data('marathon_prompt.html', prompt_id=id, pg = page)
+    
 # Admin pages
-
-
 @views.route('/manage', methods=['GET'])
 @check_admin
 def get_manage_page():

@@ -30,6 +30,10 @@
     font-size: 20px;
 }
 
+.text-size-3 {
+    font-size: 40px;
+}
+
 .thumbcaption {
     margin: 5px 5px;
 }
@@ -71,7 +75,7 @@ a:hover, a:hover * {
 
 .HUDwrapper {
     position:fixed;
-    z-index: 1000000;
+    z-index: 1000;
     width:auto !important;
     bottom: 0;
     background-color: #F8F8F8;
@@ -94,4 +98,8 @@ a:hover, a:hover * {
     .l-col {
         white-space: nowrap
     }
+}
+
+.bold {
+    font-weight: bold !important;
 }

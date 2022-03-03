@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+
+<script defer type="module" src="{{url_for('static', filename='js/marathon_prompt.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div id="app">
+    <div class="col-xl-12">
+        <div class="card">
+
+            <div class="card-body">
+    
+                <h4>Prompt #[[getPromptID()]]</h4>
+                <p><h6><strong>[[prompt.start]]</strong>: [[prompt.initcheckpoints]]</h6></p>
+                <p>[[runs.length]] total runs</p>
+            
+                <table class="table table-hover">
+                    <thead>
+                        <th scope="col">Name</th>
+                        <th scope="col">Time</th>
+                        <th scope="col">Distance</th>
+                        <th scope="col">Checkpoints Hit</th>
+                    </thead>
+                    <tbody>
+                        <tr v-for="run in runs">
+                            <td v-if="run.username" v-bind:class="run_id && run.run_id === parseInt(run_id) ? 'bold': ''" >[[run.username]]</td>
+                            <td v-else>null</td>
+                            <td>[[((run.total_time)/1000).toFixed(3)]] s</td>
+                            <td>[[run.path.length]]</td>
+                            <td>[[run.checkpoints.length]]</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>  
+            <!--
+            <div class="card-footer text-center">
+                <button class="btn btn-outline-secondary" v-on:click="prevPage" v-bind:class="{invisible: getPageNo()===1}"><i class="bi bi-arrow-left" id="prev-page"></i></button>
+                <span><strong>[[getPageNo()]] out of [[Math.ceil(runs.length/runsPerPage)]] pages</span>
+                <button class="btn btn-outline-secondary" v-on:click="nextPage" v-bind:class="{invisible: getPageNo()===Math.ceil(runs.length/runsPerPage)}"><i class="bi bi-arrow-right" id="next-page"></i></button>
+            </div>
+            -->
+        </div>
+    </div>
+</div>
+{% endblock %}

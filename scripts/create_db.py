@@ -45,7 +45,6 @@ def create_database(db_name, recreate=False, test_config=None):
         conn.close()
 
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Create the db for wikispeedruns.')
     parser.add_argument('--db_name', default=DEFAULT_DB_NAME)

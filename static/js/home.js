@@ -1,3 +1,5 @@
+import { SavedMarathonGames } from "./modules/game/marathon/showSaves.js";
+
 async function getPrompts()
 {
     const response = await fetch("/api/sprints/active");
@@ -23,19 +25,30 @@ async function getTopUsers()
     return ratings;
 }
 
+async function getMarathonPrompts()
+{
+    const response = await fetch("/api/marathon/all");
+    return await response.json();
+}
+
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
+    components: {
+        'saved-marathon-games': SavedMarathonGames,
+    },
     data: {
         dailyPrompts: [],
         activePrompts: [],
         topUsers: [],
+        marathonPrompts: [],
         timeLeft: "",
     },
 
     created: async function() {
         this.topUsers = await getTopUsers();
+        this.marathonPrompts = await getMarathonPrompts(); 
 
         const prompts = await getPrompts();
         this.dailyPrompts = prompts.filter(p => p.rated);

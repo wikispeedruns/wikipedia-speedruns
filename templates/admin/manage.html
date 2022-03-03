@@ -19,6 +19,8 @@
 
     <path-generator></path-generator>
 
+    
+
     <div class="row">
 
         <div class="col-sm-6"> <div class="card mb-5"> <div class="card-body">
@@ -88,12 +90,30 @@
                         </tr>
                     </tbody>
                 </table>
-
                 </div></div>
             </template>
 
         </div>
-    </div>        
+    </div> 
+    
+    <marathon-generator></marathon-generator>
+
+    <div class="row">
+        <div class="col px-0"> <div class="card"> <div class="card-body">
+           
+            <h4> Marathon prompts: </h4>
+            
+            <ul>
+                <marathon-item
+                    v-for="p in marathon"
+                    v-bind:prompt="p"
+                    v-bind:key="p.prompt_id"
+                    v-on:change="getPrompts"
+                >
+                </marathon-item>
+            </ul>
+        </div></div></div> 
+    </div>
 </div>
 
 {% endblock %}
