@@ -58,7 +58,7 @@ def genBatch(prevBatch, min_incoming=100, min_outgoing=100, N=10, d=2):
             if not type(start) is int:
                 start = utils.convertToID(start['a'])
             
-            p1 = scraper.findPaths(rand, start, id=True)['ArticlesIDs']
+            p1 = scraper.findPaths(rand, start)['ArticlesIDs']
             #p1 = scraper.findPaths(rand, start[0], id=True)['ArticlesIDs']
             #p2 = scraper.findPaths(rand, start[1], id=True)['ArticlesIDs']
             #p3 = scraper.findPaths(p1[int(len(p1)/2)], p2[int(len(p2)/2)], id=True)['ArticlesIDs']
@@ -114,10 +114,10 @@ def genPrompts(initBatch, batches=5, nPerBatch=10, buckets=5):
         
     batchesArr.sort(key = lambda x: -x["s"])
     
-    for item in batchesArr:
-        print(f"{item['a']}: {item['s']}")
-    
-    
     final = list(split(batchesArr, buckets))
-    
-    return final
+        
+    return [[x['a'] for x in b] for b in final]
+
+    """
+    {"start": "Dragonfly", "seed": "123456", "initcheckpoints": ["Insect wing", "Bicycle", "Environmentalism", "DNA", "Kentucky Senate"], "checkpoints": [["John McCain", "Donald Trump", "Soviet Union", "South Korea", "Czech Republic", "Javanese language", "Jim Cummings", "Achaemenid Empire", "Marco Rubio", "Hasmonean dynasty"], ["Vichy France", "Bruce Springsteen", "South Asia", "Chicago Loop", "Solomon Islands", "Han dynasty", "Eastern Europe", "Sumerian language", "Art movement", "Forensic science"], ["Thelonious Monk", "Cell membrane", "Volcanic ash", "WBAL-TV", "Maren Morris", "Ancient Greek", "Persian carpet", "Joey Jordison", "New York City", "Warner Music Group"], ["Washington County, Alabama", "Birdman (rapper)", "Climate change adaptation", "Bart D. Ehrman", "Philadelphia", "Italy", "Methodism", "WWE", "Bahrain", "Wisconsin"], ["Beijing", "Ukraine", "Russia", "Nanjing", "England", "Volga", "Canal", "Stoicism", "Euronext", "William Chambers (architect)"], ["Judo", "Ukrainian Greek Catholic Church", "Minneapolis\u2013Saint Paul International Airport", "Jonathan Coulton", "Vale of White Horse", "Uffie", "Egg Harbor Township, New Jersey", "United States Department of Energy", "Existence", "Paris Peace Conference (1919\u20131920)"], ["Annonay", "NS\u00cd Runav\u00edk", "10th edition of Systema Naturae", "Secret police", "James Franciscus", "Human Development Index", "Historical linguistics", "Calendar of saints", "Ectoderm", "The New York Times Magazine"]]}
+    """

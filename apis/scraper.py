@@ -4,6 +4,8 @@ from wikispeedruns.scraper import findPaths
 from wikispeedruns.scraper_graph_utils import convertToArticleName
 from wikispeedruns.prompt_generator import generatePrompts
 
+import json
+
 scraper_api = Blueprint("scraper", __name__, url_prefix="/api/scraper")
 
 SCRAPER_TIMEOUT = 20

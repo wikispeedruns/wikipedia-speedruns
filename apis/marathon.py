@@ -13,17 +13,17 @@ marathon_api = Blueprint('marathon', __name__, url_prefix='/api/marathon')
 
 @marathon_api.post('/runs/')
 def create_run():
-    query = "INSERT INTO `marathonruns` (`path`, `prompt_id`, `user_id`, `checkpoints`, `total_time`) VALUES (%s, %s, %s, %s, %s)"
+    query = "INSERT INTO `marathonruns` (`path`, `prompt_id`, `user_id`, `checkpoints`, `total_time`, `finished`) VALUES (%s, %s, %s, %s, %s, %s)"
     sel_query = "SELECT LAST_INSERT_ID()"
 
     # datetime wants timestamp in seconds since epoch
     path = json.dumps(request.json['path'])
     checkpoints = json.dumps(request.json['checkpoints'])
     
-    print(checkpoints)
-    
     prompt_id = request.json['prompt_id']
     time = str(request.json['time'])
+    
+    finished = str(request.json['finished'])
 
     if ('user_id' in session):
         user_id = session['user_id']
@@ -34,8 +34,8 @@ def create_run():
 
     db = get_db()
     with db.cursor() as cursor:
-        print(cursor.mogrify(query, (path, prompt_id, user_id, checkpoints, time)))
-        result = cursor.execute(query, (path, prompt_id, user_id, checkpoints, time))
+        print(cursor.mogrify(query, (path, prompt_id, user_id, checkpoints, time, finished)))
+        result = cursor.execute(query, (path, prompt_id, user_id, checkpoints, time, finished))
         
         cursor.execute(sel_query)
         id = cursor.fetchone()[0]
@@ -75,6 +75,8 @@ def create_marathon_prompt():
     print("Starting prompt generation")
     
     checkpoints = genPrompts(initcheckpoints, batches=nbatch, nPerBatch=nperbatch, buckets=nbucket)
+    
+    print(checkpoints)
 
     print("Finished prompt generation")
     
@@ -141,7 +143,7 @@ def get_all_marathon_prompts():
 
 
 
-
+    
 @marathon_api.get('/prompt/<id>')
 def get_marathon_prompt(id):
     

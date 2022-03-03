@@ -1,3 +1,5 @@
+import { SavedMarathonGames } from "./modules/game/marathon/showSaves.js";
+
 async function getPrompts()
 {
     const response = await fetch("/api/sprints/active");
@@ -33,6 +35,9 @@ async function getMarathonPrompts()
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
+    components: {
+        'saved-marathon-games': SavedMarathonGames,
+    },
     data: {
         dailyPrompts: [],
         activePrompts: [],

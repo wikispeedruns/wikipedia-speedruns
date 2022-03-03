@@ -1,58 +1,189 @@
-import { serverData } from "./modules/serverData.js"
-import { fetchJson } from "./modules/fetch.js";
-import { getRandTip } from "./modules/tooltips.js";
-//create and import modules for loading/parsing wikipedia pages
+//JS module imports
+import { serverData } from "./modules/serverData.js";
 
+import { submitRun, saveRun, loadRun, removeSave } from "./modules/game/marathon/runs.js";
 
-const prompt_id = serverData["prompt_id"];
+import { CountdownTimer } from "./modules/game/marathon/countdown.js";
+import { FinishPage } from "./modules/game/marathon/finish.js";
+import { ArticleRenderer } from "./modules/game/articleRenderer.js";
+
+//retrieve the unique prompt_id of the prompt to load
+const PROMPT_ID = serverData["prompt_id"];
+const load_save = serverData["load_save"] === '1';
 
 let app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
+    components: {
+        'countdown-timer': CountdownTimer,
+        'finish-page': FinishPage
+    },
     data: {
-        startArticle: "",
-        timer: "",
-        countdown: 2,
-        finished: false,
-        started: false,
-        forfeited: false,
-        showHelp: false,
-        activeTip: "",
-        path: [],
-        finalTime: "",
-        prompt_id: 0,
-        run_id: "",
 
         checkpoints: [],
         activeCheckpoints: [],
         visitedCheckpoints: [],
-        numVisitedUnique: 0,
         clicksRemaining: 11,
+        clicksPerCheckpoint: 5,
 
-        pathToLastCheckpoints: "Finding paths...",
+        startArticle: "",    //For all game modes, this is the first article to load
+        lastArticle: "",
+        path: [],             //array to store the user's current path so far, submitted with run
+
+        promptId: 0,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
+        runId: -1,          //unique ID for the current run. This gets populated upon start of run
+
+        startTime: 0,     //For all game modes, the start time of run (mm elapsed since January 1, 1970)
+        lastTime:0,
+        endTime: null,       //For all game modes, the end time of run (mm elapsed since January 1, 1970)
+        elapsed: 0,
+        timerInterval: null,
+
+        finished: false,     //Flag for whether a game has finished, used for rendering
+        started: false,      //Flag for whether a game has started (countdown finished), used for rendering
+        forfeited: false,
+        showHelp: false,
+        saved: false,
+
+        renderer: null,
     },
+
     computed: {
         numCheckpointsVisited: function() {
             return this.visitedCheckpoints.length
         },
+
+        numVisitedUnique: function () {
+            return new Set(this.path).size;
+        }
     },
-    methods: {
-        formatPath: function(pathArr) {
-            let output = "";
-            for (let i = 0; i < pathArr.length - 1; i++) {
-                output = output.concat(pathArr[i])
-                output = output.concat(" -> ")
+
+
+    mounted: async function() {
+        this.promptId = PROMPT_ID;
+
+        const response = await fetch("/api/marathon/prompt/" + this.promptId);
+        if (response.status != 200) {
+            const error = await response.text();
+            this.alert(error);
+            // Prevent are you sure you want to leave prompt
+            window.onbeforeunload = null;
+            window.location.replace("/");   // TODO error page
+
+            return;
+        }
+        const prompt = await response.json();
+
+        if (load_save) {
+            const loadedSave = loadRun(PROMPT_ID)
+            this.lastArticle = loadedSave.path[loadedSave.path.length-1]
+            this.activeCheckpoints = loadedSave.active_checkpoints
+            this.checkpoints = loadedSave.remaining_checkpoints
+            this.clicksRemaining = loadedSave.clicks_remaining + 1
+            this.lastTime = loadedSave.time
+            this.path = loadedSave.path
+            this.path.pop()
+            this.visitedCheckpoints = loadedSave.visited_checkpoints
+
+            removeSave(PROMPT_ID)
+
+        } else {
+
+            this.activeCheckpoints = JSON.parse(prompt['initcheckpoints']);
+            this.checkpoints = JSON.parse(prompt['checkpoints']);
+        }
+
+        this.startArticle = prompt['start'];
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback);
+    },
+
+
+    methods : {
+        async pageCallback(page, loadTime) {
+
+            this.clicksRemaining -= 1;
+            
+            this.path.push(page);
+
+            this.startTime += loadTime;
+
+            let hitcheckpoint = false;
+            let checkpointindex = -1;
+            for (let i = 0; i < this.activeCheckpoints.length; i++) {
+                if (page.replace("_", " ").toLowerCase() === this.activeCheckpoints[i].replace("_", " ").toLowerCase()) {
+                    this.clicksRemaining += this.clicksPerCheckpoint;
+                    //query for new checkpoint
+                    checkpointindex = i;
+                    hitcheckpoint = true;
+                    this.visitedCheckpoints.push(page);
+                }
             }
-            output = output.concat(pathArr[pathArr.length - 1])
-            return output;
+
+            if (this.clicksRemaining === 0) {
+                await this.finish(1);
+            }
+
+            setMargin();
+
+            if (hitcheckpoint) {
+                let got = false
+                this.checkpoints.forEach(bucket => {
+                    if (bucket.length > 0 && !got) {
+                        let el = bucket.pop()
+                        console.log(el)
+                        this.activeCheckpoints[checkpointindex] = el
+                        got = true
+                    }
+                })
+            }
         },
 
-        finishPrompt: function(event) {
-            window.location.replace("/marathonprompt/" + prompt_id + "?run_id=" + this.run_id);
+        async start() {
+            //start timer
+            this.startTime = Date.now();
+
+            //set the timer update interval
+            this.timerInterval = setInterval(() => {
+                const seconds = (Date.now() - this.startTime + this.lastTime) / 1000;
+                this.elapsed = seconds;
+            }, 50);
+
+            if (load_save) {
+                await this.renderer.loadPage(this.lastArticle);
+                await this.pageCallback(this.lastArticle, Date.now() - this.startTime)
+            } else {
+                await this.renderer.loadPage(this.startArticle);
+                await this.pageCallback(this.startArticle, Date.now() - this.startTime)
+            }
+
+            this.started = true;
+
+            setMargin();
+
         },
 
-        home: function(event) {
-            window.location.replace("/");
+        async saveRun() {
+            this.finished = true;
+            this.saved = true;
+            // Disable popup
+            window.onbeforeunload = null;
+            this.endTime = Date.now() + this.lastTime;
+
+            this.runId = await saveRun(this.$data);
+        },
+
+        async finish(finished) {
+            if (finished === 0) {
+                this.forfeited = true;
+            }
+
+            this.finished = true;
+            // Disable popup
+            window.onbeforeunload = null;
+            this.endTime = Date.now();
+
+            this.runId = await submitRun(this.promptId, this.endTime - this.startTime, this.visitedCheckpoints, this.path, finished);
+            removeSave(PROMPT_ID)
         },
 
         formatActiveCheckpoints: function() {
@@ -69,349 +200,27 @@ let app = new Vue({
             return output
         },
 
-        forfeitRun: function() {
-            this.forfeited = true;
-            finish();
-        },
-
-        genPathsToCheckpoints: function() {
-            let el = document.getElementById("genPathsToCheckpoints");
-            let newEl = document.createElement("p");
-            newEl.innerHTML = this.pathToLastCheckpoints;
-
-            el.parentNode.replaceChild(newEl, el);
-        }
-
     }
-})
-
-var timerInterval = null;
-
-var keyMap = {};
-
-const clicksPerCheckpoint = 5;
-
-var startTime = 0;
-
-function handleWikipediaLink(e) {
-    e.preventDefault();
-    const linkEl = e.currentTarget;
-
-    if (linkEl.getAttribute("href").substring(0, 1) === "#") {
-        let a = linkEl.getAttribute("href").substring(1);
-        //console.log(a);
-        document.getElementById(a).scrollIntoView();
-
-    } else {
-
-        // Ignore external links
-        if (linkEl.getAttribute("href").substring(0, 6) !== "/wiki/") return;
-
-        // Disable the other links, otherwise we might load multiple links
-        document.querySelectorAll("#wikipedia-frame a").forEach((el) => {
-            el.onclick = (e) => {
-                e.preventDefault();
-                console.log("prevent multiple click");
-            };
-        });
-
-        // Remove "/wiki/" from string
-        loadPage(linkEl.getAttribute("href").substring(6))
-    }
-}
+});
 
 function setMargin() {
     const element = document.getElementById("time-box");
-    document.getElementById("wikipedia-frame").firstChild.style.paddingBottom = (element.offsetHeight + 25) + "px";
-    console.log(element.offsetHeight + 25);
-    document.getElementById("help-box").style.bottom = (element.offsetHeight + 25);
+    let margin = (element.offsetHeight + 25) > 250 ? (element.offsetHeight + 25) : 250
+    document.getElementById("wikipedia-frame").lastChild.style.paddingBottom = margin +"px";
 }
 
 
-async function loadPage(page) {
-
-
-
-    const resp = await fetch(
-        `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${page}`, {
-            mode: "cors"
-        }
-    )
-    const body = await resp.json()
-
-    const title = body["parse"]["title"]
-
-    let frameBody = document.getElementById("wikipedia-frame")
-    frameBody.innerHTML = body["parse"]["text"]["*"]
-    frameBody.querySelectorAll("a").forEach(function(a) {
-        a.innerHTML = '<div style="display:inline-block">' + a.text.split('').map(function(character) {
-            return '<div style="display:inline-block">' + character.replace(/\s/g, '&nbsp;') + '</div>'
-        }).join('') + '</div>'
-    });
-
-    app.$data.clicksRemaining -= 1;
-
-    document.getElementById("title").innerHTML = "<h1><i>" + title + "</i></h1>"
-
-    if (!app.$data.path.includes(title)) {
-        app.$data.numVisitedUnique += 1;
-    }
-
-    // Start timer if we are at the start
-    if (app.$data.path.length == 0) {
-        startTime = Date.now()
-        timerInterval = setInterval(displayTimer, 20);
-    }
-
-    app.$data.path.push(title)
-
-    var hitcheckpoint = false;
-    var checkpointindex = -1;
-
-    for (let i = 0; i < app.$data.activeCheckpoints.length; i++) {
-
-        if (formatStr(title) === formatStr(app.$data.activeCheckpoints[i])) {
-            app.$data.clicksRemaining += clicksPerCheckpoint;
-
-            //query for new checkpoint
-
-            checkpointindex = i;
-            hitcheckpoint = true;
-
-            app.$data.visitedCheckpoints.push(title);
-
-        }
-
-    }
-
-
-    if (app.$data.clicksRemaining === 0) {
-        await finish(title);
-    }
-
-    document.querySelectorAll("#wikipedia-frame a").forEach((el) => {
-        el.onclick = handleWikipediaLink;
-    });
-
-    hideElements();
-    setMargin();
-    window.scrollTo(0, 0)
-
-
-    if (hitcheckpoint) {
-        //console.log("hit checkpoint, getting new checkpoint")
-
-        //console.log(app.$data.activeCheckpoints[checkpointindex])
-
-        let got = false
-
-        app.$data.checkpoints.forEach(bucket => {
-            if (bucket.length > 0 && !got) {
-                let el = bucket.pop()
-                app.$data.activeCheckpoints[checkpointindex] = el['a']
-                console.log(el['a'])
-                got = true
-            }
-        })
-    }
-}
-
-async function finish(title) {
-
-    app.$data.finished = true;
-    app.$data.finalTime = app.$data.timer;
-
-    // Stop timer
-    clearInterval(timerInterval);
-
-    // Prevent are you sure you want to leave prompt
-    window.onbeforeunload = null;
-
-    // Send results to API
-    try {
-        const response = await fetchJson(`/api/marathon/runs/`, "POST", {
-            path: JSON.stringify(app.$data.path),
-            checkpoints: JSON.stringify(app.$data.visitedCheckpoints),
-            prompt_id: String(app.$data.prompt_id),
-            time: app.$data.finalTime,
-        })
-
-        app.$data.run_id = await response.json()
-
-        //console.log("run saved")
-
-    } catch (e) {
-        console.log(e);
-    }
-
-    let finalStr = ""
-    for (let i = 0; i < app.$data.activeCheckpoints.length; i++) {
-        //TODO
-
-        //const response = await fetchJson(`/api/scraper/path`, "POST", {
-        //    start: title,
-        //    end: app.$data.activeCheckpoints[i]
-        //})
-
-        //const resp = await response.json()
-
-        //finalStr += String(resp) += "\n"
-    }
-    app.$data.pathToLastCheckpoints = finalStr;
-
-
-}
-
-
-function hideElements() {
-
-    const hide = ["reference", "mw-editsection", "reflist", "portal", "refbegin", "sidebar", "authority-control", "external", "sistersitebox"]
-    for (let i = 0; i < hide.length; i++) {
-        let elements = document.getElementsByClassName(hide[i])
-            //console.log("found: " + hide[i] + elements.length)
-        for (let j = 0; j < elements.length; j++) {
-            elements[j].style.display = "none";
-        }
-    }
-
-    const idS = ["See_also", "Notes_and_references", "Further_reading", "External_links", "References", "Notes", "Citations", "Explanatory_notes"];
-    for (let i = 0; i < idS.length; i++) {
-        let e = document.getElementById(idS[i]);
-        if (e !== null) {
-            e.style.display = "none";
-        }
-    }
-
-    //hide Disambig
-
-    let elements = document.getElementsByClassName("hatnote");
-    for (let i = 0; i < elements.length; i++) {
-        let a = elements[i].getElementsByClassName("mw-disambig");
-        //console.log(a)
-        if (a.length !== 0) {
-            elements[i].style.display = "none";
-        }
-        //mw-disambig
-    }
-
-    //let all = document.getElementsByClassName("mw-parser-output")[0].querySelectorAll("h2", "div", "ul", "p");
-    let all = document.getElementById("wikipedia-frame").querySelectorAll("h2, div, ul, p, h3");
-    let flip = false
-    for (let i = 0; i < all.length; i++) {
-        if (!flip) {
-            if (all[i].tagName == "H2") {
-                //console.log("checking h2");
-                let check = all[i].getElementsByClassName("mw-headline")
-                if (check.length !== 0) {
-                    //console.log(check[0].id)
-                    for (let j = 0; j < idS.length; j++) {
-                        if (check[0].id == idS[j]) {
-                            //console.log("found see also at: " + i);
-                            all[i].style.display = "none";
-                            flip = true;
-                        }
-                    }
-                }
-            }
-        } else {
-            all[i].style.display = "none";
-        }
-    }
-
-}
-
-function formatStr(string) {
-    return string.replace("_", " ").toLowerCase()
-}
-
-function displayTimer() {
-    const seconds = (Date.now() - startTime) / 1000;
-    app.$data.timer = seconds;
-}
-
-async function countdownOnLoad() {
-
-    app.$data.activeTip = getRandTip();
-
-    let countDownStart = Date.now();
-    let countDownTime = app.$data.countdown * 1000;
-
-    document.getElementById("mirroredimgblock").classList.toggle("invisible");
-
-    // Condition 1: countdown timer
-    const promise1 = new Promise(resolve => {
-        const x = setInterval(function() {
-            const now = Date.now()
-
-            // Find the distance between now and the count down date
-            let distance = countDownStart + countDownTime - now;
-            app.$data.countdown = Math.floor(distance / 1000) + 1;
-
-            if (distance <= 0) {
-                resolve();
-                clearInterval(x);
-            }
-
-            if (distance < 700 && distance > 610 && document.getElementById("mirroredimgblock").classList.contains("invisible")) {
-                document.getElementById("mirroredimgblock").classList.toggle("invisible")
-            }
-
-        }, 50);
-    });
-
-    await Promise.any([promise1]);
-}
-
-function disableFind(e) {
-    console.log(e);
-    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) {
-        e.preventDefault();
-        this.alert("WARNING: Attempt to Find in page. This will be recorded.")
-    }
-}
-
-function startGame() {
-    app.$data.started = true;
-    startTime = Date.now();
-    timerInterval = setInterval(displayTimer, 20);
-}
-
-window.addEventListener("load", async function() {
-    const response = await fetch("/api/marathon/prompt/" + prompt_id);
-
-    app.$data.prompt_id = prompt_id;
-
-    if (response.status != 200) {
-        const error = await response.text();
-        this.alert(error)
-            // Prevent are your sure you want to leave prompt
-        window.onbeforeunload = null;
-        window.location.href = "/" // TODO error page
-
-    }
-
-    const prompt = await response.json();
-
-    //console.log(prompt)
-
-    app.$data.startArticle = prompt['start'];
-    app.$data.activeCheckpoints = JSON.parse(prompt['initcheckpoints']);
-    app.$data.checkpoints = JSON.parse(prompt['checkpoints']);
-
-    //await countdownOnLoad();
-
-    await Promise.all([loadPage(app.$data.startArticle), countdownOnLoad()]);
-    startGame();
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    //await loadPage(app.$data.startArticle);
-    setMargin();
-});
-
+// Prevent accidental leaves
 window.onbeforeunload = function() {
     return true;
 };
 
+// Disable find hotkeys, players will be given a warning
 window.addEventListener("keydown", function(e) {
-    disableFind(e);
+    //disable find
+    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) {
+        e.preventDefault();
+        this.alert("WARNING: Attempt to Find in page. This will be recorded.");
+    }
 });
+
