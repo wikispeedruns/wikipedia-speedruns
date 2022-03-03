@@ -142,7 +142,8 @@ def get_prompt(id):
 @sprint_api.get('/<int:id>/leaderboard/<int:run_id>')
 def get_prompt_leaderboard(id, run_id):
     # First get the prompt details, and the string
-    prompt = prompts.get_prompt(id, "sprint", user_id=session.get("user_id"))
+    user_id = session.get("user_id")
+    prompt = prompts.get_prompt(id, "sprint", user_id=user_id)
 
     if not session.get("admin", False) and (prompt["active"] and prompt["rated"] and not prompt.get("played", False)):
         return "Cannot view leaderboard of currently rated prompt until played", 401
@@ -191,8 +192,10 @@ def get_prompt_leaderboard(id, run_id):
 
         for run in results:
             run['path'] = json.loads(run['path'])
-
+            if run_id is None and user_id is not None and run['user_id'] == user_id:
+                run_id = run['run_id']
 
         resp["leaderboard"] = results
+        resp["run_id"] = run_id
 
         return jsonify(resp)

@@ -251,11 +251,11 @@ var app = new Vue({
                 runs.sort((a, b) => (a.path.length > b.path.length) ? 1 : ((a.path.length === b.path.length) ? ((a.run_time > b.run_time) ? 1 : -1) : -1))
                 resp.leaderboard = runs
             }
-            if (this.run_id == "" && resp.prompt && resp.prompt.user_first_run) {
-                this.run_id = resp.prompt.user_first_run
+
+            if (this.run_id == "" && resp.run_id != null) {
+                this.run_id = resp.run_id
             }
             return resp
-
         },
 
         genGraph: function () {

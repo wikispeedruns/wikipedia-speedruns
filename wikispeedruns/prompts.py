@@ -129,11 +129,8 @@ def get_prompt(prompt_id: int, prompt_type: PromptType, user_id: Optional[int]=N
             return None
 
         if (user_id is not None):
-            cur.execute(f"SELECT COUNT(*) as count, MIN(run_id) as first_run FROM {prompt_type}_runs WHERE prompt_id=%s AND user_id=%s",
-                        (prompt_id, user_id))
-            user_record = cur.fetchone()
-            prompt["played"] = user_record["count"] > 0
-            prompt["user_first_run"] = user_record["first_run"]
+            cur.execute(f"SELECT COUNT(*) as count FROM {prompt_type}_runs WHERE prompt_id=%s AND user_id=%s", (prompt_id, user_id))
+            prompt["played"] = cur.fetchone()["count"] > 0
 
         prompt = compute_visibility(prompt)
         return prompt
