@@ -27,22 +27,22 @@ var SavedMarathonGames = {
                 <div class="card-body">
                     <h4>Your saved marathon games:</h4>
                     <table class="table table-hover">
-                    <thead>
-                        <th scope="col">Prompt #</th>
-                        <th scope="col">Checkpoints Visited</th>
-                        <th scope="col">Articles Visited</th>
-                        <th scope="col">Clicks Remaining</th>
-                        <th scope="col">Active Checkpoints</th>
-                    </thead>
-                    <tbody>
-                        <tr v-for="game in savedGames" v-cloak>
-                            <td>{{game.prompt_id}} (<a v-bind:href="'/play/marathon/' + game.prompt_id + '?load_save=1'">continue</a>)</td>
-                            <td>{{game.visited_checkpoints.length}}</td>
-                            <td>{{new Set(game.path).size}}</td>
-                            <td>{{game.clicks_remaining}}</td>
-                            <td>{{game.active_checkpoints}}</td>
-                        </tr>
-                    </tbody>
+                        <thead>
+                            <th scope="col" class="px-2 py-2">Prompt #</th>
+                            <th scope="col" class="px-2 py-2">Checkpoints Visited</th>
+                            <th scope="col" class="px-2 py-2">Articles Visited</th>
+                            <th scope="col" class="px-2 py-2">Clicks Remaining</th>
+                            <th scope="col" class="px-2 py-2">Active Checkpoints</th>
+                        </thead>
+                        <tbody>
+                            <tr v-for="game in savedGames" v-cloak>
+                                <td>{{game.prompt_id}} (<a v-bind:href="'/play/marathon/' + game.prompt_id + '?load_save=1'">continue</a>)</td>
+                                <td>{{game.visited_checkpoints.length}}</td>
+                                <td>{{new Set(game.path).size}}</td>
+                                <td>{{game.clicks_remaining}}</td>
+                                <td>{{game.active_checkpoints}}</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
