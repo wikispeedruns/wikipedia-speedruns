@@ -17,7 +17,6 @@ def test_create_lobby(cursor, client, session):
         "rules": {},
     })
 
-    print(response)
     lobby_id = response.json["lobby_id"]
 
     # Assert that we inserted and are now deleting something

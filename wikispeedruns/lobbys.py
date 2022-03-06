@@ -86,4 +86,14 @@ def get_lobby_prompts(lobby_id: int) -> List[LobbyPrompt]:
         db.commit()
 
 
+def get_lobby_user_info(lobby_id: int, user_id: Optional[int]) -> Optional[dict]:
+    query = "SELECT owner FROM user_lobbys WHERE lobby_id=%s AND user_id=%s"
+
+    if (user_id == None): return None
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (lobby_id, user_id))
+        return cursor.fetchone()
+
 # TODO scores, users
