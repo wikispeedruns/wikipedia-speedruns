@@ -82,7 +82,12 @@ def user(user_base):
 @pytest.fixture()
 def session(client, user):
     client.post("/api/users/login", json=user)
-    yield user
+
+    # Get the session info, including user login
+    with client.session_transaction() as session:
+        pass
+
+    yield session
 
 @pytest.fixture()
 def admin_session(client):

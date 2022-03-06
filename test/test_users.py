@@ -81,11 +81,11 @@ def test_login_logout(client, user):
     assert response.status_code == 200
     assert has_session()
 
-    client.post("/api/users/logout")
+    response = client.post("/api/users/logout")
     assert response.status_code == 200
     assert no_session()
 
-    client.post("/api/users/login", json={"email": user["email"], "password": user["password"]})
+    response = client.post("/api/users/login", json={"email": user["email"], "password": user["password"]})
     assert response.status_code == 200
     assert has_session()
 

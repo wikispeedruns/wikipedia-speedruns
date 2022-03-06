@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS `lobbys` (
 CREATE TABLE IF NOT EXISTS `user_lobbys` (
     `user_id` INT NOT NULL,
     `lobby_id` INT NOT NULL,
+    `owner` BOOLEAN DEFAULT 0,
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`),
     FOREIGN KEY (`lobby_id`) REFERENCES `lobbys`(`lobby_id`)
 );
