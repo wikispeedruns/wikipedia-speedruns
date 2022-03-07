@@ -90,8 +90,8 @@ def test_login_logout(client, user):
     assert has_session()
 
 
-def test_confirm_email(client, cursor, user_base):
-    user, outbox = user_base
+def test_confirm_email(client, cursor, user_with_outbox):
+    user, outbox = user_with_outbox
 
     assert len(outbox) == 1
 

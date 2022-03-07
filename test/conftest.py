@@ -57,7 +57,7 @@ def db_cursor_fixture(db):
         db.commit()
 
 @pytest.fixture()
-def user_base(client, mail, cursor):
+def user_with_outbox(client, mail, cursor):
     '''
     Adds a user for testing, with basic checks
     '''
@@ -70,24 +70,51 @@ def user_base(client, mail, cursor):
     with mail.record_messages() as outbox:
         response = client.post("/api/users/create/email", json=user)
 
+    # Get user id and put it for users of this fixture
+    get_id_query = "SELECT user_id FROM users WHERE username=%s"
+    cursor.execute(get_id_query, user["username"])
+    user["user_id"] = cursor.fetchone()["user_id"]
+
     yield user, outbox
 
     cursor.execute("DELETE FROM users WHERE username=%s", (user["username"],))
 
 @pytest.fixture()
-def user(user_base):
-    user_info, _ = user_base
+def user(user_with_outbox):
+    user_info, _ = user_with_outbox
     yield user_info
+
+@pytest.fixture()
+def user2(client, mail, cursor):
+    '''
+    Adds a user for testing, with basic checks
+    '''
+    user2 = {
+        "username" : "ahhhhhhh",
+        "email" : "ahhhhhhh@gmail.com",
+        "password" : "lmao"
+    }
+
+    client.post("/api/users/create/email", json=user2)
+
+    # Get user id and put it for users of this fixture
+    get_id_query = "SELECT user_id FROM users WHERE username=%s"
+    cursor.execute(get_id_query, user2["username"])
+    user2["user_id"] = cursor.fetchone()["user_id"]
+
+    yield user2
+
+    cursor.execute("DELETE FROM users WHERE username=%s", (user2["username"],))
 
 @pytest.fixture()
 def session(client, user):
     client.post("/api/users/login", json=user)
+    yield user
 
-    # Get the session info, including user login
-    with client.session_transaction() as session:
-        pass
-
-    yield session
+@pytest.fixture()
+def session2(client, user2):
+    client.post("/api/users/login", json=user2)
+    yield user2
 
 @pytest.fixture()
 def admin_session(client):

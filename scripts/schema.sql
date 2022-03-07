@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `lobbys` (
     `lobby_id` INT NOT NULL AUTO_INCREMENT, -- Internal
     `name` VARCHAR(50) NULL,
     `desc` VARCHAR(200) NULL,
-    `passphrase` VARCHAR(16) NOT NULL,     -- Not a hash, should be auto genearted
+    `passcode` VARCHAR(16) NOT NULL,     -- Not a hash, should be auto genearted
     `create_date` DATETIME NOT NULL,
     `active_date` DATETIME NULL,
     `rules` JSON NULL,

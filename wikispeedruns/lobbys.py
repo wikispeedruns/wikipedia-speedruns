@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import List, Literal, Tuple, TypedDict, Optional
 
+import pymysql
+
 from db import get_db
 from pymysql.cursors import DictCursor
 
@@ -12,7 +14,7 @@ class LobbyPrompt(TypedDict):
     start: str
     end: str
 
-def _random_passphrase() -> str:
+def _random_passcode() -> str:
     return "".join([str(secrets.randbelow(10)) for _ in range(6)])
 
 
@@ -22,15 +24,15 @@ def create_lobby(user_id: int,
                  name: Optional[str]=None,
                  desc: Optional[str]=None) -> Optional[int]:
     lobby_query = """
-    INSERT INTO lobbys (`name`, `desc`, passphrase, create_date, active_date, rules)
-    VALUES (%(name)s, %(desc)s, %(passphrase)s, %(now)s, %(now)s, %(rules)s);
+    INSERT INTO lobbys (`name`, `desc`, passcode, create_date, active_date, rules)
+    VALUES (%(name)s, %(desc)s, %(passcode)s, %(now)s, %(now)s, %(rules)s);
     """
     user_query = """
     INSERT INTO user_lobbys (user_id, lobby_id, `owner`)
     VALUES (%s, %s, 1);
     """
 
-    passphrase = _random_passphrase()
+    passcode = _random_passcode()
     now = datetime.now()
 
     db = get_db()
@@ -38,7 +40,7 @@ def create_lobby(user_id: int,
         cursor.execute(lobby_query, {
             "name": name,
             "desc": desc,
-            "passphrase": passphrase,
+            "passcode": passcode,
             "now": now,
             "rules": rules
         })
@@ -51,6 +53,19 @@ def create_lobby(user_id: int,
 
         return lobby_id
 
+
+def get_lobby(lobby_id: int) -> Optional[dict]:
+    query = """
+        SELECT lobby_id, `name`, `desc`, passcode, create_date, active_date, rules
+        FROM lobbys
+        WHERE lobby_id=%s
+    """
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (lobby_id,))
+        return cursor.fetchone()
+
+# Lobby Prompt Management
 
 def add_lobby_prompt(lobby_id: int, start: int, end: int) -> bool:
     query = """
@@ -84,6 +99,23 @@ def get_lobby_prompts(lobby_id: int) -> List[LobbyPrompt]:
             "lobby_id": lobby_id,
         })
         db.commit()
+
+
+# Lobby user management
+
+def join_lobby_as_user(lobby_id: int, user_id: int) -> bool:
+    query = "INSERT INTO user_lobbys (lobby_id, user_id) VALUES (%s, %s)"
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        try:
+            cursor.execute(query, (lobby_id, user_id))
+            db.commit()
+        except pymysql.IntegrityError:
+            # Lobby or user does not exist
+            return False
+
+    return True
 
 
 def get_lobby_user_info(lobby_id: int, user_id: Optional[int]) -> Optional[dict]:
