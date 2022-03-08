@@ -43,6 +43,18 @@
                     <ul class="navbar-nav ms-auto mb-2 mb-md-0">
 
                     <template v-if="loggedIn">
+                        <li v-if="isAdmin" class="nav-item">
+                            <a class="nav-link active" v-bind:href="'/testarticle'">Test</a>
+                        </li>
+
+                        <li v-if="isAdmin" class="nav-item">
+                            <a class="nav-link active" v-bind:href="'/stats'">Stats</a>
+                        </li>
+                        
+                        <li v-if="isAdmin" class="nav-item">
+                            <a class="nav-link active" v-bind:href="'/manage'">Manage</a>
+                        </li>
+
                         <li class="nav-item me-2">
                             <a class="nav-link active" v-bind:href="'/profile/' + username">[[username]]</a>
                         </li>

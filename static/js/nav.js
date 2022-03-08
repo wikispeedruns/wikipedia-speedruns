@@ -14,6 +14,7 @@ var app = new Vue({
         if ("username" in serverData) {
             this.loggedIn = true;
             this.username = serverData["username"];
+            this.isAdmin = serverData["admin"];
         }
     },
 

@@ -47,6 +47,7 @@ def create_app(test_config=None):
     from apis.profiles import profile_api
     from apis.scraper import scraper_api
     from apis.ratings import ratings_api
+    from apis.stats import stats_api
     from views import views
 
     app.register_blueprint(sprint_api)
@@ -55,6 +56,7 @@ def create_app(test_config=None):
     app.register_blueprint(profile_api)
     app.register_blueprint(scraper_api)
     app.register_blueprint(ratings_api)
+    app.register_blueprint(stats_api)
 
     app.register_blueprint(views)
 

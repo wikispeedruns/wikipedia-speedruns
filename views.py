@@ -16,9 +16,11 @@ def render_with_data(template, **kwargs):
         data["user_id"] = session["user_id"]
         data["username"] = session["username"]
 
-        return render_template(template, data=data)
-    else:
-        return render_template(template, data=data)
+    # only use for rendering non-data front-end UI elements
+    if "admin" in session and session["admin"]:
+        data["admin"] = True
+        
+    return render_template(template, data=data)
 
 # Front end pages
 @views.route('/', methods=['GET'])
@@ -118,7 +120,6 @@ def get_replay_page():
 
 # Admin pages
 
-
 @views.route('/manage', methods=['GET'])
 @check_admin
 def get_manage_page():
@@ -128,3 +129,8 @@ def get_manage_page():
 @check_admin
 def get_test_article_page():
     return render_with_data('admin/articleTester.html')
+
+@views.route('/stats', methods=['GET'])
+@check_admin
+def get_stats_page():
+    return render_with_data('admin/stats.html')
