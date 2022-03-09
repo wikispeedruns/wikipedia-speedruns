@@ -8,6 +8,8 @@ import { MarathonHelp } from "./modules/game/marathon/help.js";
 import { FinishPage } from "./modules/game/marathon/finish.js";
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 
+import { basicCannon, fireworks, side } from "./modules/confetti.js";
+
 //retrieve the unique prompt_id of the prompt to load
 const PROMPT_ID = serverData["prompt_id"];
 const load_save = serverData["load_save"] === '1';
@@ -135,9 +137,12 @@ let app = new Vue({
                     checkpointindex = i;
                     hitcheckpoint = true;
                     this.visitedCheckpoints.push(page);
+
+                    basicCannon(0, 0, false, 315)
+                    basicCannon(1, 0, false, 225) 
                 }
             }
-
+                       
             if (this.clicksRemaining === 0) {
                 await this.finish(1);
             }
@@ -153,7 +158,8 @@ let app = new Vue({
                         this.activeCheckpoints[checkpointindex] = el
                         got = true
                     }
-                })
+                });
+                
             }
 
             if (!this.reachedstop && this.checkpointMarkReached) {
@@ -199,7 +205,10 @@ let app = new Vue({
         async finish(finished) {
             if (finished === 0) {
                 this.forfeited = true;
+            } else {
+                side();
             }
+            fireworks();
 
             this.finished = true;
             // Disable popup
@@ -207,7 +216,8 @@ let app = new Vue({
             this.endTime = Date.now();
 
             this.runId = await submitRun(this.promptId, this.endTime - this.startTime, this.visitedCheckpoints, this.path, finished);
-            removeSave(PROMPT_ID)
+            removeSave(PROMPT_ID);
+        
         },
 
         formatActiveCheckpoints: function() {

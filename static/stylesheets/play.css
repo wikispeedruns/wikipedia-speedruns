@@ -91,7 +91,7 @@
 .centered {
 	width:auto;
 	max-width: 1000px !important;
-	z-index: 100000;
+	z-index: 10000;
 	position: fixed;
 	top: 50%;
 	left: 50%;
