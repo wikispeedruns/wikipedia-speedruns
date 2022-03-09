@@ -13,6 +13,7 @@
 {% block content %}
 
 <div id="app">
+    <canvas id="confettiCanvas" style="pointer-events:none;"></canvas>
 
     <div v-show="started && !finished" id="time-box" class="HUDwrapper container" v-cloak>
         <div class="row flex-row flex-nowrap py-2">

@@ -120,6 +120,9 @@ let app = new Vue({
 
 
     methods : {
+
+
+
         async pageCallback(page, loadTime) {
 
             this.clicksRemaining -= 1;
@@ -130,6 +133,7 @@ let app = new Vue({
 
             let hitcheckpoint = false;
             let checkpointindex = -1;
+
             for (let i = 0; i < this.activeCheckpoints.length; i++) {
                 if (page.replace("_", " ").toLowerCase() === this.activeCheckpoints[i].replace("_", " ").toLowerCase()) {
                     this.clicksRemaining += this.clicksPerCheckpoint + 1;
@@ -137,9 +141,6 @@ let app = new Vue({
                     checkpointindex = i;
                     hitcheckpoint = true;
                     this.visitedCheckpoints.push(page);
-
-                    basicCannon(0, 0, false, 315)
-                    basicCannon(1, 0, false, 225) 
                 }
             }
                        
@@ -148,7 +149,8 @@ let app = new Vue({
             }
 
             setMargin();
-
+            
+            
             if (hitcheckpoint) {
                 let got = false
                 this.checkpoints.forEach(bucket => {
@@ -159,7 +161,7 @@ let app = new Vue({
                         got = true
                     }
                 });
-                
+                conf();
             }
 
             if (!this.reachedstop && this.checkpointMarkReached) {
@@ -189,6 +191,8 @@ let app = new Vue({
             this.started = true;
 
             setMargin();
+
+            setConf();
 
         },
 
@@ -236,6 +240,54 @@ let app = new Vue({
 
     }
 });
+
+function setConf() {
+    var el = document.getElementById('confettiCanvas')
+    el.style.width = window.innerWidth
+    el.style.height = window.innerHeight
+}
+
+function conf() {
+    var myConfetti = confetti.create(document.getElementById('confettiCanvas'), { resize: true
+    });
+    myConfetti({
+        particleCount: 100,
+        spread: 90, 
+        startVelocity: 40, 
+        ticks: 70, 
+        zIndex: 9999999, 
+        angle: 315,
+        origin: { x: 0, y: 0 } , 
+    });
+    myConfetti({
+        particleCount: 100,
+        spread: 90, 
+        startVelocity: 40, 
+        ticks: 70, 
+        zIndex: 9999999, 
+        angle: 225,
+        origin: { x: 1, y: 0 } , 
+    });
+    myConfetti({
+        particleCount: 100,
+        spread: 90, 
+        startVelocity: 40, 
+        ticks: 70, 
+        zIndex: 9999999, 
+        angle: 45,
+        origin: { x: 0, y: 1 } , 
+    });
+    myConfetti({
+        particleCount: 100,
+        spread: 90, 
+        startVelocity: 40, 
+        ticks: 70, 
+        zIndex: 9999999, 
+        angle: 135,
+        origin: { x: 1, y: 1 } , 
+    });
+
+}
 
 function setMargin() {
     const element = document.getElementById("time-box");

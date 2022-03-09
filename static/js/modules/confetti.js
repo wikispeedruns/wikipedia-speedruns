@@ -17,9 +17,10 @@ return Math.floor(Math.random() * (max - min)) + min;
 }
 
 function basicCannon(xi=0.5, yi=0.5, randomAngle=true, angle=90) {
-    let defaults = { startVelocity: 30, spread: 90, ticks: 70, zIndex: 250000, angle: randomAngle ? randomInt(55, 125) : angle, };
+    console.log("basicCannon")
+    let defaults = { startVelocity: 30, spread: 90, ticks: 70, zIndex: 9999999, angle: randomAngle ? randomInt(55, 125) : angle, };
     let particleCount = 100;
-    confetti(Object.assign({}, defaults, { particleCount, origin: { x: xi, y: yi } , color: defaultColors,zIndex: 250000,}));
+    confetti(Object.assign({}, defaults, { particleCount, origin: { x: xi, y: yi } , color: defaultColors,zIndex: 9999999,}));
 }
 
 function fireworks(dur=5) {

@@ -101,3 +101,9 @@
     margin-bottom: 15px;
     border: 2px solid #000000 !important;
 }
+
+#confettiCanvas {
+	position: fixed;
+	top: 0;
+	left: 0;
+}
