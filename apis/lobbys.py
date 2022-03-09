@@ -1,6 +1,8 @@
+from tracemalloc import start
 from flask import jsonify, request, Blueprint, session
 
 import json
+import datetime
 
 from util.decorators import check_json, check_user, check_request_json, OptionalArg
 
@@ -76,7 +78,6 @@ def join_lobby(lobby_id):
 
 @lobby_api.get("/<int:lobby_id>")
 def get_lobby(lobby_id):
-    print(lobby_id, session)
     if not _check_membership(lobby_id, session):
         return "You do not have access to this lobby", 401
 
@@ -87,12 +88,12 @@ def get_lobby(lobby_id):
         return ret
 
 
-# Prompt management
+# Prompts
 
 @lobby_api.post("/<int:lobby_id>/prompts")
 @check_user
 @check_request_json({"start": str, "end": str})
-def add_lobby_prompts(lobby_id):
+def add_lobby_prompt(lobby_id):
     user_id = session.get("user_id")
     user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
 
@@ -107,9 +108,48 @@ def add_lobby_prompts(lobby_id):
 
 
 # TODO allow anonymous users?
-@lobby_api.get("/<int:lobby_id>/prompts")
-def get_lobby_prompts(lobby_id):
+@lobby_api.get('/<int:lobby_id>/prompts', defaults={'prompt_id' : None})
+@lobby_api.get("/<int:lobby_id>/prompts/<int:prompt_id>")
+def get_lobby_prompts(lobby_id, prompt_id):
     if not _check_membership(lobby_id, session):
         return "You are not a member of this lobby", 401
 
-    return jsonify(lobbys.get_lobby_prompts(lobby_id))
+    return jsonify(lobbys.get_lobby_prompts(lobby_id, prompt_id))
+
+
+
+# Runs
+@lobby_api.post("'/<int:lobby_id>/prompts/<int:prompt_id>/runs'")
+@check_request_json({"start_time": int, "end_time": int, "path": dict})
+def add_lobby_run(lobby_id, prompt_id):
+    if not _check_membership(lobby_id, session):
+        return "You do not have access to this lobby", 401
+
+    lobbys.add_lobby_run(
+        lobby_id   = lobby_id,
+        prompt_id  = prompt_id,
+        start_time = datetime.fromtimestamp(request.json['start_time']/1000),
+        end_time   = datetime.fromtimestamp(request.json['end_time']/1000),
+        path       = json.dumps(request.json['path']),
+        user_id    = session.get("user_id"),
+        name       = session.get("lobbys", {}).get(str(lobby_id))
+    )
+
+
+
+# Runs
+@lobby_api.get("'/<int:lobby_id>/prompts/<int:prompt_id>/runs'")
+@check_request_json({"start_time": int, "end_time": int, "path": dict})
+def get_lobby_run(lobby_id, prompt_id):
+    if not _check_membership(lobby_id, session):
+        return "You do not have access to this lobby", 401
+
+    lobbys.add_lobby_run(
+        lobby_id   = lobby_id,
+        prompt_id  = prompt_id,
+        start_time = datetime.fromtimestamp(request.json['start_time']/1000),
+        end_time   = datetime.fromtimestamp(request.json['end_time']/1000),
+        path       = json.dumps(request.json['path']),
+        user_id    = session.get("user_id"),
+        name       = session.get("lobbys", {}).get(str(lobby_id))
+    )

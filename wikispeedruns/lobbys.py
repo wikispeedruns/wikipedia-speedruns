@@ -1,5 +1,7 @@
 from datetime import datetime
+import json
 from typing import List, Literal, Tuple, TypedDict, Optional
+from unittest import result
 
 import pymysql
 
@@ -91,13 +93,20 @@ def add_lobby_prompt(lobby_id: int, start: int, end: int) -> bool:
         return True
 
 
-def get_lobby_prompts(lobby_id: int) -> List[LobbyPrompt]:
-    query = "SELECT prompt_id, start, end FROM lobby_prompts WHERE lobby_id=%s"
+def get_lobby_prompts(lobby_id: int, prompt_id: Optional[int]=None ) -> List[LobbyPrompt]:
+    query = "SELECT prompt_id, start, end FROM lobby_prompts WHERE lobby_id=%(lobby_id)s"
+
+    query_args = {
+        "lobby_id": lobby_id
+    }
+
+    if (prompt_id):
+        query += " AND prompt_id=%s"
+        query_args["prompt_id"] = prompt_id
+
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query, {
-            "lobby_id": lobby_id,
-        })
+        cursor.execute(query, query_args)
         db.commit()
 
 
@@ -128,4 +137,66 @@ def get_lobby_user_info(lobby_id: int, user_id: Optional[int]) -> Optional[dict]
         cursor.execute(query, (lobby_id, user_id))
         return cursor.fetchone()
 
-# TODO scores, users
+
+# Lobby Runs
+
+def add_lobby_run(lobby_id: int, prompt_id: int,
+                  start_time: datetime, end_time: datetime, path: str,
+                  user_id: Optional[int]=None, name: Optional[str]=None):
+
+
+    query_args = {
+        "lobby_id": lobby_id,
+        "prompt_id": prompt_id,
+        "start_time": start_time,
+        "end_time": end_time,
+        "path": path
+    }
+
+    if (user_id is not None):
+        query_args["ident_col"] = "user_id"
+        query_args["ident_val"] = user_id
+    elif (name is not None):
+        query_args["ident_col"] = "name"
+        query_args["ident_val"] = name
+    else:
+        raise ValueError("One of user_id or name should be defined")
+
+    db = get_db()
+
+    with db.cursor() as cursor:
+        query = """
+        INSERT INTO lobby_runs (lobby_id, prompt_id, start_time, end_time, path, %(ident_col)s)
+        VALUES (%(lobby_id)s, %(prompt_id)s, %(start_time)s %(end_time)s, %(path)s, %(ident_val)s;
+        """
+
+        cursor.execute(query, query_args)
+
+        db.commit()
+
+def get_lobby_runs(lobby_id: int, prompt_id: Optional[int]=None):
+    query = """
+        SELECT run_id, prompt_id user_id, name, start_time, end_time, path
+        TIMESTAMPDIFF(MICROSECOND, start_time, end_time) AS run_time,
+        FROM lobby_runs
+        WHERE lobby_id=%(lobby_id)s
+    """
+
+    query_args = {
+        "lobby_id": lobby_id
+    }
+
+    if (prompt_id):
+        query += " AND prompt_id=%s"
+        query_args["prompt_id"] = prompt_id
+
+    db = get_db()
+
+    with db.cursor() as cursor:
+        cursor.execute(query, query_args)
+        results = cursor.fetchall()
+        for run in results:
+            run['path'] = json.loads(run['path'])
+
+        return results
+
