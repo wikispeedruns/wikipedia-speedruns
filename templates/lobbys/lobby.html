@@ -1,6 +1,23 @@
 {% extends 'base.html' %}
 
 {% block head %}
+<style>
+/* Tooltip */
+.button-tooltip-container {
+    display: flex;
+    align-items: center;
+    margin-top: 16px;
+    min-height: 30px;
+
+}
+
+#custom-tooltip {
+    display: none;
+    margin-left: 10px;
+}
+</style>
+
+
 <script type="module">
 import { fetchJson } from "/static/js/modules/fetch.js";
 import { serverData } from "/static/js/modules/serverData.js";
@@ -18,14 +35,37 @@ var app = new Vue({
 
         prompts: [],
 
-        lobbyInfo: {}
+        lobbyInfo: {
+            "name": null,
+            "desc": null,
+            "user": {
+                "name": null,
+                "owner": null
+            }
+        }
     },
 
     created: async function() {
         this.getPrompts();
+        this.getLobbyInfo();
     },
 
     methods: {
+
+        copyInviteLink() {
+            const link = `Join my Wikispeedruns lobby\n${window.location.href}\nPasscode: ${this.lobbyInfo.passcode}`
+            document.getElementById("custom-tooltip").style.display = "inline";
+            navigator.clipboard.writeText(link);
+            setTimeout(function() {
+                document.getElementById("custom-tooltip").style.display = "none";
+            }, 1500);
+        },
+
+        async getLobbyInfo() {
+            const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}`);
+            this.lobbyInfo = await resp.json();
+        },
+
         async getPrompts() {
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}/prompts`);
             this.prompts = await resp.json();
@@ -44,7 +84,7 @@ var app = new Vue({
 
             const end = await getArticleTitle(this.endPrompt);
             if (end === null) {
-                this.addPromptMessage = `"${this.startPrompt}" is not a Wikipedia article`;
+                this.addPromptMessage = `"${this.endPrompt}" is not a Wikipedia article`;
                 return;
             }
 
@@ -64,48 +104,26 @@ var app = new Vue({
 {% endblock %}
 
 {% block content %}
-<div id="app">
-    <h2>Lobby</h2>
+<div id="app" v-cloak>
+    <h2 v-if="lobbyInfo.name">[[lobbyInfo.name]]</h2>
+    <h2 v-else>Lobby [[lobbyInfo.lobby_id]]: </h2>
 
-    <hr>
+    <p>[[lobbyInfo.desc]]</p>
 
-    <table class="table table-hover">
-        <thead>
-            <th style="width:100px" scope="col">Prompt #</th>
-            <th scope="col">Start Article</th>
-            <th class="text-center"></th>
-        </thead>
-        <tbody>
-            <tr v-for="prompt in prompts" v-cloak>
-                <td>[[prompt.prompt_id]]</span>
-                    <template v-if="loggedIn">
-                        (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)
-                    </template>
-                    <template v-else>
-                        (<a v-on:click="alertLogin" v-bind:href="'/play/' + prompt.prompt_id">play</a>)
-                    </template>
-
-                </td>
-
-                <td>[[prompt.start]]</td>
-                <td class="text-center">
-                    <template v-if="prompt.played">
-                        <a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a>
-                    </template>
-                    <template v-else>
-                        <span title="Play this prompt to see the results!">-</span>
-                    </template>
-                </td>
-                </tr>
-        </tbody>
-    </table>
+    <h4> Invite Others: </h4>
+    <p> Link: [[window.location.href]]    </p>
+    <p> Passcode: [[lobbyInfo.passcode]]    </p>
 
 
-    <template>
+    <div class="button-tooltip-container">
+        <button @click="copyInviteLink" class="btn btn-light">Copy Invite</button>
+        <span id="custom-tooltip" ref="shareTooltip">Copied invite to clipboard!</span>
+    </div>
 
-        <hr>
-        <h2>Manage Lobby</h2>
-        <h4> Add a prompt</h4>
+
+    <template v-if="lobbyInfo.user.owner">
+
+        <h4>Manage: Add a prompt</h4>
         <form id="newPrompt" v-on:submit.prevent="addPrompt">
             <label for="start">Start Article:</label>
             <input type="text" id="start" name="start" v-model="startPrompt">
@@ -116,7 +134,36 @@ var app = new Vue({
         </form>
 
         <p>[[addPromptMessage]]</p>
+
+        <hr>
+
     </template>
+
+
+    <h3> Prompts </h3>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <th style="width:100px" scope="col">Prompt #</th>
+                    <th scope="col">Start Article</th>
+                    <th scope="col">End Article</th>
+                    <th class="text-center"></th>
+                </thead>
+                <tbody>
+                    <tr v-for="prompt in prompts" v-cloak>
+                        <td>[[prompt.prompt_id]]
+                            (<a v-bind:href="'/lobby/' + lobbyInfo.lobby_id + '/play/' + prompt.prompt_id">play</a>)
+                        </td>
+
+                        <td>[[prompt.start]]</td>
+                        <td>[[prompt.end]]</td>
+                        </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
 
 </div>

@@ -1,3 +1,4 @@
+from click import prompt
 from flask import Blueprint, render_template, request, redirect, session
 
 from util.decorators import check_admin, check_user
@@ -131,6 +132,12 @@ def get_lobby_page(lobby_id):
         return render_with_data('lobbys/lobby.html', lobby_id=lobby_id)
     else:
         return render_with_data('lobbys/join.html', lobby_id=lobby_id)
+
+
+@views.route('/lobby/<int:lobby_id>/play/<int:prompt_id>', methods=['GET'])
+def get_lobby_play_page(lobby_id, prompt_id):
+    return render_with_data('play.html', lobby_id=lobby_id, prompt_id=prompt_id)
+
 
 
 # Admin pages

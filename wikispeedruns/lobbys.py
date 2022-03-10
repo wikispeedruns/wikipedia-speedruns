@@ -1,3 +1,4 @@
+from cProfile import run
 from datetime import datetime
 import json
 from typing import List, Literal, Tuple, TypedDict, Optional
@@ -83,14 +84,9 @@ def get_lobby(lobby_id: int) -> Optional[dict]:
 
 def add_lobby_prompt(lobby_id: int, start: int, end: int) -> bool:
     query = """
-    INSERT INTO lobby_prompts (lobby_id, start, end, prompt_id
-    VALUES(
-        %(lobby_id)s, %(start)s, %(end)s, (
-            SELECT IFNULL(MAX(prompt_id) + 1, 1)
-            FROM lobby_prompts
-            WHERE lobby_id=%(lobby_id)s
-        )
-    );
+    INSERT INTO lobby_prompts (lobby_id, start, end, prompt_id)
+    SELECT %(lobby_id)s, %(start)s, %(end)s, IFNULL(MAX(prompt_id) + 1, 1)
+    FROM lobby_prompts WHERE lobby_id=%(lobby_id)s;
     """
 
     db = get_db()
@@ -106,6 +102,7 @@ def add_lobby_prompt(lobby_id: int, start: int, end: int) -> bool:
 
 
 def get_lobby_prompts(lobby_id: int, prompt_id: Optional[int]=None ) -> List[LobbyPrompt]:
+    ## TODO user_id?
     query = "SELECT prompt_id, start, end FROM lobby_prompts WHERE lobby_id=%(lobby_id)s"
 
     query_args = {
@@ -113,7 +110,7 @@ def get_lobby_prompts(lobby_id: int, prompt_id: Optional[int]=None ) -> List[Lob
     }
 
     if (prompt_id):
-        query += " AND prompt_id=%s"
+        query += " AND prompt_id=%(prompt_id)s"
         query_args["prompt_id"] = prompt_id
 
     db = get_db()
@@ -162,29 +159,32 @@ def add_lobby_run(lobby_id: int, prompt_id: int,
         "prompt_id": prompt_id,
         "start_time": start_time,
         "end_time": end_time,
-        "path": path
+        "path": path,
+        "user_id": None,
+        "name": None
     }
 
     if (user_id is not None):
-        query_args["ident_col"] = "user_id"
-        query_args["ident_val"] = user_id
+        query_args["user_id"] = user_id
     elif (name is not None):
-        query_args["ident_col"] = "name"
-        query_args["ident_val"] = name
+        query_args["name"] = name
     else:
         raise ValueError("One of user_id or name should be defined")
 
     db = get_db()
 
     with db.cursor() as cursor:
-        query = """
-        INSERT INTO lobby_runs (lobby_id, prompt_id, start_time, end_time, path, %(ident_col)s)
-        VALUES (%(lobby_id)s, %(prompt_id)s, %(start_time)s %(end_time)s, %(path)s, %(ident_val)s;
+        query = f"""
+        INSERT INTO lobby_runs (lobby_id, prompt_id, start_time, end_time, path, user_id, `name`)
+        VALUES (%(lobby_id)s, %(prompt_id)s, %(start_time)s, %(end_time)s, %(path)s, %(user_id)s, %(name)s);
         """
-
         cursor.execute(query, query_args)
 
+        cursor.execute("SELECT LAST_INSERT_ID()")
+        run_id = cursor.fetchone()[0]
         db.commit()
+
+    return run_id
 
 def get_lobby_runs(lobby_id: int, prompt_id: Optional[int]=None):
     query = """
