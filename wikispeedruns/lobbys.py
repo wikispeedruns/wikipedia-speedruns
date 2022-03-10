@@ -119,7 +119,7 @@ def get_lobby_prompts(lobby_id: int, prompt_id: Optional[int]=None ) -> List[Lob
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, query_args)
-        db.commit()
+        return cursor.fetchall()
 
 
 # Lobby user management

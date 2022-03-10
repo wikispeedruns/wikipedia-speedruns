@@ -103,7 +103,16 @@ def get_lobby_prompts(lobby_id, prompt_id):
     if not lobbys.check_membership(lobby_id, session):
         return "You are not a member of this lobby", 401
 
-    return jsonify(lobbys.get_lobby_prompts(lobby_id, prompt_id))
+    prompts = lobbys.get_lobby_prompts(lobby_id, prompt_id)
+
+    if prompt_id is None:
+        return jsonify(prompts)
+    else:
+        if len(prompts) == 0:
+            return "Prompt not found", 404
+
+        return jsonify(prompts[0])
+
 
 
 
