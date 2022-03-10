@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, session
 
-from util.decorators import check_admin
+from util.decorators import check_admin, check_user
 
 import db
 import random
+
+import wikispeedruns
 
 views = Blueprint("views", __name__)
 
@@ -116,8 +118,22 @@ def get_replay_page():
     run_id = request.args.get('run_id', '')
     return render_with_data('replay.html', run_id=run_id)
 
-# Admin pages
+# Lobby Pages
+@views.route('/lobby/create', methods=['GET'])
+@check_user
+def get_lobby_create_page():
+    return render_with_data('lobbys/create.html', )
 
+
+@views.route('/lobby/<int:lobby_id>', methods=['GET'])
+def get_lobby_page(lobby_id):
+    if wikispeedruns.lobbys.check_membership(lobby_id, session):
+        return render_with_data('lobbys/lobby.html', lobby_id=lobby_id)
+    else:
+        return render_with_data('lobbys/join.html', lobby_id=lobby_id)
+
+
+# Admin pages
 
 @views.route('/manage', methods=['GET'])
 @check_admin

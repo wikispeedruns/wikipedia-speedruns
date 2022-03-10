@@ -52,7 +52,9 @@ def test_join_lobby_user(client, cursor, session2, lobby):
     lobby_id = lobby["lobby_id"]
 
     # Join lobby
-    resp = client.post(f"/api/lobbys/{lobby_id}/join")
+    resp = client.post(f"/api/lobbys/{lobby_id}/join", json={
+        "passcode": lobby["passcode"]
+    })
     assert resp.status_code == 200
 
     # check user shows up in table
@@ -89,7 +91,9 @@ def test_permissions_user(client, session2, lobby):
     assert resp.status_code == 401
 
     # Join lobby as non owner, make sure prompt endpoints don't work
-    resp = client.post(f"/api/lobbys/{lobby_id}/join")
+    resp = client.post(f"/api/lobbys/{lobby_id}/join", json={
+        "passcode": lobby["passcode"]
+    })
 
     resp = client.post(f"api/lobbys/{lobby_id}/prompts", json={
         "start": "test",

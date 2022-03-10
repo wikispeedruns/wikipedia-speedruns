@@ -19,6 +19,18 @@ class LobbyPrompt(TypedDict):
 def _random_passcode() -> str:
     return "".join([str(secrets.randbelow(10)) for _ in range(6)])
 
+def check_membership(lobby_id: int, session: dict) -> bool:
+    user_id = session.get("user_id")
+    if get_lobby_user_info(lobby_id, user_id) is not None:
+        return True
+
+    # lobby_id gets converted to string in session when creating cookie apparently
+    if "lobbys" in session and session["lobbys"].get(str(lobby_id)) is not None:
+        return True
+
+    return False
+
+
 
 # TODO let non users also create lobbies?
 def create_lobby(user_id: int,
