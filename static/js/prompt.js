@@ -3,28 +3,13 @@ import {pathArrowFilter} from "./modules/game/filters.js";
 
 const prompt_id = serverData["prompt_id"];
 const run_id = serverData["run_id"] || "";
+const lobby_id = serverData["lobby_id"] || null;
+
 const pg = serverData["pg"];
 const sortMode = serverData["sortMode"];
 
 const runsPerPage = 10;
 
-
-/*
-Vue.component('run-item', {
-    delimiters: ['[[', ']]'],
-    props: ['run', 'rank'],
-
-    template: (`
-    <tr>
-        <td scope="col">[[rank]]</td>
-        <td style="white-space: nowrap" v-if="run.username"  scope="col"><strong>[[run.username]]</strong></td>
-        <td v-else  scope="col"><strong>You</strong></td>
-        <td style="white-space: nowrap"  scope="col">[[(run.run_time/1000000).toFixed(3)]] s</td>
-        <td  scope="col">[[run.path.length]]</td>
-        <td  scope="col"><span class="d-none d-sm-block">[[run.path]]</span><span class="d-block d-sm-none">Test</span></td>
-    </tr>`
-    )
-});*/
 
 
 function populateGraph(runs) {
@@ -41,7 +26,7 @@ function populateGraph(runs) {
     graph.newEdge(dennis, michael, {color: '#00A0B0'});
     graph.newEdge(michael, dennis, {color: '#6A4A3C'});
     */
-    
+
     var nodes = [];
     var edges = [];
 
@@ -65,7 +50,7 @@ function populateGraph(runs) {
 
     var startNode;
     var endNode;
-    
+
 
     for (let i = 0; i < runs.length; i++) {
         if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
@@ -80,19 +65,19 @@ function populateGraph(runs) {
                 if (j === 0) {
                     node.type = 1;
                     startNode = node;
-                } 
+                }
                 else if (j === pathNodes.length - 1) {
                     node.type = 2;
                     endNode = node;
-                } 
+                }
                 else if (node.label !== startNode.label){
                     node.type = 0;
                     nodes.push(node);
                 }
-                
+
                 //let node = {type: type, label: pathNodes[j], count: 1, current: cur};
                 //nodes.push(node);
-                
+
             } else {
                 if (cur) {
                     nodes[index].current = cur;
@@ -201,7 +186,7 @@ function populateGraph(runs) {
 
     })
 
-    
+
     return graph;
 }
 
@@ -245,7 +230,7 @@ var app = new Vue({
             }
 
 
-            let resp = await response.json(); 
+            let resp = await response.json();
 
             if (mode === 'path') {
                 let runs = resp.leaderboard
@@ -254,7 +239,7 @@ var app = new Vue({
             }
             return resp
 
-        }, 
+        },
 
         genGraph: function () {
             var paths = this.renderedRuns;
@@ -310,10 +295,10 @@ var app = new Vue({
         },
 
         buildNewLink: function (page) {
-            let base = "/prompt/" + prompt_id + "?page=" + String(page)
+            let base = window.location.href.split('?')[0] + "?page=" + String(page)
             if (run_id) {
                 base += "&run_id=" + run_id
-            } 
+            }
             if (this.sortMode === 'path') {
                 base += "&sort=path"
             }
@@ -335,22 +320,22 @@ var app = new Vue({
         sortStatus: function(tab) {
             if (this.sortMode === tab) {
                 return `<i class="bi bi-chevron-down"></i>`
-            }   
+            }
             return `<i class="bi bi-dash-lg"></i>`
         },
 
         toggleSort: function(tab) {
             if (tab === 'time' && this.sortMode === 'path') {
                 if (run_id) {
-                    window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
+                    window.location.replace(window.location.href.split('?')[0] + "?run_id=" + run_id);
                 } else {
-                    window.location.replace("/prompt/" + prompt_id);
+                    window.location.replace(window.location.href.split('?')[0]);
                 }
             } else if (tab === 'path' && this.sortMode === 'time') {
                 if (run_id) {
-                    window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id + "&sort=path");
+                    window.location.replace(window.location.href.split('?')[0] + "?run_id=" + run_id + "&sort=path");
                 } else {
-                    window.location.replace("/prompt/" + prompt_id + "?sort=path");
+                    window.location.replace(window.location.href.split('?')[0] + "?sort=path");
                 }
             }
         },
@@ -361,16 +346,25 @@ var app = new Vue({
     },
 
     created: async function() {
-        const resp = await this.getLeaderboard(this.sortMode);
 
-        this.available = resp['prompt']['available'];
+        if (lobby_id) {
+            this.available = true;
 
-        this.prompt = resp["prompt"];
-        this.runs = resp["leaderboard"];
+            const resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}/runs`);
+            this.runs = await resp.json();
+            this.prompt = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}`);
+        }
+        else {
+            const resp = await this.getLeaderboard(this.sortMode);
 
+            this.available = resp['prompt']['available'];
+            this.prompt = resp["prompt"];
+            this.runs = resp["leaderboard"];
+        }
         this.paginate();
         this.totalpages = Math.ceil(this.runs.length/this.runsPerPage);
         this.page = pg;
+
         this.genGraph();
     }
 })

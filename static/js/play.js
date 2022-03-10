@@ -58,10 +58,12 @@ async function submitRun(promptId, lobbyId,  runId, startTime, endTime, path) {
     }
 
     if (lobbyId) {
-        const response = await fetchJson(`/api/lobbys/${promptId}/prompts/${promptId}/runs`, 'POST', reqBody);
+        const response = await fetchJson(`/api/lobbys/${lobbyId}/prompts/${promptId}/runs`, 'POST', reqBody);
+        return (await response.json())["run_id"];
     } else {
         // Send results to API
         const response = await fetchJson(`/api/runs/${runId}`, 'PATCH', reqBody);
+        return runId;
     }
 }
 
@@ -78,7 +80,8 @@ let app = new Vue({
         endArticle: "",      //For sprint games. Reaching this article will trigger game finishing sequence
         path: [],             //array to store the user's current path so far, submitted with run
 
-        promptId: 0,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
+        promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
+        lobbyId: null,
         runId: -1,          //unique ID for the current run. This gets populated upon start of run
 
         startTime: null,     //For all game modes, the start time of run (mm elapsed since January 1, 1970)
@@ -94,6 +97,7 @@ let app = new Vue({
 
     mounted: async function() {
         this.promptId = PROMPT_ID;
+        this.lobbyId = LOBBY_ID;
 
         const prompt = await getPrompt(PROMPT_ID, LOBBY_ID);
 
@@ -122,7 +126,7 @@ let app = new Vue({
                 window.onbeforeunload = null;
 
                 this.endTime = Date.now();
-                await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
+                this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
             }
 
         },

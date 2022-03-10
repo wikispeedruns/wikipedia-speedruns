@@ -154,12 +154,6 @@ def get_lobby_runs(lobby_id, prompt_id):
     if not lobbys.check_membership(lobby_id, session):
         return "You do not have access to this lobby", 401
 
-    lobbys.add_lobby_run(
-        lobby_id   = lobby_id,
-        prompt_id  = prompt_id,
-        start_time = datetime.fromtimestamp(request.json['start_time']/1000),
-        end_time   = datetime.fromtimestamp(request.json['end_time']/1000),
-        path       = json.dumps(request.json['path']),
-        user_id    = session.get("user_id"),
-        name       = session.get("lobbys", {}).get(str(lobby_id))
-    )
+    runs = lobbys.get_lobby_runs(lobby_id, prompt_id)
+
+    return jsonify(runs), 200

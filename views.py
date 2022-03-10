@@ -1,3 +1,4 @@
+from cProfile import run
 from click import prompt
 from flask import Blueprint, render_template, request, redirect, session
 
@@ -137,6 +138,24 @@ def get_lobby_page(lobby_id):
 @views.route('/lobby/<int:lobby_id>/play/<int:prompt_id>', methods=['GET'])
 def get_lobby_play_page(lobby_id, prompt_id):
     return render_with_data('play.html', lobby_id=lobby_id, prompt_id=prompt_id)
+
+@views.route('/lobby/<int:lobby_id>/prompt/<int:prompt_id>', methods=['GET'])
+def get_lobby_prompt_page(lobby_id, prompt_id):
+    run_id = request.args.get('run_id')
+    page = request.args.get('page', 1)
+    sortMode = request.args.get('sort', 'time')
+
+    args = {
+        "lobby_id": lobby_id,
+        "prompt_id": prompt_id,
+        "pg": page,
+        "sortMode": sortMode,
+    }
+
+    if (run_id):
+        args["run_id"] = run_id
+
+    return render_with_data('prompt.html', **args)
 
 
 

@@ -188,8 +188,8 @@ def add_lobby_run(lobby_id: int, prompt_id: int,
 
 def get_lobby_runs(lobby_id: int, prompt_id: Optional[int]=None):
     query = """
-        SELECT run_id, prompt_id user_id, name, start_time, end_time, path
-        TIMESTAMPDIFF(MICROSECOND, start_time, end_time) AS run_time,
+        SELECT run_id, prompt_id, user_id, name, start_time, end_time, `path`,
+        TIMESTAMPDIFF(MICROSECOND, start_time, end_time) AS run_time
         FROM lobby_runs
         WHERE lobby_id=%(lobby_id)s
     """
@@ -199,12 +199,13 @@ def get_lobby_runs(lobby_id: int, prompt_id: Optional[int]=None):
     }
 
     if (prompt_id):
-        query += " AND prompt_id=%s"
+        query += " AND prompt_id=%(prompt_id)s"
         query_args["prompt_id"] = prompt_id
 
     db = get_db()
 
-    with db.cursor() as cursor:
+    with db.cursor(cursor=DictCursor) as cursor:
+        print(cursor.mogrify(query, query_args))
         cursor.execute(query, query_args)
         results = cursor.fetchall()
         for run in results:

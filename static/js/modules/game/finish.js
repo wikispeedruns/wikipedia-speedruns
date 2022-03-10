@@ -3,7 +3,9 @@ var FinishPage = {
 
     props: [
         "promptId",
+        "lobbyId",
         "runId",
+
 
         "startArticle",
         "endArticle",
@@ -25,12 +27,20 @@ var FinishPage = {
 
         //redirect to the corresponding prompt page
         finishPrompt: function (event) {
-            window.location.replace("/prompt/" + this.promptId + "?run_id=" + this.runId);
+            if (this.lobbyId) {
+                window.location.replace(`/lobby/${this.lobbyId}/prompt/${this.promptId}?run_id=${this.runId}`);
+            } else {
+                window.location.replace(`/prompt/${this.promptId}?run_id=${this.runId}`);
+            }
         },
 
         //go back to home page
         home: function (event) {
-            window.location.replace("/");
+            if (this.lobbyId) {
+                window.location.replace(`/lobby/${this.lobbyId}`);
+            } else {
+                window.location.replace("/");
+            }
         },
 
 
@@ -54,10 +64,12 @@ var FinishPage = {
                 <p>Time: <strong>{{(finalTime / 1000).toFixed(3)}} </strong>Seconds</p>
                 <p>Number of links visited: <strong>{{path.length-1}}</strong></p>
                 <p>The path you took: <br>{{path}}</p>
-                <div class="button-tooltip-container">
+
+                <div v-if="!lobbyId" class="button-tooltip-container">
                     <button @click="copyResults" class="share-btn btn-1 btn-1c"><i class="bi bi-share"></i> Share</button>
                     <span id="custom-tooltip" ref="shareTooltip">Copied results to clipboard!</span>
                 </div>
+
                 <div><button @click="finishPrompt" class="btn btn-outline-secondary">See the leaderboard</button></div>
                 <br/>
                 <div><button @click="home" class="btn btn-outline-secondary">Return to home page</button></div>
