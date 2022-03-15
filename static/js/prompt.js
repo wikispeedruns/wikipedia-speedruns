@@ -16,17 +16,6 @@ function populateGraph(runs) {
 
     var graph = new Springy.Graph();
 
-    /*
-    var dennis = graph.newNode({
-    label: 'Dennis',
-    ondoubleclick: function() { console.log("Hello!"); }
-    });
-    var michael = graph.newNode({label: 'Michael'});
-
-    graph.newEdge(dennis, michael, {color: '#00A0B0'});
-    graph.newEdge(michael, dennis, {color: '#6A4A3C'});
-    */
-
     var nodes = [];
     var edges = [];
 
@@ -229,14 +218,7 @@ var app = new Vue({
                 window.location.replace("/");   // TODO error page
             }
 
-
             let resp = await response.json();
-
-            if (mode === 'path') {
-                let runs = resp.leaderboard
-                runs.sort((a, b) => (a.path.length > b.path.length) ? 1 : ((a.path.length === b.path.length) ? ((a.run_time > b.run_time) ? 1 : -1) : -1))
-                resp.leaderboard = runs
-            }
             return resp
 
         },
@@ -270,6 +252,7 @@ var app = new Vue({
             const last = pg * runsPerPage
             for (let i = 0; i < this.runs.length; i++) {
                 let run = this.runs[i]
+
                 if (run_id) {
                     if (run.run_id === parseInt(run_id)) {
                         this.currentRun = run;
@@ -353,14 +336,22 @@ var app = new Vue({
             const resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}/runs`);
             this.runs = await resp.json();
             this.prompt = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}`);
+
+
+
         }
         else {
-            const resp = await this.getLeaderboard(this.sortMode);
+            const resp = await this.getLeaderboard();
 
             this.available = resp['prompt']['available'];
             this.prompt = resp["prompt"];
             this.runs = resp["leaderboard"];
         }
+
+        if (this.sortMode === 'path') {
+            this.runs.sort((a, b) => (a.path.length > b.path.length) ? 1 : ((a.path.length === b.path.length) ? ((a.run_time > b.run_time) ? 1 : -1) : -1))
+        }
+
         this.paginate();
         this.totalpages = Math.ceil(this.runs.length/this.runsPerPage);
         this.page = pg;

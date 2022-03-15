@@ -36,6 +36,7 @@
                         <tr v-if="currentRunPosition === -1">
                             <td>[[currentRunRank]]</td>
                             <td class="l-col" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
+                            <td class="l-col" v-else-if="currentRun.name"><strong>[[currentRun.name]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td class="l-col">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
                             <td>[[currentRun.path.length]]</td>
@@ -55,8 +56,17 @@
                         </tr>
                         <tr v-for="(run, index) in renderedRuns">
                             <td>[[getRenderedRank(index)]]</td>
-                            <td class="l-col" v-if="run.username"><strong>[[run.username]]</strong></td>
+
+                            <td class="l-col" v-if="run.username">
+                                <strong v-if="run.run_id == currentRun.run_id">[[run.username]]</strong>
+                                <span v-else>[[run.username]]</span>
+                            </td>
+                            <td class="l-col" v-else-if="run.name">
+                                <strong v-if="run.run_id == currentRun.run_id">[[run.name]]</strong>
+                                <span v-else>[[run.name]]</span>
+                            </td>
                             <td v-else><strong>You</strong></td>
+
                             <td class="l-col">[[(run.run_time/1000000).toFixed(3)]] s</td>
                             <td>[[run.path.length]]</td>
                             <td>[[run.path | pathArrow]]
@@ -76,6 +86,7 @@
                         <tr v-if="currentRunPosition === 1">
                             <td>[[currentRunRank]]</td>
                             <td class="l-col" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
+                            <td class="l-col" v-else-if="currentRun.name"><strong>[[currentRun.name]]</strong></td>
                             <td v-else><strong>You</strong></td>
                             <td class="l-col">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
                             <td>[[currentRun.path.length]]</td>
