@@ -48,12 +48,19 @@ python create_db.py
 ```
 
 There is also an interactive script (with instructions in the scripts) which
-can be used to set up a local admin account.
+can be used to set up a local admin account. Through the admin account, 
+prompts can be managed through `/manage`.
 ```
 cd scripts
 python create_admin_account.py
 ```
 
+(Optional) Finally, there is also a script to populate the database with data
+for local development
+```
+cd scripts
+python populate_db.py
+```
 ## 4. Running
 
 #### (Optional) Set environment variables for development
