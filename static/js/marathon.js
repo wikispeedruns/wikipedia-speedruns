@@ -24,6 +24,8 @@ let app = new Vue({
     },
     data: {
 
+        username: serverData["username"],
+
         checkpoints: [],
         activeCheckpoints: [],
         visitedCheckpoints: [],
@@ -93,6 +95,9 @@ let app = new Vue({
 
         if (load_save) {
             const loadedSave = loadRun(PROMPT_ID)
+
+            console.log(loadedSave)
+
             this.lastArticle = loadedSave.path[loadedSave.path.length-1]
             this.activeCheckpoints = loadedSave.active_checkpoints
             this.checkpoints = loadedSave.remaining_checkpoints
@@ -201,7 +206,7 @@ let app = new Vue({
             this.saved = true;
             // Disable popup
             window.onbeforeunload = null;
-            this.endTime = Date.now() + this.lastTime;
+            this.endTime = Date.now();
 
             this.runId = await saveRun(this.$data);
         },
@@ -219,7 +224,7 @@ let app = new Vue({
             window.onbeforeunload = null;
             this.endTime = Date.now();
 
-            this.runId = await submitRun(this.promptId, this.endTime - this.startTime, this.visitedCheckpoints, this.path, finished);
+            this.runId = await submitRun(this.promptId, this.endTime - this.startTime + this.lastTime, this.visitedCheckpoints, this.path, finished);
             removeSave(PROMPT_ID);
         
         },

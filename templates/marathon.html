@@ -88,7 +88,7 @@
     <finish-page
         v-bind:forfeited="forfeited"
         v-bind:start-article="startArticle"
-        v-bind:final-time="endTime - startTime"
+        v-bind:final-time="endTime - startTime + lastTime"
         v-bind:num-visited-unique="numVisitedUnique"
         v-bind:num-checkpoints-visited="numCheckpointsVisited"
         v-bind:active-checkpoints="activeCheckpoints"
@@ -97,6 +97,7 @@
         v-bind:path="path"
         v-bind:saved="saved"
         v-bind:checkpoint-limit="numCheckpointsToStop"
+        v-bind:username="username"
 
         v-show="finished"
     ></finish-page>

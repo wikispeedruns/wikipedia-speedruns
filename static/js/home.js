@@ -1,4 +1,5 @@
 import { SavedMarathonGames } from "./modules/game/marathon/showSaves.js";
+import { serverData } from "./modules/serverData.js";
 
 async function getPrompts()
 {
@@ -44,6 +45,7 @@ var app = new Vue({
         topUsers: [],
         marathonPrompts: [],
         timeLeft: "",
+        username: serverData["username"]
     },
 
     created: async function() {
