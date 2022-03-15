@@ -1,5 +1,5 @@
 from util.decorators import check_admin
-from flask import Flask, jsonify, request, Blueprint, session
+from flask import Flask, jsonify, request, Blueprint, session, abort
 import json
 
 from db import get_db
@@ -196,7 +196,42 @@ def get_marathon_prompt_leaderboard(id, run_id):
         for run in results:
             run['path'] = json.loads(run['path'])
             run['checkpoints'] = json.loads(run['checkpoints'])
-            if run['total_time'] is None:
-                run['total_time'] = 9999.99
 
         return jsonify(results)
+    
+    
+@marathon_api.get('/<username>')
+def get_marathon_personal_leaderboard(username):
+        
+    if session.get("username") == username or session.get("admin"):
+    
+        id_query = '''
+        SELECT user_id FROM users WHERE users.username=%s
+        '''
+    
+        query = '''
+        SELECT marathonruns.checkpoints AS checkpoints, finished, initcheckpoints, marathonruns.prompt_id AS prompt_id, path, run_id, start, total_time
+        FROM marathonruns
+        LEFT JOIN marathonprompts ON marathonprompts.prompt_id=marathonruns.prompt_id
+        WHERE marathonruns.user_id=%s
+        '''
+        
+        db = get_db()
+        with db.cursor(cursor=DictCursor) as cursor:
+            # print(cursor.mogrify(query, tuple(args)))         # debug
+            cursor.execute(id_query, (username, ))
+            id_res = cursor.fetchone()
+            
+            #print(id_res)
+            cursor.execute(query, (str(id_res['user_id']),))
+            results = cursor.fetchall()
+            
+            for run in results:
+                run['path'] = json.loads(run['path'])
+                run['checkpoints'] = json.loads(run['checkpoints'])
+                run['initcheckpoints'] = json.loads(run['initcheckpoints'])
+                
+            #print(results)
+            return jsonify(results)
+        
+    abort(404)

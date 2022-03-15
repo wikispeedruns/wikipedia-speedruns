@@ -13,7 +13,7 @@
 
 <div id="app">
 
-    <h3>Welcome to Wikipedia Speedruns! <a href="/about#beta"><span class="beta">BETA*</span></a></h3>
+    <h3>Welcome<span v-if="username"> back</span> to Wikipedia Speedruns<span v-if="username">, [[username]]</span>! <a href="/about#beta"><span class="beta">BETA*</span></a></h3>
 
 
     <p>The goal of this game is simple. Try to get from one wikipedia page to another as fast as possible by clicking on the links in the page. </p>
@@ -115,6 +115,8 @@
                             </tr>
                         </tbody>
                         </table>
+
+                        <button v-if="username" v-on:click="window.location.replace('/marathonruns/' + username)" class="btn btn-outline-secondary mt-auto">Check your marathon run history</button>
                     </div>
                 </div>
             </div>

@@ -12,7 +12,8 @@ var FinishPage = {
         "promptId",
         "runId",
         "saved",
-        "checkpointLimit"
+        "checkpointLimit",
+        "username"
     ],
 
     methods: {
@@ -29,7 +30,7 @@ var FinishPage = {
 
         //redirect to the corresponding prompt page
         finishPrompt: function(event) {
-            window.location.replace("/marathonprompt/" + this.promptId + "?run_id=" + this.runId);
+            window.location.replace("/marathonruns/" + this.username);
         },
 
         //go back to home page
@@ -45,7 +46,7 @@ var FinishPage = {
         genPathsToCheckpoints: function() {
             let el = document.getElementById("genPathsToCheckpoints");
             let newEl = document.createElement("p");
-            newEl.innerHTML = "WIP";
+            newEl.innerHTML = "WIP... Stay Tuned!";
 
             el.parentNode.replaceChild(newEl, el);
         }
@@ -81,10 +82,10 @@ var FinishPage = {
                         <button @click="copyResults" class="share-btn btn-1 btn-1c"><i class="bi bi-share"></i> Share</button>
                         <span id="custom-tooltip" ref="shareTooltip">Copied results to clipboard!</span>
                     </div>
-                    <div><button @click="finishPrompt" class="btn btn-outline-secondary">See the leaderboard</button></div>
-                    <br/>
                 </div>
                 <div><button @click="home" class="btn btn-outline-secondary">Return to home page</button></div>
+                <br/>
+                <div v-if="username"><button @click="finishPrompt" class="btn btn-outline-secondary">Check your marathon run history</button></div>
             </div>
         </div>
     </div>`

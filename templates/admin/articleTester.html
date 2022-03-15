@@ -2,10 +2,13 @@
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/play.css')}}">
 
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
 {% block head %}
 
 <script type="module">
 import { ArticleRenderer } from "/static/js/modules/game/articleRenderer.js";
+import { basicCannon } from "/static/js/modules/confetti.js";
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
@@ -23,7 +26,10 @@ var app = new Vue({
 
         pageCallback(article, loadTime) {
             this.message = (`'${article}' took ${loadTime/1000} seconds to load`);
-            console.log(message);
+            console.log(this.message);
+
+            basicCannon(0, 0, false, 315)
+            basicCannon(1, 0, false, 225) 
         }
     },
 

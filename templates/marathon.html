@@ -6,11 +6,14 @@
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/play.css')}}">
 <script type="module" src="{{url_for('static', filename='js/marathon.js')}}"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
 {% endblock %}
 
 {% block content %}
 
 <div id="app">
+    <canvas id="confettiCanvas" style="pointer-events:none;"></canvas>
 
     <div v-show="started && !finished" id="time-box" class="HUDwrapper container" v-cloak>
         <div class="row flex-row flex-nowrap py-2">
@@ -85,7 +88,7 @@
     <finish-page
         v-bind:forfeited="forfeited"
         v-bind:start-article="startArticle"
-        v-bind:final-time="endTime - startTime"
+        v-bind:final-time="endTime - startTime + lastTime"
         v-bind:num-visited-unique="numVisitedUnique"
         v-bind:num-checkpoints-visited="numCheckpointsVisited"
         v-bind:active-checkpoints="activeCheckpoints"
@@ -94,6 +97,7 @@
         v-bind:path="path"
         v-bind:saved="saved"
         v-bind:checkpoint-limit="numCheckpointsToStop"
+        v-bind:username="username"
 
         v-show="finished"
     ></finish-page>

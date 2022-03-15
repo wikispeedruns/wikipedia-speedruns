@@ -119,15 +119,12 @@ def get_marathon_play_page(id):
     print(loadsave)
     return render_with_data('marathon.html', prompt_id=id, load_save=loadsave)
 
-@views.route('/marathonprompt/<id>', methods=['GET'])
-def get_marathon_prompt_page(id):
-    run_id = request.args.get('run_id', '')
+@views.route('/marathonruns/<username>', methods=['GET'])
+def get_marathon_personal_leaderboard(username):
     page = request.args.get('page', 1)
-        
-    if len(run_id) != 0:
-        return render_with_data('marathon_prompt.html', prompt_id=id, run_id=run_id, pg = page)
-    else:
-        return render_with_data('marathon_prompt.html', prompt_id=id, pg = page)
+    sortMode = request.args.get('sort', 'cp')
+
+    return render_with_data('marathon_prompt.html', pg = page, sortMode=sortMode, profile_name=username)
     
 # Admin pages
 @views.route('/manage', methods=['GET'])

@@ -94,6 +94,16 @@ a:hover, a:hover * {
     }
 }
 
+.checkpointCol {
+    display: block;
+}
+
+@media (max-width: 767px) {
+    .checkpointCol {
+        display: none;
+    }
+}
+
 @media (min-width: 500px) {
     .l-col {
         white-space: nowrap
@@ -102,4 +112,10 @@ a:hover, a:hover * {
 
 .bold {
     font-weight: bold !important;
+}
+
+.table td.fit, 
+.table th.fit {
+    white-space: nowrap;
+    width: 1%;
 }

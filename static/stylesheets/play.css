@@ -91,7 +91,7 @@
 .centered {
 	width:auto;
 	max-width: 1000px !important;
-	z-index: 100000;
+	z-index: 10000;
 	position: fixed;
 	top: 50%;
 	left: 50%;
@@ -100,4 +100,10 @@
 	background-color: #F8F8F8;
     margin-bottom: 15px;
     border: 2px solid #000000 !important;
+}
+
+#confettiCanvas {
+	position: fixed;
+	top: 0;
+	left: 0;
 }
