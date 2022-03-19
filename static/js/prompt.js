@@ -2,7 +2,6 @@ import { serverData } from "./modules/serverData.js"
 import {pathArrowFilter} from "./modules/game/filters.js";
 
 const prompt_id = serverData["prompt_id"];
-const run_id = serverData["run_id"] || "";
 const lobby_id = serverData["lobby_id"] || null;
 
 const pg = serverData["pg"];
@@ -47,7 +46,7 @@ var LeaderboardRow = {
 
 
 
-function populateGraph(runs) {
+function populateGraph(runs, run_id) {
 
     var graph = new Springy.Graph();
 
@@ -241,8 +240,8 @@ var app = new Vue({
         totalpages: 0,
         sortMode: sortMode,
 
-        lobbyId: lobby_id
-
+        lobbyId: lobby_id,
+        run_id: serverData["run_id"] || "",
     },
 
     components: {
@@ -252,7 +251,7 @@ var app = new Vue({
 
     methods : {
         getLeaderboard: async function (mode) {
-            var response = await fetch("/api/sprints/" + prompt_id + "/leaderboard/" + run_id);
+            var response = await fetch("/api/sprints/" + prompt_id + "/leaderboard/" + this.run_id);
 
             if (response.status == 401) {
                 alert(await response.text());
@@ -260,8 +259,12 @@ var app = new Vue({
             }
 
             let resp = await response.json();
-            return resp
 
+            if (!this.run_id && resp.run_id != null) {
+                this.run_id = resp.run_id
+            }
+
+            return resp
         },
 
         genGraph: function () {
@@ -269,7 +272,7 @@ var app = new Vue({
             if (this.currentRunPosition === -1 || this.currentRunPosition === 1) {
                 paths = paths.concat(this.currentRun)
             }
-            var graph1 = populateGraph(paths);
+            var graph1 = populateGraph(paths, this.run_id);
             $('#springydemo').springy({ graph: graph1 });
         },
 
@@ -285,7 +288,7 @@ var app = new Vue({
         },
 
         getRunID: function() {
-            return parseInt(run_id);
+            return parseInt(this.run_id);
         },
 
         paginate: function () {
@@ -294,8 +297,8 @@ var app = new Vue({
             for (let i = 0; i < this.runs.length; i++) {
                 let run = this.runs[i]
 
-                if (run_id) {
-                    if (run.run_id === parseInt(run_id)) {
+                if (this.run_id) {
+                    if (run.run_id === parseInt(this.run_id)) {
                         this.currentRun = run;
                         this.currentRunRank = i+1;
                         if (i < first) {
@@ -320,8 +323,8 @@ var app = new Vue({
 
         buildNewLink: function (page) {
             let base = window.location.href.split('?')[0] + "?page=" + String(page)
-            if (run_id) {
-                base += "&run_id=" + run_id
+            if (this.run_id) {
+                base += "&run_id=" + this.run_id
             }
             if (this.sortMode === 'path') {
                 base += "&sort=path"
@@ -350,14 +353,14 @@ var app = new Vue({
 
         toggleSort: function(tab) {
             if (tab === 'time' && this.sortMode === 'path') {
-                if (run_id) {
-                    window.location.replace(window.location.href.split('?')[0] + "?run_id=" + run_id);
+                if (this.run_id) {
+                    window.location.replace(window.location.href.split('?')[0] + "?run_id=" + this.run_id);
                 } else {
                     window.location.replace(window.location.href.split('?')[0]);
                 }
             } else if (tab === 'path' && this.sortMode === 'time') {
-                if (run_id) {
-                    window.location.replace(window.location.href.split('?')[0] + "?run_id=" + run_id + "&sort=path");
+                if (this.run_id) {
+                    window.location.replace(window.location.href.split('?')[0] + "?run_id=" + this.run_id + "&sort=path");
                 } else {
                     window.location.replace(window.location.href.split('?')[0] + "?sort=path");
                 }

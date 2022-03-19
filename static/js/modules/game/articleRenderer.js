@@ -27,9 +27,9 @@ export class ArticleRenderer {
 
 
         hideElements(this.frame);
-        disableFindableLinks(this.frame);
+        // disableFindableLinks(this.frame);
         stripNamespaceLinks(this.frame);
-        
+
 
         this.frame.querySelectorAll("a, area").forEach((el) => {
             // Arrow function to prevent this from being overwritten
