@@ -14,7 +14,6 @@ const runsPerPage = 10;
 var LeaderboardRow = {
     props: [
         "currentRunId",
-
         "run",
         "rank",
     ],
@@ -35,6 +34,7 @@ var LeaderboardRow = {
 
             <td class="l-col">{{(run.run_time/1000000).toFixed(3)}} s</td>
             <td>{{run.path.length}}</td>
+
             <td>{{run.path | pathArrow}}
                 <a v-bind:href="'/replay?run_id=' + run.run_id" target="_blank" title="Replay" >
                     <i class="bi bi-play"></i>
@@ -279,11 +279,11 @@ var app = new Vue({
         },
 
         getPromptID: function() {
-            return Number(prompt_id);
+            return parseInt(prompt_id);
         },
 
         getRunID: function() {
-            return Number(run_id);
+            return parseInt(run_id);
         },
 
         paginate: function () {
