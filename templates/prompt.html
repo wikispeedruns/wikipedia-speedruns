@@ -12,10 +12,19 @@
 {% block content %}
 <div id="app">
     <div class="col-xl-12">
+        <p>
+            <small v-cloak>
+                <a v-if="lobbyId" v-bind:href="'/lobby/' + lobbyId"> Back to Lobby</a>
+                <a v-else href="/"> Back to Home</a>
+            </small>
+        </p>
+
         <div class="card">
             <div class="card-body">
 
+
                 <h4>Prompt #[[getPromptID()]]</h4>
+
                 <p>
                     <h6 v-if="available">
                         <strong>[[prompt.start]]</strong> to <strong v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>

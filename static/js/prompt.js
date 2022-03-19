@@ -10,6 +10,7 @@ const sortMode = serverData["sortMode"];
 
 const runsPerPage = 10;
 
+Vue.filter('pathArrow', pathArrowFilter)
 
 var LeaderboardRow = {
     props: [
@@ -222,7 +223,6 @@ function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
-Vue.filter('pathArrow', pathArrowFilter)
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
@@ -240,6 +240,8 @@ var app = new Vue({
         page: 0,
         totalpages: 0,
         sortMode: sortMode,
+
+        lobbyId: lobby_id
 
     },
 
