@@ -159,7 +159,9 @@ var app = new Vue({
 
                         <td>[[prompt.start]]</td>
                         <td>[[prompt.end]]</td>
-                        </tr>
+
+                        <td><a v-bind:href="'/lobby/' + lobbyInfo.lobby_id + '/prompt/' + prompt.prompt_id">Results</a></td>
+                    </tr>
                 </tbody>
             </table>
         </div>
