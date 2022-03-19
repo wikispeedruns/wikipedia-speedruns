@@ -11,6 +11,40 @@ const sortMode = serverData["sortMode"];
 const runsPerPage = 10;
 
 
+var LeaderboardRow = {
+    props: [
+        "currentRunId",
+
+        "run",
+        "rank",
+    ],
+
+    template: (`
+        <tr>
+            <td>{{rank}}</td>
+
+            <td class="l-col" v-if="run.username">
+                <strong v-if="run.run_id === currentRunId">{{run.username}}</strong>
+                <span v-else>{{run.username}}</span>
+            </td>
+            <td class="l-col" v-else-if="run.name">
+                <strong v-if="run.run_id === currentRunId">{{run.name}}</strong>
+                <span v-else>{{run.name}}</span>
+            </td>
+            <td v-else><strong>You</strong></td>
+
+            <td class="l-col">{{(run.run_time/1000000).toFixed(3)}} s</td>
+            <td>{{run.path.length}}</td>
+            <td>{{run.path | pathArrow}}
+                <a v-bind:href="'/replay?run_id=' + run.run_id" target="_blank" title="Replay" >
+                    <i class="bi bi-play"></i>
+                </a>
+            </td>
+        </tr>
+    `)
+}
+
+
 
 function populateGraph(runs) {
 
@@ -209,6 +243,11 @@ var app = new Vue({
 
     },
 
+    components: {
+        'leaderboard-row': LeaderboardRow
+    },
+
+
     methods : {
         getLeaderboard: async function (mode) {
             var response = await fetch("/api/sprints/" + prompt_id + "/leaderboard/" + run_id);
@@ -240,11 +279,11 @@ var app = new Vue({
         },
 
         getPromptID: function() {
-            return prompt_id;
+            return Number(prompt_id);
         },
 
         getRunID: function() {
-            return run_id;
+            return Number(run_id);
         },
 
         paginate: function () {
