@@ -29,29 +29,48 @@ class RequestJsonError(Exception):
      pass
 
 
-def check_request_json(expected: Dict[str, type]):
-    
-    def check(expected, reqjson):
-        for k in expected:
-            if (k not in reqjson):
+# Wrapper for optinal arg
+# Kind of accidnetally building our own type system here oops
+class OptionalArg():
+    def __init__(self, base_type):
+        self.base_type = base_type
+
+
+def check_json(schema, reqjson):
+    for k in schema:
+        expected_type = schema[k]
+
+        if (k not in reqjson):
+            if (type(expected_type) == OptionalArg):
+                continue
+            else:
                 raise RequestJsonError(f"argument {k} missing")
 
-            if (expected[k] != type(reqjson[k])):
-                raise RequestJsonError(f"argument '{k}' expected '{expected[k].__name__}' but got '{type(reqjson[k]).__name__}'")
+        if (type(expected_type) == OptionalArg):
+            expected_type = expected_type.base_type
 
-            if (expected[k] == dict):
-                check(expected[k], reqjson[k])
+        if (type(expected_type) == list):
+            for entry in reqjson[k]:
+                check_json(expected_type[0], entry)
+            continue
+
+        if (type(expected_type) == dict):
+            check_json(expected_type, reqjson[k])
+            continue
+
+        if (expected_type != type(reqjson[k])):
+            raise RequestJsonError(f"argument '{k}' expected '{expected_type.__name__}' but got '{type(reqjson[k]).__name__}'")
 
 
+def check_request_json(expected: Dict[str, type]):
     def wrapper(endpoint_func):
         def wrapped(*args, **kwargs):
             try:
-                check(expected, request.json)
+                check_json(expected, request.json)
             except RequestJsonError as e:
                 return f"Invalid Request: {e.args[0]}", 400
 
             return endpoint_func(*args, **kwargs)
-            
 
 
         wrapped.__name__ = endpoint_func.__name__

@@ -1,5 +1,6 @@
 import { fetchJson } from "./modules/fetch.js";
 import { getPath } from "./modules/scraper.js";
+import { getArticleTitle } from "./modules/wikipediaAPI/util.js";
 
 Vue.component('prompt-item', {
     props: ['prompt'],
@@ -14,7 +15,7 @@ Vue.component('prompt-item', {
 
         async deletePrompt() {
             const resp = await fetchJson("/api/sprints/" + this.prompt.prompt_id, "DELETE");
-            
+
             if (resp.status == 200) this.$emit('delete-prompt')
             else alert(await resp.text())
         },
@@ -22,9 +23,9 @@ Vue.component('prompt-item', {
 
     template: (`
     <li>
-        <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}} -> {{prompt.end}} 
+        <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}} -> {{prompt.end}}
 
-        <span v-if="prompt.used && !prompt.rated"> 
+        <span v-if="prompt.used && !prompt.rated">
             {{prompt.active_start}} - {{prompt.active_end}}
         </span>
 
@@ -67,7 +68,7 @@ Vue.component('prompt-set', {
         <p v-if="start === end">{{start.substring(5)}}</p>
 
         <ul class="ps-3 my-0">
-            <prompt-item 
+            <prompt-item
                 v-for="p in prompts"
                 v-bind:prompt="p"
                 v-bind:key="p.prompt_id"
@@ -80,8 +81,8 @@ Vue.component('prompt-set', {
             <div class="input-group input-group-sm mb-2">
                 <input class="form-control" v-model="promptToAdd">
                 <div class="input-group-append">
-                    <button type="submit" class="btn btn-dark"> 
-                        <i class="bi bi-arrow-right-square"></i> 
+                    <button type="submit" class="btn btn-dark">
+                        <i class="bi bi-arrow-right-square"></i>
                     </button>
                 </div>
             </div>
@@ -138,7 +139,7 @@ Vue.component('path-generator', {
                 const response = await fetchJson("/api/scraper/gen_prompts", 'POST', {
                     'N': 1
                 })
-        
+
                 if (response.status != 200) {
                     // For user facing interface, do something other than this
                     alert(await response.text());
@@ -146,13 +147,13 @@ Vue.component('path-generator', {
                 }
 
                 const resp = await response.json()
-                
+
                 let prompt = {};
 
                 prompt.start = resp['Prompts'][0][0];
                 prompt.end = resp['Prompts'][0][1];
-                prompt.path = await getPath(prompt.start, prompt.end);    
-            
+                prompt.path = await getPath(prompt.start, prompt.end);
+
                 this.prompts.push(prompt);
             } catch(e) {
                 console.log(e);
@@ -182,26 +183,29 @@ var app = new Vue({
     data: {
         unused: [],
         weeks: [],
+
+        startPrompt: "",
+        endPrompt: "",
     },
 
     created: async function() {
         await this.getPrompts();
     },
-    
+
     methods: {
         toISODate(date) {
             return date.toISOString().substring(0, 10);
         },
         async getPrompts() {
             const prompts = await (await fetchJson("/api/sprints/managed")).json();
-            
+
             this.unused = prompts.filter(p => !p["used"]);
-            
+
             const used = prompts.filter(p => p["used"]);
 
             let daily = used.filter(p => p["rated"]);
             let weeklys = used.filter(p => !p["rated"]);
-            
+
             let nextDailys = {};
             let nextWeeklys = {};
 
@@ -218,7 +222,7 @@ var app = new Vue({
                 const key = p["active_start"].substring(0, 10);
                 if (!nextWeeklys[key]) {
                     nextWeeklys[key] = [];
-                }                
+                }
                 nextWeeklys[key].push(p);
             })
 
@@ -254,43 +258,27 @@ var app = new Vue({
         },
 
         async newPrompt(event) {
-    
-            let reqBody = {};
-        
-            const resp = await fetch(
-                `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("start").value}`,
-                {
-                    mode: "cors"
-                }
-            )
-            const body = await resp.json()
-        
-            reqBody["start"] = body["parse"]["title"];
-        
-        
-            const resp1 = await fetch(
-                `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("end").value}`,
-                {
-                    mode: "cors"
-                }
-            )
-            const body1 = await resp1.json()
-        
-            reqBody["end"] = body1["parse"]["title"];
-        
+
+            const start = await getArticleTitle(this.startPrompt);
+            if (!start) {
+                alert(`Invalid article name "${this.startPrompt}"`);
+            }
+
+            const end = await getArticleTitle(this.endPrompt);
+            if (!end) {
+                alert(`Invalid article name "${this.endPrompt}"`);
+            }
+
             try {
-                const response = await fetch("/api/sprints/", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(reqBody)
+                const response = await fetchJson("/api/sprints/", "POST", {
+                    "start": start,
+                    "end": end
                 })
-        
+
             } catch(e) {
                 console.log(e);
             }
-        
+
             this.getPrompts();
         }
 

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+<script type="module">
+// TODO rules
+import { fetchJson } from "/static/js/modules/fetch.js";
+
+var app = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    data: {
+        name: "",
+        desc: "",
+    },
+
+    methods: {
+        async handleSubmit() {
+            let requestBody = {
+                // TODO rules
+                rules: {}
+            }
+
+            // Only add these fields if not empty
+            if (this.name) requestBody["name"] = this.name;
+            if (this.desc) requestBody["desc"] = this.desc;
+
+            let resp = await fetchJson("/api/lobbys", "POST", requestBody);
+            const lobby_id = (await resp.json())["lobby_id"];
+
+            window.location.href = `/lobby/${lobby_id}`
+        }
+    }
+
+});
+
+
+</script>
+
+{% endblock %}
+
+{% block content %}
+<div id="app" class="col-lg-4 col-md-6" >
+    <form id="createForm" v-on:submit.prevent="handleSubmit">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name (Optional*)</label>
+            <input v-model="name" id="name" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label for="desc" class="form-label">Description (Optional)</label>
+            <textarea v-model="desc" id="desc" class="form-control"></textarea>
+        </div>
+
+        <p>
+            Custom rules coming soon!
+        </p>
+
+        <button type="submit" class="btn btn-light">Create Lobby</button>
+
+
+    </form>
+
+
+
+</div>
+
+<p>
+    *Unamed lobbies will not be saved in your profile and will be deleted after a period of inactivity!
+</p>
+{% endblock %}

@@ -8,17 +8,64 @@ these components should be as modular/generic as possible.
 
 //JS module imports
 import { serverData } from "./modules/serverData.js";
-
-import { getRandTip } from "./modules/game/tips.js";
-import { startRun, submitRun } from "./modules/game/runs.js";
+import { fetchJson } from "./modules/fetch.js";
 
 import { CountdownTimer } from "./modules/game/countdown.js";
 import { FinishPage } from "./modules/game/finish.js";
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 
 
-//retrieve the unique prompt_id of the prompt to load
+// retrieve the unique prompt_id of the prompt to load
 const PROMPT_ID = serverData["prompt_id"];
+
+// Get lobby if a lobby_prompt
+const LOBBY_ID = serverData["lobby_id"] || null;
+
+async function getPrompt(promptId, lobbyId=null) {
+    const url = (lobbyId === null) ? `/api/sprints/${promptId}` : `/api/lobbys/${lobbyId}/prompts/${promptId}`;
+    const response = await fetch(url);
+
+    if (response.status != 200) {
+        const error = await response.text();
+        alert(error);
+
+        // Prevent are you sure you want to leave prompt
+        window.onbeforeunload = null;
+        window.location.replace("/");   // TODO error page
+        return;
+    }
+
+    return await response.json();
+}
+
+async function startRun(promptId, lobbyId=null) {
+    // No need to record unfinished private runs
+    if (lobbyId) {
+        return -1;
+    }
+
+    const response = await fetchJson("/api/runs", "POST", {
+        "prompt_id": promptId,
+    });
+    return await response.json();
+}
+
+async function submitRun(promptId, lobbyId,  runId, startTime, endTime, path) {
+    const reqBody = {
+        "start_time": startTime,
+        "end_time": endTime,
+        "path": path,
+    }
+
+    if (lobbyId) {
+        const response = await fetchJson(`/api/lobbys/${lobbyId}/prompts/${promptId}/runs`, 'POST', reqBody);
+        return (await response.json())["run_id"];
+    } else {
+        // Send results to API
+        const response = await fetchJson(`/api/runs/${runId}`, 'PATCH', reqBody);
+        return runId;
+    }
+}
 
 //Vue container. This contains data, rendering flags, and functions tied to game logic and rendering. See play.html
 let app = new Vue({
@@ -33,7 +80,8 @@ let app = new Vue({
         endArticle: "",      //For sprint games. Reaching this article will trigger game finishing sequence
         path: [],             //array to store the user's current path so far, submitted with run
 
-        promptId: 0,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
+        promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
+        lobbyId: null,
         runId: -1,          //unique ID for the current run. This gets populated upon start of run
 
         startTime: null,     //For all game modes, the start time of run (mm elapsed since January 1, 1970)
@@ -47,27 +95,16 @@ let app = new Vue({
         renderer: null,
     },
 
-
     mounted: async function() {
         this.promptId = PROMPT_ID;
+        this.lobbyId = LOBBY_ID;
 
-        const response = await fetch("/api/sprints/" + this.promptId);
-        if (response.status != 200) {
-            const error = await response.text();
-            alert(error);
-
-            // Prevent are you sure you want to leave prompt
-            window.onbeforeunload = null;
-            window.location.replace("/");   // TODO error page
-
-            return;
-        }
-        const prompt = await response.json();
+        const prompt = await getPrompt(PROMPT_ID, LOBBY_ID);
 
         this.startArticle = prompt["start"];
         this.endArticle = prompt["end"];
 
-        this.runId = await startRun(this.promptId);
+        this.runId = await startRun(PROMPT_ID, LOBBY_ID);
 
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback);
     },
@@ -89,7 +126,7 @@ let app = new Vue({
                 window.onbeforeunload = null;
 
                 this.endTime = Date.now();
-                await submitRun(this.runId, this.startTime, this.endTime, this.path);
+                this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
             }
 
         },

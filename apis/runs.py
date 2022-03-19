@@ -17,7 +17,7 @@ def create_run():
     '''
     Creates a new run given a prompt.
 
-    Returns the user ID of the run created.
+    Returns the ID of the run created.
     '''
 
     query = "INSERT INTO `sprint_runs` (`prompt_id`,`user_id`) VALUES (%s, %s)"
@@ -53,7 +53,7 @@ def finish_run(id):
     Returns the user ID of the run updated.
     '''
     query = 'UPDATE `sprint_runs` SET `start_time`=%s, `end_time`=%s, `path`=%s WHERE `run_id`=%s'
-    
+
     start_time = datetime.fromtimestamp(request.json['start_time']/1000)
     end_time = datetime.fromtimestamp(request.json['end_time']/1000)
     path = json.dumps(request.json['path'])
@@ -78,7 +78,7 @@ def get_all_runs():
         cursor.execute(query)
         results = cursor.fetchall()
         return jsonify(results)
-    
+
 @run_api.get('/<id>')
 def get_run(id):
     '''
@@ -86,11 +86,11 @@ def get_run(id):
     '''
 
     query = '''
-    SELECT run_id, start_time, end_time, path, prompt_id, user_id 
-    FROM sprint_runs 
+    SELECT run_id, start_time, end_time, path, prompt_id, user_id
+    FROM sprint_runs
     WHERE run_id=%s
     '''
-        
+
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (id))
