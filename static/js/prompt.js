@@ -76,8 +76,6 @@ function populateGraph(runs, run_id) {
 
 
     for (let i = 0; i < runs.length; i++) {
-        if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
-
         var pathNodes = runs[i]["path"]
         var cur = (runs[i]["run_id"] === Number(run_id)) ? true : false;
 
@@ -117,9 +115,6 @@ function populateGraph(runs, run_id) {
 
 
     for (let i = 0; i < runs.length; i++) {
-        if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
-
-
         var pathNodes = runs[i]["path"]
         var cur = (runs[i]["run_id"] === Number(run_id)) ? true : false;
 
