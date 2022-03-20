@@ -17,7 +17,6 @@ async function getBackupPrompts()
     return resp["prompts"].filter(p => !p["active"]);
 }
 
-
 async function getTopUsers()
 {
     const response = await fetch("/api/ratings");
@@ -45,10 +44,19 @@ var app = new Vue({
         topUsers: [],
         marathonPrompts: [],
         timeLeft: "",
-        username: serverData["username"]
+        username: serverData["username"],
+        loggedIn: false,
+    },
+    methods: {
+        alertLogin: (e) => {
+            e.preventDefault();
+            alert("Please login if you would like to play the prompt of the day!");
+        }
     },
 
     created: async function() {
+        this.loggedIn = "username" in serverData;
+
         this.topUsers = await getTopUsers();
         this.marathonPrompts = await getMarathonPrompts(); 
 
@@ -73,13 +81,13 @@ var app = new Vue({
                 const s = Math.round(diff % 60).toString().padStart(2, "0");
                 diff /= 60;
                 diff = Math.floor(diff);
-                
+
                 const m = Math.round(diff % 60).toString().padStart(2, "0");
                 diff /= 60;
 
                 const h = Math.floor(diff).toString().padStart(2, "0");
-                
-                this.timeLeft = `${h}:${m}:${s}`;         
+
+                this.timeLeft = `${h}:${m}:${s}`;
             }, 1000);
 
         }

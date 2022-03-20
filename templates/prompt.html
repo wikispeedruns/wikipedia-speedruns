@@ -40,7 +40,12 @@
                             <td v-else><strong>You</strong></td>
                             <td class="l-col">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
                             <td>[[currentRun.path.length]]</td>
-                            <td><span class="d-none d-sm-block">[[currentRun.path]]</span><button class="d-block d-sm-none btn btn-outline-secondary btn-sm" v-on:click.stop="showPath($event, currentRun.path)">Show</button></td>
+                            <td>[[currentRun.path | pathArrow]]
+                                <a v-bind:href="'/replay?run_id=' + currentRun.run_id" target="_blank" title="Replay" >
+                                    <i class="bi bi-play"></i>
+                                </a>
+                            </td>
+
                         </tr>
 
                         <tr v-if="currentRunPosition === -1">
@@ -56,8 +61,12 @@
                             <td v-else><strong>You</strong></td>
                             <td class="l-col">[[(run.run_time/1000000).toFixed(3)]] s</td>
                             <td>[[run.path.length]]</td>
-                            <td><span class="d-none d-sm-block">[[run.path]]</span><button class="d-block d-sm-none btn btn-outline-secondary btn-sm" v-on:click.stop="showPath($event, run.path)">Show</button></td>
-                            <td class="l-col">[[(run.run_time/1000000 + run.path.length * 20).toFixed(3)]] s</td>
+                            <td>[[run.path | pathArrow]]
+                                <a v-bind:href="'/replay?run_id=' + run.run_id" target="_blank" title="Replay" >
+                                    <i class="bi bi-play"></i>
+                                </a>
+                            </td>
+
                         </tr>
 
                         <tr v-if="currentRunPosition === 1">
@@ -73,7 +82,11 @@
                             <td v-else><strong>You</strong></td>
                             <td class="l-col">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
                             <td>[[currentRun.path.length]]</td>
-                            <td><span class="d-none d-sm-block">[[currentRun.path]]</span><button class="d-block d-sm-none btn btn-outline-secondary btn-sm" v-on:click.stop="showPath($event, currentRun.path)">Show</button></td>
+                            <td>[[currentRun.path | pathArrow]]
+                                <a v-bind:href="'/replay?run_id=' + currentRun.run_id" target="_blank" title="Replay">
+                                    <i class="bi bi-play"></i>
+                                </a>
+                            </td>
                         </tr>
 
 
