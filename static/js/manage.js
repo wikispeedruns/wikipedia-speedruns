@@ -1,5 +1,6 @@
 import { fetchJson } from "./modules/fetch.js";
 import { getPath } from "./modules/scraper.js";
+import { getArticleTitle } from "./modules/getArticleTitle.js";
 
 Vue.component('prompt-item', {
     props: ['prompt'],
@@ -204,8 +205,8 @@ Vue.component('marathon-generator', {
     data: function() {
         return {
             start: "United States",
-            startcp: "[\"A\", \"B\", \"C\", \"D\", \"E\"]",
-            cp: "[\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\"]",
+            startcp: [],
+            cp: [],
             seed: "0"
         }
     },
@@ -215,7 +216,9 @@ Vue.component('marathon-generator', {
         submitPrompt: async function() {
             try {
 
-                const response = await fetchJson("/api/marathon/add/", 'POST', { 'data': this.$data })
+                if (this.startcp.length != 5) throw new Error("Need 5 checkpoints");
+
+                const response = await fetchJson("/api/marathon/add/", 'POST', {'data': this.$data })
 
                 if (response.status != 200) {
                     // For user facing interface, do something other than this
@@ -223,7 +226,7 @@ Vue.component('marathon-generator', {
                     return;
                 }
 
-                document.getElementById("generatedMarathonText").innerHTML = "Generation success, refresh to see recently added prompt"
+                document.getElementById("generatedMarathonText").innerHTML = "Generation success, ${this.cp.length} checkpoints. Refresh to see recently added prompt"
 
             } catch (e) {
                 document.getElementById("generatedMarathonText").innerHTML = e
@@ -240,11 +243,11 @@ Vue.component('marathon-generator', {
                     <input class="form-control" type="text" name="startField" v-model="start">
                 </div>
                 <div class="input-group">
-                    <label class="input-group-text" for="cp1Field">Starting CPs:</label>
+                    <label class="input-group-text" for="startCpField">Starting CPs:</label>
                     <input class="form-control" type="text" name="startCpField" v-model="startcp">
                 </div>
                 <div class="input-group">
-                    <label class="input-group-text" for="cp1Field">CP Queue:</label>
+                    <label class="input-group-text" for="cpField">CP Queue:</label>
                     <textarea class="form-control" type="text" name="cpField" v-model="cp"></textarea>
                 </div>
                 <div class="input-group">
@@ -359,24 +362,9 @@ var app = new Vue({
 
             let reqBody = {};
 
-            const resp = await fetch(
-                `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("start").value}`, {
-                    mode: "cors"
-                }
-            )
-            const body = await resp.json()
+            reqBody["start"] = await getArticleTitle(document.getElementById("start").value);
 
-            reqBody["start"] = body["parse"]["title"];
-
-
-            const resp1 = await fetch(
-                `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("end").value}`, {
-                    mode: "cors"
-                }
-            )
-            const body1 = await resp1.json()
-
-            reqBody["end"] = body1["parse"]["title"];
+            reqBody["end"] = await getArticleTitle(document.getElementById("end").value);
 
             try {
                 const response = await fetch("/api/sprints/", {
