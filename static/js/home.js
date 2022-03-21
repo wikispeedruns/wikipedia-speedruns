@@ -1,4 +1,3 @@
-import { SavedMarathonGames } from "./modules/game/marathon/showSaves.js";
 import { MarathonPrompts } from "./modules/game/marathon/marathonPrompts.js";
 import { serverData } from "./modules/serverData.js";
 
@@ -37,7 +36,6 @@ var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     components: {
-        'saved-marathon-games': SavedMarathonGames,
         'marathon-prompts': MarathonPrompts,
     },
     data: {

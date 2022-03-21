@@ -13,12 +13,12 @@
 
 <div id="app">
 
-    <h3>Welcome<span v-if="username"> back</span> to Wikipedia Speedruns<span v-if="username">, [[username]]</span>! <a href="/about#beta"><span class="beta">BETA*</span></a></h3>
+    <h3 class="mb-4">Welcome<span v-if="username"> back</span> to Wikipedia Speedruns<span v-if="username">, [[username]]</span>! <a href="/about#beta"><span class="beta">BETA*</span></a></h3>
 
 
     <p>The goal of this game is simple. Try to get from one wikipedia page to another as fast as possible by clicking on the links in the page. </p>
-    <p>There are a few simple rules:<br>
-        <ul>
+    <p >There are a few simple rules:<br>
+        <ul class="mb-4">
             <li>Any link shown on the page is fair game.</li>
             <li>DO NOT use Ctrl+F/find in your browser!</li>
             <li>Live with your mistakes (the back button will end your run).</li>
@@ -26,9 +26,7 @@
         </ul>
     </p>
 
-
-    <hr>
-
+    <hr class="mt-4">
 
     <div class="row justify-content-md-center">
 
@@ -107,18 +105,12 @@
 
     <p class="my-4"> Still want more? Checkout our <a href="/archive">archive</a> or click <a href="/random">here</a> to try a random prompt.</p>
     
-    <hr>
+    <hr class="mt-4">
 
-    <div class="row justify-content-md-center">
+    <div class="container-xxl" id="marathon-block">
 
-        <div class="col">
-
-            <marathon-prompts v-bind:prompts="marathonPrompts" v-bind:username="username"></marathon-prompts>
-
-            <hr>
-
-            <saved-marathon-games></saved-marathon-games>
-        </div>
+        <marathon-prompts v-bind:prompts="marathonPrompts" v-bind:username="username"></marathon-prompts>
+        
     </div>
     
 
@@ -146,7 +138,7 @@
 
     
 
-    <hr>
+    <hr class="mt-4">
 
     <div>
         <p>
@@ -169,9 +161,9 @@
         </p>
     </div>
 
-    <hr>
+    <hr class="mt-4">
 
-    <div class="social-menu center">
+    <div class="social-menu center py-3">
         <a href="https://twitter.com/WikiSpeedruns" target="_blank">
             <button type="button" class="btn">
                 <i class="bi bi-twitter"></i>
