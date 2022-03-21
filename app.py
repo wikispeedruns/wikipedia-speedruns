@@ -11,16 +11,6 @@ import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 from wikispeedruns import lobbys
-
-
-# sentry_sdk.init(
-#     dsn="https://3fcc7c6b479248c8ac9839aad0440cba@o1133616.ingest.sentry.io/6180332",
-#     integrations=[FlaskIntegration()],
-
-#     # Set percent of things that are traced
-#     traces_sample_rate=0
-# )
-
 def create_app(test_config=None):
 
     app = Flask(__name__)
@@ -37,6 +27,16 @@ def create_app(test_config=None):
             pass
     else:
         app.config.update(test_config)
+
+
+    # Setup monitoring if enabled
+    if (app.config.get("SENTRY_ENABLED")):
+        sentry_sdk.init(
+            dsn="https://3fcc7c6b479248c8ac9839aad0440cba@o1133616.ingest.sentry.io/6180332",
+            integrations=[FlaskIntegration()],
+            # Set percent of things that are traced
+            traces_sample_rate=0
+        )
 
 
     db.init_app(app)
@@ -60,5 +60,9 @@ def create_app(test_config=None):
     app.register_blueprint(ratings_api)
     app.register_blueprint(lobby_api)
     app.register_blueprint(views)
+
+    @app.route("/testerror")
+    def test_error():
+        return 1/ 0
 
     return app
