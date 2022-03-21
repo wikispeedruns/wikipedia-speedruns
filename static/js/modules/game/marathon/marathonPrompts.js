@@ -28,18 +28,14 @@ var MarathonPrompts = {
         <div class="col px-0">
             <div class="card">
                 <div class="alert alert-info my-0" role="alert">
-                    Introducing our new <a href="#marathon-block" class="alert-link">Marathon</a> game mode. Give it a try!
+                    <strong>Introducing our new <a href="#marathon-block" class="alert-link">Marathon</a> game mode</strong>: 
+                    Every article you visit will costs one 'click', but every checkpoint you reach will get you five more clicks. 
+                    Think strategically, and see how far you can go!
                 </div>
                 <div class="card-body">
-                    
-                    <!--<h4>Marathon Prompts:</h4>-->
-                    <p>
-                        Every checkpoint you reach will buy you five more clicks and a new checkpoint, but every click you make on the way will cost one. There is no time limit on marathon mode - see how far you can go!
-                    </p>
 
                     <p v-if="username">Check your marathon run history <a v-bind:href="'/marathonruns/' + username">here</a>.</p>
 
-                    
                     <div v-if="savedGames.length > 0">
                         
                         <p>Here are your saved marathon games. Click 'continue' on any to get back into it!</p>
@@ -62,11 +58,9 @@ var MarathonPrompts = {
                                 </tr>
                             </tbody>
                         </table>
-                        <hr class="mt-5">
-                        <p>Click any prompt below to start a new marathon game. Any new saves you create will overwrite your previous save!</p>
+                        <hr class="mt-4">
+                        <p>Click any prompt below to start a new marathon game.</p>
                     </div>
-
-                    
 
                     <table class="table table-hover">
                         <thead>
@@ -82,10 +76,9 @@ var MarathonPrompts = {
                             </tr>
                         </tbody>
                     </table>
-
-                    
-
-                    
+                </div>
+                <div class="card-footer text-muted" v-if="savedGames.length > 0">
+                    <strong>NOTE</strong>: Any new saves you create will overwrite your previous save for the same prompt. Be careful, clearing your browser cache will delete all saves!
                 </div>
             </div>
         </div>
