@@ -61,8 +61,4 @@ def create_app(test_config=None):
     app.register_blueprint(lobby_api)
     app.register_blueprint(views)
 
-    @app.route("/testerror")
-    def test_error():
-        return 1/ 0
-
     return app
