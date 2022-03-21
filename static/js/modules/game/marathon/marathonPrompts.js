@@ -26,7 +26,7 @@ var MarathonPrompts = {
                         </tbody>
                     </table>
 
-                    <button v-if="username" v-on:click="window.location.replace('/marathonruns/' + username)" class="btn btn-outline-secondary mt-auto">Check your marathon run history</button>
+                    <p v-if="username">Check your marathon run history <a v-bind:href="'/marathonruns/' + username">here</a>.</p>
                 </div>
             </div>
         </div>

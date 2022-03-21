@@ -222,8 +222,8 @@ def get_marathon_personal_leaderboard(username):
         query = '''
         SELECT marathonruns.checkpoints AS checkpoints, finished, initcheckpoints, marathonruns.prompt_id AS prompt_id, path, run_id, start, total_time
         FROM marathonruns
-        LEFT JOIN marathonprompts ON marathonprompts.prompt_id=marathonruns.prompt_id
-        WHERE marathonruns.user_id=%s
+        LEFT JOIN marathonprompts ON marathonruns.prompt_id=marathonprompts.prompt_id
+        WHERE marathonruns.user_id=%s AND initcheckpoints IS NOT NULL
         '''
         
         db = get_db()
@@ -236,12 +236,14 @@ def get_marathon_personal_leaderboard(username):
             cursor.execute(query, (str(id_res['user_id']),))
             results = cursor.fetchall()
             
+            print(results)
+            
             for run in results:
                 run['path'] = json.loads(run['path'])
                 run['checkpoints'] = json.loads(run['checkpoints'])
                 run['initcheckpoints'] = json.loads(run['initcheckpoints'])
                 
-            #print(results)
+            
             return jsonify(results)
         
     abort(404)
