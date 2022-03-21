@@ -99,9 +99,9 @@ def add_marathon_prompt():
     print(data)
     
     start = data['start']
-    initcheckpoints = json.loads(data['startcp'])
+    initcheckpoints = data['startcp']
     seed = data['seed']
-    checkpoints = json.loads(data['cp'])
+    checkpoints = data['cp']
     
     print(start)
     print(type(start))

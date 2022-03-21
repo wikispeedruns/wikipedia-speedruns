@@ -227,7 +227,7 @@ Vue.component('marathon-generator', {
                     return;
                 }
 
-                document.getElementById("generatedMarathonText").innerHTML = "Prompt submit success, ${this.cp.length} checkpoints. Refresh to see recently added prompt"
+                document.getElementById("generatedMarathonText").innerHTML = "Prompt submit success. Refresh to see recently added prompt"
 
             } catch (e) {
                 document.getElementById("generatedMarathonText").innerHTML = e
@@ -239,6 +239,12 @@ Vue.component('marathon-generator', {
             if (document.getElementById("inputField").value.length < 1) return;
 
             let a = await getArticleTitle(document.getElementById("inputField").value)
+
+            if (this.cp.includes(a) || this.startcp.includes(a)) {
+                document.getElementById("generatedMarathonText").innerHTML = "Article already exists"
+                return
+            }
+
             if (mode == 0) {
                 this.start = a
             } else if (mode == 1) {
@@ -307,7 +313,11 @@ Vue.component('marathon-generator', {
                     <div>Reserve Checkpoints:
                         <ol>
                         <template v-for="(item, index) in cp">
-                            <li>{{item}}</li>
+                            <li>{{item}} 
+                                <button v-on:click="moveup(index, 1)"><i class="bi bi-chevron-up"></i></button>
+                                <button v-on:click="movedown(index, 1)"><i class="bi bi-chevron-down"></i></button>
+                                <button v-on:click="deleteA(index, 1)"><i class="bi bi-trash"></i></button>
+                            </li>
                         </template>
                         </ol>
                     </div>
