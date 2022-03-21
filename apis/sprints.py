@@ -18,7 +18,7 @@ sprint_api = Blueprint('sprints', __name__, url_prefix='/api/sprints')
 @check_admin
 @check_request_json({"start": str, "end": str})
 def create_prompt():
-    print(request.json)
+    #print(request.json)
     
     start = request.json.get('start')
     end = request.json.get('end')

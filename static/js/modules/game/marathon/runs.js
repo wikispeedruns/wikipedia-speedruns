@@ -29,7 +29,7 @@ async function saveRun(data) {
         "time": data.endTime - data.startTime + data.lastTime,
         "clicks_remaining": data.clicksRemaining,
     }
-    console.log(reqBody)
+    //console.log(reqBody)
 
     localStorage.setItem('WS-M-'+String(data.promptId), JSON.stringify(reqBody))
 
@@ -46,7 +46,7 @@ function removeSave(id) {
 
 async function submitRun(prompt_id, time, checkpoints, path, finished) {
 
-    console.log(time)
+    //console.log(time)
 
     const reqBody = {
         "path": path,
