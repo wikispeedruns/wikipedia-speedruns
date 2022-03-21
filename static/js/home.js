@@ -1,4 +1,5 @@
 import { SavedMarathonGames } from "./modules/game/marathon/showSaves.js";
+import { MarathonPrompts } from "./modules/game/marathon/marathonPrompts.js";
 import { serverData } from "./modules/serverData.js";
 
 async function getPrompts()
@@ -37,6 +38,7 @@ var app = new Vue({
     el: '#app',
     components: {
         'saved-marathon-games': SavedMarathonGames,
+        'marathon-prompts': MarathonPrompts,
     },
     data: {
         dailyPrompts: [],

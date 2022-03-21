@@ -10,8 +10,8 @@ var CountdownTimer = {
 
     data: function () {
         return {
-            countdownDuration: 800000, // milliseconds to countdown from
-            countdownRemaining: 800000,
+            countdownDuration: 8000, // milliseconds to countdown from
+            countdownRemaining: 8000,
             tip: "",
 
             started: false,

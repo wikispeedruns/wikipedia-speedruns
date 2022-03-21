@@ -72,23 +72,6 @@ async function submitRun(prompt_id, time, checkpoints, path, finished) {
     } catch(e) {
         console.log(e);
     }
-
-/*
-    try {
-        const response = await fetchJson(`/api/marathon/runs/`, "POST", {
-            path: JSON.stringify(app.$data.path),
-            checkpoints: JSON.stringify(app.$data.visitedCheckpoints),
-            prompt_id: String(app.$data.prompt_id),
-            time: app.$data.finalTime,
-        })
-
-         await response.json()
-
-    } catch (e) {
-        console.log(e);
-    }
-
-    return id*/
 }
 
 

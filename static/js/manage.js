@@ -203,26 +203,19 @@ Vue.component('path-generator', {
 Vue.component('marathon-generator', {
     data: function() {
         return {
-            start: "China",
-            cp1: "United States",
-            cp2: "Nickle",
-            cp3: "Road",
-            cp4: "DNA",
-            cp5: "Clay",
-            seed: "123456",
-            nbucket: "5",
-            nbatch: "5",
-            nperbatch: "10",
-            promptinput: "",
+            start: "United States",
+            startcp: "[\"A\", \"B\", \"C\", \"D\", \"E\"]",
+            cp: "[\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\"]",
+            seed: "0"
         }
     },
 
 
     methods: {
-        submitMarathonPrompt: async function() {
+        submitPrompt: async function() {
             try {
 
-                const response = await fetchJson("/api/marathon/add/", 'POST', { 'data': this.promptinput })
+                const response = await fetchJson("/api/marathon/add/", 'POST', { 'data': this.$data })
 
                 if (response.status != 200) {
                     // For user facing interface, do something other than this
@@ -230,99 +223,39 @@ Vue.component('marathon-generator', {
                     return;
                 }
 
-                //const resp = await response.json()
-
-                console.log(await response.text())
+                document.getElementById("generatedMarathonText").innerHTML = "Generation success, refresh to see recently added prompt"
 
             } catch (e) {
+                document.getElementById("generatedMarathonText").innerHTML = e
                 console.log(e);
             }
         },
-
-        displayGenerated: async function() {
-
-            console.log("generating")
-            document.getElementById("generatedMarathonText").innerHTML = "Generating... Please give up to 3 minutes"
-
-            try {
-
-                const response = await fetchJson("/api/marathon/gen/", 'POST', this.$data)
-
-                if (response.status != 200) {
-                    // For user facing interface, do something other than this
-                    alert(await response.text());
-                    return;
-                }
-
-                console.log("Finished, displaying output")
-
-                document.getElementById("generatedMarathonText").innerHTML = await response.text()
-
-                //const resp = await response.json()
-
-                //console.log(await response.text())
-
-            } catch (e) {
-                console.log(e);
-                document.getElementById("generatedMarathonText").innerHTML = e
-            }
-        }
     },
 
     template: (`
-        <div>
-        <div>
-            <b>SUBMIT PRE-GENERATED PROMPT</b>
-            <div class="input-group">
-                <label class="input-group-text" for="promptinput">Full Prompt:</label>
-                <input class="form-control" type="text" name="promptinput" v-model="promptinput">
+        <div>          
+            <div>
+                <div class="input-group">
+                    <label class="input-group-text" for="startField">Start Article:</label>
+                    <input class="form-control" type="text" name="startField" v-model="start">
+                </div>
+                <div class="input-group">
+                    <label class="input-group-text" for="cp1Field">Starting CPs:</label>
+                    <input class="form-control" type="text" name="startCpField" v-model="startcp">
+                </div>
+                <div class="input-group">
+                    <label class="input-group-text" for="cp1Field">CP Queue:</label>
+                    <textarea class="form-control" type="text" name="cpField" v-model="cp"></textarea>
+                </div>
+                <div class="input-group">
+                    <label class="input-group-text" for="seedField">Seed:</label>
+                    <input class="form-control" type="text" name="seedField" v-model="seed">
+                </div>
+                <button id="genMarathonPromptButton" v-on:click="submitPrompt">Click to submit prompt</button>
             </div>
-            <button id="submitMarathonPromptButton" v-on:click="submitMarathonPrompt">Click to submit marathon prompt</button>
-        </div>
-        <hr>
-        <div id="generatedMarathonText"></div>
-        <hr>    
-        <div>
-            <b>***GENERATE PROMPT, ONLY USE ON LOCAL***</b>
-            <div class="input-group">
-                <label class="input-group-text" for="startField">Start Article:</label>
-                <input class="form-control" type="text" name="startField" v-model="start">
-            </div>
-            <div class="input-group">
-                <label class="input-group-text" for="cp1Field">1st CP:</label>
-                <input class="form-control" type="text" name="cp1Field" v-model="cp1">
-            </div>
-            <div class="input-group">
-                <label class="input-group-text" for="cp2Field">2nd CP:</label>
-                <input class="form-control" type="text" name="cp2Field" v-model="cp2">
-            </div>
-            <div class="input-group">
-                <label class="input-group-text" for="cp3Field">3rd CP:</label>
-                <input class="form-control" type="text" name="cp3Field" v-model="cp3">
-            </div>
-            <div class="input-group">
-                <label class="input-group-text" for="cp4Field">4th CP:</label>
-                <input class="form-control" type="text" name="cp4Field" v-model="cp4">
-            </div>
-            <div class="input-group">
-                <label class="input-group-text" for="cp5Field">5th CP:</label>
-                <input class="form-control" type="text" name="cp5Field" v-model="cp5">
-            </div>
-            <div class="input-group">
-                <label class="input-group-text" for="seedField">Seed:</label>
-                <input class="form-control" type="text" name="seedField" v-model="seed">
-            </div>
-            <div class="input-group">
-                <label class="input-group-text form-control" for="nbatch">N-Bucket:</label>
-                <input class="form-control" type="text" name="nbatch" v-model="nbatch">
-                <label class="input-group-text form-control" for="nbucket">N-Batch:</label>
-                <input class="form-control" type="text" name="nbucket" v-model="nbucket">
-                <label class="input-group-text form-control" for="nperbatch">N-PerBatch:</label>
-                <input class="form-control" type="text" name="nperbatch" v-model="nperbatch">
-            </div>
-            <button id="genMarathonPromptButton" v-on:click="displayGenerated">Click to generate random marathon prompt</button>
-        </div>
-        <hr>
+            <hr>
+            <div id="generatedMarathonText"></div>
+            <hr>  
         </div>
     `)
 

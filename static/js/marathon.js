@@ -157,15 +157,10 @@ let app = new Vue({
             
             
             if (hitcheckpoint) {
-                let got = false
-                this.checkpoints.forEach(bucket => {
-                    if (bucket.length > 0 && !got) {
-                        let el = bucket.pop()
-                        console.log(el)
-                        this.activeCheckpoints[checkpointindex] = el
-                        got = true
-                    }
-                });
+                let el = this.checkpoints.shift()
+                console.log(el)
+                this.activeCheckpoints[checkpointindex] = el
+
                 conf();
             }
 
