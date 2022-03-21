@@ -106,15 +106,6 @@
     <p class="my-4"> Still want more? Checkout our <a href="/archive">archive</a> or click <a href="/random">here</a> to try a random prompt.</p>
     
     <hr class="mt-4">
-
-    <div class="container-xxl" id="marathon-block">
-
-        <marathon-prompts v-bind:prompts="marathonPrompts" v-bind:username="username"></marathon-prompts>
-        
-    </div>
-    
-
-    <hr>
     <h4> Top 10 rated players:</h4> Note the <a href="/about#ratings">rating system</a> is still experimental </p>
 
     <div class="row justify-content-md-center">
@@ -134,6 +125,14 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    <hr class="mt-4">
+
+    <div class="container-xxl" id="marathon-block">
+
+        <marathon-prompts v-bind:prompts="marathonPrompts" v-bind:username="username"></marathon-prompts>
+        
     </div>
 
     
