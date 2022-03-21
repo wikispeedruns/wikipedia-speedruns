@@ -1,5 +1,6 @@
 
-//send request to create an empty run, returns the run_id
+//send request to create an empty run, returns the run_id, NOT IN USE
+/*
 async function startRun(prompt_id) {
     const reqBody = {
         "prompt_id": prompt_id,
@@ -15,10 +16,8 @@ async function startRun(prompt_id) {
         return await response.json();
     } catch(e) {
         console.log(e);
-    }
-
-    
-}
+    }    
+}*/
 
 async function saveRun(data) {
     const reqBody = {
