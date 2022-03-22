@@ -273,7 +273,7 @@ Vue.component('marathon-generator', {
                 if (ind == this.startcp.length-1) return;
                 [this.startcp[ind], this.startcp[ind+1]] = [this.startcp[ind+1], this.startcp[ind]];
             } else if (mode == 1) {
-                if (ind == this.startcp.length-1) return;
+                if (ind == this.cp.length-1) return;
                 [this.cp[ind], this.cp[ind+1]] = [this.cp[ind+1], this.cp[ind]];
             }
             this.$forceUpdate();
