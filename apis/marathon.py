@@ -45,7 +45,7 @@ def create_run():
 
     return "Error submitting prompt"
 
-
+"""
 @marathon_api.post('/gen/')
 @check_admin
 def create_marathon_prompt():
@@ -86,23 +86,31 @@ def create_marathon_prompt():
               'checkpoints': checkpoints}
     
     return json.dumps(output)
-
+"""
     
 
 @marathon_api.post('/add/')
 @check_admin
 def add_marathon_prompt():
     print("Received add marathon prompt req")
-    #print(request.json)
-    
-    data = json.loads(request.json.get("data"))
+        
+    data = request.json.get("data")
     
     print(data)
     
     start = data['start']
-    initcheckpoints = data['initcheckpoints']
+    initcheckpoints = data['startcp']
     seed = data['seed']
-    checkpoints = data['checkpoints']
+    checkpoints = data['cp']
+    
+    print(start)
+    print(type(start))
+    print(initcheckpoints)
+    print(type(initcheckpoints))
+    print(seed)
+    print(type(seed))
+    print(checkpoints)
+    print(type(checkpoints))
     
     query = "INSERT INTO `marathonprompts` (start, initcheckpoints, seed, checkpoints) VALUES (%s, %s, %s, %s);"
     db = get_db()
@@ -110,6 +118,8 @@ def add_marathon_prompt():
         result = cursor.execute(query, (start, json.dumps(initcheckpoints), seed, json.dumps(checkpoints)))
         db.commit()
         return "Prompt added!"
+    
+    #return "Prompt added!"
 
 
 @marathon_api.delete('/delete/<id>')
@@ -212,8 +222,8 @@ def get_marathon_personal_leaderboard(username):
         query = '''
         SELECT marathonruns.checkpoints AS checkpoints, finished, initcheckpoints, marathonruns.prompt_id AS prompt_id, path, run_id, start, total_time
         FROM marathonruns
-        LEFT JOIN marathonprompts ON marathonprompts.prompt_id=marathonruns.prompt_id
-        WHERE marathonruns.user_id=%s
+        LEFT JOIN marathonprompts ON marathonruns.prompt_id=marathonprompts.prompt_id
+        WHERE marathonruns.user_id=%s AND initcheckpoints IS NOT NULL
         '''
         
         db = get_db()
@@ -226,12 +236,14 @@ def get_marathon_personal_leaderboard(username):
             cursor.execute(query, (str(id_res['user_id']),))
             results = cursor.fetchall()
             
+            print(results)
+            
             for run in results:
                 run['path'] = json.loads(run['path'])
                 run['checkpoints'] = json.loads(run['checkpoints'])
                 run['initcheckpoints'] = json.loads(run['initcheckpoints'])
                 
-            #print(results)
+            
             return jsonify(results)
         
     abort(404)

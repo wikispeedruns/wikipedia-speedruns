@@ -18,6 +18,8 @@ sprint_api = Blueprint('sprints', __name__, url_prefix='/api/sprints')
 @check_admin
 @check_request_json({"start": str, "end": str})
 def create_prompt():
+    #print(request.json)
+    
     start = request.json.get('start')
     end = request.json.get('end')
 
@@ -90,15 +92,20 @@ def get_managed_prompts():
 
 @sprint_api.get('/active')
 def get_active_prompts():
-    return jsonify(prompts.get_active_prompts("sprint"))
+    return jsonify(prompts.get_active_prompts("sprint", user_id=session.get("user_id")))
 
 @sprint_api.get('/archive')
 def get_archive_prompts():
     try:
         limit = int(request.args.get('limit', 20))
         offset = int(request.args.get('offset', 0))
-        
-        sprints, num_prompts = prompts.get_archive_prompts("sprint", offset=offset, limit=limit)
+        sort_desc = request.args.get('sort_desc', "True").lower() == "true"
+        sprints, num_prompts = prompts.get_archive_prompts("sprint",
+            offset=offset,
+            limit=limit,
+            sort_desc=sort_desc,                           
+            user_id=session.get("user_id")
+        )
 
         return jsonify({
             "prompts": sprints,
@@ -107,7 +114,6 @@ def get_archive_prompts():
 
     except ValueError:
         return "Invalid limit or offset", 400
-
 
 ### Specific prompt endpoints
 
@@ -138,7 +144,8 @@ def get_prompt(id):
 @sprint_api.get('/<int:id>/leaderboard/<int:run_id>')
 def get_prompt_leaderboard(id, run_id):
     # First get the prompt details, and the string
-    prompt = prompts.get_prompt(id, "sprint", user_id=session.get("user_id"))
+    user_id = session.get("user_id")
+    prompt = prompts.get_prompt(id, "sprint", user_id=user_id)
 
     if not session.get("admin", False) and (prompt["active"] and prompt["rated"] and not prompt.get("played", False)):
         return "Cannot view leaderboard of currently rated prompt until played", 401
@@ -152,10 +159,10 @@ def get_prompt_leaderboard(id, run_id):
     SELECT run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
     FROM sprint_runs AS runs
     JOIN (
-            SELECT users.user_id, username, MIN(run_id) AS first_run 
+            SELECT users.user_id, username, MIN(run_id) AS first_run
             FROM sprint_runs AS runs
             JOIN users ON users.user_id=runs.user_id
-            WHERE prompt_id=%s 
+            WHERE prompt_id=%s
             GROUP BY user_id
     ) firsts
     ON firsts.user_id=runs.user_id AND first_run=run_id
@@ -179,7 +186,7 @@ def get_prompt_leaderboard(id, run_id):
         args.append(run_id)
 
     query += ordering
-    
+
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, tuple(args))
@@ -187,8 +194,10 @@ def get_prompt_leaderboard(id, run_id):
 
         for run in results:
             run['path'] = json.loads(run['path'])
+            if run_id is None and user_id is not None and run['user_id'] == user_id:
+                run_id = run['run_id']
 
-        
         resp["leaderboard"] = results
+        resp["run_id"] = run_id
 
         return jsonify(resp)

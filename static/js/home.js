@@ -1,4 +1,4 @@
-import { SavedMarathonGames } from "./modules/game/marathon/showSaves.js";
+import { MarathonPrompts } from "./modules/game/marathon/marathonPrompts.js";
 import { serverData } from "./modules/serverData.js";
 
 async function getPrompts()
@@ -16,7 +16,6 @@ async function getBackupPrompts()
 
     return resp["prompts"].filter(p => !p["active"]);
 }
-
 
 async function getTopUsers()
 {
@@ -37,7 +36,7 @@ var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     components: {
-        'saved-marathon-games': SavedMarathonGames,
+        'marathon-prompts': MarathonPrompts,
     },
     data: {
         dailyPrompts: [],
@@ -45,10 +44,19 @@ var app = new Vue({
         topUsers: [],
         marathonPrompts: [],
         timeLeft: "",
-        username: serverData["username"]
+        username: serverData["username"],
+        loggedIn: false,
+    },
+    methods: {
+        alertLogin: (e) => {
+            e.preventDefault();
+            alert("Please login if you would like to play the prompt of the day!");
+        }
     },
 
     created: async function() {
+        this.loggedIn = "username" in serverData;
+
         this.topUsers = await getTopUsers();
         this.marathonPrompts = await getMarathonPrompts(); 
 
@@ -73,13 +81,13 @@ var app = new Vue({
                 const s = Math.round(diff % 60).toString().padStart(2, "0");
                 diff /= 60;
                 diff = Math.floor(diff);
-                
+
                 const m = Math.round(diff % 60).toString().padStart(2, "0");
                 diff /= 60;
 
                 const h = Math.floor(diff).toString().padStart(2, "0");
-                
-                this.timeLeft = `${h}:${m}:${s}`;         
+
+                this.timeLeft = `${h}:${m}:${s}`;
             }, 1000);
 
         }

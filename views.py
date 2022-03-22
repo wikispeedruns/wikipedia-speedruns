@@ -32,11 +32,11 @@ def get_about_page():
 
 @views.route('/archive', methods=['GET'])
 def get_archive_page():
-
     try:
         limit = int(request.args.get('limit', 20))
         offset = int(request.args.get('offset', 0))
-        return render_with_data('archive.html', limit=limit, offset=offset)
+        sort_desc = request.args.get('sort_desc', "True") == "True"
+        return render_with_data('archive.html', limit=limit, offset=offset, sort_desc=sort_desc)
     except ValueError:
         return "Page Not Found", 404
 
@@ -111,6 +111,10 @@ def get_reset_page(id, token):
 def get_gen_error_page():
     return render_with_data('users/generic_error.html')
 
+@views.route('/replay', methods=['GET'])
+def get_replay_page():
+    run_id = request.args.get('run_id', '')
+    return render_with_data('replay.html', run_id=run_id)
 
 
 @views.route('/play/marathon/<id>', methods=['GET'])

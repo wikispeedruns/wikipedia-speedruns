@@ -33,6 +33,7 @@ let app = new Vue({
 
         startArticle: "",    //For all game modes, this is the first article to load
         lastArticle: "",
+        currentArticle: "",
         path: [],             //array to store the user's current path so far, submitted with run
 
         promptId: 0,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
@@ -98,17 +99,17 @@ let app = new Vue({
 
             console.log(loadedSave)
 
-            this.lastArticle = loadedSave.path[loadedSave.path.length-1]
-            this.activeCheckpoints = loadedSave.active_checkpoints
-            this.checkpoints = loadedSave.remaining_checkpoints
-            this.clicksRemaining = loadedSave.clicks_remaining + 1
-            this.lastTime = loadedSave.time
-            this.path = loadedSave.path
-            this.path.pop()
-            this.visitedCheckpoints = loadedSave.visited_checkpoints
+            this.lastArticle = loadedSave.path[loadedSave.path.length-1];
+            this.activeCheckpoints = loadedSave.active_checkpoints;
+            this.checkpoints = loadedSave.remaining_checkpoints;
+            this.clicksRemaining = loadedSave.clicks_remaining + 1;
+            this.lastTime = loadedSave.time;
+            this.path = loadedSave.path;
+            this.currentArticle = this.path.pop();
+            this.visitedCheckpoints = loadedSave.visited_checkpoints;
 
             if (this.checkpointMarkReached) {
-                this.reachedstop = true
+                this.reachedstop = true;
             }
 
             removeSave(PROMPT_ID)
@@ -117,6 +118,7 @@ let app = new Vue({
 
             this.activeCheckpoints = JSON.parse(prompt['initcheckpoints']);
             this.checkpoints = JSON.parse(prompt['checkpoints']);
+            this.currentArticle = this.startArticle;
         }
 
         this.startArticle = prompt['start'];
@@ -133,6 +135,7 @@ let app = new Vue({
             this.clicksRemaining -= 1;
             
             this.path.push(page);
+            this.currentArticle = page;
 
             this.startTime += loadTime;
 
@@ -157,15 +160,10 @@ let app = new Vue({
             
             
             if (hitcheckpoint) {
-                let got = false
-                this.checkpoints.forEach(bucket => {
-                    if (bucket.length > 0 && !got) {
-                        let el = bucket.pop()
-                        console.log(el)
-                        this.activeCheckpoints[checkpointindex] = el
-                        got = true
-                    }
-                });
+                let el = this.checkpoints.shift()
+                console.log(el)
+                this.activeCheckpoints[checkpointindex] = el
+
                 conf();
             }
 
@@ -194,6 +192,7 @@ let app = new Vue({
             }
 
             this.started = true;
+            
 
             setMargin();
 

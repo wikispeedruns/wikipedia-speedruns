@@ -1,5 +1,6 @@
 import { fetchJson } from "./modules/fetch.js";
 import { getPath } from "./modules/scraper.js";
+import { getArticleTitle } from "./modules/getArticleTitle.js";
 
 Vue.component('prompt-item', {
     props: ['prompt'],
@@ -203,26 +204,22 @@ Vue.component('path-generator', {
 Vue.component('marathon-generator', {
     data: function() {
         return {
-            start: "China",
-            cp1: "United States",
-            cp2: "Nickle",
-            cp3: "Road",
-            cp4: "DNA",
-            cp5: "Clay",
-            seed: "123456",
-            nbucket: "5",
-            nbatch: "5",
-            nperbatch: "10",
-            promptinput: "",
+            start: "United States",
+            startcp: [],
+            cp: [],
+            seed: "0",
         }
     },
 
 
     methods: {
-        submitMarathonPrompt: async function() {
+        submitPrompt: async function() {
             try {
 
-                const response = await fetchJson("/api/marathon/add/", 'POST', { 'data': this.promptinput })
+                if (this.startcp.length != 5) throw new Error("Need 5 starting checkpoints");
+                if (this.cp.length < 40) throw new Error("Need 40+ checkpoints");
+
+                const response = await fetchJson("/api/marathon/add/", 'POST', {'data': this.$data })
 
                 if (response.status != 200) {
                     // For user facing interface, do something other than this
@@ -230,99 +227,122 @@ Vue.component('marathon-generator', {
                     return;
                 }
 
-                //const resp = await response.json()
-
-                console.log(await response.text())
+                document.getElementById("generatedMarathonText").innerHTML = "Prompt submit success. Refresh to see recently added prompt"
 
             } catch (e) {
+                document.getElementById("generatedMarathonText").innerHTML = e
                 console.log(e);
             }
         },
 
-        displayGenerated: async function() {
+        addArticle: async function(mode) {
+            if (document.getElementById("inputField").value.length < 1) return;
 
-            console.log("generating")
-            document.getElementById("generatedMarathonText").innerHTML = "Generating... Please give up to 3 minutes"
+            let a = await getArticleTitle(document.getElementById("inputField").value)
 
-            try {
-
-                const response = await fetchJson("/api/marathon/gen/", 'POST', this.$data)
-
-                if (response.status != 200) {
-                    // For user facing interface, do something other than this
-                    alert(await response.text());
-                    return;
-                }
-
-                console.log("Finished, displaying output")
-
-                document.getElementById("generatedMarathonText").innerHTML = await response.text()
-
-                //const resp = await response.json()
-
-                //console.log(await response.text())
-
-            } catch (e) {
-                console.log(e);
-                document.getElementById("generatedMarathonText").innerHTML = e
+            if (this.cp.includes(a) || this.startcp.includes(a)) {
+                document.getElementById("generatedMarathonText").innerHTML = "Article already exists"
+                return
             }
+
+            if (mode == 0) {
+                this.start = a
+            } else if (mode == 1) {
+                this.startcp.push(a)
+            } else if (mode == 2) {
+                this.startcp.unshift(a)
+            } else if (mode == 3) {
+                this.cp.push(a)
+            } else if (mode == 4) {
+                this.cp.unshift(a)
+            }
+        },
+
+        moveup: function (ind, mode) {
+            if (ind == 0) return;
+            if (mode == 0) {
+                [this.startcp[ind-1], this.startcp[ind]] = [this.startcp[ind], this.startcp[ind-1]];
+            } else if (mode == 1) {
+                [this.cp[ind-1], this.cp[ind]] = [this.cp[ind], this.cp[ind-1]];
+            }
+            this.$forceUpdate();
+        },
+
+        movedown: function (ind, mode) {
+            if (mode == 0) {
+                if (ind == this.startcp.length-1) return;
+                [this.startcp[ind], this.startcp[ind+1]] = [this.startcp[ind+1], this.startcp[ind]];
+            } else if (mode == 1) {
+                if (ind == this.startcp.length-1) return;
+                [this.cp[ind], this.cp[ind+1]] = [this.cp[ind+1], this.cp[ind]];
+            }
+            this.$forceUpdate();
+        }, 
+
+        deleteA: function(ind, mode) {
+            if (mode == 0) {
+                this.startcp.splice(ind,1)
+            } else if (mode == 1) {
+                this.cp.splice(ind,1)
+            }
+            this.$forceUpdate();
         }
     },
 
     template: (`
-        <div>
-        <div>
-            <b>SUBMIT PRE-GENERATED PROMPT</b>
-            <div class="input-group">
-                <label class="input-group-text" for="promptinput">Full Prompt:</label>
-                <input class="form-control" type="text" name="promptinput" v-model="promptinput">
+        <div>          
+            <div>
+                <div class="input-group">
+                    <label class="input-group-text" for="seedField">Seed:</label>
+                    <input class="form-control" type="text" name="seedField" v-model="seed">
+                </div>
+
+                <div>
+                    <div>Starting Article: {{start}}</div>
+                    <div>Starting Checkpoints:
+                        <ol>
+                        <template v-for="(item, index) in startcp" :key="index">
+                            <li>{{item}} 
+                                <button v-on:click="moveup(index, 0)"><i class="bi bi-chevron-up"></i></button>
+                                <button v-on:click="movedown(index, 0)"><i class="bi bi-chevron-down"></i></button>
+                                <button v-on:click="deleteA(index, 0)"><i class="bi bi-trash"></i></button>
+                            </li>
+                        </template>
+                        </ol>
+                    </div>
+                    <div>Reserve Checkpoints:
+                        <ol>
+                        <template v-for="(item, index) in cp">
+                            <li>{{item}} 
+                                <button v-on:click="moveup(index, 1)"><i class="bi bi-chevron-up"></i></button>
+                                <button v-on:click="movedown(index, 1)"><i class="bi bi-chevron-down"></i></button>
+                                <button v-on:click="deleteA(index, 1)"><i class="bi bi-trash"></i></button>
+                            </li>
+                        </template>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-group-text" for="inputField">Add checkpoint:</label>
+                    <input class="form-control" type="text" name="inputField" id="inputField">
+                </div>
+                <div>
+                <button v-on:click="addArticle(0)">Set start</button>
+                </div>
+                <div>
+                <button v-on:click="addArticle(1)">Add article to starting checkpoints (end of list)</button>
+                <button v-on:click="addArticle(2)">Add article to starting checkpoints (start of list)</button>
+                </div>
+                <div>
+                <button v-on:click="addArticle(3)">Add article to checkpoints (end of list)</button>
+                <button v-on:click="addArticle(4)">Add article to checkpoints (start of list)</button>
+                </div>
+                <button id="genMarathonPromptButton" v-on:click="submitPrompt">Click to submit prompt</button>
             </div>
-            <button id="submitMarathonPromptButton" v-on:click="submitMarathonPrompt">Click to submit marathon prompt</button>
-        </div>
-        <hr>
-        <div id="generatedMarathonText"></div>
-        <hr>    
-        <div>
-            <b>***GENERATE PROMPT, ONLY USE ON LOCAL***</b>
-            <div class="input-group">
-                <label class="input-group-text" for="startField">Start Article:</label>
-                <input class="form-control" type="text" name="startField" v-model="start">
-            </div>
-            <div class="input-group">
-                <label class="input-group-text" for="cp1Field">1st CP:</label>
-                <input class="form-control" type="text" name="cp1Field" v-model="cp1">
-            </div>
-            <div class="input-group">
-                <label class="input-group-text" for="cp2Field">2nd CP:</label>
-                <input class="form-control" type="text" name="cp2Field" v-model="cp2">
-            </div>
-            <div class="input-group">
-                <label class="input-group-text" for="cp3Field">3rd CP:</label>
-                <input class="form-control" type="text" name="cp3Field" v-model="cp3">
-            </div>
-            <div class="input-group">
-                <label class="input-group-text" for="cp4Field">4th CP:</label>
-                <input class="form-control" type="text" name="cp4Field" v-model="cp4">
-            </div>
-            <div class="input-group">
-                <label class="input-group-text" for="cp5Field">5th CP:</label>
-                <input class="form-control" type="text" name="cp5Field" v-model="cp5">
-            </div>
-            <div class="input-group">
-                <label class="input-group-text" for="seedField">Seed:</label>
-                <input class="form-control" type="text" name="seedField" v-model="seed">
-            </div>
-            <div class="input-group">
-                <label class="input-group-text form-control" for="nbatch">N-Bucket:</label>
-                <input class="form-control" type="text" name="nbatch" v-model="nbatch">
-                <label class="input-group-text form-control" for="nbucket">N-Batch:</label>
-                <input class="form-control" type="text" name="nbucket" v-model="nbucket">
-                <label class="input-group-text form-control" for="nperbatch">N-PerBatch:</label>
-                <input class="form-control" type="text" name="nperbatch" v-model="nperbatch">
-            </div>
-            <button id="genMarathonPromptButton" v-on:click="displayGenerated">Click to generate random marathon prompt</button>
-        </div>
-        <hr>
+            <hr>
+            <div id="generatedMarathonText"></div>
+            <hr>  
         </div>
     `)
 
@@ -426,24 +446,9 @@ var app = new Vue({
 
             let reqBody = {};
 
-            const resp = await fetch(
-                `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("start").value}`, {
-                    mode: "cors"
-                }
-            )
-            const body = await resp.json()
+            reqBody["start"] = await getArticleTitle(document.getElementById("start").value);
 
-            reqBody["start"] = body["parse"]["title"];
-
-
-            const resp1 = await fetch(
-                `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${document.getElementById("end").value}`, {
-                    mode: "cors"
-                }
-            )
-            const body1 = await resp1.json()
-
-            reqBody["end"] = body1["parse"]["title"];
+            reqBody["end"] = await getArticleTitle(document.getElementById("end").value);
 
             try {
                 const response = await fetch("/api/sprints/", {
