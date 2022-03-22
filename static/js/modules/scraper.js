@@ -4,7 +4,7 @@ import { fetchJson } from './fetch.js'
 async function getPath(start, end) {
     const response = await fetchJson("/api/scraper/path", "POST", {
         "start": start,
-        "end": end  
+        "end": end
     });
 
     if (response.status != 200) {
@@ -14,7 +14,7 @@ async function getPath(start, end) {
 
     const path = await response.json();
 
-    return path['Articles'];
+    return path['task_id'];
 }
 
 

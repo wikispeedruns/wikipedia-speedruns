@@ -103,7 +103,22 @@ Vue.component('path-checker', {
 
     methods: {
         async pathCheck() {
-            this.path = await getPath(this.pathStart, this.pathEnd);
+            const task_id = await getPath(this.pathStart, this.pathEnd);
+
+            let interval = setInterval(async () => {
+                const response = await fetchJson("/api/scraper/path/result", "POST", {
+                    "task_id": task_id,
+                });
+
+                const resp = await response.json();
+                console.log(resp);
+
+                if (resp["status"] == "complete") {
+                    clearInterval(interval);
+                    this.path = resp["Articles"];
+                }
+            }, 1000);
+
         }
     },
 
