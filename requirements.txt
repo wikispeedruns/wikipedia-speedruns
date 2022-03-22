@@ -6,5 +6,7 @@ Flask-Dance>=5.0.0
 itsdangerous==2.0.0
 pytest==6.2.5
 
-cryptography 
+celery[redis]
+
+cryptography
 sentry-sdk[flask]

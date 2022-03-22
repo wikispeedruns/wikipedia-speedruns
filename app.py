@@ -42,6 +42,7 @@ def create_app(test_config=None):
     db.init_app(app)
     mail.init_app(app)
     tokens.init_app(app)
+    tasks.make_celery(app)
 
     from apis.sprints import sprint_api
     from apis.runs import run_api
