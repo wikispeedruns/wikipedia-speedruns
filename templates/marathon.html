@@ -17,8 +17,9 @@
 
     <div v-show="started && !finished" id="time-box" class="HUDwrapper container" v-cloak>
         <div class="row flex-row flex-nowrap py-2">
-            <div class="col-sm-auto px-4">
+            <div class="col-sm-auto px-4 flex-wrap">
                 Start Article<br><strong>[[startArticle]]</strong>
+                <br>Current Article<br><strong>[[currentArticle]]</strong>
             </div>
             <div class="col-sm-auto px-4">
                 Clicks Remaining<br><strong class="text-size-3" v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
