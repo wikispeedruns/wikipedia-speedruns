@@ -19,9 +19,9 @@ def get_path():
     end = request.json['end']
 
     result = shortest_path.delay(start, end)
-    print(result.wait())
 
-    return "TEST"
+    print(result.id)
+    return result.wait()
 
 
 @scraper_api.post('/gen_prompts')
@@ -46,6 +46,6 @@ def get_prompts():
     return jsonify({'Prompts':outputArr})
 
 
-@celery.task()
+@celery.task(time_limit=SCRAPER_TIMEOUT)
 def shortest_path(start: str, end: str):
     return findPaths(start, end)
