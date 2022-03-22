@@ -15,6 +15,21 @@ scraper_api = Blueprint("scraper", __name__, url_prefix="/api/scraper")
 
 SCRAPER_TIMEOUT = 20
 
+def get_result(task):
+    task_id = request.json['task_id']
+    result = task.AsyncResult(task_id)
+
+    if result.ready():
+        return {
+            "status": "complete",
+            "result": result.get()
+        }
+    else:
+        return {
+            "status": "pending"
+        }
+
+
 @scraper_api.post('/path')
 @check_request_json({'start': str, 'end': str})
 def get_path():
@@ -31,19 +46,7 @@ def get_path():
 @scraper_api.post('/path/result')
 @check_request_json({'task_id': str})
 def get_path_result():
-
-    task_id = request.json['task_id']
-    result = shortest_path.AsyncResult(task_id)
-
-    if result.ready():
-        return {
-            "status": "complete",
-            **result.get()
-        }
-    else:
-        return {
-            "status": "pending"
-        }
+    return get_result(shortest_path)
 
 
 @celery.task(time_limit=SCRAPER_TIMEOUT)
@@ -51,14 +54,25 @@ def shortest_path(start: str, end: str):
     return findPaths(start, end)
 
 @scraper_api.post('/gen_prompts')
-def get_prompts():
+def get_generated():
+    result = generate_prompt.delay()
+    return {
+        "task_id": result.id
+    }
 
-    n = int(request.json['N'])
+@scraper_api.post('/gen_prompts/result')
+@check_request_json({'task_id': str})
+def get_generated_result():
+    return get_result(shortest_path)
+
+
+@celery.task(time_limit=SCRAPER_TIMEOUT)
+def generate_prompt():
     d = 25
     thresholdStart = 200
 
     # try:
-    paths = generatePrompts(thresholdStart=thresholdStart, thresholdEnd=thresholdStart, n=n, dist=d)
+    paths = generatePrompts(thresholdStart=thresholdStart, thresholdEnd=thresholdStart, n=1, dist=d)
     # except Exception as err:
     #     print(err)
     #     return str(err), 500
@@ -66,8 +80,6 @@ def get_prompts():
     outputArr = []
 
     for path in paths:
-
         outputArr.append([str(convertToArticleName(path[0])), str(convertToArticleName(path[-1]))])
 
-    return jsonify({'Prompts':outputArr})
-
+    return {'Prompts': outputArr}

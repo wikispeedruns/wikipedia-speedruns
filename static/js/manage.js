@@ -1,4 +1,4 @@
-import { fetchJson } from "./modules/fetch.js";
+import { fetchAsync, fetchJson } from "./modules/fetch.js";
 import { getPath } from "./modules/scraper.js";
 import { getArticleTitle, articleCheck } from "./modules/wikipediaAPI/util.js";
 
@@ -103,22 +103,12 @@ Vue.component('path-checker', {
 
     methods: {
         async pathCheck() {
-            const task_id = await getPath(this.pathStart, this.pathEnd);
 
-            let interval = setInterval(async () => {
-                const response = await fetchJson("/api/scraper/path/result", "POST", {
-                    "task_id": task_id,
-                });
-
-                const resp = await response.json();
-                console.log(resp);
-
-                if (resp["status"] == "complete") {
-                    clearInterval(interval);
-                    this.path = resp["Articles"];
-                }
-            }, 1000);
-
+            const res = await fetchAsync("/api/scraper/path", "POST", {
+                "start": this.pathStart,
+                "end": this.pathEnd
+            });
+            this.path = res["Articles"];
         }
     },
 
@@ -149,23 +139,18 @@ Vue.component('path-generator', {
     methods: {
         async genPrompt() {
             try {
-                const response = await fetchJson("/api/scraper/gen_prompts", 'POST', {
-                    'N': 1
-                })
-
-                if (response.status != 200) {
-                    // For user facing interface, do something other than this
-                    alert(await response.text());
-                    return;
-                }
-
-                const resp = await response.json()
+                const resp = await fetchAsync("/api/scraper/gen_prompts", 'POST');
 
                 let prompt = {};
 
                 prompt.start = resp['Prompts'][0][0];
                 prompt.end = resp['Prompts'][0][1];
-                prompt.path = await getPath(prompt.start, prompt.end);
+
+                const res = await fetchAsync("/api/scraper/path", "POST", {
+                    "start": prompt.start,
+                    "end": prompt.end
+                });
+                prompt.path = res["Articles"];
 
                 this.prompts.push(prompt);
             } catch (e) {
@@ -209,7 +194,7 @@ Vue.component('marathon-item', {
 
     template: (`
     <li>
-        <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}} 
+        <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}}
         <div>{{prompt.initcheckpoints}}</div>
         <div>{{prompt.checkpoints}}</div>
         <button v-on:click="deletePrompt" type="button" class="btn btn-default" >
@@ -302,7 +287,7 @@ Vue.component('marathon-section', {
                 [this.cp[ind], this.cp[ind+1]] = [this.cp[ind+1], this.cp[ind]];
             }
             this.$forceUpdate();
-        }, 
+        },
 
         deleteA: function(ind, mode) {
             if (mode == 0) {
@@ -333,7 +318,7 @@ Vue.component('marathon-section', {
     },
 
     template: (`
-        <div>          
+        <div>
             <div>
                 <div class="input-group">
                     <label class="input-group-text" for="seedField">Seed:</label>
@@ -345,7 +330,7 @@ Vue.component('marathon-section', {
                     <div>Starting Checkpoints:
                         <ol>
                         <template v-for="(item, index) in startcp" :key="index">
-                            <li>{{item}} 
+                            <li>{{item}}
                                 <button v-on:click="moveup(index, 0)"><i class="bi bi-chevron-up"></i></button>
                                 <button v-on:click="movedown(index, 0)"><i class="bi bi-chevron-down"></i></button>
                                 <button v-on:click="deleteA(index, 0)"><i class="bi bi-trash"></i></button>
@@ -356,7 +341,7 @@ Vue.component('marathon-section', {
                     <div>Reserve Checkpoints:
                         <ol>
                         <template v-for="(item, index) in cp">
-                            <li>{{item}} 
+                            <li>{{item}}
                                 <button v-on:click="moveup(index, 1)"><i class="bi bi-chevron-up"></i></button>
                                 <button v-on:click="movedown(index, 1)"><i class="bi bi-chevron-down"></i></button>
                                 <button v-on:click="deleteA(index, 1)"><i class="bi bi-trash"></i></button>
@@ -365,7 +350,7 @@ Vue.component('marathon-section', {
                         </ol>
                     </div>
                 </div>
-                
+
                 <div class="input-group">
                     <label class="input-group-text" for="inputField">Add checkpoint:</label>
                     <input class="form-control" type="text" name="inputField" id="inputField">
@@ -399,8 +384,8 @@ Vue.component('marathon-section', {
                         >
                         </marathon-item>
                     </ul>
-                </div></div></div> 
-            </div>  
+                </div></div></div>
+            </div>
         </div>
     `)
 });
@@ -415,7 +400,7 @@ var app = new Vue({
         unused: [],
         weeks: [],
         marathon: [],
-  
+
         startPrompt: "",
         endPrompt: "",
     },

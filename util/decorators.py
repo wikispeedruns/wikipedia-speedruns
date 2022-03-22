@@ -84,3 +84,8 @@ def check_request_json(expected: Dict[str, type]):
         return wrapped
 
     return wrapper
+
+
+
+def async_endpoint(endpoint_func):
+    pass
