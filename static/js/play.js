@@ -9,6 +9,7 @@ these components should be as modular/generic as possible.
 //JS module imports
 import { serverData } from "./modules/serverData.js";
 import { fetchJson } from "./modules/fetch.js";
+import { getArticleSummary } from "./modules/wikipediaAPI/util.js";
 
 import { CountdownTimer } from "./modules/game/countdown.js";
 import { FinishPage } from "./modules/game/finish.js";
@@ -78,6 +79,7 @@ let app = new Vue({
     data: {
         startArticle: "",    //For all game modes, this is the first article to load
         endArticle: "",      //For sprint games. Reaching this article will trigger game finishing sequence
+        endArticleSummary: "", // For end article hover tooltip
         path: [],             //array to store the user's current path so far, submitted with run
 
         promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
@@ -103,6 +105,12 @@ let app = new Vue({
 
         this.startArticle = prompt["start"];
         this.endArticle = prompt["end"];
+
+        this.endArticleSummary = await getArticleSummary(this.endArticle);
+        if ("originalimage" in this.endArticleSummary) {
+            document.getElementById("tooltip-img").innerHTML = '<img src="' + this.endArticleSummary["originalimage"]["source"] + '"/>'
+        }
+        document.getElementById("tooltip-txt").innerHTML = this.endArticleSummary["extract_html"]
 
         this.runId = await startRun(PROMPT_ID, LOBBY_ID);
 
@@ -146,12 +154,28 @@ let app = new Vue({
             await this.renderer.loadPage(this.startArticle);
 
             setMargin();
+            handlePagePreview();
 
             await this.pageCallback(this.startArticle, Date.now() - this.startTime)
         },
 
     }
 })
+
+function handlePagePreview() {
+    const tooltip = document.querySelector(".tooltip-auto");
+    const tooltipContainer = document.querySelector(".tooltip-container");
+
+    tooltip.addEventListener("mouseenter", (e) => {
+        tooltipContainer.classList.add("fade-in");
+        tooltipContainer.style.left = `${e.clientX}px`;
+        tooltipContainer.style.bottom = `${window.innerHeight-e.clientY}px`;
+    })
+
+    tooltip.addEventListener("mouseout", () => {
+        tooltipContainer.classList.remove("fade-in");
+    })
+}
 
 function setMargin() {
     const element = document.getElementById("time-box");

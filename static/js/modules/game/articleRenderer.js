@@ -1,3 +1,4 @@
+import { getArticle } from "../wikipediaAPI/util.js";
 
 export class ArticleRenderer {
 
@@ -10,19 +11,14 @@ export class ArticleRenderer {
     }
 
     async loadPage(page) {
-        const resp = await fetch(
-            `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${page}`,
-            {
-                mode: "cors"
-            }
-        )
-        const body = await resp.json();
 
-        this.frame.innerHTML = body["parse"]["text"]["*"];
+        const body = await getArticle(page);
+
+        this.frame.innerHTML = body["text"]["*"];
 
         // Create title
         let titleEl = document.createElement("div");
-        titleEl.innerHTML = "<h1><i>" + body["parse"]["title"] + "</i></h1>";
+        titleEl.innerHTML = "<h1><i>" + body["title"] + "</i></h1>";
         this.frame.insertBefore(titleEl, this.frame.firstChild);
 
 
@@ -38,7 +34,7 @@ export class ArticleRenderer {
 
         window.scrollTo(0, 0);
 
-        return body["parse"]["title"]
+        return body["title"]
     }
 
     async loadPageWrapper(page) {
