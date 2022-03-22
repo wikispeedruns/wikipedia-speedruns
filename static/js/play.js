@@ -78,6 +78,7 @@ let app = new Vue({
     data: {
         startArticle: "",    //For all game modes, this is the first article to load
         endArticle: "",      //For sprint games. Reaching this article will trigger game finishing sequence
+        currentArticle: "",
         path: [],             //array to store the user's current path so far, submitted with run
 
         promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
@@ -104,6 +105,8 @@ let app = new Vue({
         this.startArticle = prompt["start"];
         this.endArticle = prompt["end"];
 
+        this.currentArticle = this.startArticle;
+
         this.runId = await startRun(PROMPT_ID, LOBBY_ID);
 
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback);
@@ -114,6 +117,8 @@ let app = new Vue({
         async pageCallback(page, loadTime) {
             // Game logic for sprint mode:
             this.path.push(page);
+
+            this.currentArticle = page;
 
             this.startTime += loadTime;
 
