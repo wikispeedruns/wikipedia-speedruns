@@ -24,7 +24,7 @@ var MarathonPrompts = {
     },
 
     template: (`
-    <div class="row pb-4">
+    <div class="row">
         <div class="col px-0">
             <div class="card">
                 <div class="alert alert-info my-0" role="alert">
