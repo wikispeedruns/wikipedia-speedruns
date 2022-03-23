@@ -103,15 +103,6 @@ def add_marathon_prompt():
     seed = data['seed']
     checkpoints = data['cp']
     
-    print(start)
-    print(type(start))
-    print(initcheckpoints)
-    print(type(initcheckpoints))
-    print(seed)
-    print(type(seed))
-    print(checkpoints)
-    print(type(checkpoints))
-    
     query = "INSERT INTO `marathonprompts` (start, initcheckpoints, seed, checkpoints) VALUES (%s, %s, %s, %s);"
     db = get_db()
     with db.cursor() as cursor:
