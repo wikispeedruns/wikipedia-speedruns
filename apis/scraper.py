@@ -1,5 +1,6 @@
 from tabnanny import check
 from flask import session, request, abort, Blueprint, jsonify, current_app
+from util.async_result import register_async_endpoint
 
 from wikispeedruns.scraper import findPaths
 from wikispeedruns.scraper_graph_utils import convertToArticleName
@@ -15,67 +16,30 @@ scraper_api = Blueprint("scraper", __name__, url_prefix="/api/scraper")
 
 SCRAPER_TIMEOUT = 20
 
-def get_result(task):
-    task_id = request.json['task_id']
-    result = task.AsyncResult(task_id)
+# Shortest path
 
-    if result.ready():
-        return {
-            "status": "complete",
-            "result": result.get()
-        }
-    else:
-        return {
-            "status": "pending"
-        }
-
-
-@scraper_api.post('/path')
-@check_request_json({'start': str, 'end': str})
-def get_path():
-
+def shortest_path_parse(task, request):
     start = request.json['start']
     end = request.json['end']
-
-    result = shortest_path.delay(start, end)
-
-    return {
-        "task_id": result.id
-    }
-
-@scraper_api.post('/path/result')
-@check_request_json({'task_id': str})
-def get_path_result():
-    return get_result(shortest_path)
-
+    return task.delay(start, end)
 
 @celery.task(time_limit=SCRAPER_TIMEOUT)
 def shortest_path(start: str, end: str):
     return findPaths(start, end)
 
-@scraper_api.post('/gen_prompts')
-def get_generated():
-    result = generate_prompt.delay()
-    return {
-        "task_id": result.id
-    }
+register_async_endpoint(scraper_api, "/path", shortest_path, shortest_path_parse)
 
-@scraper_api.post('/gen_prompts/result')
-@check_request_json({'task_id': str})
-def get_generated_result():
-    return get_result(shortest_path)
 
+# Prompt Generation
+
+def generate_prompt_parse(task, request):
+    return task.delay()
 
 @celery.task(time_limit=SCRAPER_TIMEOUT)
 def generate_prompt():
     d = 25
     thresholdStart = 200
-
-    # try:
     paths = generatePrompts(thresholdStart=thresholdStart, thresholdEnd=thresholdStart, n=1, dist=d)
-    # except Exception as err:
-    #     print(err)
-    #     return str(err), 500
 
     outputArr = []
 
@@ -83,3 +47,6 @@ def generate_prompt():
         outputArr.append([str(convertToArticleName(path[0])), str(convertToArticleName(path[-1]))])
 
     return {'Prompts': outputArr}
+
+
+register_async_endpoint(scraper_api, "/gen_prompts", generate_prompt, generate_prompt_parse)

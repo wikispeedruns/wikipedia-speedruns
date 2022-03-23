@@ -41,7 +41,7 @@ async function fetchAsync(basePath, method='GET', body=null)
                 clearInterval(interval);
                 resolve(resp["result"]);
             }
-        }, 1000);
+        }, 5000);
     });
 
 
