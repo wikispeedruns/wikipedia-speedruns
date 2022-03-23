@@ -9,12 +9,15 @@ these components should be as modular/generic as possible.
 //JS module imports
 import { serverData } from "./modules/serverData.js";
 import { fetchJson } from "./modules/fetch.js";
+import { startRun, submitRun } from "./modules/game/runs.js";
 
 import { CountdownTimer } from "./modules/game/countdown.js";
 import { FinishPage } from "./modules/game/finish.js";
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 
 import { basicCannon, fireworks, side } from "./modules/confetti.js";
+
+import { addSprintRunToLocalStorage, submitSprintRunToLocalStorage, uploadAllLocalStorageSprintRuns } from "./modules/localStorage/localStorageSprint.js";
 
 
 // retrieve the unique prompt_id of the prompt to load
@@ -40,34 +43,6 @@ async function getPrompt(promptId, lobbyId=null) {
     return await response.json();
 }
 
-async function startRun(promptId, lobbyId=null) {
-    // No need to record unfinished private runs
-    if (lobbyId) {
-        return -1;
-    }
-
-    const response = await fetchJson("/api/runs", "POST", {
-        "prompt_id": promptId,
-    });
-    return await response.json();
-}
-
-async function submitRun(promptId, lobbyId,  runId, startTime, endTime, path) {
-    const reqBody = {
-        "start_time": startTime,
-        "end_time": endTime,
-        "path": path,
-    }
-
-    if (lobbyId) {
-        const response = await fetchJson(`/api/lobbys/${lobbyId}/prompts/${promptId}/runs`, 'POST', reqBody);
-        return (await response.json())["run_id"];
-    } else {
-        // Send results to API
-        const response = await fetchJson(`/api/runs/${runId}`, 'PATCH', reqBody);
-        return runId;
-    }
-}
 
 //Vue container. This contains data, rendering flags, and functions tied to game logic and rendering. See play.html
 let app = new Vue({
@@ -96,9 +71,15 @@ let app = new Vue({
         started: false,      //Flag for whether a game has started (countdown finished), used for rendering
 
         renderer: null,
+
+
+        loggedIn: false,
     },
 
     mounted: async function() {
+
+        this.loggedIn = "username" in serverData;
+
         this.promptId = PROMPT_ID;
         this.lobbyId = LOBBY_ID;
 
@@ -109,9 +90,16 @@ let app = new Vue({
 
         this.currentArticle = this.startArticle;
 
-        this.runId = await startRun(PROMPT_ID, LOBBY_ID);
+        if (this.loggedIn) {
+            this.runId = await startRun(PROMPT_ID, LOBBY_ID);
+        } else {
+            this.runId = addSprintRunToLocalStorage(PROMPT_ID);
+            console.log("Not logged in, adding to local storage")
+            //console.log(this.runId);
+        }
 
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback);
+
     },
 
 
@@ -134,8 +122,13 @@ let app = new Vue({
 
                 this.endTime = Date.now();
 
-                this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
-              
+                if (this.loggedIn) {
+                    this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
+                } else {
+                    this.runId = submitSprintRunToLocalStorage(PROMPT_ID, this.runId, this.startTime, this.endTime, this.path);
+                    console.log("Not logged in, submitting run to local storage")
+                }
+
                 fireworks();
             }
 
@@ -167,7 +160,7 @@ function setMargin() {
     const element = document.getElementById("time-box");
     let margin = (element.offsetHeight + 25) > 100 ? (element.offsetHeight + 25) : 100
     document.getElementById("wikipedia-frame").lastChild.style.paddingBottom = margin +"px";
-    console.log(margin)
+    //console.log(margin)
 }
 
 // Prevent accidental leaves

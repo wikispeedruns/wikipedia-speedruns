@@ -10,6 +10,8 @@ import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 
 import { basicCannon, fireworks, side } from "./modules/confetti.js";
 
+import { submitMarathonRunToLocalStorage, uploadAllLocalStorageMarathonRuns } from "./modules/localStorage/localStorageMarathon.js";
+
 //retrieve the unique prompt_id of the prompt to load
 const PROMPT_ID = serverData["prompt_id"];
 const load_save = serverData["load_save"] === '1';
@@ -23,7 +25,7 @@ let app = new Vue({
         'marathon-help': MarathonHelp,
     },
     data: {
-
+        loggedIn: false,
         username: serverData["username"],
 
         checkpoints: [],
@@ -80,6 +82,7 @@ let app = new Vue({
 
 
     mounted: async function() {
+        this.loggedIn = "username" in serverData;
         this.promptId = PROMPT_ID;
 
         const response = await fetch("/api/marathon/prompt/" + this.promptId);
@@ -223,7 +226,12 @@ let app = new Vue({
             window.onbeforeunload = null;
             this.endTime = Date.now();
 
-            this.runId = await submitRun(this.promptId, this.endTime - this.startTime + this.lastTime, this.visitedCheckpoints, this.path, finished);
+            if (this.loggedIn) {
+                this.runId = await submitRun(this.promptId, this.endTime - this.startTime + this.lastTime, this.visitedCheckpoints, this.path, finished);
+            } else {
+                this.runId = await submitMarathonRunToLocalStorage(this.promptId, this.endTime - this.startTime + this.lastTime, this.visitedCheckpoints, this.path, finished);
+            }
+
             removeSave(PROMPT_ID);
         
         },
