@@ -40,7 +40,27 @@ var FinishPage = {
 
 
         generateResults: function(event) {
-            return `WIP`
+
+            let ranks = {
+                0: "bruh 💀", //0
+                3: "Wiki Noob ", //1-3
+                6: "Wiki Apprentice", //4-6
+                9: "Wiki Enjoyer", //7-9
+                14: "Winner", //10-14
+                20: "Tryhard", //15-19
+                35: "Overachiever", //20-34
+                100: "We didn't plan for anyone to get this far" //35+
+            };
+
+            let rank = "We didn't plan for anyone to get this far"
+            for (const threshold in ranks) {
+                if (this.numCheckpointsVisited <= threshold) {
+                    rank = ranks[threshold];
+                    break;
+                }
+            }
+
+            return `Wiki Speedruns Marathon ${this.promptId}\n${this.startArticle}\n${this.numCheckpointsVisited} 🚩\nStatus: ${rank}`
         },
 
         genPathsToCheckpoints: function() {
