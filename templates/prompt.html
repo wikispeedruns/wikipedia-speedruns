@@ -12,10 +12,19 @@
 {% block content %}
 <div id="app">
     <div class="col-xl-12">
+        <p>
+            <small v-cloak>
+                <a v-if="lobbyId" v-bind:href="'/lobby/' + lobbyId"> Back to Lobby</a>
+                <a v-else href="/"> Back to Home</a>
+            </small>
+        </p>
+
         <div class="card">
             <div class="card-body">
 
+
                 <h4>Prompt #[[getPromptID()]]</h4>
+
                 <p>
                     <h6 v-if="available">
                         <strong>[[prompt.start]]</strong> to <strong v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>
@@ -32,62 +41,31 @@
                         <th scope="col">Path</th>
                     </thead>
                     <tbody>
+                        <!-- See this https://v2.vuejs.org/v2/guide/components.html?redirect=true#DOM-Template-Parsing-Caveats -->
+                        <tr is="leaderboard-row"
+                            v-if="currentRunPosition === -1"
+                            v-bind:current-run-id="getRunID()"
+                            v-bind:run="currentRun"
+                            v-bind:rank="currentRunRank"
+                        ></tr>
 
-                        <tr v-if="currentRunPosition === -1">
-                            <td>[[currentRunRank]]</td>
-                            <td class="l-col" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
-                            <td v-else><strong>You</strong></td>
-                            <td class="l-col">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
-                            <td>[[currentRun.path.length]]</td>
-                            <td>[[currentRun.path | pathArrow]]
-                                <a v-bind:href="'/replay?run_id=' + currentRun.run_id" target="_blank" title="Replay" >
-                                    <i class="bi bi-play"></i>
-                                </a>
-                            </td>
+                        <tr v-if="currentRunPosition === -1"><td colspan="5">...</td></tr>
 
-                        </tr>
+                        <tr is="leaderboard-row"
+                            v-for="(run, index) in renderedRuns"
+                            v-bind:key="run.run_id"
+                            v-bind:current-run-id="getRunID()"
+                            v-bind:run="run"
+                            v-bind:rank="getRenderedRank(index)"
+                        ></tr>
 
-                        <tr v-if="currentRunPosition === -1">
-                            <td>...</td>
-                            <td>[[null]]</td>
-                            <td>[[null]]</td>
-                            <td>[[null]]</td>
-                            <td>[[null]]</td>
-                        </tr>
-                        <tr v-for="(run, index) in renderedRuns">
-                            <td>[[getRenderedRank(index)]]</td>
-                            <td class="l-col" v-if="run.username"><strong>[[run.username]]</strong></td>
-                            <td v-else><strong>You</strong></td>
-                            <td class="l-col">[[(run.run_time/1000000).toFixed(3)]] s</td>
-                            <td>[[run.path.length]]</td>
-                            <td>[[run.path | pathArrow]]
-                                <a v-bind:href="'/replay?run_id=' + run.run_id" target="_blank" title="Replay" >
-                                    <i class="bi bi-play"></i>
-                                </a>
-                            </td>
-
-                        </tr>
-
-                        <tr v-if="currentRunPosition === 1">
-                            <td>...</td>
-                            <td>[[null]]</td>
-                            <td>[[null]]</td>
-                            <td>[[null]]</td>
-                            <td>[[null]]</td>
-                        </tr>
-                        <tr v-if="currentRunPosition === 1">
-                            <td>[[currentRunRank]]</td>
-                            <td class="l-col" v-if="currentRun.username"><strong>[[currentRun.username]]</strong></td>
-                            <td v-else><strong>You</strong></td>
-                            <td class="l-col">[[(currentRun.run_time/1000000).toFixed(3)]] s</td>
-                            <td>[[currentRun.path.length]]</td>
-                            <td>[[currentRun.path | pathArrow]]
-                                <a v-bind:href="'/replay?run_id=' + currentRun.run_id" target="_blank" title="Replay">
-                                    <i class="bi bi-play"></i>
-                                </a>
-                            </td>
-                        </tr>
-
+                        <tr v-if="currentRunPosition === 1"><td colspan="5">...</td></tr>
+                        <tr is="leaderboard-row"
+                            v-if="currentRunPosition === 1"
+                            v-bind:current-run-id="getRunID()"
+                            v-bind:run="currentRun"
+                            v-bind:rank="currentRunRank"
+                        ></tr>
 
                     </tbody>
                 </table>

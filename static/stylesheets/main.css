@@ -81,7 +81,7 @@ a:hover, a:hover * {
     background-color: #F8F8F8;
     margin-bottom: 15px;
     border: 2px solid #000000 !important;
-    
+
 }
 
 @media (max-width: 1200px) {
@@ -110,6 +110,7 @@ a:hover, a:hover * {
     }
 }
 
+
 .bold {
     font-weight: bold !important;
 }
@@ -119,3 +120,6 @@ a:hover, a:hover * {
     white-space: nowrap;
     width: 1%;
 }
+
+[v-cloak] { display: none }
+

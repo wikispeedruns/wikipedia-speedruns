@@ -21,6 +21,7 @@
         <div class="row flex-row">
             <div class="col-sm-auto text-nowrap px-4 py-2">
                 Start Article<br><strong>[[startArticle]]</strong>
+                <br>Current Article<br><strong>[[currentArticle]]</strong>
             </div>
             <div class="col-sm-auto text-nowrap px-4 py-2">
                 End Article<br><strong>[[endArticle]]</strong>
@@ -40,6 +41,7 @@
     <!-- TODO its a bit ugly passing all these in, should clean this up-->
     <finish-page
         v-bind:prompt-id="promptId"
+        v-bind:lobby-id="lobbyId"
         v-bind:run-id="runId"
 
         v-bind:start-article="startArticle"

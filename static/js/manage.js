@@ -1,6 +1,6 @@
 import { fetchJson } from "./modules/fetch.js";
 import { getPath } from "./modules/scraper.js";
-import { getArticleTitle } from "./modules/getArticleTitle.js";
+import { getArticleTitle } from "./modules/wikipediaAPI/util.js";
 
 Vue.component('prompt-item', {
     props: ['prompt'],
@@ -23,9 +23,9 @@ Vue.component('prompt-item', {
 
     template: (`
     <li>
-        <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}} -> {{prompt.end}} 
+        <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}} -> {{prompt.end}}
 
-        <span v-if="prompt.used && !prompt.rated"> 
+        <span v-if="prompt.used && !prompt.rated">
             {{prompt.active_start}} - {{prompt.active_end}}
         </span>
 
@@ -93,7 +93,7 @@ Vue.component('prompt-set', {
         <p v-if="start === end">{{start.substring(5)}}</p>
 
         <ul class="ps-3 my-0">
-            <prompt-item 
+            <prompt-item
                 v-for="p in prompts"
                 v-bind:prompt="p"
                 v-bind:key="p.prompt_id"
@@ -106,8 +106,8 @@ Vue.component('prompt-set', {
             <div class="input-group input-group-sm mb-2">
                 <input class="form-control" v-model="promptToAdd">
                 <div class="input-group-append">
-                    <button type="submit" class="btn btn-dark"> 
-                        <i class="bi bi-arrow-right-square"></i> 
+                    <button type="submit" class="btn btn-dark">
+                        <i class="bi bi-arrow-right-square"></i>
                     </button>
                 </div>
             </div>
@@ -358,8 +358,9 @@ var app = new Vue({
         unused: [],
         weeks: [],
         marathon: [],
-
-        toMakePublic: 0,
+  
+        startPrompt: "",
+        endPrompt: "",
     },
 
     created: async function() {
@@ -372,13 +373,7 @@ var app = new Vue({
         },
         async getPrompts() {
             const prompts = await (await fetchJson("/api/sprints/managed")).json();
-
-            console.log(prompts)
-
             this.unused = prompts.filter(p => !p["used"]);
-
-            console.log(this.unused)
-
             const used = prompts.filter(p => p["used"]);
 
             console.log(used)
@@ -444,19 +439,22 @@ var app = new Vue({
 
         async newPrompt(event) {
 
-            let reqBody = {};
+            const start = await getArticleTitle(this.startPrompt);
+            if (!start) {
+                alert(`Invalid article name "${this.startPrompt}"`);
+                return;
+            }
 
-            reqBody["start"] = await getArticleTitle(document.getElementById("start").value);
-
-            reqBody["end"] = await getArticleTitle(document.getElementById("end").value);
+            const end = await getArticleTitle(this.endPrompt);
+            if (!end) {
+                alert(`Invalid article name "${this.endPrompt}"`);
+                return;
+            }
 
             try {
-                const response = await fetch("/api/sprints/", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(reqBody)
+                const response = await fetchJson("/api/sprints/", "POST", {
+                    "start": start,
+                    "end": end
                 })
 
             } catch (e) {

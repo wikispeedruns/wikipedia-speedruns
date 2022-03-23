@@ -103,7 +103,7 @@ def get_archive_prompts():
         sprints, num_prompts = prompts.get_archive_prompts("sprint",
             offset=offset,
             limit=limit,
-            sort_desc=sort_desc,                           
+            sort_desc=sort_desc,
             user_id=session.get("user_id")
         )
 
