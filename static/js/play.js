@@ -9,6 +9,7 @@ these components should be as modular/generic as possible.
 //JS module imports
 import { serverData } from "./modules/serverData.js";
 import { fetchJson } from "./modules/fetch.js";
+import { getArticleSummary } from "./modules/wikipediaAPI/util.js";
 
 import { CountdownTimer } from "./modules/game/countdown.js";
 import { FinishPage } from "./modules/game/finish.js";
@@ -81,6 +82,7 @@ let app = new Vue({
         startArticle: "",    //For all game modes, this is the first article to load
         endArticle: "",      //For sprint games. Reaching this article will trigger game finishing sequence
         currentArticle: "",
+        articlePreview: "",
         path: [],             //array to store the user's current path so far, submitted with run
 
         promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
@@ -96,6 +98,11 @@ let app = new Vue({
         started: false,      //Flag for whether a game has started (countdown finished), used for rendering
 
         renderer: null,
+        hover: false,
+        loading: false,
+
+        clientX: 0,
+        clientY: 0
     },
 
     mounted: async function() {
@@ -111,12 +118,14 @@ let app = new Vue({
 
         this.runId = await startRun(PROMPT_ID, LOBBY_ID);
 
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback);
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.setupPreviews);
     },
 
 
     methods : {
         async pageCallback(page, loadTime) {
+            this.loading = false;
+            this.hover = false;
             // Game logic for sprint mode:
             this.path.push(page);
 
@@ -157,8 +166,66 @@ let app = new Vue({
 
             setMargin();
 
+            this.setupPreviews();
             await this.pageCallback(this.startArticle, Date.now() - this.startTime)
         },
+
+        displayPreview: function() {
+            let html = "";
+            if ("originalimage" in this.articlePreview) {
+                html += '<img src="' + this.articlePreview["originalimage"]["source"] + '"/>';
+            }
+            html += '<div>' + this.articlePreview["extract_html"] + '</div>';
+            return html;
+        },
+
+        computePosition: function() {
+            const vh = window.innerHeight;
+            const vw = window.innerWidth;
+            const styleObject = new Object();
+            if (this.clientX < vw / 2.0) {
+                styleObject['left'] = `${this.clientX+10}px`;
+            } else {
+                styleObject['right'] = `${vw-this.clientX+10}px`;
+            }
+            if (this.clientY < vh / 2.0) {
+                styleObject['top'] = `${this.clientY+10}px`;
+            } else {
+                styleObject['bottom'] = `${vh-this.clientY+10}px`;
+            }
+            return styleObject;
+        },
+
+        mouseEnter: function(e) {
+            this.loading = true;
+            const href = e.currentTarget.getAttribute("href");
+            const title = href.split('/wiki/').pop();
+            // const promise1 = getArticleSummary(title);
+            // const promise2 = new Promise(resolve => setTimeout(resolve, 500));
+            getArticleSummary(title).then(resp => {
+                if (this.loading) {
+                    this.articlePreview = resp;
+                    this.hover = true;
+                    this.clientX = e.clientX;
+                    this.clientY = e.clientY;
+                }
+            });
+        },
+
+        mouseLeave: function() {
+            this.loading = false;
+            this.hover = false;
+            this.articlePreview = '';
+        },
+
+        setupPreviews: function() {
+            document.getElementById("wikipedia-frame").querySelectorAll("a").forEach(e => {
+                if (e.hasAttribute("href") && e.getAttribute("href").startsWith("/wiki/")) {
+                    e.addEventListener("mouseenter", this.mouseEnter);
+                    e.addEventListener("mouseleave", this.mouseLeave);
+                }
+            });
+        }
 
     }
 })
@@ -167,7 +234,6 @@ function setMargin() {
     const element = document.getElementById("time-box");
     let margin = (element.offsetHeight + 25) > 100 ? (element.offsetHeight + 25) : 100
     document.getElementById("wikipedia-frame").lastChild.style.paddingBottom = margin +"px";
-    console.log(margin)
 }
 
 // Prevent accidental leaves
