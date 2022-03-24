@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+
+<script defer type="module" src="{{url_for('static', filename='js/marathon_prompt.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+
+<div id="app">
+    <div class="col-xl-12">
+        <h4 class="my-4">[[username]]'s Marathon Record</h4>
+        <div class="card">
+            
+            <div class="card-body">
+
+                <p>[[runs.length]] total runs</p>
+                
+                <table class="table table-hover">
+                    <thead>
+                        <th class="fit" scope="col">Prompt #</th>
+                        <th scope="col">Start</th>
+                        <th scope="col"><a v-on:click="toggleSort('path')">Articles Reached <span v-html="sortStatus('path')"></span></a></th>
+                        <th scope="col"><a v-on:click="toggleSort('cp')">Checkpoint Count <span v-html="sortStatus('cp')"></span></a></th>
+                        <th scope="col" class="checkpointCol">Checkpoints Reached</th>
+                        <th class="fit" scope="col"><a v-on:click="toggleSort('time')">Time <span v-html="sortStatus('time')"></span></a></th>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(run, index) in renderedRuns">
+                            <td>[[run.prompt_id]]</td>
+                            <td>[[run.start]]</td>
+                            <td>[[run.path.length]]</td>
+                            <td>[[run.checkpoints.length]]</td>
+                            <td class="checkpointCol">[[run.checkpoints]]</td>
+                            <td class="l-col">[[(run.total_time/1000).toFixed(3)]] s</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!--<p class="my-4" v-show="runs.length === 0">You don't have any marathon runs. Try one from the home page list! <a v-bind:href="'\'">Home</a></p>-->
+
+            </div>
+
+            <div v-cloak class="card-footer text-center">
+                <button class="btn btn-outline-secondary"
+                    v-on:click="buildNewLink(1)"
+                    v-bind:class="{invisible: getPageNo() === 1 || getPageNo()===0}">
+
+                    <i class="bi bi-chevron-double-left"></i>
+                </button>
+
+                <button class="btn btn-outline-secondary"
+                    v-on:click="buildNewLink(parseInt(page)-1)"
+                    v-bind:class="{invisible: getPageNo() === 1 || getPageNo()===0}">
+
+                    <i class="bi bi-chevron-left" id="prev-page"></i>
+                </button>
+
+                <span>Page <strong>[[getPageNo()]]</strong> of [[totalpages]] </span>
+
+                <button class="btn btn-outline-secondary"
+                    v-on:click="buildNewLink(parseInt(page)+1)"
+                    v-bind:class="{invisible: getPageNo() === totalpages}">
+
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+
+                <button class="btn btn-outline-secondary"
+                    v-on:click="buildNewLink(totalpages)"
+                    v-bind:class="{invisible: getPageNo() === totalpages}">
+
+                    <i class="bi bi-chevron-double-right"></i>
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

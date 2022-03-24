@@ -47,8 +47,8 @@
                             v-bind:current-run-id="getRunID()"
                             v-bind:run="currentRun"
                             v-bind:rank="currentRunRank"
-                        >
-                        </tr>
+                        ></tr>
+
                         <tr v-if="currentRunPosition === -1"><td colspan="5">...</td></tr>
 
                         <tr is="leaderboard-row"
@@ -57,8 +57,7 @@
                             v-bind:current-run-id="getRunID()"
                             v-bind:run="run"
                             v-bind:rank="getRenderedRank(index)"
-                        >
-                        </tr>
+                        ></tr>
 
                         <tr v-if="currentRunPosition === 1"><td colspan="5">...</td></tr>
                         <tr is="leaderboard-row"
@@ -66,9 +65,7 @@
                             v-bind:current-run-id="getRunID()"
                             v-bind:run="currentRun"
                             v-bind:rank="currentRunRank"
-                        >
-                        </tr>
-
+                        ></tr>
 
                     </tbody>
                 </table>

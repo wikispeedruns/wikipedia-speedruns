@@ -32,8 +32,33 @@ Vue.component('prompt-item', {
         <button v-on:click="deletePrompt" type="button" class="btn btn-default">
             <i class="bi bi-trash"></i>
         </button>
-    </li>`
-    )
+    </li>`)
+});
+
+Vue.component('marathon-item', {
+    props: ['prompt'],
+
+    methods: {
+
+        async deletePrompt() {
+            const resp = await fetchJson("/api/marathon/delete/" + this.prompt.prompt_id, "DELETE");
+
+            if (resp.status == 200) this.$emit('delete-prompt')
+            else alert(await resp.text())
+
+            app.getPrompts();
+        },
+    },
+
+    template: (`
+    <li>
+        <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}} 
+        <div>{{prompt.initcheckpoints}}</div>
+        <div>{{prompt.checkpoints}}</div>
+        <button v-on:click="deletePrompt" type="button" class="btn btn-default" >
+            <i class="bi bi-trash"></i>
+        </button>
+    </li>`)
 });
 
 
@@ -52,12 +77,12 @@ Vue.component('prompt-set', {
             if (response.status != 200) {
                 alert(await response.text());
             } else {
-                this.$emit('move-prompt')  // TODO reload just this box instead of triggering a full realead
+                this.$emit('move-prompt') // TODO reload just this box instead of triggering a full realead
             }
         },
     },
 
-    data: function () {
+    data: function() {
         return {
             promptToAdd: 0
         }
@@ -155,7 +180,7 @@ Vue.component('path-generator', {
                 prompt.path = await getPath(prompt.start, prompt.end);
 
                 this.prompts.push(prompt);
-            } catch(e) {
+            } catch (e) {
                 console.log(e);
             }
         }
@@ -176,6 +201,155 @@ Vue.component('path-generator', {
 
 
 
+Vue.component('marathon-generator', {
+    data: function() {
+        return {
+            start: "United States",
+            startcp: [],
+            cp: [],
+            seed: "0",
+        }
+    },
+
+
+    methods: {
+        submitPrompt: async function() {
+            try {
+
+                if (this.startcp.length != 5) throw new Error("Need 5 starting checkpoints");
+                if (this.cp.length < 40) throw new Error("Need 40+ checkpoints");
+
+                const response = await fetchJson("/api/marathon/add/", 'POST', {'data': this.$data })
+
+                if (response.status != 200) {
+                    // For user facing interface, do something other than this
+                    alert(await response.text());
+                    return;
+                }
+
+                document.getElementById("generatedMarathonText").innerHTML = "Prompt submit success. Refresh to see recently added prompt"
+
+            } catch (e) {
+                document.getElementById("generatedMarathonText").innerHTML = e
+                console.log(e);
+            }
+        },
+
+        addArticle: async function(mode) {
+            if (document.getElementById("inputField").value.length < 1) return;
+
+            let a = await getArticleTitle(document.getElementById("inputField").value)
+
+            if (this.cp.includes(a) || this.startcp.includes(a)) {
+                document.getElementById("generatedMarathonText").innerHTML = "Article already exists"
+                return
+            }
+
+            if (mode == 0) {
+                this.start = a
+            } else if (mode == 1) {
+                this.startcp.push(a)
+            } else if (mode == 2) {
+                this.startcp.unshift(a)
+            } else if (mode == 3) {
+                this.cp.push(a)
+            } else if (mode == 4) {
+                this.cp.unshift(a)
+            }
+        },
+
+        moveup: function (ind, mode) {
+            if (ind == 0) return;
+            if (mode == 0) {
+                [this.startcp[ind-1], this.startcp[ind]] = [this.startcp[ind], this.startcp[ind-1]];
+            } else if (mode == 1) {
+                [this.cp[ind-1], this.cp[ind]] = [this.cp[ind], this.cp[ind-1]];
+            }
+            this.$forceUpdate();
+        },
+
+        movedown: function (ind, mode) {
+            if (mode == 0) {
+                if (ind == this.startcp.length-1) return;
+                [this.startcp[ind], this.startcp[ind+1]] = [this.startcp[ind+1], this.startcp[ind]];
+            } else if (mode == 1) {
+                if (ind == this.cp.length-1) return;
+                [this.cp[ind], this.cp[ind+1]] = [this.cp[ind+1], this.cp[ind]];
+            }
+            this.$forceUpdate();
+        }, 
+
+        deleteA: function(ind, mode) {
+            if (mode == 0) {
+                this.startcp.splice(ind,1)
+            } else if (mode == 1) {
+                this.cp.splice(ind,1)
+            }
+            this.$forceUpdate();
+        }
+    },
+
+    template: (`
+        <div>          
+            <div>
+                <div class="input-group">
+                    <label class="input-group-text" for="seedField">Seed:</label>
+                    <input class="form-control" type="text" name="seedField" v-model="seed">
+                </div>
+
+                <div>
+                    <div>Starting Article: {{start}}</div>
+                    <div>Starting Checkpoints:
+                        <ol>
+                        <template v-for="(item, index) in startcp" :key="index">
+                            <li>{{item}} 
+                                <button v-on:click="moveup(index, 0)"><i class="bi bi-chevron-up"></i></button>
+                                <button v-on:click="movedown(index, 0)"><i class="bi bi-chevron-down"></i></button>
+                                <button v-on:click="deleteA(index, 0)"><i class="bi bi-trash"></i></button>
+                            </li>
+                        </template>
+                        </ol>
+                    </div>
+                    <div>Reserve Checkpoints:
+                        <ol>
+                        <template v-for="(item, index) in cp">
+                            <li>{{item}} 
+                                <button v-on:click="moveup(index, 1)"><i class="bi bi-chevron-up"></i></button>
+                                <button v-on:click="movedown(index, 1)"><i class="bi bi-chevron-down"></i></button>
+                                <button v-on:click="deleteA(index, 1)"><i class="bi bi-trash"></i></button>
+                            </li>
+                        </template>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-group-text" for="inputField">Add checkpoint:</label>
+                    <input class="form-control" type="text" name="inputField" id="inputField">
+                </div>
+                <div>
+                <button v-on:click="addArticle(0)">Set start</button>
+                </div>
+                <div>
+                <button v-on:click="addArticle(1)">Add article to starting checkpoints (end of list)</button>
+                <button v-on:click="addArticle(2)">Add article to starting checkpoints (start of list)</button>
+                </div>
+                <div>
+                <button v-on:click="addArticle(3)">Add article to checkpoints (end of list)</button>
+                <button v-on:click="addArticle(4)">Add article to checkpoints (start of list)</button>
+                </div>
+                <button id="genMarathonPromptButton" v-on:click="submitPrompt">Click to submit prompt</button>
+            </div>
+            <hr>
+            <div id="generatedMarathonText"></div>
+            <hr>  
+        </div>
+    `)
+
+});
+
+
+
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
@@ -183,7 +357,8 @@ var app = new Vue({
     data: {
         unused: [],
         weeks: [],
-
+        marathon: [],
+  
         startPrompt: "",
         endPrompt: "",
     },
@@ -198,10 +373,10 @@ var app = new Vue({
         },
         async getPrompts() {
             const prompts = await (await fetchJson("/api/sprints/managed")).json();
-
             this.unused = prompts.filter(p => !p["used"]);
-
             const used = prompts.filter(p => p["used"]);
+
+            console.log(used)
 
             let daily = used.filter(p => p["rated"]);
             let weeklys = used.filter(p => !p["rated"]);
@@ -227,6 +402,7 @@ var app = new Vue({
             })
 
             let cur = new Date();
+            console.log(cur)
 
             // Change cur to first day of this week
             cur.setUTCDate(cur.getUTCDate() - cur.getUTCDay());
@@ -235,7 +411,7 @@ var app = new Vue({
             for (let i = 0; i < 2; i++) {
                 let end = new Date(cur)
                 end.setDate(cur.getDate() + 7);
-
+                console.log(end)
                 this.weeks.push({
                     start: this.toISODate(cur),
                     end: this.toISODate(end),
@@ -246,8 +422,8 @@ var app = new Vue({
 
                 for (let j = 0; j < 7; j++) {
 
-                    const day =  new Date(cur);
-                    this.weeks[i].days.push( {
+                    const day = new Date(cur);
+                    this.weeks[i].days.push({
                         "date": this.toISODate(day),
                         "prompts": nextDailys[this.toISODate(day)] || []
                     });
@@ -255,6 +431,10 @@ var app = new Vue({
                     cur.setDate(cur.getDate() + 1);
                 }
             }
+
+            const marathonprompts = await (await fetchJson("/api/marathon/all")).json();
+
+            this.marathon = marathonprompts;
         },
 
         async newPrompt(event) {
@@ -262,11 +442,13 @@ var app = new Vue({
             const start = await getArticleTitle(this.startPrompt);
             if (!start) {
                 alert(`Invalid article name "${this.startPrompt}"`);
+                return;
             }
 
             const end = await getArticleTitle(this.endPrompt);
             if (!end) {
                 alert(`Invalid article name "${this.endPrompt}"`);
+                return;
             }
 
             try {
@@ -275,7 +457,7 @@ var app = new Vue({
                     "end": end
                 })
 
-            } catch(e) {
+            } catch (e) {
                 console.log(e);
             }
 
@@ -284,6 +466,3 @@ var app = new Vue({
 
     } // End methods
 }); // End vue
-
-
-

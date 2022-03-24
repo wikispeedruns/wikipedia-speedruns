@@ -1,11 +1,11 @@
 
-import { getRandTip } from "./tips.js";
+import { getRandTip } from "../tips.js";
 
 var CountdownTimer = {
 
     props: [
         "startArticle",
-        "endArticle",
+        "activeCheckpoints",
     ],
 
     data: function () {
@@ -58,12 +58,12 @@ var CountdownTimer = {
     <div v-show="!started">
         <div class="text-center text-size-1">
             <p>Starting Article: <strong>{{startArticle}}</strong></p>
-            <p>Goal Article: <strong>{{endArticle}}</strong></p>
+            <p>Starting Checkpoints: <strong>{{activeCheckpoints}}</strong></p>
             <p>Good Luck!</p>
 
             <div><button id="start-btn" class="btn btn-outline-secondary">(Don't want to wait? Start immediately!)</button></div>
         </div>
-        <div v-show="countdownRemaining < 7000000" class="mirroredimgblock">
+        <div v-show="countdownRemaining < 700" class="mirroredimgblock">
             <img src="/static/assets/startgun.gif" class="startgun">
             <img src="/static/assets/startgun.gif" class="startgun invgif">
         </div>

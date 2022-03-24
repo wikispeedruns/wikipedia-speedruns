@@ -15,6 +15,8 @@ import { CountdownTimer } from "./modules/game/countdown.js";
 import { FinishPage } from "./modules/game/finish.js";
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 
+import { basicCannon, fireworks, side } from "./modules/confetti.js";
+
 
 // retrieve the unique prompt_id of the prompt to load
 const PROMPT_ID = serverData["prompt_id"];
@@ -140,7 +142,10 @@ let app = new Vue({
                 window.onbeforeunload = null;
 
                 this.endTime = Date.now();
+
                 this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
+              
+                fireworks();
             }
 
         },

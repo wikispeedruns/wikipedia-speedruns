@@ -152,7 +152,7 @@ def forwardBFS(start: int, end: int, forwardVisited: Dict[int, Tuple[int, int]],
 
     #CHeck if the queue is empty before a path is found
     if not queue:
-        raise RuntimeError('No Path')
+        raise RuntimeError(f'No Path in forward for {start}, {end}')
     
     #pop from queue and prepare to process the first {batchSize} queue elements, however many is left in the queue, or however many elements if left in the queue that all has the same depth.
     #ensure that only elements of the same depth are searched in each function call
@@ -238,7 +238,7 @@ def reverseBFS(start: int, end: int, forwardVisited: Dict[int, Tuple[int, int]],
 
     #CHeck if the queue is empty before a path is found
     if not queue:
-        raise RuntimeError('No Path')
+        raise RuntimeError(f'No Path in reverse for {start}, {end}')
     
     #pop from queue and prepare to process the first {batchSize} queue elements, however many is left in the queue, or however many elements if left in the queue that all has the same depth.
     #ensure that only elements of the same depth are searched in each function call
@@ -401,24 +401,31 @@ def findPaths(startTitle: str, endTitle: str) -> Dict[str, List]:
       
     start_time = time.time()
     
-    startID = int(convertToID(startTitle))
-    endID = int(convertToID(endTitle))
+    if startTitle == endTitle:
+        return {"Articles":[convertToArticleName(startTitle)],
+              "ArticlesIDs":[endTitle]}
+    
+    startID = startTitle
+    endID = endTitle
+    if not id:
+        startID = int(convertToID(startTitle))
+        endID = int(convertToID(endTitle))
     
     #try:
     paths = bidirectionalSearcher(startID, endID)
     
-    print(paths)
+    #print(paths)
     
     for path in paths:
-        print("Path:")
-        print(path)
+        #print("Path:")
+        #print(path)
         print(convertPathToNames(path))
         
     
     output = {"Articles":convertPathToNames(paths[0]),
               "ArticlesIDs":paths[0]}
     
-    print(f"Search duration: {time.time() - start_time}")
+    #print(f"Search duration: {time.time() - start_time}")
     
     
     return output

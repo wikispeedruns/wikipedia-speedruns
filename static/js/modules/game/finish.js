@@ -45,10 +45,7 @@ var FinishPage = {
 
 
         generateResults: function(event) {
-            return `Wiki Speedruns ${this.promptId}
-            ${this.startArticle}
-            ${this.path.length - 1} 🖱️
-            ${(this.finalTime) / 1000} ⏱️`
+            return `Wiki Speedruns ${this.promptId}\n${this.startArticle}\n${this.path.length - 1} 🖱️\n${(this.finalTime) / 1000} ⏱️`
         },
 
     },
