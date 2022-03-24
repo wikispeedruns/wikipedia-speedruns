@@ -46,17 +46,27 @@
                             <thead>
                                 <th scope="col">Prompt #</th>
                                 <th scope="col">Starting Article</th>
+                                <th class="text-center"></th>
                             </thead>
                             <tbody>
                                 <tr v-for="prompt in dailyPrompts" v-cloak>
                                     <td>[[prompt.prompt_id]]</span> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
 
                                     <td>[[prompt.start]]</td>
+
+                                    <td class="text-center">
+                                        <template v-if="prompt.played">
+                                            <a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a>
+                                        </template>
+                                        <template v-else>
+                                            <span title="Play this prompt to see the results!">-</span>
+                                        </template>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                     </template>
-                    <template v-else> 
+                    <template v-else>
                         <hr>
                         <p>Currently unavailable</p>
                     </template>
@@ -68,12 +78,12 @@
                 </div>
             </div>
 
-        </div>    
+        </div>
 
         <div class="col-sm-6">
             <div class="card">
                 <div class="card-body">
-    
+
                     <h4> Try some other Prompts </h4>
                     <table class="table table-hover">
                         <thead>
@@ -95,26 +105,26 @@
                                         <span title="Play this prompt to see the results!">-</span>
                                     </template>
                                 </td>
-    
+
                             </tr>
                         </tbody>
                     </table>
                 </div>
-    
-    
+
+
             </div>
         </div>
 
     </div>
 
     <p class="my-4"> Still want more? Checkout our <a href="/archive">archive</a> or click <a href="/random">here</a> to try a random prompt.</p>
-    
+
     <hr class="mt-4">
 
     <div class="container-xxl" id="marathon-block">
 
         <marathon-prompts v-bind:prompts="marathonPrompts" v-bind:username="username"></marathon-prompts>
-        
+
     </div>
 
 
@@ -140,9 +150,9 @@
         </div>
     </div>
 
-    
 
-    
+
+
 
     <hr class="mt-4">
 
