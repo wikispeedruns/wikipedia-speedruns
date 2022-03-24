@@ -5,9 +5,10 @@ export class ArticleRenderer {
     /* frame: DOM element (i.e. through getElementById) to render article in
      * pageCallback: Called upon loading an article, should expect new page and load time
      */
-    constructor(frame, pageCallback) {
+    constructor(frame, pageCallback, setupPreviews) {
         this.frame = frame;
         this.pageCallback = pageCallback;
+        this.setupPreviews = setupPreviews;
     }
 
     async loadPage(page) {
@@ -43,6 +44,7 @@ export class ArticleRenderer {
             const startTime = Date.now();
             const title = await this.loadPage(page);
 
+            this.setupPreviews();
             this.pageCallback(title, Date.now() - startTime);
 
         } catch (error) {

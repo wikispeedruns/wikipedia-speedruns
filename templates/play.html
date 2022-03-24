@@ -21,7 +21,10 @@
                 <br>Current Article<br><strong>[[currentArticle]]</strong>
             </div>
             <div class="col-sm-auto text-nowrap px-4 py-2">
-                End Article<br><strong>[[endArticle]] </strong><small class="tooltip-auto">ⓘ</small>
+                End Article<br><strong>[[endArticle]] </strong>
+                <small style="cursor: default;" :href="`/wiki/${endArticle}`" @mouseenter="mouseEnter" @mouseleave="mouseLeave">
+                    ⓘ
+                </small>
             </div>
             <div class="col-sm-auto text-nowrap px-4 py-2">
                 Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
@@ -29,10 +32,7 @@
         </div>
     </div>
 
-    <div class="tooltip-container">
-        <div id="tooltip-img"></div>
-        <div id="tooltip-txt"></div>
-    </div>
+    <div v-if="loading && hover" v-html="displayPreview()" class="tooltip-container" :style="computePosition()"></div>
 
     <countdown-timer id="time-box"
         v-bind:start-article="startArticle"
