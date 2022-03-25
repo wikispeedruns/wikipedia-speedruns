@@ -9,18 +9,18 @@ stats_api = Blueprint("stats", __name__, url_prefix="/api/stats")
 @check_admin
 @stats_api.get("/totals")
 def get_total_stats():
-    queries = {}
-    queries['users_total'] = "SELECT COUNT(*) AS total_users FROM users"
-    queries['sprints_total'] = "SELECT COUNT(*) AS total_runs FROM sprint_runs"
-    queries['sprints_finished'] = "SELECT COUNT(*) AS finished_runs FROM sprint_runs WHERE path IS NOT NULL"
+    queries = []
+    queries.append("SELECT COUNT(*) AS users_total FROM users")
+    queries.append("SELECT COUNT(*) AS sprints_total FROM sprint_runs")
+    queries.append("SELECT COUNT(*) AS sprints_finished FROM sprint_runs WHERE path IS NOT NULL")
 
     results = {}
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        for name, query in queries.items():
+        for query in queries:
             cursor.execute(query)
-            results[name] = cursor.fetchall()
+            results.update(cursor.fetchall()[0])
         return jsonify(results)
 
 
@@ -29,12 +29,21 @@ def get_total_stats():
 def get_weekly_stats():
     queries = {}
     queries['users_weekly'] = '''
-    SELECT 
-        YEAR(join_date) AS year, 
-        DATE_FORMAT(join_date, '%b %e') AS week, 
-        COUNT(*) AS weekly_users
-    FROM users
-    GROUP BY year, week
+    WITH data AS (
+        SELECT 
+            YEAR(join_date) AS year, 
+            DATE_FORMAT(join_date, '%b %e') AS week, 
+            COUNT(*) AS weekly_users
+        FROM users
+        GROUP BY year, week
+    )
+
+    SELECT
+        year,
+        week,
+        weekly_users,
+        SUM(weekly_users) OVER (ORDER BY week) AS cum_total
+    FROM data
     '''
     queries['plays_weekly'] = '''
     SELECT 
@@ -58,7 +67,7 @@ def get_weekly_stats():
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        for name, query in queries:
+        for name, query in queries.items():
             cursor.execute(query)
             results[name] = cursor.fetchall()
         return jsonify(results)
@@ -88,7 +97,7 @@ def get_daily_stats():
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        for name, query in queries:
+        for name, query in queries.items():
             cursor.execute(query)
             results[name] = cursor.fetchall()
         return jsonify(results)

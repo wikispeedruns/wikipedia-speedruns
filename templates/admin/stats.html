@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+<script type="module" src="{{url_for('static', filename='js/stats.js') }}"></script>
+<link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/stats.css')}}">
+{% endblock %}
+
+{% block content %}
+
+<div id="app">
+    <stat-box id="total-users">Total Users: [[totals.users]]</stat-box>
+    <stat-box id="total-users">Total Runs: [[totals.runs]]</stat-box>
+    <stat-box id="total-users">Total Finished Runs: [[totals.finished_runs]]</stat-box>
+
+    <div class="chart-container" style="position: relative; height:80vh; width:80vw">
+        <canvas id="line-chart"></canvas>
+    </div>
+     
+    <div>[[weekly.users]]</div>
+    <div>[[weekly.runs]]</div>
+    <div>[[weekly.finished_runs]]</div>
+    <div>[[daily.avg_unique_plays]]</div>
+</div>
+{% endblock %}
