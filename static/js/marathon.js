@@ -132,12 +132,12 @@ let app = new Vue({
 
         async pageCallback(page, loadTime) {
 
-            this.clicksRemaining -= 1;
-
             if (this.path.length == 0) {
                 this.path.push(page);
+                this.clicksRemaining -= 1;
             } else if (this.path[this.path.length - 1] != page) {
                 this.path.push(page);
+                this.clicksRemaining -= 1;
             }
             
             //this.path.push(page);
