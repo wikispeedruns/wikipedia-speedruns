@@ -130,7 +130,7 @@ let app = new Vue({
 
         async pageCallback(page, loadTime) {
 
-            console.log("page callback")
+            // console.log("page callback")
 
             this.clicksRemaining -= 1;
             
