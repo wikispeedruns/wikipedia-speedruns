@@ -25,3 +25,94 @@ height: 40vh;
 width: 40vw;
 }
 
+.box-wrapper {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+}
+
+/* Large */
+.box {
+    flex: 1;
+}
+  
+/* Medium screens */
+@media all and (max-width: 800px) {
+    .box-wrapper {
+        justify-content: space-around;
+    }
+}
+  
+/* Small screens */
+@media all and (max-width: 500px) {
+    .box-wrapper {
+        flex-direction: column;
+    }
+}
+
+.box {
+	background: #347aeb;
+	border-radius: 5px;
+    margin: 40px;
+    padding: 10px;
+}
+
+.box__header {
+	padding: 15px 25px;
+	position: relative;
+}
+
+.box__header-title {
+	color: #fff;
+	font-size: 18px;
+}
+
+.box__body {
+	padding: 1em;
+}
+
+.stats {
+	color: #fff;
+	position: relative;
+    padding: 1em;
+}
+
+.stats__amount {
+	font-size: 42px;
+	font-weight: bold;
+	line-height: 1.2;
+}
+
+.stats__caption {
+	font-size: 18px;
+
+}
+
+.stats--main .stats__amount {
+	font-size: 54px;
+}
+
+.stats__change {
+	position: absolute;
+	top: 10px;
+	right: 0;
+	text-align: right;
+	color: #B1B7C8;
+}
+
+.stats__value {
+	font-size: 18px;
+}
+
+.stats__period {
+	font-size: 14px;
+}
+
+.stats__value--positive {
+	color: #AEDC6F;
+}
+
+.stats__value--negative {
+	color: #FB5055;
+}
+

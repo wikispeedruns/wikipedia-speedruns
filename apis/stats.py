@@ -9,16 +9,16 @@ stats_api = Blueprint("stats", __name__, url_prefix="/api/stats")
 @check_admin
 @stats_api.get("/totals")
 def get_total_stats():
-    queries = []
-    queries.append("SELECT COUNT(*) AS users_total FROM users")
-    queries.append("SELECT COUNT(*) AS sprints_total FROM sprint_runs")
-    queries.append("SELECT COUNT(*) AS sprints_finished FROM sprint_runs WHERE path IS NOT NULL")
+    queries = {}
+    queries['total_users'] = "SELECT COUNT(*) AS users_total FROM users"
+    queries['total_runs'] = "SELECT COUNT(*) AS sprints_total FROM sprint_runs"
+    queries['total_finished_runs'] = "SELECT COUNT(*) AS sprints_finished FROM sprint_runs WHERE path IS NOT NULL"
 
     results = {}
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        for query in queries:
+        for _, query in queries.items():
             cursor.execute(query)
             results.update(cursor.fetchall()[0])
         return jsonify(results)
