@@ -48,6 +48,8 @@ export class ArticleRenderer {
             this.pageCallback(title, Date.now() - startTime);
 
         } catch (error) {
+
+            console.log(error)
             // Reenable all links if loadPage fails
             this.frame.querySelectorAll("a, area").forEach((el) => {
                 // Arrow function to prevent this from being overwritten
