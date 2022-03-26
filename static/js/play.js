@@ -124,6 +124,9 @@ let app = new Vue({
 
     methods : {
         async pageCallback(page, loadTime) {
+
+            console.log("page callback")
+
             this.loading = false;
             this.hover = false;
             // Game logic for sprint mode:
