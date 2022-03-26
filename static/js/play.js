@@ -133,6 +133,8 @@ let app = new Vue({
 
             this.startTime += loadTime;
 
+            setMargin();
+
             //if the page's title matches that of the end article, finish the game, and submit the run
             if (page.replace("_", " ").toLowerCase() === this.endArticle.replace("_", " ").toLowerCase()) {
 
@@ -163,8 +165,6 @@ let app = new Vue({
             }, 50);
 
             await this.renderer.loadPage(this.startArticle);
-
-            setMargin();
 
             this.setupPreviews();
             await this.pageCallback(this.startArticle, Date.now() - this.startTime)
@@ -233,7 +233,7 @@ let app = new Vue({
 function setMargin() {
     const element = document.getElementById("time-box");
     let margin = (element.offsetHeight + 25) > 100 ? (element.offsetHeight + 25) : 100
-    document.getElementById("wikipedia-frame").lastChild.style.paddingBottom = margin +"px";
+    document.getElementById("wikipedia-frame").style.marginBottom = margin +"px";
 }
 
 // Prevent accidental leaves
