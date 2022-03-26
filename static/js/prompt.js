@@ -255,7 +255,10 @@ var app = new Vue({
 
     methods : {
         getLeaderboard: async function (mode) {
-            var response = await fetch("/api/sprints/" + prompt_id + "/leaderboard/" + this.runId);
+            let path = "/api/sprints/" + prompt_id + "/leaderboard/";
+            if (this.runId) path += this.runId;
+
+            var response = await fetch(path);
 
             if (response.status == 401) {
                 alert(await response.text());
