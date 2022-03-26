@@ -122,13 +122,11 @@ let app = new Vue({
         }
 
         this.startArticle = prompt['start'];
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback);
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.setupPreview);
     },
 
 
     methods : {
-
-
 
         async pageCallback(page, loadTime) {
 
@@ -244,6 +242,12 @@ let app = new Vue({
 
             return output
         },
+
+
+
+        setupPreview: function () {
+            return;
+        }
 
     }
 });
