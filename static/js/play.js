@@ -183,15 +183,21 @@ let app = new Vue({
             const vh = window.innerHeight;
             const vw = window.innerWidth;
             const styleObject = new Object();
-            if (this.clientX < vw / 2.0) {
-                styleObject['left'] = `${this.clientX+10}px`;
+
+            if (vw >= 768) {
+                if (this.clientX < vw / 2.0) {
+                    styleObject['left'] = `${this.clientX+10}px`;
+                } else {
+                    styleObject['right'] = `${vw-this.clientX+10}px`;
+                }
+                if (this.clientY < vh / 2.0) {
+                    styleObject['top'] = `${this.clientY+10}px`;
+                } else {
+                    styleObject['bottom'] = `${vh-this.clientY+10}px`;
+                }
             } else {
-                styleObject['right'] = `${vw-this.clientX+10}px`;
-            }
-            if (this.clientY < vh / 2.0) {
-                styleObject['top'] = `${this.clientY+10}px`;
-            } else {
-                styleObject['bottom'] = `${vh-this.clientY+10}px`;
+                styleObject['left'] = '10px';
+                styleObject['bottom'] = `${document.getElementById("time-box-mobile").offsetHeight + 25}px`;
             }
             return styleObject;
         },
@@ -219,12 +225,20 @@ let app = new Vue({
         },
 
         setupPreviews: function() {
-            document.getElementById("wikipedia-frame").querySelectorAll("a").forEach(e => {
-                if (e.hasAttribute("href") && e.getAttribute("href").startsWith("/wiki/")) {
-                    e.addEventListener("mouseenter", this.mouseEnter);
-                    e.addEventListener("mouseleave", this.mouseLeave);
-                }
-            });
+            if (screen.width >= 768) {
+                document.getElementById("wikipedia-frame").querySelectorAll("a").forEach(e => {
+                    if (e.hasAttribute("href") && e.getAttribute("href").startsWith("/wiki/")) {
+                        e.addEventListener("mouseenter", this.mouseEnter);
+                        e.addEventListener("mouseleave", this.mouseLeave);
+                    }
+                });
+            } 
+        },
+
+        mobilePreviewClick: function (e) {
+            //console.log("click function")
+            if (this.loading) this.mouseLeave();
+            else this.mouseEnter(e);
         }
 
     }
@@ -232,7 +246,9 @@ let app = new Vue({
 
 function setMargin() {
     const element = document.getElementById("time-box");
-    let margin = (element.offsetHeight + 25) > 100 ? (element.offsetHeight + 25) : 100
+    const mobile_timebox_el = document.getElementById("time-box-mobile");
+    let margin = Math.max((element.offsetHeight + 25), (mobile_timebox_el.offsetHeight + 25), 100);
+    //(element.offsetHeight + 25) > 100 ? (element.offsetHeight + 25) : 100
     document.getElementById("wikipedia-frame").style.marginBottom = margin +"px";
 }
 

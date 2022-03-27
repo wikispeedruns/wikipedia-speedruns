@@ -155,3 +155,14 @@
 	top: 0;
 	left: 0;
 }
+
+@media (max-width: 767px) {
+    .main-text {
+        font-size: 14px;
+    }
+}
+
+.HUDwrapper-mobile {
+    padding: 5px 10px;
+    font-size: 14px;
+}

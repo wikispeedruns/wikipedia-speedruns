@@ -75,7 +75,6 @@ a:hover, a:hover * {
     background-color: #F8F8F8;
     margin-bottom: 15px;
     border: 2px solid #000000 !important;
-
 }
 
 @media (max-width: 1200px) {
@@ -95,6 +94,24 @@ a:hover, a:hover * {
 @media (max-width: 767px) {
     .checkpointCol {
         display: none;
+    }
+
+    .show-on-mobile {
+        display: block;
+    }
+
+    .show-on-desktop {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) {
+    .show-on-mobile {
+        display: none;
+    }
+
+    .show-on-desktop {
+        display: block;
     }
 }
 
