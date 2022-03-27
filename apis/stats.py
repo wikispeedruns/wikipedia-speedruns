@@ -12,7 +12,7 @@ def get_total_stats():
     queries = {}
     queries['total_users'] = "SELECT COUNT(*) AS users_total FROM users"
     queries['total_runs'] = "SELECT COUNT(*) AS sprints_total FROM sprint_runs"
-    queries['total_finished_runs'] = "SELECT COUNT(*) AS sprints_finished FROM sprint_runs WHERE path IS NOT NULL"
+    queries['total_finished_runs'] = "SELECT COUNT(*) AS sprints_finished FROM sprint_runs WHERE end_time IS NOT NULL"
 
     results = {}
 
@@ -25,74 +25,93 @@ def get_total_stats():
 
 
 @check_admin
-@stats_api.get("/weekly")
-def get_weekly_stats():
-    queries = {}
-    queries['users_weekly'] = '''
-    WITH data AS (
-        SELECT 
-            YEAR(join_date) AS year, 
-            DATE_FORMAT(join_date, '%b %e') AS week, 
-            COUNT(*) AS weekly_users
-        FROM users
-        GROUP BY year, week
-    )
-
-    SELECT
-        year,
-        week,
-        weekly_users,
-        SUM(weekly_users) OVER (ORDER BY week) AS cum_total
-    FROM data
-    '''
-    queries['plays_weekly'] = '''
-    SELECT 
-        YEAR(start_time) AS year, 
-        DATE_FORMAT(start_time, '%b %e') AS week, 
-        COUNT(*) AS weekly_plays 
-    FROM sprint_runs
-    GROUP BY year, week
-    '''
-    queries['finished_plays_weekly'] = '''
-    SELECT 
-        YEAR(start_time) AS year, 
-        DATE_FORMAT(start_time, '%b %e') AS week, 
-        COUNT(*) AS weekly_plays 
-    FROM sprint_runs
-    WHERE path IS NOT NULL
-    GROUP BY year, week
-    '''
-    
-    results = {}
-
-    db = get_db()
-    with db.cursor(cursor=DictCursor) as cursor:
-        for name, query in queries.items():
-            cursor.execute(query)
-            results[name] = cursor.fetchall()
-        return jsonify(results)
-
-@check_admin
 @stats_api.get("/daily")
 def get_daily_stats():
     queries = {}
-    queries['avg_unique_user_plays'] = '''
-    SELECT 
-        day, 
-        year,
-        AVG(plays) AS "plays_per_user"
-    FROM (
+    queries['daily_new_users'] = '''
+    WITH data AS (
         SELECT 
-            user_id, 
-            DATE_FORMAT(start_time, '%b %e') AS day,
-            YEAR(start_time) as year,
-            COUNT(*) AS plays
-        FROM sprint_runs 
-        GROUP BY user_id, day, year
-    ) a
-    group by day, year
+            DATE(join_date) AS day,
+            COUNT(*) AS daily_users 
+        FROM users
+        GROUP BY day 
+    )
+
+    SELECT
+        day,
+        daily_users,
+        SUM(daily_users) OVER (ORDER BY day) AS total 
+    FROM data
     '''
 
+    queries['daily_plays'] = '''
+    WITH data AS (
+        SELECT 
+            DATE(start_time) AS day,
+            COUNT(*) AS daily_plays 
+        FROM sprint_runs
+        WHERE start_time IS NOT NULL
+        GROUP BY day 
+    )
+
+    SELECT
+        day,
+        daily_plays,
+        SUM(daily_plays) OVER (ORDER BY day) AS total 
+    FROM data
+    '''
+        
+    queries['daily_finished_plays'] = '''
+    WITH data AS (
+        SELECT 
+            DATE(start_time) AS day,
+            COUNT(*) AS daily_plays 
+        FROM sprint_runs
+        WHERE start_time IS NOT NULL AND end_time IS NOT NULL
+        GROUP BY day 
+    )
+
+    SELECT
+        day,
+        daily_plays,
+        SUM(daily_plays) OVER (ORDER BY day) AS total 
+    FROM data
+    '''
+
+    queries['avg_user_plays'] = '''
+    WITH data AS (
+        SELECT user_id,
+        DATE(start_time) AS day,
+        COUNT(*) AS plays
+        FROM sprint_runs
+        WHERE user_id IS NOT NULL AND start_time IS NOT NULL
+        GROUP BY user_id, day
+    )
+
+    SELECT
+        day,
+        AVG(plays) AS "plays_per_user"
+    FROM data
+    GROUP BY day
+    '''
+
+    queries['active_users'] = '''
+    WITH data AS (
+        SELECT
+            COUNT(*) AS plays,
+            DATE(end_time) AS day,
+            user_id
+        FROM sprint_runs
+        WHERE user_id IS NOT NULL AND end_time IS NOT NULL
+        GROUP BY user_id, day
+    )
+
+    SELECT 
+        day,
+        COUNT(*) AS active_users
+    FROM data
+    GROUP BY day
+    '''
     results = {} 
 
     db = get_db()

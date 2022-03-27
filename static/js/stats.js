@@ -1,40 +1,102 @@
-function update_data(totals) {
-        console.log(totals);
-        app.totals.users = totals['users_total'];
-        app.totals.runs = totals['sprints_total'];
-        app.totals.finished_runs = totals['sprints_finished'];
+function update_totals(totals) {
+    app.totals.users = totals['users_total'];
+    app.totals.runs = totals['sprints_total'];
+    app.totals.finished_runs = totals['sprints_finished'];
+}
+
+function update_daily(d_totals) {
+    app.daily.users = d_totals['daily_new_users'];
+    app.daily.runs = d_totals['daily_plays'];
+    app.daily.finished_runs = d_totals['daily_finished_plays'];
+    app.daily.plays_per_user = d_totals['avg_user_plays'];
+    app.daily.active_users = d_totals['active_users'];
 }
 
 async function get_data() {
     let response = await fetch("/api/stats/totals");
     const totals = await response.json(); 
-
-    update_data(totals);
-    response = await fetch("/api/stats/weekly");
-    const w_totals = await response.json();
-
-    app.weekly.users = w_totals['users_weekly'];
-    app.weekly.runs = w_totals['plays_weekly'];
-    app.weekly.finished_runs = w_totals['finished_plays_weekly'];
+    update_totals(totals);
 
     response = await fetch("/api/stats/daily");
     const d_totals = await response.json();
-
-    app.daily.avg_unique_plays = d_totals['avg_unique_user_plays'];
-
+    console.log(d_totals);
+    update_daily(d_totals);
 }
 
 async function draw_graphs() {
-    new Chart("line-chart", {
+    new Chart("daily-users", {
         type: 'line',
         data: {
-          labels: app.weekly.users.map(({week}) => week),
+          labels: app.daily.users.map(({day}) => day),
           datasets: [{ 
-              data: app.weekly.users.map(({weekly_users}) => weekly_users),
-              label: "Weekly New Users",
+              data: app.daily.users.map(({total}) => total),
+              label: "Total Users",
               borderColor: "#3e95cd",
               fill: false
             },
+          ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+        }
+    });
+
+    new Chart("daily-new-users", {
+        type: 'line',
+        data: {
+          labels: app.daily.users.map(({day}) => day),
+          datasets: [{ 
+              data: app.daily.users.map(({daily_users}) => daily_users),
+              label: "New Users",
+              borderColor: "#3e95cd",
+              fill: false
+            },
+          ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+        }
+    });
+
+    new Chart("daily-runs", {
+        type: 'line',
+        data: {
+          labels: app.daily.runs.map(({day}) => day),
+          datasets: [{ 
+              data: app.daily.runs.map(({daily_plays}) => daily_plays),
+              label: "Daily Plays",
+              borderColor: "#3e95cd",
+              fill: false
+            }
+          ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+        }
+    });   
+
+    new Chart("daily-active-users", {
+        type: 'line',
+        data: {
+          labels: app.daily.active_users.map(({day}) => day),
+          datasets: [{ 
+              data: app.daily.active_users.map(({active_users}) => active_users),
+              label: "Daily Active Users",
+              borderColor: "#3e95cd",
+              fill: false
+            }
           ]
         },
         options: {
@@ -56,13 +118,12 @@ var app = new Vue({
             runs: 0,
             finished_runs: 0,
         },
-        weekly: {
+        daily: {
             users: [],
             runs: [],
             finished_runs: [],
-        },
-        daily: {
-            avg_unique_plays: [],
+            plays_per_user: [],
+            active_users: []
         },
     },
 
