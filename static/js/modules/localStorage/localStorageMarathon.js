@@ -1,7 +1,7 @@
 import { submitRun } from "../game/marathon/runs.js"
 import { getLocalStorageRuns, addRunToLocalStorage, setLocalStorageRuns } from "./localStorage.js"
 
-function submitMarathonRunToLocalStorage(prompt_id, time, checkpoints, path, finished) {
+function submitLocalRun(prompt_id, time, checkpoints, path, finished) {
     const data = {
         "path": path,
         "checkpoints": checkpoints,
@@ -10,13 +10,13 @@ function submitMarathonRunToLocalStorage(prompt_id, time, checkpoints, path, fin
         "finished": finished
     };
 
-    const key = "WS-S-marathonruns";
+    const key = "WS-LM-marathonruns";
 
     return addRunToLocalStorage(key, data);
 }
 
-async function uploadAllLocalStorageMarathonRuns() {
-    const key = "WS-S-marathonruns";
+async function uploadLocalMarathons() {
+    const key = "WS-LM-marathonruns";
     let data = getLocalStorageRuns(key);
 
     if (Object.keys(data).length == 0) return;
@@ -44,4 +44,4 @@ async function uploadAllLocalStorageMarathonRuns() {
     localStorage.removeItem(key);
 }
 
-export { submitMarathonRunToLocalStorage, uploadAllLocalStorageMarathonRuns };
+export { submitLocalRun, uploadLocalMarathons };

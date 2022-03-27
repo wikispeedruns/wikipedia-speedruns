@@ -1,7 +1,7 @@
 import {startRun, submitRun} from "../game/runs.js"
 import { getLocalStorageRuns, addRunToLocalStorage, setLocalStorageRuns } from "./localStorage.js"
 
-function addSprintRunToLocalStorage(promptId) {
+function startLocalRun(promptId) {
     const data = {
         prompt_id: promptId,
     };
@@ -11,7 +11,7 @@ function addSprintRunToLocalStorage(promptId) {
     return addRunToLocalStorage(key, data);
 }
 
-function submitSprintRunToLocalStorage(promptId, runId, startTime, endTime, path) {
+function submitLocalRun(promptId, runId, startTime, endTime, path) {
     let data = {
         prompt_id: promptId,
         start_time: startTime,
@@ -28,7 +28,7 @@ function submitSprintRunToLocalStorage(promptId, runId, startTime, endTime, path
     //console.log(getLocalStorageRuns(key));
 }
 
-async function uploadAllLocalStorageSprintRuns() {
+async function uploadLocalSprints() {
     const key = "WS-S-sprint-runs";
     let data = getLocalStorageRuns(key);
 
@@ -60,5 +60,5 @@ async function uploadAllLocalStorageSprintRuns() {
     localStorage.removeItem(key);
 }
 
-export { addSprintRunToLocalStorage, submitSprintRunToLocalStorage, uploadAllLocalStorageSprintRuns };
+export { startLocalRun, submitLocalRun, uploadLocalSprints };
 

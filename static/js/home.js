@@ -1,7 +1,7 @@
 import { MarathonPrompts } from "./modules/game/marathon/marathonPrompts.js";
 import { serverData } from "./modules/serverData.js";
-import { addSprintRunToLocalStorage, submitSprintRunToLocalStorage, uploadAllLocalStorageSprintRuns } from "./modules/localStorage/localStorageSprint.js";
-import { submitMarathonRunToLocalStorage, uploadAllLocalStorageMarathonRuns } from "./modules/localStorage/localStorageMarathon.js";
+import { uploadLocalSprints } from "./modules/localStorage/localStorageSprint.js";
+import { uploadLocalMarathons } from "./modules/localStorage/localStorageMarathon.js";
 
 async function getPrompts()
 {
@@ -60,8 +60,8 @@ var app = new Vue({
         this.loggedIn = "username" in serverData;
 
         if (this.loggedIn) {
-            await uploadAllLocalStorageSprintRuns();
-            await uploadAllLocalStorageMarathonRuns();
+            await uploadLocalSprints();
+            await uploadLocalMarathons();
         }
 
         this.topUsers = await getTopUsers();

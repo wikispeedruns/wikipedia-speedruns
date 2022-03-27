@@ -17,7 +17,7 @@ import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 
 import { basicCannon, fireworks, side } from "./modules/confetti.js";
 
-import { addSprintRunToLocalStorage, submitSprintRunToLocalStorage, uploadAllLocalStorageSprintRuns } from "./modules/localStorage/localStorageSprint.js";
+import { startLocalRun, submitLocalRun } from "./modules/localStorage/localStorageSprint.js";
 
 
 // retrieve the unique prompt_id of the prompt to load
@@ -90,10 +90,10 @@ let app = new Vue({
 
         this.currentArticle = this.startArticle;
 
-        if (this.loggedIn) {
+        if (this.loggedIn || this.lobbyId) {
             this.runId = await startRun(PROMPT_ID, LOBBY_ID);
         } else {
-            this.runId = addSprintRunToLocalStorage(PROMPT_ID);
+            this.runId = startLocalRun(PROMPT_ID);
             console.log("Not logged in, adding to local storage")
             //console.log(this.runId);
         }
@@ -122,10 +122,10 @@ let app = new Vue({
 
                 this.endTime = Date.now();
 
-                if (this.loggedIn) {
+                if (this.loggedIn || this.lobbyId) {
                     this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
                 } else {
-                    this.runId = submitSprintRunToLocalStorage(PROMPT_ID, this.runId, this.startTime, this.endTime, this.path);
+                    this.runId = submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, this.path);
                     console.log("Not logged in, submitting run to local storage")
                 }
 

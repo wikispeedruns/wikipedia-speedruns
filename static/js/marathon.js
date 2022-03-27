@@ -10,7 +10,7 @@ import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 
 import { basicCannon, fireworks, side } from "./modules/confetti.js";
 
-import { submitMarathonRunToLocalStorage, uploadAllLocalStorageMarathonRuns } from "./modules/localStorage/localStorageMarathon.js";
+import { submitLocalRun } from "./modules/localStorage/localStorageMarathon.js";
 
 //retrieve the unique prompt_id of the prompt to load
 const PROMPT_ID = serverData["prompt_id"];
@@ -229,7 +229,7 @@ let app = new Vue({
             if (this.loggedIn) {
                 this.runId = await submitRun(this.promptId, this.endTime - this.startTime + this.lastTime, this.visitedCheckpoints, this.path, finished);
             } else {
-                this.runId = await submitMarathonRunToLocalStorage(this.promptId, this.endTime - this.startTime + this.lastTime, this.visitedCheckpoints, this.path, finished);
+                this.runId = await submitLocalRun(this.promptId, this.endTime - this.startTime + this.lastTime, this.visitedCheckpoints, this.path, finished);
             }
 
             removeSave(PROMPT_ID);
