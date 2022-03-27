@@ -130,10 +130,7 @@ let app = new Vue({
 
         async pageCallback(page, loadTime) {
 
-            if (this.path.length == 0) {
-                this.path.push(page);
-                this.clicksRemaining -= 1;
-            } else if (this.path[this.path.length - 1] != page) {
+            if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
                 this.path.push(page);
                 this.clicksRemaining -= 1;
             }

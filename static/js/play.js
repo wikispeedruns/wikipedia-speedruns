@@ -131,9 +131,7 @@ let app = new Vue({
             this.hover = false;
             // Game logic for sprint mode:
 
-            if (this.path.length == 0) {
-                this.path.push(page);
-            } else if (this.path[this.path.length - 1] != page) {
+            if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
                 this.path.push(page);
             }
             //this.path.push(page);
