@@ -3,14 +3,14 @@
 {% block head %}
 <script type="module" src="{{url_for('static', filename='js/manage.js') }}"></script>
 {% endblock %}
-    
+
 {% block content %}
-<div id="app">    
+<div id="app">
     <form id="newPrompt" v-on:submit.prevent="newPrompt">
         <label for="start">Start Article:</label>
-        <input type="text" id="start" name="start">
+        <input type="text" id="start" name="start" v-model="startPrompt">
         <label for="end">End Article:</label>
-        <input type="text" id="end" name="end">
+        <input type="text" id="end" name="end" v-model="endPrompt">
 
         <input type="submit" value="Submit">
     </form>
@@ -19,12 +19,14 @@
 
     <path-generator></path-generator>
 
+    
+
     <div class="row">
 
         <div class="col-sm-6"> <div class="card mb-5"> <div class="card-body">
-           
+
             <h4> Unused: </h4>
-            
+
             <ul>
                 <prompt-item
                     v-for="p in unused"
@@ -45,8 +47,8 @@
             <template v-for="(week, index) in weeks">
 
                 <div class="card mb-5"> <div class="card-body">
-                <h3> 
-                    Week: [[week.start.substring(5)]] through [[week.end.substring(5)]] 
+                <h3>
+                    Week: [[week.start.substring(5)]] through [[week.end.substring(5)]]
                     <template v-if="index === 0">(Current) </template>
                 </h3>
 
@@ -59,7 +61,7 @@
                     v-on:delete-prompt="getPrompts"
                     v-on:move-prompt="getPrompts"
                 >
-                </prompt-set>   
+                </prompt-set>
 
                 <h6>Daily Prompts: </h6>
                 <table class="table table-bordered" style="table-layout: fixed;">
@@ -73,9 +75,9 @@
                         <th>Sa</th>
                     </thead>
                     <tbody style="font-size:x-small">
-                        <tr> 
+                        <tr>
                             <td v-for="day in week.days">
-                                <prompt-set 
+                                <prompt-set
                                     v-bind:prompts="day.prompts"
                                     v-bind:start="day.date"
                                     v-bind:end="day.date"
@@ -88,12 +90,30 @@
                         </tr>
                     </tbody>
                 </table>
-
                 </div></div>
             </template>
 
         </div>
-    </div>        
+    </div> 
+    
+    <marathon-generator></marathon-generator>
+
+    <div class="row">
+        <div class="col px-0"> <div class="card"> <div class="card-body">
+           
+            <h4> Marathon prompts: </h4>
+            
+            <ul>
+                <marathon-item
+                    v-for="p in marathon"
+                    v-bind:prompt="p"
+                    v-bind:key="p.prompt_id"
+                    v-on:change="getPrompts"
+                >
+                </marathon-item>
+            </ul>
+        </div></div></div> 
+    </div>
 </div>
 
 {% endblock %}

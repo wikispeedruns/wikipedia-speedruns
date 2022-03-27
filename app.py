@@ -10,15 +10,7 @@ from util.flaskjson import ISODateJSONEncoder
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
-
-# sentry_sdk.init(
-#     dsn="https://3fcc7c6b479248c8ac9839aad0440cba@o1133616.ingest.sentry.io/6180332",
-#     integrations=[FlaskIntegration()],
-
-#     # Set percent of things that are traced
-#     traces_sample_rate=0
-# )
-
+from wikispeedruns import lobbys
 def create_app(test_config=None):
 
     app = Flask(__name__)
@@ -37,6 +29,16 @@ def create_app(test_config=None):
         app.config.update(test_config)
 
 
+    # Setup monitoring if enabled
+    if (app.config.get("SENTRY_ENABLED")):
+        sentry_sdk.init(
+            dsn="https://3fcc7c6b479248c8ac9839aad0440cba@o1133616.ingest.sentry.io/6180332",
+            integrations=[FlaskIntegration()],
+            # Set percent of things that are traced
+            traces_sample_rate=0
+        )
+
+
     db.init_app(app)
     mail.init_app(app)
     tokens.init_app(app)
@@ -48,6 +50,8 @@ def create_app(test_config=None):
     from apis.scraper import scraper_api
     from apis.ratings import ratings_api
     from apis.stats import stats_api
+    from apis.marathon import marathon_api
+    from apis.lobbys import lobby_api
     from views import views
 
     app.register_blueprint(sprint_api)
@@ -57,7 +61,8 @@ def create_app(test_config=None):
     app.register_blueprint(scraper_api)
     app.register_blueprint(ratings_api)
     app.register_blueprint(stats_api)
-
+    app.register_blueprint(marathon_api)
+    app.register_blueprint(lobby_api)
     app.register_blueprint(views)
 
     return app

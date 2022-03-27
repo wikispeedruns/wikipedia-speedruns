@@ -1,9 +1,13 @@
+from cProfile import run
+from click import prompt
 from flask import Blueprint, render_template, request, redirect, session
 
-from util.decorators import check_admin
+from util.decorators import check_admin, check_user
 
 import db
 import random
+
+import wikispeedruns
 
 views = Blueprint("views", __name__)
 
@@ -83,14 +87,15 @@ def get_prompt_page(id):
     run_id = request.args.get('run_id', '')
     page = request.args.get('page', 1)
     sortMode = request.args.get('sort', 'time')
+    timeFilter = request.args.get('time_filter', 'all')
 
     if int(page) < 1:
         page = 1
 
     if len(run_id) != 0:
-        return render_with_data('prompt.html', prompt_id=id, run_id=run_id, pg = page, sortMode=sortMode)
+        return render_with_data('prompt.html', prompt_id=id, run_id=run_id, pg = page, sortMode=sortMode, timeFilter=timeFilter)
     else:
-        return render_with_data('prompt.html', prompt_id=id, pg = page, sortMode=sortMode)
+        return render_with_data('prompt.html', prompt_id=id, pg = page, sortMode=sortMode, timeFilter=timeFilter)
 
 
 @views.route('/play/<id>', methods=['GET'])
@@ -118,8 +123,57 @@ def get_replay_page():
     run_id = request.args.get('run_id', '')
     return render_with_data('replay.html', run_id=run_id)
 
-# Admin pages
+# Marathon pages
+@views.route('/play/marathon/<id>', methods=['GET'])
+def get_marathon_play_page(id):
+    loadsave = request.args.get('load_save', 0)
+    print(loadsave)
+    return render_with_data('marathon.html', prompt_id=id, load_save=loadsave)
 
+@views.route('/marathonruns/<username>', methods=['GET'])
+def get_marathon_personal_leaderboard(username):
+    page = request.args.get('page', 1)
+    sortMode = request.args.get('sort', 'cp')
+    return render_with_data('marathon_prompt.html', pg = page, sortMode=sortMode, profile_name=username)
+
+# Lobby Pages
+@views.route('/lobby/create', methods=['GET'])
+@check_user
+def get_lobby_create_page():
+    return render_with_data('lobbys/create.html', )
+
+
+@views.route('/lobby/<int:lobby_id>', methods=['GET'])
+def get_lobby_page(lobby_id):
+    if wikispeedruns.lobbys.check_membership(lobby_id, session):
+        return render_with_data('lobbys/lobby.html', lobby_id=lobby_id)
+    else:
+        return render_with_data('lobbys/join.html', lobby_id=lobby_id)
+
+@views.route('/lobby/<int:lobby_id>/play/<int:prompt_id>', methods=['GET'])
+def get_lobby_play_page(lobby_id, prompt_id):
+    return render_with_data('play.html', lobby_id=lobby_id, prompt_id=prompt_id)
+
+@views.route('/lobby/<int:lobby_id>/prompt/<int:prompt_id>', methods=['GET'])
+def get_lobby_prompt_page(lobby_id, prompt_id):
+    run_id = request.args.get('run_id')
+    page = request.args.get('page', 1)
+    sortMode = request.args.get('sort', 'time')
+
+    args = {
+        "lobby_id": lobby_id,
+        "prompt_id": prompt_id,
+        "pg": page,
+        "sortMode": sortMode,
+    }
+
+    if (run_id):
+        args["run_id"] = run_id
+
+    return render_with_data('prompt.html', **args)
+
+
+# Admin pages
 @views.route('/manage', methods=['GET'])
 @check_admin
 def get_manage_page():

@@ -2,46 +2,55 @@ import { serverData } from "./modules/serverData.js"
 import {pathArrowFilter} from "./modules/game/filters.js";
 
 const prompt_id = serverData["prompt_id"];
-const run_id = serverData["run_id"] || "";
+const lobby_id = serverData["lobby_id"] || null;
+
 const pg = serverData["pg"];
 const sortMode = serverData["sortMode"];
+const timeFilter = serverData["timeFilter"]; //['all', '1', '7', '30', '100']
 
 const runsPerPage = 10;
 
+Vue.filter('pathArrow', pathArrowFilter)
 
-/*
-Vue.component('run-item', {
-    delimiters: ['[[', ']]'],
-    props: ['run', 'rank'],
+var LeaderboardRow = {
+    props: [
+        "currentRunId",
+        "run",
+        "rank",
+    ],
 
     template: (`
-    <tr>
-        <td scope="col">[[rank]]</td>
-        <td style="white-space: nowrap" v-if="run.username"  scope="col"><strong>[[run.username]]</strong></td>
-        <td v-else  scope="col"><strong>You</strong></td>
-        <td style="white-space: nowrap"  scope="col">[[(run.run_time/1000000).toFixed(3)]] s</td>
-        <td  scope="col">[[run.path.length]]</td>
-        <td  scope="col"><span class="d-none d-sm-block">[[run.path]]</span><span class="d-block d-sm-none">Test</span></td>
-    </tr>`
-    )
-});*/
+        <tr>
+            <td>{{rank}}</td>
+
+            <td class="l-col" v-if="run.username">
+                <strong v-if="run.run_id === currentRunId">{{run.username}}</strong>
+                <span v-else>{{run.username}}</span>
+            </td>
+            <td class="l-col" v-else-if="run.name">
+                <strong v-if="run.run_id === currentRunId">{{run.name}}</strong>
+                <span v-else>{{run.name}}</span>
+            </td>
+            <td v-else><strong>You</strong></td>
+
+            <td class="l-col">{{(run.run_time/1000000).toFixed(3)}} s</td>
+            <td>{{run.path.length}}</td>
+
+            <td>{{run.path | pathArrow}}
+                <a v-bind:href="'/replay?run_id=' + run.run_id" target="_blank" title="Replay" >
+                    <i class="bi bi-play"></i>
+                </a>
+            </td>
+        </tr>
+    `)
+}
 
 
-function populateGraph(runs) {
+
+function populateGraph(runs, run_id) {
 
     var graph = new Springy.Graph();
 
-    /*
-    var dennis = graph.newNode({
-    label: 'Dennis',
-    ondoubleclick: function() { console.log("Hello!"); }
-    });
-    var michael = graph.newNode({label: 'Michael'});
-
-    graph.newEdge(dennis, michael, {color: '#00A0B0'});
-    graph.newEdge(michael, dennis, {color: '#6A4A3C'});
-    */
-    
     var nodes = [];
     var edges = [];
 
@@ -65,11 +74,9 @@ function populateGraph(runs) {
 
     var startNode;
     var endNode;
-    
+
 
     for (let i = 0; i < runs.length; i++) {
-        if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
-
         var pathNodes = runs[i]["path"]
         var cur = (runs[i]["run_id"] === Number(run_id)) ? true : false;
 
@@ -80,19 +87,19 @@ function populateGraph(runs) {
                 if (j === 0) {
                     node.type = 1;
                     startNode = node;
-                } 
+                }
                 else if (j === pathNodes.length - 1) {
                     node.type = 2;
                     endNode = node;
-                } 
+                }
                 else if (node.label !== startNode.label){
                     node.type = 0;
                     nodes.push(node);
                 }
-                
+
                 //let node = {type: type, label: pathNodes[j], count: 1, current: cur};
                 //nodes.push(node);
-                
+
             } else {
                 if (cur) {
                     nodes[index].current = cur;
@@ -109,9 +116,6 @@ function populateGraph(runs) {
 
 
     for (let i = 0; i < runs.length; i++) {
-        if (!runs[i]["user_id"] && runs[i]["run_id"] !== Number(run_id)) continue;
-
-
         var pathNodes = runs[i]["path"]
         var cur = (runs[i]["run_id"] === Number(run_id)) ? true : false;
 
@@ -201,7 +205,7 @@ function populateGraph(runs) {
 
     })
 
-    
+
     return graph;
 }
 
@@ -214,7 +218,6 @@ function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
-Vue.filter('pathArrow', pathArrowFilter)
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
@@ -232,36 +235,41 @@ var app = new Vue({
         page: 0,
         totalpages: 0,
         sortMode: sortMode,
+        timeFilter: timeFilter,
 
+        lobbyId: lobby_id,
+        run_id: serverData["run_id"] || "",
     },
+
+    components: {
+        'leaderboard-row': LeaderboardRow
+    },
+
 
     methods : {
         getLeaderboard: async function (mode) {
-            var response = await fetch("/api/sprints/" + prompt_id + "/leaderboard/" + run_id);
+            var response = await fetch("/api/sprints/" + prompt_id + "/leaderboard/" + this.run_id);
 
             if (response.status == 401) {
                 alert(await response.text());
                 window.location.replace("/");   // TODO error page
             }
 
+            let resp = await response.json();
 
-            let resp = await response.json(); 
-
-            if (mode === 'path') {
-                let runs = resp.leaderboard
-                runs.sort((a, b) => (a.path.length > b.path.length) ? 1 : ((a.path.length === b.path.length) ? ((a.run_time > b.run_time) ? 1 : -1) : -1))
-                resp.leaderboard = runs
+            if (!this.run_id && resp.run_id != null) {
+                this.run_id = resp.run_id
             }
-            return resp
 
-        }, 
+            return resp
+        },
 
         genGraph: function () {
             var paths = this.renderedRuns;
             if (this.currentRunPosition === -1 || this.currentRunPosition === 1) {
                 paths = paths.concat(this.currentRun)
             }
-            var graph1 = populateGraph(paths);
+            var graph1 = populateGraph(paths, this.run_id);
             $('#springydemo').springy({ graph: graph1 });
         },
 
@@ -273,11 +281,11 @@ var app = new Vue({
         },
 
         getPromptID: function() {
-            return prompt_id;
+            return parseInt(prompt_id);
         },
 
         getRunID: function() {
-            return run_id;
+            return parseInt(this.run_id);
         },
 
         paginate: function () {
@@ -285,8 +293,9 @@ var app = new Vue({
             const last = pg * runsPerPage
             for (let i = 0; i < this.runs.length; i++) {
                 let run = this.runs[i]
-                if (run_id) {
-                    if (run.run_id === parseInt(run_id)) {
+
+                if (this.run_id) {
+                    if (run.run_id === parseInt(this.run_id)) {
                         this.currentRun = run;
                         this.currentRunRank = i+1;
                         if (i < first) {
@@ -310,14 +319,10 @@ var app = new Vue({
         },
 
         buildNewLink: function (page) {
-            let base = "/prompt/" + prompt_id + "?page=" + String(page)
-            if (run_id) {
-                base += "&run_id=" + run_id
-            } 
-            if (this.sortMode === 'path') {
-                base += "&sort=path"
-            }
-            window.location.replace(base)
+
+            let url = new URL(window.location.href)
+            url.searchParams.set('page', String(page))
+            window.location.replace(url)
         },
 
         showPath: function(event, path) {
@@ -335,42 +340,86 @@ var app = new Vue({
         sortStatus: function(tab) {
             if (this.sortMode === tab) {
                 return `<i class="bi bi-chevron-down"></i>`
-            }   
+            }
             return `<i class="bi bi-dash-lg"></i>`
         },
 
         toggleSort: function(tab) {
+            let url = new URL(window.location.href)
             if (tab === 'time' && this.sortMode === 'path') {
-                if (run_id) {
-                    window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id);
-                } else {
-                    window.location.replace("/prompt/" + prompt_id);
-                }
+                url.searchParams.set('sort', 'time')
             } else if (tab === 'path' && this.sortMode === 'time') {
-                if (run_id) {
-                    window.location.replace("/prompt/" + prompt_id + "?run_id=" + run_id + "&sort=path");
-                } else {
-                    window.location.replace("/prompt/" + prompt_id + "?sort=path");
-                }
+                url.searchParams.set('sort', 'path')
+            }
+
+            window.location.replace(url)
+        },
+
+        toggleTimeFilter: function(f) {
+            if (f != this.timeFilter) {
+                let url = new URL(window.location.href)
+                url.searchParams.set('time_filter', f)
+                window.location.replace(url)
             }
         },
 
         runReplay: function(event) {
             console.log(event)
+        },
+
+        filterByTime: function() {
+
+            let now = Date.now()
+
+            this.runs.forEach(el => {
+                let date = Date.parse(el.end_time)
+                console.log((now - date) / (1000 * 60 * 60 * 24))
+            });
+
+            if (!['1', '7', '30', '100'].includes(this.timeFilter)) return;
+            
+            let output = []
+
+            this.runs.forEach(el => {
+                let date = Date.parse(el.end_time)
+                console.log((now - date) / (1000 * 60 * 60 * 24))
+                if ((now - date) / (1000 * 60 * 60 * 24) < parseInt(this.timeFilter)){ 
+                    output.push(el); 
+                } 
+            });
+
+            this.runs = output;
         }
     },
 
     created: async function() {
-        const resp = await this.getLeaderboard(this.sortMode);
 
-        this.available = resp['prompt']['available'];
+        if (lobby_id) {
+            this.available = true;
 
-        this.prompt = resp["prompt"];
-        this.runs = resp["leaderboard"];
+            const resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}/runs`);
+            this.runs = await resp.json();
+            this.prompt = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}`);
+
+        }
+        else {
+            const resp = await this.getLeaderboard();
+
+            this.available = resp['prompt']['available'];
+            this.prompt = resp["prompt"];
+            this.runs = resp["leaderboard"];
+        }
+
+        this.filterByTime();
+
+        if (this.sortMode === 'path') {
+            this.runs.sort((a, b) => (a.path.length > b.path.length) ? 1 : ((a.path.length === b.path.length) ? ((a.run_time > b.run_time) ? 1 : -1) : -1))
+        }
 
         this.paginate();
         this.totalpages = Math.ceil(this.runs.length/this.runsPerPage);
         this.page = pg;
+
         this.genGraph();
     }
 })

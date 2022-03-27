@@ -5,6 +5,9 @@
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/play.css')}}">
 <script type="module" src="{{url_for('static', filename='js/play.js')}}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
 <style>
     [v-cloak] { display: none }
 </style>
@@ -18,15 +21,21 @@
         <div class="row flex-row">
             <div class="col-sm-auto text-nowrap px-4 py-2">
                 Start Article<br><strong>[[startArticle]]</strong>
+                <br>Current Article<br><strong>[[currentArticle]]</strong>
             </div>
             <div class="col-sm-auto text-nowrap px-4 py-2">
-                End Article<br><strong>[[endArticle]]</strong>
+                End Article<br><strong>[[endArticle]] </strong>
+                <small style="cursor: default;" :href="`/wiki/${endArticle}`" @mouseenter="mouseEnter" @mouseleave="mouseLeave">
+                    ⓘ
+                </small>
             </div>
             <div class="col-sm-auto text-nowrap px-4 py-2">
                 Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
             </div>
         </div>
     </div>
+
+    <div v-if="loading && hover" v-html="displayPreview()" class="tooltip-container" :style="computePosition()"></div>
 
     <countdown-timer id="time-box"
         v-bind:start-article="startArticle"
@@ -37,6 +46,7 @@
     <!-- TODO its a bit ugly passing all these in, should clean this up-->
     <finish-page
         v-bind:prompt-id="promptId"
+        v-bind:lobby-id="lobbyId"
         v-bind:run-id="runId"
 
         v-bind:start-article="startArticle"

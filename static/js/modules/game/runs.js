@@ -1,21 +1,17 @@
 
-//send request to create an empty run, returns the run_id
-async function startRun(prompt_id) {
-    const reqBody = {
+import { fetchJson } from "../fetch.js";
+
+// Send request to create an empty run, returns the run_id
+async function startRun(prompt_id, lobby_id=null) {
+    if (lobby_id === null) {
+        // Don't bother creating a run for lobby prompts
+        return -1;
+    }
+
+    const response = await fetchJson("/api/runs", "POST", {
         "prompt_id": prompt_id,
-    }
-    try {
-        const response = await fetch("/api/runs", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(reqBody)
-        })
-        return await response.json();
-    } catch(e) {
-        console.log(e);
-    }
+    });
+    return await response.json();
 }
 
 async function submitRun(runId, startTime, endTime, path ) {
@@ -25,19 +21,10 @@ async function submitRun(runId, startTime, endTime, path ) {
         "path": path,
     }
 
-    // Send results to API
-    try {
-        const response = await fetch(`/api/runs/${runId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(reqBody)
-        })
 
-    } catch(e) {
-        console.log(e);
-    }
+
+    // Send results to API
+    const response = await fetchJson(`/api/runs/${runId}`, 'PATCH', reqBody);
 }
 
 

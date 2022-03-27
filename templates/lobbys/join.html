@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+<script type="module">
+// TODO rules
+import { fetchJson } from "/static/js/modules/fetch.js";
+import { serverData } from "/static/js/modules/serverData.js";
+
+var app = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    data: {
+        name: "",
+        passcode: "",
+
+        lobby_id: serverData["lobby_id"],
+        user_id: serverData["user_id"],
+        username: serverData["username"],
+
+        message:""
+    },
+
+    methods: {
+        async handleJoin() {
+            // Only add these fields if not empty
+            this.message = "";
+
+            const requestBody = {
+                "passcode": this.passcode
+            };
+
+            console.log(this.username);
+
+            if (!this.username) {
+                requestBody["name"] = this.name;
+            }
+
+            let resp = await fetchJson(`/api/lobbys/${this.lobby_id}/join`, "POST", requestBody);
+
+            if (resp.status === 401 || resp.status === 404) {
+                this.message = await resp.text();
+            } else if (resp.status == 200) {
+                window.location.href = `/lobby/${this.lobby_id}`;
+            } else {
+                this.message = "Error joining lobby";
+            }
+        }
+    }
+
+});
+
+
+</script>
+
+{% endblock %}
+
+{% block content %}
+<div id="app" class="col-lg-4 col-md-6" >
+
+    <h3 v-cloak>Joining Lobby #[[lobby_id]]</h3>
+
+    <form id="joinForm" v-on:submit.prevent="handleJoin">
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Name: </label>
+
+            <strong v-if="username">[[username]]</strong>
+            <input v-else v-model="name" id="name" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label for="desc" class="form-label">Passcode:</label>
+            <input v-model="passcode" id="desc" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-light">Join</button>
+
+    </form>
+
+    <p id="message">[[message]]</p>
+
+</div>
+
+{% endblock %}

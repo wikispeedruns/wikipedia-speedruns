@@ -16,14 +16,14 @@ function validationAlert(msg, isErr=true)
     element.innerText = msg;
 }
 
-async function handleLogin(event)    
+async function handleLogin(event)
 {
     event.preventDefault();
     var re = /\S+@\S+\.\S+/;
 
     const login = document.getElementById("login").value;
     const password = document.getElementById("password").value;
-    
+
     var reqBody;
 
     // TODO what if username looks like an email? We should prevent that somehow
@@ -38,6 +38,9 @@ async function handleLogin(event)
             "password": password,
         };
     }
+
+    // Clear message
+    validationAlert("", false);
 
     const response = await fetch("/api/users/login", {
         method: 'POST',
@@ -56,7 +59,7 @@ async function handleLogin(event)
     } else {
         validationAlert("Error logging in");
     }
-    
+
 }
 
 window.onload = function() {
@@ -66,7 +69,7 @@ window.onload = function() {
 </script>
 
 <style>
-    
+
 
 </style>
 {% endblock %}

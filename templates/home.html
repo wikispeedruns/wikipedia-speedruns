@@ -13,12 +13,12 @@
 
 <div id="app">
 
-    <h3>Welcome to Wikipedia Speedruns! <a href="/about#beta"><span class="beta">BETA*</span></a></h3>
+    <h3 class="mb-4">Welcome<span v-if="username"> back</span> to Wikipedia Speedruns<span v-if="username">, [[username]]</span>! <a href="/about#beta"><span class="beta">BETA*</span></a></h3>
 
 
     <p>The goal of this game is simple. Try to get from one wikipedia page to another as fast as possible by clicking on the links in the page. </p>
-    <p>There are a few simple rules:<br>
-        <ul>
+    <p >There are a few simple rules:<br>
+        <ul class="mb-4">
             <li>Any link shown on the page is fair game.</li>
             <li>DO NOT use Ctrl+F/find in your browser!</li>
             <li>Live with your mistakes (the back button will end your run).</li>
@@ -26,20 +26,65 @@
         </ul>
     </p>
 
+    <p v-if="loggedIn">
+        <b>New:</b> Try creating a private lobby <a href="/lobby/create">here</a>
+    </p>
 
-    <hr>
-
+    <hr class="mt-4">
 
     <div class="row justify-content-md-center">
 
-    <div class="col-sm-6">
+        <div class="col-sm-6">
 
-        <div class="card">
-            <div class="card-body">
-                <h4>Prompt of the Day</h4>
-                <template v-if="dailyPrompts.length > 0">
-                    <h6 >Time Remaining: [[timeLeft]]</h6>
+            <div class="card">
+                <div class="card-body">
+                    <h4>Prompt of the Day</h4>
+                    <template v-if="dailyPrompts.length > 0">
+                        <h6 >Time Remaining: [[timeLeft]]</h6>
 
+                        <table class="table table-hover">
+                            <thead>
+                                <th scope="col">Prompt #</th>
+                                <th scope="col">Starting Article</th>
+                                <th class="text-center"></th>
+                            </thead>
+                            <tbody>
+                                <tr v-for="prompt in dailyPrompts" v-cloak>
+                                    <td>[[prompt.prompt_id]]</span> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
+
+                                    <td>[[prompt.start]]</td>
+
+                                    <td class="text-center">
+                                        <template v-if="prompt.played">
+                                            <a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a>
+                                        </template>
+                                        <template v-else>
+                                            <span title="Play this prompt to see the results!">-</span>
+                                        </template>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </template>
+                    <template v-else>
+                        <hr>
+                        <p>Currently unavailable</p>
+                    </template>
+
+                </div>
+
+                <div class="card-footer text-muted">
+                    These prompts are <a href="/about#ratings">rated</a>.
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-body">
+
+                    <h4> Try some other Prompts </h4>
                     <table class="table table-hover">
                         <thead>
                             <th style="width:100px" scope="col">Prompt #</th>
@@ -47,17 +92,10 @@
                             <th class="text-center"></th>
                         </thead>
                         <tbody>
-                            <tr v-for="prompt in dailyPrompts" v-cloak>
-                                <td>[[prompt.prompt_id]]</span>
-                                    <template v-if="loggedIn">
-                                        (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)
-                                    </template>
-                                    <template v-else>
-                                        (<a v-on:click="alertLogin" v-bind:href="'/play/' + prompt.prompt_id">play</a>)
-                                    </template>
-
+                            <tr v-for="prompt in activePrompts" v-cloak>
+                                <td>
+                                    [[prompt.prompt_id]] (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)
                                 </td>
-
                                 <td>[[prompt.start]]</td>
                                 <td class="text-center">
                                     <template v-if="prompt.played">
@@ -67,63 +105,31 @@
                                         <span title="Play this prompt to see the results!">-</span>
                                     </template>
                                 </td>
-                                </tr>
+
+                            </tr>
                         </tbody>
                     </table>
-                </template>
-                <template v-else>
-                    <hr>
-                    <p>Currently unavailable</p>
-                </template>
+                </div>
 
-            </div>
 
-            <div class="card-footer text-muted">
-                These prompts are <a href="/about#ratings">rated</a>.
             </div>
         </div>
 
     </div>
 
-    <div class="col-sm-6">
-        <div class="card">
-            <div class="card-body">
-
-                <h4> Try some other Prompts </h4>
-                <table class="table table-hover">
-                    <thead>
-                        <th style="width:100px" scope="col">Prompt #</th>
-                        <th scope="col">Start Article</th>
-                        <th class="text-center"></th>
-                    </thead>
-                    <tbody>
-                        <tr v-for="prompt in activePrompts" v-cloak>
-                            <td>
-                                [[prompt.prompt_id]] (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)
-                            </td>
-                            <td>[[prompt.start]]</td>
-                            <td class="text-center">
-                                <template v-if="prompt.played">
-                                    <a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a>
-                                </template>
-                                <template v-else>
-                                    <span title="Play this prompt to see the results!">-</span>
-                                </template>
-                            </td>
-
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-
-        </div>
-    </div>
-    </div>
     <p class="my-4"> Still want more? Checkout our <a href="/archive">archive</a> or click <a href="/random">here</a> to try a random prompt.</p>
 
-    <hr>
-    <h4> Top 10 rated players:</h4> Note the <a href="/about#ratings">rating system</a> is still experimental </p>
+    <hr class="mt-4">
+
+    <div class="container-xxl" id="marathon-block">
+
+        <marathon-prompts v-bind:prompts="marathonPrompts" v-bind:username="username"></marathon-prompts>
+
+    </div>
+
+
+    <hr class="mt-4">
+    <h4> Top 10 rated players:</h4> Note the <a href="/about#ratings">rating system</a> is based on each player's performance on daily prompts, and is still experimental.</p>
 
     <div class="row justify-content-md-center">
         <div class="col-6">
@@ -144,7 +150,11 @@
         </div>
     </div>
 
-    <hr>
+
+
+
+
+    <hr class="mt-4">
 
     <div>
         <p>
@@ -167,9 +177,9 @@
         </p>
     </div>
 
-    <hr>
+    <hr class="mt-4">
 
-    <div class="social-menu center">
+    <div class="social-menu center py-3">
         <a href="https://twitter.com/WikiSpeedruns" target="_blank">
             <button type="button" class="btn">
                 <i class="bi bi-twitter"></i>

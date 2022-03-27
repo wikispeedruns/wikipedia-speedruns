@@ -1,3 +1,4 @@
+import { MarathonPrompts } from "./modules/game/marathon/marathonPrompts.js";
 import { serverData } from "./modules/serverData.js";
 
 async function getPrompts()
@@ -24,15 +25,26 @@ async function getTopUsers()
     return ratings;
 }
 
+async function getMarathonPrompts()
+{
+    const response = await fetch("/api/marathon/all");
+    return await response.json();
+}
+
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
+    components: {
+        'marathon-prompts': MarathonPrompts,
+    },
     data: {
         dailyPrompts: [],
         activePrompts: [],
         topUsers: [],
+        marathonPrompts: [],
         timeLeft: "",
+        username: serverData["username"],
         loggedIn: false,
     },
     methods: {
@@ -46,6 +58,7 @@ var app = new Vue({
         this.loggedIn = "username" in serverData;
 
         this.topUsers = await getTopUsers();
+        this.marathonPrompts = await getMarathonPrompts(); 
 
         const prompts = await getPrompts();
         this.dailyPrompts = prompts.filter(p => p.rated);
