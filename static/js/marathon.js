@@ -130,11 +130,12 @@ let app = new Vue({
 
         async pageCallback(page, loadTime) {
 
-            // console.log("page callback")
-
-            this.clicksRemaining -= 1;
+            if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
+                this.path.push(page);
+                this.clicksRemaining -= 1;
+            }
             
-            this.path.push(page);
+            //this.path.push(page);
             this.currentArticle = page;
 
             this.startTime += loadTime;
