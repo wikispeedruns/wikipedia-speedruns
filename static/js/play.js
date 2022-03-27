@@ -90,7 +90,7 @@ let app = new Vue({
 
         this.currentArticle = this.startArticle;
 
-        if (this.loggedIn || this.lobbyId) {
+        if (this.loggedIn || this.lobbyId != null) {
             this.runId = await startRun(PROMPT_ID, LOBBY_ID);
         } else {
             this.runId = startLocalRun(PROMPT_ID);
@@ -122,7 +122,7 @@ let app = new Vue({
 
                 this.endTime = Date.now();
 
-                if (this.loggedIn || this.lobbyId) {
+                if (this.loggedIn || this.lobbyId != null) {
                     this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
                 } else {
                     this.runId = submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, this.path);
