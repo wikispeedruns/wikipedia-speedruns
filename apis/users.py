@@ -358,7 +358,7 @@ def reset_password():
     Given the user id, reset token and a new password, change the password
     '''
     get_query = "SELECT hash FROM `users` WHERE `user_id`=%s"
-    update_query = "UPDATE `users` SET `hash`=%s WHERE `user_id`=%s"
+    update_query = "UPDATE `users` SET `hash`=%s, `is_old_hash`=0 WHERE `user_id`=%s"
 
     if not all([field in request.json for field in ["user_id", "password", "token"]]):
         return "Invalid request", 400
