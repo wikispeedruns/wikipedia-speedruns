@@ -125,19 +125,20 @@ let app = new Vue({
         }
 
         this.startArticle = prompt['start'];
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback);
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.setupPreview);
     },
 
 
     methods : {
 
-
-
         async pageCallback(page, loadTime) {
 
-            this.clicksRemaining -= 1;
+            if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
+                this.path.push(page);
+                this.clicksRemaining -= 1;
+            }
             
-            this.path.push(page);
+            //this.path.push(page);
             this.currentArticle = page;
 
             this.startTime += loadTime;
@@ -195,9 +196,6 @@ let app = new Vue({
             }
 
             this.started = true;
-            
-
-            setMargin();
 
             setConf();
 
@@ -249,6 +247,12 @@ let app = new Vue({
 
             return output
         },
+
+
+
+        setupPreview: function () {
+            return;
+        }
 
     }
 });
@@ -304,7 +308,7 @@ function conf() {
 function setMargin() {
     const element = document.getElementById("time-box");
     let margin = (element.offsetHeight + 25) > 250 ? (element.offsetHeight + 25) : 250
-    document.getElementById("wikipedia-frame").lastChild.style.paddingBottom = margin +"px";
+    document.getElementById("wikipedia-frame").style.marginBottom = margin +"px";
 }
 
 

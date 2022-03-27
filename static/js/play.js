@@ -10,6 +10,7 @@ these components should be as modular/generic as possible.
 import { serverData } from "./modules/serverData.js";
 import { fetchJson } from "./modules/fetch.js";
 import { startRun, submitRun } from "./modules/game/runs.js";
+import { getArticleSummary } from "./modules/wikipediaAPI/util.js";
 
 import { CountdownTimer } from "./modules/game/countdown.js";
 import { FinishPage } from "./modules/game/finish.js";
@@ -56,6 +57,7 @@ let app = new Vue({
         startArticle: "",    //For all game modes, this is the first article to load
         endArticle: "",      //For sprint games. Reaching this article will trigger game finishing sequence
         currentArticle: "",
+        articlePreview: "",
         path: [],             //array to store the user's current path so far, submitted with run
 
         promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
@@ -71,9 +73,12 @@ let app = new Vue({
         started: false,      //Flag for whether a game has started (countdown finished), used for rendering
 
         renderer: null,
-
-
         loggedIn: false,
+        hover: false,
+        loading: false,
+
+        clientX: 0,
+        clientY: 0
     },
 
     mounted: async function() {
@@ -98,19 +103,29 @@ let app = new Vue({
             //console.log(this.runId);
         }
 
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback);
-
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.setupPreviews);
     },
 
 
     methods : {
         async pageCallback(page, loadTime) {
+
+            // console.log("page callback")
+
+            this.loading = false;
+            this.hover = false;
             // Game logic for sprint mode:
-            this.path.push(page);
+
+            if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
+                this.path.push(page);
+            }
+            //this.path.push(page);
 
             this.currentArticle = page;
 
             this.startTime += loadTime;
+
+            setMargin();
 
             //if the page's title matches that of the end article, finish the game, and submit the run
             if (page.replace("_", " ").toLowerCase() === this.endArticle.replace("_", " ").toLowerCase()) {
@@ -148,10 +163,66 @@ let app = new Vue({
 
             await this.renderer.loadPage(this.startArticle);
 
-            setMargin();
-
+            this.setupPreviews();
             await this.pageCallback(this.startArticle, Date.now() - this.startTime)
         },
+
+        displayPreview: function() {
+            let html = "";
+            if ("originalimage" in this.articlePreview) {
+                html += '<img src="' + this.articlePreview["originalimage"]["source"] + '"/>';
+            }
+            html += '<div>' + this.articlePreview["extract_html"] + '</div>';
+            return html;
+        },
+
+        computePosition: function() {
+            const vh = window.innerHeight;
+            const vw = window.innerWidth;
+            const styleObject = new Object();
+            if (this.clientX < vw / 2.0) {
+                styleObject['left'] = `${this.clientX+10}px`;
+            } else {
+                styleObject['right'] = `${vw-this.clientX+10}px`;
+            }
+            if (this.clientY < vh / 2.0) {
+                styleObject['top'] = `${this.clientY+10}px`;
+            } else {
+                styleObject['bottom'] = `${vh-this.clientY+10}px`;
+            }
+            return styleObject;
+        },
+
+        mouseEnter: function(e) {
+            this.loading = true;
+            const href = e.currentTarget.getAttribute("href");
+            const title = href.split('/wiki/').pop();
+            // const promise1 = getArticleSummary(title);
+            // const promise2 = new Promise(resolve => setTimeout(resolve, 500));
+            getArticleSummary(title).then(resp => {
+                if (this.loading) {
+                    this.articlePreview = resp;
+                    this.hover = true;
+                    this.clientX = e.clientX;
+                    this.clientY = e.clientY;
+                }
+            });
+        },
+
+        mouseLeave: function() {
+            this.loading = false;
+            this.hover = false;
+            this.articlePreview = '';
+        },
+
+        setupPreviews: function() {
+            document.getElementById("wikipedia-frame").querySelectorAll("a").forEach(e => {
+                if (e.hasAttribute("href") && e.getAttribute("href").startsWith("/wiki/")) {
+                    e.addEventListener("mouseenter", this.mouseEnter);
+                    e.addEventListener("mouseleave", this.mouseLeave);
+                }
+            });
+        }
 
     }
 })
@@ -159,8 +230,7 @@ let app = new Vue({
 function setMargin() {
     const element = document.getElementById("time-box");
     let margin = (element.offsetHeight + 25) > 100 ? (element.offsetHeight + 25) : 100
-    document.getElementById("wikipedia-frame").lastChild.style.paddingBottom = margin +"px";
-    //console.log(margin)
+    document.getElementById("wikipedia-frame").style.marginBottom = margin +"px";
 }
 
 // Prevent accidental leaves
