@@ -24,7 +24,7 @@ async function getArticleTitle(page) {
     const body = await resp.json()
 
     if ("items" in body) {
-        return body["items"][0]["title"];
+        return body["items"][0]["title"].replaceAll('_', ' ');
     } else {
         return null;
     }
