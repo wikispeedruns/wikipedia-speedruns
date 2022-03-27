@@ -63,7 +63,7 @@ var CountdownTimer = {
 
             <div><button id="start-btn" class="btn btn-outline-secondary">(Don't want to wait? Start immediately!)</button></div>
         </div>
-        <div v-show="countdownRemaining < 7000000" class="mirroredimgblock">
+        <div v-show="countdownRemaining < 700" class="mirroredimgblock">
             <img src="/static/assets/startgun.gif" class="startgun">
             <img src="/static/assets/startgun.gif" class="startgun invgif">
         </div>

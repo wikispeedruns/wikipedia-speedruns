@@ -20,9 +20,11 @@ def render_with_data(template, **kwargs):
         data["user_id"] = session["user_id"]
         data["username"] = session["username"]
 
-        return render_template(template, data=data)
-    else:
-        return render_template(template, data=data)
+    # only use for rendering non-data front-end UI elements
+    if "admin" in session and session["admin"]:
+        data["admin"] = True
+        
+    return render_template(template, data=data)
 
 # Front end pages
 @views.route('/', methods=['GET'])
@@ -85,14 +87,15 @@ def get_prompt_page(id):
     run_id = request.args.get('run_id', '')
     page = request.args.get('page', 1)
     sortMode = request.args.get('sort', 'time')
+    timeFilter = request.args.get('time_filter', 'all')
 
     if int(page) < 1:
         page = 1
 
     if len(run_id) != 0:
-        return render_with_data('prompt.html', prompt_id=id, run_id=run_id, pg = page, sortMode=sortMode)
+        return render_with_data('prompt.html', prompt_id=id, run_id=run_id, pg = page, sortMode=sortMode, timeFilter=timeFilter)
     else:
-        return render_with_data('prompt.html', prompt_id=id, pg = page, sortMode=sortMode)
+        return render_with_data('prompt.html', prompt_id=id, pg = page, sortMode=sortMode, timeFilter=timeFilter)
 
 
 @views.route('/play/<id>', methods=['GET'])
@@ -147,7 +150,6 @@ def get_lobby_page(lobby_id):
     else:
         return render_with_data('lobbys/join.html', lobby_id=lobby_id)
 
-
 @views.route('/lobby/<int:lobby_id>/play/<int:prompt_id>', methods=['GET'])
 def get_lobby_play_page(lobby_id, prompt_id):
     return render_with_data('play.html', lobby_id=lobby_id, prompt_id=prompt_id)
@@ -181,3 +183,8 @@ def get_manage_page():
 @check_admin
 def get_test_article_page():
     return render_with_data('admin/articleTester.html')
+
+@views.route('/stats', methods=['GET'])
+@check_admin
+def get_stats_page():
+    return render_with_data('admin/stats.html')
