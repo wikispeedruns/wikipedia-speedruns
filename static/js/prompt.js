@@ -6,6 +6,7 @@ const lobby_id = serverData["lobby_id"] || null;
 
 const pg = serverData["pg"];
 const sortMode = serverData["sortMode"];
+const timeFilter = serverData["timeFilter"]; //['all', '1', '7', '30', '100']
 
 const runsPerPage = 10;
 
@@ -234,6 +235,7 @@ var app = new Vue({
         page: 0,
         totalpages: 0,
         sortMode: sortMode,
+        timeFilter: timeFilter,
 
         lobbyId: lobby_id,
         run_id: serverData["run_id"] || "",
@@ -317,14 +319,10 @@ var app = new Vue({
         },
 
         buildNewLink: function (page) {
-            let base = window.location.href.split('?')[0] + "?page=" + String(page)
-            if (this.run_id) {
-                base += "&run_id=" + this.run_id
-            }
-            if (this.sortMode === 'path') {
-                base += "&sort=path"
-            }
-            window.location.replace(base)
+
+            let url = new URL(window.location.href)
+            url.searchParams.set('page', String(page))
+            window.location.replace(url)
         },
 
         showPath: function(event, path) {
@@ -347,23 +345,50 @@ var app = new Vue({
         },
 
         toggleSort: function(tab) {
+            let url = new URL(window.location.href)
             if (tab === 'time' && this.sortMode === 'path') {
-                if (this.run_id) {
-                    window.location.replace(window.location.href.split('?')[0] + "?run_id=" + this.run_id);
-                } else {
-                    window.location.replace(window.location.href.split('?')[0]);
-                }
+                url.searchParams.set('sort', 'time')
             } else if (tab === 'path' && this.sortMode === 'time') {
-                if (this.run_id) {
-                    window.location.replace(window.location.href.split('?')[0] + "?run_id=" + this.run_id + "&sort=path");
-                } else {
-                    window.location.replace(window.location.href.split('?')[0] + "?sort=path");
-                }
+                url.searchParams.set('sort', 'path')
+            }
+
+            window.location.replace(url)
+        },
+
+        toggleTimeFilter: function(f) {
+            if (f != this.timeFilter) {
+                let url = new URL(window.location.href)
+                url.searchParams.set('time_filter', f)
+                window.location.replace(url)
             }
         },
 
         runReplay: function(event) {
             console.log(event)
+        },
+
+        filterByTime: function() {
+
+            let now = Date.now()
+
+            this.runs.forEach(el => {
+                let date = Date.parse(el.end_time)
+                console.log((now - date) / (1000 * 60 * 60 * 24))
+            });
+
+            if (!['1', '7', '30', '100'].includes(this.timeFilter)) return;
+            
+            let output = []
+
+            this.runs.forEach(el => {
+                let date = Date.parse(el.end_time)
+                console.log((now - date) / (1000 * 60 * 60 * 24))
+                if ((now - date) / (1000 * 60 * 60 * 24) < parseInt(this.timeFilter)){ 
+                    output.push(el); 
+                } 
+            });
+
+            this.runs = output;
         }
     },
 
@@ -376,8 +401,6 @@ var app = new Vue({
             this.runs = await resp.json();
             this.prompt = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}`);
 
-
-
         }
         else {
             const resp = await this.getLeaderboard();
@@ -386,6 +409,8 @@ var app = new Vue({
             this.prompt = resp["prompt"];
             this.runs = resp["leaderboard"];
         }
+
+        this.filterByTime();
 
         if (this.sortMode === 'path') {
             this.runs.sort((a, b) => (a.path.length > b.path.length) ? 1 : ((a.path.length === b.path.length) ? ((a.run_time > b.run_time) ? 1 : -1) : -1))
