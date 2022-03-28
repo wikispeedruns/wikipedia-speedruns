@@ -44,14 +44,16 @@ def populate_sprints(cursor):
 
 def populate_users(cursor):
     # Create 40 users with username/password of testuser[i]/testuser[i] for i 1-40
-    query = "INSERT INTO `users` (`username`, `hash`, `email`) VALUES (%s, %s, %s)"
+    query = "INSERT INTO `users` (`username`, `hash`, `email`, `join_date`) VALUES (%s, %s, %s, %s)"
 
     users = []
+    date = datetime.datetime.now() - datetime.timedelta(days=40)
     for i in range(40):
         username = f"testuser{i+1}"
         hash = bcrypt.hashpw(base64.b64encode(hashlib.sha256(username.encode()).digest()), bcrypt.gensalt())
         email = username + "@testemail.com"
-        users.append((username, hash, email))
+        date = date + datetime.timedelta(days=1)
+        users.append((username, hash, email, date))
 
     try:
         cursor.executemany(query, users)
@@ -81,7 +83,8 @@ def populate_runs(cursor):
     for p in prompts:
         run_time = 50
         for u in users:
-            start_time = p["active_start"] + datetime.timedelta(hours=2)
+            # TODO: change start_time and end_time to be timestamp(3) instead of datetime
+            start_time = p["active_start"] + datetime.timedelta(hours=2) 
             end_time = p["active_start"] + datetime.timedelta(hours=2, seconds=run_time)
             path = json.dumps([p["start"], p["end"]])
 
