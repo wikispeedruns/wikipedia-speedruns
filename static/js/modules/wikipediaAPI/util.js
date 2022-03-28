@@ -14,19 +14,18 @@ async function getArticle(page) {
     }
 }
 
-async function getArticleTitle(page) {
+async function getArticleTitle(title) {
     const resp = await fetch(
-        `https://en.wikipedia.org/api/rest_v1/page/title/${page}`,
-        {
+        `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&prop=displaytitle&page=${title}`, {
             mode: "cors"
         }
     )
     const body = await resp.json()
 
-    if ("items" in body) {
-        return body["items"][0]["title"];
-    } else {
+    if ("error" in body) {
         return null;
+    } else {
+        return body["parse"]["title"];
     }
 }
 
