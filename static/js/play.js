@@ -118,14 +118,12 @@ let app = new Vue({
 
         this.runId = await startRun(PROMPT_ID, LOBBY_ID);
 
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.setupPreviews);
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.mouseEnter, this.mouseLeave);
     },
 
 
     methods : {
-        async pageCallback(page, loadTime) {
-
-            // console.log("page callback")
+        pageCallback: function(page, loadTime) {
 
             this.loading = false;
             this.hover = false;
@@ -140,21 +138,9 @@ let app = new Vue({
 
             this.startTime += loadTime;
 
-            setMargin();
-
             //if the page's title matches that of the end article, finish the game, and submit the run
             if (page.replace("_", " ").toLowerCase() === this.endArticle.replace("_", " ").toLowerCase()) {
-
-                this.finished = true;
-
-                // Disable popup
-                window.onbeforeunload = null;
-
-                this.endTime = Date.now();
-
-                this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
-              
-                fireworks();
+                this.finish();
             }
 
         },
@@ -172,9 +158,19 @@ let app = new Vue({
             }, 50);
 
             await this.renderer.loadPage(this.startArticle);
+        },
 
-            this.setupPreviews();
-            await this.pageCallback(this.startArticle, Date.now() - this.startTime)
+        async finish() {
+            this.finished = true;
+
+            // Disable popup
+            window.onbeforeunload = null;
+
+            this.endTime = Date.now();
+
+            this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
+          
+            fireworks();
         },
 
         displayPreview: function() {
@@ -223,25 +219,10 @@ let app = new Vue({
             this.loading = false;
             this.hover = false;
             this.articlePreview = '';
-        },
-
-        setupPreviews: function() {
-            document.getElementById("wikipedia-frame").querySelectorAll("a").forEach(e => {
-                if (e.hasAttribute("href") && e.getAttribute("href").startsWith("/wiki/")) {
-                    e.addEventListener("mouseenter", this.mouseEnter);
-                    e.addEventListener("mouseleave", this.mouseLeave);
-                }
-            });
         }
 
     }
 })
-
-function setMargin() {
-    const element = document.getElementById("time-box");
-    let margin = (element.offsetHeight + 25) > 100 ? (element.offsetHeight + 25) : 100
-    document.getElementById("wikipedia-frame").style.marginBottom = margin +"px";
-}
 
 // Prevent accidental leaves
 window.onbeforeunload = function() {

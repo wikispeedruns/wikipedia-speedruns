@@ -30,7 +30,15 @@
                 <span v-show="!showStop"><br>Time Elapsed<br>[[parseInt(elapsed/60)]] mins</span>
             </div>
             <div class="col-lg-auto px-4">
-                Checkpoints<br><span v-html="formatActiveCheckpoints()"></span>
+                Checkpoints<br>
+                <ol style="padding-left: 1rem;">
+                    <li v-for="checkpoint in activeCheckpoints">
+                        <strong>[[checkpoint]] </strong>
+                        <small style="cursor: help;" :href="`/wiki/${checkpoint}`" @mouseenter="mouseEnter" @mouseleave="mouseLeave">
+                            ⓘ
+                        </small>
+                    </li>
+                </ol>
             </div>
         </div>
         <div v-show="!showStop" class="row flex-row flex-nowrap justify-content-end py-2">
@@ -60,7 +68,15 @@
                     <br>Unique Articles Visited<br>[[numVisitedUnique]]
                 </div>
                 <div class="col-lg-auto px-4">
-                    Checkpoints<br><span v-html="formatActiveCheckpoints()"></span>
+                    Checkpoints<br>
+                    <ol style="padding-left: 1rem;">
+                        <li v-for="checkpoint in activeCheckpoints">
+                            <strong>[[checkpoint]] </strong>
+                            <small style="cursor: help;" :href="`/wiki/${checkpoint}`" @mouseenter="mouseEnter" @mouseleave="mouseLeave">
+                                ⓘ
+                            </small>
+                        </li>
+                    </ol>
                 </div>
             </div>
             <div class="row flex-row flex-nowrap justify-content-end py-2">
@@ -79,6 +95,8 @@
 
     <marathon-help v-show="started && !finished && showHelp" v-cloak v-on:close-help="showHelp = !showHelp">
     </marathon-help>
+
+    <div v-if="loading && hover" v-html="displayPreview()" class="tooltip-container" :style="computePosition()"></div>
 
     <countdown-timer
         v-bind:start-article="startArticle"
