@@ -94,7 +94,7 @@ function setMargin(frame) {
 
 function hideElements(frame) {
 
-    const hide = ["reference","mw-editsection","reflist","portal","refbegin", "sidebar", "authority-control", "external", "sistersitebox"]
+    const hide = ["reference","mw-editsection","reflist","portal","refbegin", "sidebar", "authority-control", "external", "sistersitebox", "box-More_citations_needed"]
     for(let i=0; i<hide.length; i++) {
         let elements = document.getElementsByClassName(hide[i])
         //console.log("found: " + hide[i] + elements.length)
