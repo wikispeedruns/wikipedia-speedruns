@@ -1,7 +1,11 @@
-from flask import Blueprint, jsonify
+import gzip
+import json
+
+from flask import Blueprint, jsonify, make_response
 from pymysql.cursors import DictCursor
 
 from util.decorators import check_admin
+from util.flaskjson import CustomJSONEncoder
 from db import get_db
 
 stats_api = Blueprint("stats", __name__, url_prefix="/api/stats")
@@ -119,4 +123,10 @@ def get_daily_stats():
         for name, query in queries.items():
             cursor.execute(query)
             results[name] = cursor.fetchall()
-        return jsonify(results)
+    
+    content = gzip.compress(json.dumps(results, cls=CustomJSONEncoder).encode('utf8'), compresslevel=5)
+    response = make_response(content)
+    response.headers['Content-Length'] = len(content)
+    response.headers['Content-Encoding'] = 'gzip'
+
+    return response
