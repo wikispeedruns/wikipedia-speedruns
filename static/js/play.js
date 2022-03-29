@@ -100,6 +100,7 @@ let app = new Vue({
         renderer: null,
         hover: false,
         loading: false,
+        blocker: false,
 
         clientX: 0,
         clientY: 0
@@ -173,15 +174,6 @@ let app = new Vue({
             fireworks();
         },
 
-        displayPreview: function() {
-            let html = "";
-            if ("originalimage" in this.articlePreview) {
-                html += '<img src="' + this.articlePreview["originalimage"]["source"] + '"/>';
-            }
-            html += '<div>' + this.articlePreview["extract_html"] + '</div>';
-            return html;
-        },
-
         computePosition: function() {
             const vh = window.innerHeight;
             const vw = window.innerWidth;
@@ -199,8 +191,8 @@ let app = new Vue({
                     styleObject['bottom'] = `${vh-this.clientY+10}px`;
                 }
             } else {
-                styleObject['left'] = '10px';
-                styleObject['bottom'] = `${document.getElementById("time-box-mobile").offsetHeight + 25}px`;
+                styleObject['left'] = `${Math.floor((vw-360)/2)}px`;
+                styleObject['bottom'] = `${vh-this.clientY+25}px`;
             }
             return styleObject;
         },

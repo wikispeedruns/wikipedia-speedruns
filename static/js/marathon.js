@@ -60,6 +60,7 @@ let app = new Vue({
         renderer: null,
         hover: false,
         loading: false,
+        blocker: false,
 
         clientX: 0,
         clientY: 0
@@ -227,15 +228,6 @@ let app = new Vue({
             this.runId = await submitRun(this.promptId, this.endTime - this.startTime + this.lastTime, this.visitedCheckpoints, this.path, finished);
             removeSave(PROMPT_ID);
         
-        },
-
-        displayPreview: function() {
-            let html = "";
-            if ("originalimage" in this.articlePreview) {
-                html += '<img src="' + this.articlePreview["originalimage"]["source"] + '"/>';
-            }
-            html += '<div>' + this.articlePreview["extract_html"] + '</div>';
-            return html;
         },
 
         computePosition: function() {

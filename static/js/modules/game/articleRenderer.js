@@ -33,7 +33,7 @@ export class ArticleRenderer {
             this.frame.querySelectorAll("a, area").forEach((el) => {
                 // Arrow function to prevent this from being overwritten
                 el.onclick = (e) => this.handleWikipediaLink(e);
-                if (el.hasAttribute("href") && el.getAttribute("href").startsWith("/wiki/")) {
+                if (window.screen.width >= 768 && el.hasAttribute("href") && el.getAttribute("href").startsWith("/wiki/")) {
                     el.onmouseenter = this.mouseEnter;
                     el.onmouseleave = this.mouseLeave;
                 }
@@ -87,9 +87,10 @@ export class ArticleRenderer {
 }
 
 function setMargin(frame) {
-    const element = document.getElementById("time-box");
-    let margin = (element.offsetHeight + 25) > 250 ? (element.offsetHeight + 25) : 250;
-    frame.style.marginBottom = margin +"px";
+    const desktop_ht = document.getElementById("time-box") ? document.getElementById("time-box").offsetHeight : 225;
+    const mobile_ht = document.getElementById("time-box-mobile") ? document.getElementById("time-box-mobile").offsetHeight : 225;
+    const margin = Math.max(desktop_ht, mobile_ht, 225) + 25;
+    frame.style.marginBottom = margin + "px";
 }
 
 function hideElements(frame) {

@@ -17,24 +17,52 @@
 
 <div id="app">
 
-    <div v-show="started && !finished" id="time-box" class="HUDwrapper container">
-        <div class="row flex-row">
-            <div class="col-sm-auto text-nowrap px-4 py-2">
-                Start Article<br><strong>[[startArticle]]</strong>
-                <br>Current Article<br><strong>[[currentArticle]]</strong>
-            </div>
-            <div class="col-sm-auto text-nowrap px-4 py-2">
-                End Article<br><strong>[[endArticle]] </strong>
-                <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="mouseEnter" @mouseleave="mouseLeave">
-                    ⓘ
-                </small>
-            </div>
-            <div class="col-sm-auto text-nowrap px-4 py-2">
-                Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
+    <div v-show="started && !finished">
+
+        <div class="show-on-desktop">
+            <div class="HUDwrapper container" id="time-box">
+                <div class="row flex-row">
+                    <div class="col-sm-auto text-nowrap px-4 py-2">
+                        Start Article<br><strong>[[startArticle]]</strong>
+                        <br>Current Article<br><strong>[[currentArticle]]</strong>
+                    </div>
+                    <div class="col-sm-auto text-nowrap px-4 py-2">
+                        End Article<br><strong>[[endArticle]] </strong>
+                        <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="(e) => { blocker=true; mouseEnter(e); }">
+                            ⓘ
+                        </small>
+                    </div>
+                    <div class="col-sm-auto text-nowrap px-4 py-2">
+                        Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div v-if="loading && hover" v-html="displayPreview()" class="tooltip-container" :style="computePosition()"></div>
+        <div class="show-on-mobile">
+            <div class="HUDwrapper-mobile" id="time-box-mobile">
+                <div class="HUDwrapper-mobile-inner-container">
+                    Start Article: <strong>[[startArticle]]</strong>
+                    <br>
+                    End Article: <strong>[[endArticle]]</strong>
+                    <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="(e) => { blocker=true; mouseEnter(e); }">
+                        ⓘ
+                    </small>
+                    <br>
+                    Current Article: <strong>[[currentArticle]]</strong>
+                    <br>
+                    Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="loading && hover">
+        <div v-if="blocker" class="blocker" @click="blocker=false; mouseLeave();"></div>
+        <div class="tooltip-container" :style="computePosition()">
+            <img v-if="articlePreview.originalimage" :src="`${articlePreview.originalimage.source}`" />
+            <div v-html="articlePreview.extract_html"></div>
+        </div>
     </div>
 
     <countdown-timer id="time-box"
