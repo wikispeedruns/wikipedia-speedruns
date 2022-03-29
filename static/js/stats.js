@@ -106,6 +106,27 @@ async function draw_graphs() {
             },
         }
     });   
+
+    new Chart("average-user-plays", {
+        type: 'line',
+        data: {
+          labels: app.daily.plays_per_user.map(({day}) => day),
+          datasets: [{ 
+              data: app.daily.plays_per_user.map(({plays_per_user}) => plays_per_user),
+              label: "Average User Plays",
+              borderColor: "#3e95cd",
+              fill: false
+            }
+          ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+        }
+    });   
 }
 
 var app = new Vue({
