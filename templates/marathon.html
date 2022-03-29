@@ -72,7 +72,7 @@
                     <ol style="padding-left: 1rem;">
                         <li v-for="checkpoint in activeCheckpoints">
                             <strong>[[checkpoint]] </strong>
-                            <small style="cursor: help;" :href="`/wiki/${checkpoint}`" @click="(e) => { blocker=true; mouseEnter(e); }">
+                            <small style="cursor: help;" :href="`/wiki/${checkpoint}`" @mouseenter="mouseEnter" @mouseleave="mouseLeave">
                                 ⓘ
                             </small>
                         </li>
@@ -96,12 +96,13 @@
     <marathon-help v-show="started && !finished && showHelp" v-cloak v-on:close-help="showHelp = !showHelp">
     </marathon-help>
 
-    <div v-if="loading && hover">
-        <div v-if="blocker" class="blocker" @click="blocker=false; mouseLeave();"></div>
-        <div class="tooltip-container" :style="computePosition()">
-            <img v-if="articlePreview.originalimage" :src="`${articlePreview.originalimage.source}`" />
-            <div v-html="articlePreview.extract_html"></div>
-        </div>
+    <div v-if="showPreview && articlePreview">
+        <div v-if="showPreviewBgUnderlay" class="blocker" @click="showPreviewBgUnderlay=false; mouseLeave();"></div>
+        <page-preview
+            :article-preview="articlePreview"
+            :client-x="clientX"
+            :client-y="clientY"
+        ></page-preview>
     </div>
 
     <countdown-timer
