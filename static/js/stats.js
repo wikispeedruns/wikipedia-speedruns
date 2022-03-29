@@ -19,7 +19,6 @@ async function get_data() {
 
     response = await fetch("/api/stats/daily");
     const d_totals = await response.json();
-    console.log(d_totals);
     update_daily(d_totals);
 }
 
