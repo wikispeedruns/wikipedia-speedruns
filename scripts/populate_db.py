@@ -28,7 +28,6 @@ def populate_sprints(cursor):
         day = (now - datetime.timedelta(days=(15 - i))).date()
         prompts.append((prompt_start, prompt_end, day, day + datetime.timedelta(days=1)))
 
-    # unused prompts
     query = '''
         INSERT INTO `sprint_prompts` (`start`, `end`, `rated`, `active_start`, `active_end`)
         VALUES (%s, %s, 1, %s, %s)
@@ -44,14 +43,16 @@ def populate_sprints(cursor):
 
 def populate_users(cursor):
     # Create 40 users with username/password of testuser[i]/testuser[i] for i 1-40
-    query = "INSERT INTO `users` (`username`, `hash`, `email`) VALUES (%s, %s, %s)"
+    query = "INSERT INTO `users` (`username`, `hash`, `email`, `join_date`) VALUES (%s, %s, %s, %s)"
 
     users = []
+    date = datetime.datetime.now() - datetime.timedelta(days=40)
     for i in range(40):
         username = f"testuser{i+1}"
         hash = bcrypt.hashpw(base64.b64encode(hashlib.sha256(username.encode()).digest()), bcrypt.gensalt())
         email = username + "@testemail.com"
-        users.append((username, hash, email))
+        date = date + datetime.timedelta(days=1)
+        users.append((username, hash, email, date))
 
     try:
         cursor.executemany(query, users)
@@ -79,10 +80,13 @@ def populate_runs(cursor):
 
     runs = []
     for p in prompts:
+        if (p['active_start'] is None): continue
+
         run_time = 50
+
         for u in users:
-            start_time = p["active_start"] + datetime.timedelta(hours=2)
-            end_time = p["active_start"] + datetime.timedelta(hours=2, seconds=run_time)
+            start_time = p["active_start"] + datetime.timedelta(hours=4)
+            end_time = p["active_start"] + datetime.timedelta(hours=4, seconds=run_time)
             path = json.dumps([p["start"], p["end"]])
 
             runs.append({
@@ -93,6 +97,7 @@ def populate_runs(cursor):
                 "path": path,
             })
             run_time += 20
+
 
     cursor.executemany(runs_query, runs)
 
