@@ -86,6 +86,28 @@ async function draw_graphs() {
         }
     });   
 
+
+    new Chart("daily-finished-runs", {
+        type: 'line',
+        data: {
+          labels: app.daily.finished_runs.map(({day}) => day),
+          datasets: [{ 
+              data: app.daily.finished_runs.map(({daily_plays}) => daily_plays),
+              label: "Daily Finished Plays",
+              borderColor: "#3e95cd",
+              fill: false
+            }
+          ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+        }
+    });   
+
     new Chart("daily-active-users", {
         type: 'line',
         data: {
@@ -107,7 +129,7 @@ async function draw_graphs() {
         }
     });   
 
-    new Chart("average-user-plays", {
+    new Chart("daily-average-user-plays", {
         type: 'line',
         data: {
           labels: app.daily.plays_per_user.map(({day}) => day),
