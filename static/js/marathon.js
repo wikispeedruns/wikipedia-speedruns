@@ -300,7 +300,7 @@ function conf() {
 function setMargin() {
     const element = document.getElementById("time-box");
     let margin = (element.offsetHeight + 25) > 250 ? (element.offsetHeight + 25) : 250
-    document.getElementById("wikipedia-frame").style.marginBottom = margin +"px";
+    document.getElementById("main").style.marginBottom = margin +"px";
 }
 
 

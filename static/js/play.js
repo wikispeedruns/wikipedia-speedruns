@@ -256,7 +256,7 @@ function setMargin() {
     const mobile_timebox_el = document.getElementById("time-box-mobile");
     let margin = Math.max((element.offsetHeight + 25), (mobile_timebox_el.offsetHeight + 25), 100);
     //(element.offsetHeight + 25) > 100 ? (element.offsetHeight + 25) : 100
-    document.getElementById("wikipedia-frame").style.marginBottom = margin +"px";
+    document.getElementById("main").style.marginBottom = margin +"px";
 }
 
 // Prevent accidental leaves
