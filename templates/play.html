@@ -20,8 +20,7 @@
     <div v-show="started && !finished">
 
         <div class="show-on-desktop">
-
-            <div id="time-box" class="HUDwrapper container">
+            <div class="HUDwrapper container" id="time-box">
                 <div class="row flex-row">
                     <div class="col-sm-auto text-nowrap px-4 py-2">
                         Start Article<br><strong>[[startArticle]]</strong>
@@ -29,7 +28,7 @@
                     </div>
                     <div class="col-sm-auto text-nowrap px-4 py-2">
                         End Article<br><strong>[[endArticle]] </strong>
-                        <small style="cursor: default;" :href="`/wiki/${endArticle}`" @mouseenter="mouseEnter" @mouseleave="mouseLeave">
+                        <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="mouseEnter" @mouseleave="mouseLeave">
                             ⓘ
                         </small>
                     </div>
@@ -37,7 +36,7 @@
                         Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
                     </div>
                 </div>
-            </div>    
+            </div>
         </div>
 
         <div class="show-on-mobile">
@@ -46,7 +45,9 @@
                     Start Article: <strong>[[startArticle]]</strong>
                     <br>
                     End Article: <strong>[[endArticle]]</strong>
-                    <small style="cursor: default; font-size: 15px;" :href="`/wiki/${endArticle}`" @click="mobilePreviewClick(event)" id="mobile-end-article-info">ⓘ</small>
+                    <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="(e) => { showPreviewBgUnderlay=true; mouseEnter(e); }">
+                        ⓘ
+                    </small>
                     <br>
                     Current Article: <strong>[[currentArticle]]</strong>
                     <br>
@@ -54,8 +55,15 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <div v-if="loading && hover" v-html="displayPreview()" class="tooltip-container" :style="computePosition()"></div>
+    <div v-if="showPreview && articlePreview">
+        <div v-if="showPreviewBgUnderlay" class="blocker" @click="showPreviewBgUnderlay=false; mouseLeave();"></div>
+        <page-preview
+            :article-preview="articlePreview"
+            :client-x="clientX"
+            :client-y="clientY"
+        ></page-preview>
     </div>
 
     <countdown-timer id="time-box"
