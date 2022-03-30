@@ -30,6 +30,15 @@ async function submitRun(promptId, lobbyId,  runId, startTime, endTime, path) {
     }
 }
 
+async function updateAnonymousRun(runId) {
+    const reqBody = {
+        run_id: runId
+    };
+
+    const response = await fetchJson(`/api/runs/update_anonymous`, 'PATCH', reqBody);
+    return;
+}
+
 /*
 // Send request to create an empty run, returns the run_id
 async function startRun(prompt_id, lobby_id=null) {
@@ -58,4 +67,4 @@ async function submitRun(runId, startTime, endTime, path ) {
 }*/
 
 
-export { startRun, submitRun };
+export { startRun, submitRun, updateAnonymousRun };

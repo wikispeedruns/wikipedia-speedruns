@@ -1,14 +1,15 @@
-import {startRun, submitRun} from "../game/runs.js"
+import {startRun, submitRun, updateAnonymousRun} from "../game/runs.js"
 import { getLocalStorageRuns, addRunToLocalStorage, setLocalStorageRuns } from "./localStorage.js"
 
-function startLocalRun(promptId) {
+function startLocalRun(promptId, runId) {
     const data = {
+        run_id: runId,
         prompt_id: promptId,
     };
 
     const key = "WS-S-sprint-runs";
 
-    return addRunToLocalStorage(key, data);
+    addRunToLocalStorage(key, data);
 }
 
 function submitLocalRun(promptId, runId, startTime, endTime, path) {
@@ -32,33 +33,29 @@ async function uploadLocalSprints() {
     const key = "WS-S-sprint-runs";
     let data = getLocalStorageRuns(key);
 
-    if (Object.keys(data).length == 0) return;
+    const runs = Object.keys(data)
+    if (runs.length == 0) return;
 
     let runIds = [];
 
-    for (const k in data) {
-        const run = data[k]
-        //console.log(run)
+    for (let runId of runs) {
         try {
-            const runId = await startRun(run.prompt_id);
+            console.log("submitting stored run")
+            await updateAnonymousRun(runId);
             runIds.push(runId);
-            await submitRun(run.prompt_id, 
-                            null, 
-                            runId, 
-                            run.start_time, 
-                            run.end_time, 
-                            run.path );
         } catch (e) {
             console.log(e);
         }
     }
 
-    console.log("Finished uploading runIds: ")
-    console.log(runIds)
     console.log("Removing sprint run cache")
-
     localStorage.removeItem(key);
 }
 
-export { startLocalRun, submitLocalRun, uploadLocalSprints };
+function getLocalSprints() {
+    const key = "WS-S-sprint-runs";
+    return getLocalStorageRuns(key);
+}
+
+export { startLocalRun, submitLocalRun, uploadLocalSprints, getLocalSprints };
 

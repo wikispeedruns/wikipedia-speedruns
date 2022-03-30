@@ -95,12 +95,20 @@ let app = new Vue({
 
         this.currentArticle = this.startArticle;
 
+        /*
         if (this.loggedIn || this.lobbyId != null) {
             this.runId = await startRun(PROMPT_ID, LOBBY_ID);
         } else {
             this.runId = startLocalRun(PROMPT_ID);
             console.log("Not logged in, adding to local storage")
             //console.log(this.runId);
+        }*/
+
+        this.runId = await startRun(PROMPT_ID, LOBBY_ID);
+        if (!this.loggedIn && this.lobbyId == null) {
+            startLocalRun(PROMPT_ID, this.runId);
+            console.log("Not logged in, uploading start of run to local storage")
+            //console.log(this.runId)
         }
 
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.setupPreviews);
@@ -136,12 +144,20 @@ let app = new Vue({
                 window.onbeforeunload = null;
 
                 this.endTime = Date.now();
-
+                
+                /*
                 if (this.loggedIn || this.lobbyId != null) {
                     this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
                 } else {
                     this.runId = submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, this.path);
                     console.log("Not logged in, submitting run to local storage")
+                }*/
+
+                this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
+                if (!this.loggedIn && this.lobbyId == null) {
+                    submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, this.path);
+                    console.log("Not logged in, submitting run to local storage")
+                    //console.log(this.runId)
                 }
 
                 fireworks();

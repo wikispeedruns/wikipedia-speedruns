@@ -11,12 +11,9 @@ function setLocalStorageRuns(key, data) {
 }
 
 function addRunToLocalStorage(key, data) {
-    let prev_data = getLocalStorageRuns();
-    const ind = Object.keys(prev_data).length
-    prev_data[ind] = data;
+    let prev_data = getLocalStorageRuns(key);
+    prev_data[data['run_id']] = data;
     setLocalStorageRuns(key, prev_data);
-
-    return ind;
 }
 
 export { getLocalStorageRuns, addRunToLocalStorage, setLocalStorageRuns };
