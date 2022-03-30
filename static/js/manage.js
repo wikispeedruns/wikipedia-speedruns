@@ -35,33 +35,6 @@ Vue.component('prompt-item', {
     </li>`)
 });
 
-Vue.component('marathon-item', {
-    props: ['prompt'],
-
-    methods: {
-
-        async deletePrompt() {
-            const resp = await fetchJson("/api/marathon/delete/" + this.prompt.prompt_id, "DELETE");
-
-            if (resp.status == 200) this.$emit('delete-prompt')
-            else alert(await resp.text())
-
-            app.getPrompts();
-        },
-    },
-
-    template: (`
-    <li>
-        <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}} 
-        <div>{{prompt.initcheckpoints}}</div>
-        <div>{{prompt.checkpoints}}</div>
-        <button v-on:click="deletePrompt" type="button" class="btn btn-default" >
-            <i class="bi bi-trash"></i>
-        </button>
-    </li>`)
-});
-
-
 // TODO maybe these should load the date stuff themselves (At least on update)
 Vue.component('prompt-set', {
     props: ['start', 'end', 'rated', 'prompts'],
@@ -200,8 +173,46 @@ Vue.component('path-generator', {
 });
 
 
+Vue.component('marathon-item', {
+    props: ['prompt'],
 
-Vue.component('marathon-generator', {
+    methods: {
+
+        async deletePrompt() {
+            const resp = await fetchJson("/api/marathon/delete/" + this.prompt.prompt_id, "DELETE");
+
+            if (resp.status == 200) this.$emit('delete-prompt')
+            else alert(await resp.text())
+
+            app.getPrompts();
+        },
+
+        async copyPrompt() {
+            this.$emit('copy-prompt');
+        }
+    },
+
+    template: (`
+    <li>
+        <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}} 
+        <div>{{prompt.initcheckpoints}}</div>
+        <div>{{prompt.checkpoints}}</div>
+        <button v-on:click="deletePrompt" type="button" class="btn btn-default" >
+            <i class="bi bi-trash"></i>
+        </button>
+        <button v-on:click="copyPrompt" type="button" class="btn btn-default" >
+            <i class="bi bi-clipboard"></i>
+        </button>
+    </li>`)
+});
+
+
+
+
+Vue.component('marathon-section', {
+
+    props: ['marathonprompts'],
+
     data: function() {
         return {
             start: "United States",
@@ -210,7 +221,6 @@ Vue.component('marathon-generator', {
             seed: "0",
         }
     },
-
 
     methods: {
         submitPrompt: async function() {
@@ -286,6 +296,14 @@ Vue.component('marathon-generator', {
                 this.cp.splice(ind,1)
             }
             this.$forceUpdate();
+        },
+
+        copyPrompt: function(prompt) {
+            this.start = prompt['start']
+            this.startcp = JSON.parse(prompt['initcheckpoints'])
+            this.cp = JSON.parse(prompt['checkpoints'])
+            this.seed = prompt['seed']
+            this.$forceUpdate();
         }
     },
 
@@ -328,24 +346,38 @@ Vue.component('marathon-generator', {
                     <input class="form-control" type="text" name="inputField" id="inputField">
                 </div>
                 <div>
-                <button v-on:click="addArticle(0)">Set start</button>
+                    <button v-on:click="addArticle(0)">Set start</button>
                 </div>
                 <div>
-                <button v-on:click="addArticle(1)">Add article to starting checkpoints (end of list)</button>
-                <button v-on:click="addArticle(2)">Add article to starting checkpoints (start of list)</button>
+                    <button v-on:click="addArticle(1)">Add article to starting checkpoints (end of list)</button>
+                    <button v-on:click="addArticle(2)">Add article to starting checkpoints (start of list)</button>
                 </div>
                 <div>
-                <button v-on:click="addArticle(3)">Add article to checkpoints (end of list)</button>
-                <button v-on:click="addArticle(4)">Add article to checkpoints (start of list)</button>
+                    <button v-on:click="addArticle(3)">Add article to checkpoints (end of list)</button>
+                    <button v-on:click="addArticle(4)">Add article to checkpoints (start of list)</button>
                 </div>
                 <button id="genMarathonPromptButton" v-on:click="submitPrompt">Click to submit prompt</button>
             </div>
             <hr>
             <div id="generatedMarathonText"></div>
-            <hr>  
+            <hr>
+            <div class="row">
+                <div class="col px-0"> <div class="card"> <div class="card-body">
+                    <h4> Marathon prompts: </h4>
+                    <ul>
+                        <marathon-item
+                            v-for="p in marathonprompts"
+                            v-bind:prompt="p"
+                            v-bind:key="p.prompt_id"
+                            v-on:change="emit('reload-prompts')"
+                            v-on:copy-prompt="copyPrompt(p)"
+                        >
+                        </marathon-item>
+                    </ul>
+                </div></div></div> 
+            </div>  
         </div>
     `)
-
 });
 
 
