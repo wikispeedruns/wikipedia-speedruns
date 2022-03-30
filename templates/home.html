@@ -15,7 +15,6 @@
 
     <h3 class="mb-4">Welcome<span v-if="username"> back</span> to Wikipedia Speedruns<span v-if="username">, [[username]]</span>! <a href="/about#beta"><span class="beta">BETA*</span></a></h3>
 
-
     <p>The goal of this game is simple. Try to get from one wikipedia page to another as fast as possible by clicking on the links in the page. </p>
     <p >There are a few simple rules:<br>
         <ul class="mb-4">
@@ -26,9 +25,9 @@
         </ul>
     </p>
 
-    <p v-if="loggedIn">
-        <b>New:</b> Try creating a private lobby <a href="/lobby/create">here</a>
-    </p>
+    <div class="alert alert-info my-0" role="alert" v-if="loggedIn">
+        <b>**NEW**: </b> Try creating a private lobby <a href="/lobby/create" class="alert-link"><u>here</u></a>
+    </div>
 
     <hr class="mt-4">
 
