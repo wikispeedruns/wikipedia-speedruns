@@ -44,7 +44,6 @@
                         <!-- See this https://v2.vuejs.org/v2/guide/components.html?redirect=true#DOM-Template-Parsing-Caveats -->
                         <tr is="leaderboard-row"
                             v-if="currentRunPosition === -1"
-                            v-bind:current-run-id="getRunID()"
                             v-bind:run="currentRun"
                             v-bind:rank="currentRunRank"
                         ></tr>
@@ -54,7 +53,6 @@
                         <tr is="leaderboard-row"
                             v-for="(run, index) in renderedRuns"
                             v-bind:key="run.run_id"
-                            v-bind:current-run-id="getRunID()"
                             v-bind:run="run"
                             v-bind:rank="getRenderedRank(index)"
                         ></tr>
@@ -62,7 +60,6 @@
                         <tr v-if="currentRunPosition === 1"><td colspan="5">...</td></tr>
                         <tr is="leaderboard-row"
                             v-if="currentRunPosition === 1"
-                            v-bind:current-run-id="getRunID()"
                             v-bind:run="currentRun"
                             v-bind:rank="currentRunRank"
                         ></tr>

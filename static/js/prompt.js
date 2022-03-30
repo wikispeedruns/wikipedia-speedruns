@@ -3,6 +3,7 @@ import {pathArrowFilter} from "./modules/game/filters.js";
 
 const prompt_id = serverData["prompt_id"];
 const lobby_id = serverData["lobby_id"] || null;
+const run_id = serverData["run_id"] || null;
 
 const pg = serverData["pg"];
 const sortMode = serverData["sortMode"];
@@ -14,10 +15,15 @@ Vue.filter('pathArrow', pathArrowFilter)
 
 var LeaderboardRow = {
     props: [
-        "currentRunId",
         "run",
         "rank",
     ],
+
+    created: function() {
+        // Do it here cause these won't change
+        this.lobbyId = lobby_id;
+        this.currentRunId = run_id;
+    },
 
     template: (`
         <tr>
@@ -36,8 +42,9 @@ var LeaderboardRow = {
             <td class="l-col">{{(run.run_time/1000000).toFixed(3)}} s</td>
             <td>{{run.path.length}}</td>
 
-            <td>{{run.path | pathArrow}}
-                <a v-bind:href="'/replay?run_id=' + run.run_id" target="_blank" title="Replay" >
+            <td>
+                {{run.path | pathArrow}}
+                <a v-if="!lobbyId" v-bind:href="'/replay?run_id=' + run.run_id" target="_blank" title="Replay" >
                     <i class="bi bi-play"></i>
                 </a>
             </td>
@@ -47,7 +54,7 @@ var LeaderboardRow = {
 
 
 
-function populateGraph(runs, run_id) {
+function populateGraph(runs, runId) {
 
     var graph = new Springy.Graph();
 
@@ -78,7 +85,7 @@ function populateGraph(runs, run_id) {
 
     for (let i = 0; i < runs.length; i++) {
         var pathNodes = runs[i]["path"]
-        var cur = (runs[i]["run_id"] === Number(run_id)) ? true : false;
+        var cur = (runs[i]["run_id"] === Number(runId)) ? true : false;
 
         for (let j = 0; j < pathNodes.length; j++) {
             var index = checkIncludeLabels(pathNodes[j], nodes);
@@ -117,7 +124,7 @@ function populateGraph(runs, run_id) {
 
     for (let i = 0; i < runs.length; i++) {
         var pathNodes = runs[i]["path"]
-        var cur = (runs[i]["run_id"] === Number(run_id)) ? true : false;
+        var cur = (runs[i]["run_id"] === Number(runId)) ? true : false;
 
         for (let j = 0; j < pathNodes.length - 1; j++) {
 
@@ -238,7 +245,7 @@ var app = new Vue({
         timeFilter: timeFilter,
 
         lobbyId: lobby_id,
-        run_id: serverData["run_id"] || "",
+        runId: run_id,
     },
 
     components: {
@@ -248,7 +255,10 @@ var app = new Vue({
 
     methods : {
         getLeaderboard: async function (mode) {
-            var response = await fetch("/api/sprints/" + prompt_id + "/leaderboard/" + this.run_id);
+            let path = "/api/sprints/" + prompt_id + "/leaderboard/";
+            if (this.runId) path += this.runId;
+
+            var response = await fetch(path);
 
             if (response.status == 401) {
                 alert(await response.text());
@@ -257,8 +267,8 @@ var app = new Vue({
 
             let resp = await response.json();
 
-            if (!this.run_id && resp.run_id != null) {
-                this.run_id = resp.run_id
+            if (!this.runId && resp.run_id != null) {
+                this.runId = resp.run_id
             }
 
             return resp
@@ -269,7 +279,7 @@ var app = new Vue({
             if (this.currentRunPosition === -1 || this.currentRunPosition === 1) {
                 paths = paths.concat(this.currentRun)
             }
-            var graph1 = populateGraph(paths, this.run_id);
+            var graph1 = populateGraph(paths, this.runId);
             $('#springydemo').springy({ graph: graph1 });
         },
 
@@ -284,9 +294,6 @@ var app = new Vue({
             return parseInt(prompt_id);
         },
 
-        getRunID: function() {
-            return parseInt(this.run_id);
-        },
 
         paginate: function () {
             const first = (pg-1) * runsPerPage
@@ -294,8 +301,8 @@ var app = new Vue({
             for (let i = 0; i < this.runs.length; i++) {
                 let run = this.runs[i]
 
-                if (this.run_id) {
-                    if (run.run_id === parseInt(this.run_id)) {
+                if (this.runId) {
+                    if (run.run_id === parseInt(this.runId)) {
                         this.currentRun = run;
                         this.currentRunRank = i+1;
                         if (i < first) {
@@ -377,15 +384,15 @@ var app = new Vue({
             });
 
             if (!['1', '7', '30', '100'].includes(this.timeFilter)) return;
-            
+
             let output = []
 
             this.runs.forEach(el => {
                 let date = Date.parse(el.end_time)
                 console.log((now - date) / (1000 * 60 * 60 * 24))
-                if ((now - date) / (1000 * 60 * 60 * 24) < parseInt(this.timeFilter)){ 
-                    output.push(el); 
-                } 
+                if ((now - date) / (1000 * 60 * 60 * 24) < parseInt(this.timeFilter)){
+                    output.push(el);
+                }
             });
 
             this.runs = output;
