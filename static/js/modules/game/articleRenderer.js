@@ -42,7 +42,6 @@ export class ArticleRenderer {
             window.scrollTo(0, 0);
 
             this.pageCallback(body["title"], Date.now() - startTime);
-            setMargin(this.frame);
 
         } catch (error) {
 
@@ -84,13 +83,6 @@ export class ArticleRenderer {
             this.loadPage(linkEl.getAttribute("href").substring(6))
         }
     }
-}
-
-function setMargin(frame) {
-    const desktop_ht = document.getElementById("time-box") ? document.getElementById("time-box").offsetHeight : 225;
-    const mobile_ht = document.getElementById("time-box-mobile") ? document.getElementById("time-box-mobile").offsetHeight : 225;
-    const margin = Math.max(desktop_ht, mobile_ht, 225) + 25;
-    frame.style.marginBottom = margin + "px";
 }
 
 function hideElements(frame) {

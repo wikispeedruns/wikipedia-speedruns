@@ -173,6 +173,10 @@
     }
 }
 
+#wikipedia-frame {
+	margin-bottom: 40vh;
+}
+
 .HUDwrapper-mobile-inner-container {
     padding: 5px 10px;
     font-size: 14px;
