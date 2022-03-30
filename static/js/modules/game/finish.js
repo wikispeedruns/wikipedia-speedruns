@@ -6,7 +6,6 @@ var FinishPage = {
         "lobbyId",
         "runId",
 
-
         "startArticle",
         "endArticle",
         "finalTime",

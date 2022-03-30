@@ -100,18 +100,31 @@ var app = new Vue({
 
         }
 
-        console.log(getLocalSprints())
-        console.log(getLocalMarathons())
+        //console.log(getLocalSprints())
+        //console.log(getLocalMarathons())
 
-        /*
+        
         if (!this.loggedIn) {
 
             const localSprints = getLocalSprints();
-            Object.keys(localSprints).forEach(s => function (s) {
-                
-            })
+            
+            for (let prompt of this.dailyPrompts){
+                for (let run_id of Object.keys(localSprints)) {
+                    if (parseInt(localSprints[run_id].prompt_id) === prompt.prompt_id) {
+                        prompt.played = true
+                    }
+                }
+            }
 
-        }*/
+            for (let prompt of this.activePrompts){
+                for (let run_id of Object.keys(localSprints)) {
+                    if (parseInt(localSprints[run_id].prompt_id) === prompt.prompt_id) {
+                        prompt.played = true
+                    }
+                }
+            }
+
+        }
 
         
     }
