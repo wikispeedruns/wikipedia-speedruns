@@ -23,18 +23,25 @@
 
             <div id="time-box" class="HUDwrapper container">
                 <div class="row flex-row">
-                    <div class="col-sm-auto text-nowrap px-4 py-2">
+                    <div class="col-sm-auto text-nowrap px-4 pt-2">
                         Start Article<br><strong>[[startArticle]]</strong>
-                        <br>Current Article<br><strong>[[currentArticle]]</strong>
                     </div>
-                    <div class="col-sm-auto text-nowrap px-4 py-2">
+                    <div class="col-sm-auto text-nowrap px-4 pt-2">
                         End Article<br><strong>[[endArticle]] </strong>
                         <small style="cursor: default;" :href="`/wiki/${endArticle}`" @mouseenter="mouseEnter" @mouseleave="mouseLeave">
                             ⓘ
                         </small>
                     </div>
-                    <div class="col-sm-auto text-nowrap px-4 py-2">
+                    <div class="col-sm-auto text-nowrap px-4 pt-2">
+                        Links clicked<br><strong>[[path.length - 1]]</strong>
+                    </div>
+                    <div class="col-sm-auto text-nowrap px-4 pt-2">
                         Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
+                    </div>
+                </div>
+                <div class="row flex-row">
+                    <div class="col-lg-auto text-nowrap px-4 py-2">
+                        Current Article<br><strong>[[currentArticle]]</strong>
                     </div>
                 </div>
             </div>    
@@ -49,6 +56,8 @@
                     <small style="cursor: default; font-size: 15px;" :href="`/wiki/${endArticle}`" @click="mobilePreviewClick(event)" id="mobile-end-article-info">ⓘ</small>
                     <br>
                     Current Article: <strong>[[currentArticle]]</strong>
+                    <br>
+                    Links clicked: <strong>[[path.length - 1]]</strong>
                     <br>
                     Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
                 </div>
