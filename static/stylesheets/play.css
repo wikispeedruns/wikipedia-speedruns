@@ -89,6 +89,17 @@
 }
 
 /* End article hover tooltip */
+.blocker {
+	position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    content: ' ';
+    background: rgba(0,0,0,.5);
+    z-index: 1000000;
+}
+
 .tooltip-container {
     width: 360px;
     font-size: 14px;
@@ -155,3 +166,19 @@
 	top: 0;
 	left: 0;
 }
+
+@media (max-width: 767px) {
+    .main-text {
+        font-size: 14px;
+    }
+}
+
+#wikipedia-frame {
+	margin-bottom: 40vh;
+}
+
+.HUDwrapper-mobile-inner-container {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+

@@ -19,7 +19,6 @@ async function get_data() {
 
     response = await fetch("/api/stats/daily");
     const d_totals = await response.json();
-    console.log(d_totals);
     update_daily(d_totals);
 }
 
@@ -87,6 +86,28 @@ async function draw_graphs() {
         }
     });   
 
+
+    new Chart("daily-finished-runs", {
+        type: 'line',
+        data: {
+          labels: app.daily.finished_runs.map(({day}) => day),
+          datasets: [{ 
+              data: app.daily.finished_runs.map(({daily_plays}) => daily_plays),
+              label: "Daily Finished Plays",
+              borderColor: "#3e95cd",
+              fill: false
+            }
+          ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+        }
+    });   
+
     new Chart("daily-active-users", {
         type: 'line',
         data: {
@@ -94,6 +115,27 @@ async function draw_graphs() {
           datasets: [{ 
               data: app.daily.active_users.map(({active_users}) => active_users),
               label: "Daily Active Users",
+              borderColor: "#3e95cd",
+              fill: false
+            }
+          ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+        }
+    });   
+
+    new Chart("daily-average-user-plays", {
+        type: 'line',
+        data: {
+          labels: app.daily.plays_per_user.map(({day}) => day),
+          datasets: [{ 
+              data: app.daily.plays_per_user.map(({plays_per_user}) => plays_per_user),
+              label: "Average User Plays",
               borderColor: "#3e95cd",
               fill: false
             }

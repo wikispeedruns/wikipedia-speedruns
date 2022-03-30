@@ -15,6 +15,7 @@ import { getArticleSummary } from "./modules/wikipediaAPI/util.js";
 import { CountdownTimer } from "./modules/game/countdown.js";
 import { FinishPage } from "./modules/game/finish.js";
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
+import { PagePreview } from "./modules/game/pagePreview.js";
 
 import { basicCannon, fireworks, side } from "./modules/confetti.js";
 
@@ -51,13 +52,14 @@ let app = new Vue({
     el: '#app',
     components: {
         'countdown-timer': CountdownTimer,
-        'finish-page': FinishPage
+        'finish-page': FinishPage,
+        'page-preview': PagePreview
     },
     data: {
         startArticle: "",    //For all game modes, this is the first article to load
         endArticle: "",      //For sprint games. Reaching this article will trigger game finishing sequence
         currentArticle: "",
-        articlePreview: "",
+        articlePreview: null,
         path: [],             //array to store the user's current path so far, submitted with run
 
         promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
@@ -74,8 +76,9 @@ let app = new Vue({
 
         renderer: null,
         loggedIn: false,
-        hover: false,
-        loading: false,
+
+        showPreview: false,       // Flag for whether or not to show the preview
+        showPreviewBgUnderlay: false,     // Flag for whether to create a clickable overlay that allows a player to close the preview box by clicking anywhere outside it, only used for mobile
 
         clientX: 0,
         clientY: 0
@@ -111,56 +114,29 @@ let app = new Vue({
             //console.log(this.runId)
         }
 
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.setupPreviews);
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.mouseEnter, this.mouseLeave);
     },
 
 
     methods : {
-        async pageCallback(page, loadTime) {
+        pageCallback: function(page, loadTime) {
 
-            // console.log("page callback")
-
-            this.loading = false;
-            this.hover = false;
+            this.showPreview = false;
+            this.articlePreview = null;
             // Game logic for sprint mode:
 
             if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
                 this.path.push(page);
             }
-            //this.path.push(page);
 
             this.currentArticle = page;
 
             this.startTime += loadTime;
 
-            setMargin();
-
             //if the page's title matches that of the end article, finish the game, and submit the run
-            if (page.replace("_", " ").toLowerCase() === this.endArticle.replace("_", " ").toLowerCase()) {
-
-                this.finished = true;
-
-                // Disable popup
-                window.onbeforeunload = null;
-
-                this.endTime = Date.now();
-                
-                /*
-                if (this.loggedIn || this.lobbyId != null) {
-                    this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
-                } else {
-                    this.runId = submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, this.path);
-                    console.log("Not logged in, submitting run to local storage")
-                }*/
-
-                this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
-                if (!this.loggedIn && this.lobbyId == null) {
-                    submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, this.path);
-                    console.log("Not logged in, submitting run to local storage")
-                    //console.log(this.runId)
-                }
-
-                fireworks();
+          
+            if (page === this.endArticle) {
+                this.finish();
             }
 
         },
@@ -178,47 +154,35 @@ let app = new Vue({
             }, 50);
 
             await this.renderer.loadPage(this.startArticle);
-
-            this.setupPreviews();
-            await this.pageCallback(this.startArticle, Date.now() - this.startTime)
         },
 
-        displayPreview: function() {
-            let html = "";
-            if ("originalimage" in this.articlePreview) {
-                html += '<img src="' + this.articlePreview["originalimage"]["source"] + '"/>';
-            }
-            html += '<div>' + this.articlePreview["extract_html"] + '</div>';
-            return html;
-        },
+        async finish() {
+            this.finished = true;
 
-        computePosition: function() {
-            const vh = window.innerHeight;
-            const vw = window.innerWidth;
-            const styleObject = new Object();
-            if (this.clientX < vw / 2.0) {
-                styleObject['left'] = `${this.clientX+10}px`;
-            } else {
-                styleObject['right'] = `${vw-this.clientX+10}px`;
+            // Disable popup
+            window.onbeforeunload = null;
+
+            this.endTime = Date.now();
+
+            this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
+            if (!this.loggedIn && this.lobbyId == null) {
+                submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, this.path);
+                console.log("Not logged in, submitting run to local storage")
+                //console.log(this.runId)
             }
-            if (this.clientY < vh / 2.0) {
-                styleObject['top'] = `${this.clientY+10}px`;
-            } else {
-                styleObject['bottom'] = `${vh-this.clientY+10}px`;
-            }
-            return styleObject;
+          
+            fireworks();
         },
 
         mouseEnter: function(e) {
-            this.loading = true;
+            this.showPreview = true;
             const href = e.currentTarget.getAttribute("href");
             const title = href.split('/wiki/').pop();
             // const promise1 = getArticleSummary(title);
             // const promise2 = new Promise(resolve => setTimeout(resolve, 500));
             getArticleSummary(title).then(resp => {
-                if (this.loading) {
+                if (this.showPreview) {
                     this.articlePreview = resp;
-                    this.hover = true;
                     this.clientX = e.clientX;
                     this.clientY = e.clientY;
                 }
@@ -226,28 +190,12 @@ let app = new Vue({
         },
 
         mouseLeave: function() {
-            this.loading = false;
-            this.hover = false;
-            this.articlePreview = '';
-        },
-
-        setupPreviews: function() {
-            document.getElementById("wikipedia-frame").querySelectorAll("a").forEach(e => {
-                if (e.hasAttribute("href") && e.getAttribute("href").startsWith("/wiki/")) {
-                    e.addEventListener("mouseenter", this.mouseEnter);
-                    e.addEventListener("mouseleave", this.mouseLeave);
-                }
-            });
+            this.showPreview = false;
+            this.articlePreview = null;
         }
 
     }
 })
-
-function setMargin() {
-    const element = document.getElementById("time-box");
-    let margin = (element.offsetHeight + 25) > 100 ? (element.offsetHeight + 25) : 100
-    document.getElementById("wikipedia-frame").style.marginBottom = margin +"px";
-}
 
 // Prevent accidental leaves
 window.onbeforeunload = function() {
