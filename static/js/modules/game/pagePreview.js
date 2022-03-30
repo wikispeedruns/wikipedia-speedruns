@@ -33,7 +33,7 @@ var PagePreview = {
 
 	template: (`
 	<div class="tooltip-container" :style="computePosition()">
-        <img v-if="articlePreview.originalimage" :src="articlePreview.originalimage.source" />
+        <img v-if="articlePreview.thumbnail" :src="articlePreview.thumbnail.source" />
         <div v-html="articlePreview.extract_html"></div>
     </div>
 	`)
