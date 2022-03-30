@@ -40,15 +40,13 @@ async function uploadLocalSprints() {
 
     for (let runId of runs) {
         try {
-            console.log("submitting stored run")
             await updateAnonymousRun(runId);
             runIds.push(runId);
         } catch (e) {
             console.log(e);
         }
     }
-
-    console.log("Removing sprint run cache")
+    //console.log("Removing sprint run cache")
     localStorage.removeItem(key);
 }
 

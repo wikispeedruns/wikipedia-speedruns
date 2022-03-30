@@ -224,10 +224,9 @@ let app = new Vue({
             window.onbeforeunload = null;
             this.endTime = Date.now();
 
-            if (this.loggedIn) {
-                this.runId = await submitRun(this.promptId, this.endTime - this.startTime + this.lastTime, this.visitedCheckpoints, this.path, finished);
-            } else {
-                this.runId = await submitLocalRun(this.promptId, this.endTime - this.startTime + this.lastTime, this.visitedCheckpoints, this.path, finished);
+            this.runId = await submitRun(this.promptId, this.endTime - this.startTime + this.lastTime, this.visitedCheckpoints, this.path, finished);
+            if (!this.loggedIn) {
+                submitLocalRun(this.runId, this.promptId, this.endTime - this.startTime + this.lastTime, this.visitedCheckpoints, this.path, finished);
             }
 
             removeSave(PROMPT_ID);

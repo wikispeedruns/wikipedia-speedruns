@@ -1,8 +1,9 @@
-import { submitRun } from "../game/marathon/runs.js"
+import { submitRun, updateAnonymousRun } from "../game/marathon/runs.js"
 import { getLocalStorageRuns, addRunToLocalStorage, setLocalStorageRuns } from "./localStorage.js"
 
-function submitLocalRun(prompt_id, time, checkpoints, path, finished) {
+function submitLocalRun(run_id, prompt_id, time, checkpoints, path, finished) {
     const data = {
+        "run_id": run_id,
         "path": path,
         "checkpoints": checkpoints,
         "prompt_id": prompt_id,
@@ -12,36 +13,33 @@ function submitLocalRun(prompt_id, time, checkpoints, path, finished) {
 
     const key = "WS-LM-marathonruns";
 
-    return addRunToLocalStorage(key, data);
+    addRunToLocalStorage(key, data);
 }
 
 async function uploadLocalMarathons() {
     const key = "WS-LM-marathonruns";
     let data = getLocalStorageRuns(key);
 
-    if (Object.keys(data).length == 0) return;
+    const runs = Object.keys(data)
+    if (runs.length == 0) return;
 
     let runIds = [];
 
-    for (const k in data) {
-        const run = data[k]
+    for (let runId of runs) {
         try {
-            const runId = await submitRun(run.prompt_id, 
-                                        run.time,
-                                        run.checkpoints, 
-                                        run.path, 
-                                        run.finished );
+            await updateAnonymousRun(runId);
             runIds.push(runId);
         } catch (e) {
             console.log(e);
         }
     }
 
-    console.log("Finished uploading runIds: ")
-    console.log(runIds)
-    console.log("Removing marathon run cache")
-
     localStorage.removeItem(key);
 }
 
-export { submitLocalRun, uploadLocalMarathons };
+function getLocalMarathons() {
+    const key = "WS-LM-marathonruns";
+    return getLocalStorageRuns(key);
+}
+
+export { submitLocalRun, uploadLocalMarathons, getLocalMarathons };
