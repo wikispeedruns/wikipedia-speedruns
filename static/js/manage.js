@@ -307,6 +307,16 @@ Vue.component('marathon-section', {
         }
     },
 
+    mounted: function() {
+        let input = document.getElementById("inputField");
+        input.addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                document.getElementById("addInputToCPEnd").click();
+            }
+        });
+    },
+
     template: (`
         <div>          
             <div>
@@ -353,7 +363,7 @@ Vue.component('marathon-section', {
                     <button v-on:click="addArticle(2)">Add article to starting checkpoints (start of list)</button>
                 </div>
                 <div>
-                    <button v-on:click="addArticle(3)">Add article to checkpoints (end of list)</button>
+                    <button v-on:click="addArticle(3)" id="addInputToCPEnd">Add article to checkpoints (end of list)</button>
                     <button v-on:click="addArticle(4)">Add article to checkpoints (start of list)</button>
                 </div>
                 <button id="genMarathonPromptButton" v-on:click="submitPrompt">Click to submit prompt</button>
