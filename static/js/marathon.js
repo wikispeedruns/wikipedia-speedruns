@@ -36,7 +36,6 @@ let app = new Vue({
         startArticle: "",    //For all game modes, this is the first article to load
         lastArticle: "",
         currentArticle: "",
-        articlePreview: null,
         path: [],             //array to store the user's current path so far, submitted with run
 
         promptId: 0,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
@@ -60,11 +59,12 @@ let app = new Vue({
         saved: false,
 
         renderer: null,
-        showPreview: false,
-        showPreviewBgUnderlay: false,
+        previewContent: null,
 
-        clientX: 0,
-        clientY: 0
+        eventTimestamp: null,
+        eventType: null,
+        eventX: 0,
+        eventY: 0
     },
 
     computed: {
@@ -130,7 +130,7 @@ let app = new Vue({
         }
 
         this.startArticle = prompt['start'];
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.mouseEnter, this.mouseLeave);
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview);
     },
 
 
@@ -138,8 +138,7 @@ let app = new Vue({
 
         pageCallback: function(page, loadTime) {
 
-            this.showPreview = false;
-            this.articlePreview = null;
+            this.hidePreview();
 
             if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
                 this.path.push(page);
@@ -231,24 +230,29 @@ let app = new Vue({
         
         },
 
-        mouseEnter: function(e) {
-            this.showPreview = true;
+        showPreview: function(e) {
+            this.eventTimestamp = e.timeStamp;
+            this.eventType = e.type;
+            this.eventX = e.clientX;
+            this.eventY = e.clientY;
             const href = e.currentTarget.getAttribute("href");
             const title = href.split('/wiki/').pop();
+            const promises = [ getArticleSummary(title) ];
+            if (e.type !== "click") {
+                promises.push(new Promise(resolve => setTimeout(resolve, 600)));
+            }
             // const promise1 = getArticleSummary(title);
             // const promise2 = new Promise(resolve => setTimeout(resolve, 500));
-            getArticleSummary(title).then(resp => {
-                if (this.showPreview) {
-                    this.articlePreview = resp;
-                    this.clientX = e.clientX;
-                    this.clientY = e.clientY;
+            Promise.all(promises).then((values) => {
+                if (e.timeStamp === this.eventTimestamp) {
+                    this.previewContent = values[0];
                 }
             });
         },
 
-        mouseLeave: function() {
-            this.showPreview = false;
-            this.articlePreview = null;
+        hidePreview: function() {
+            this.eventTimestamp = null;
+            this.previewContent = null;
         }
 
     }
