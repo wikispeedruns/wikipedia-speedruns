@@ -35,6 +35,33 @@ Vue.component('prompt-item', {
     </li>`)
 });
 
+Vue.component('marathon-item', {
+    props: ['prompt'],
+
+    methods: {
+
+        async deletePrompt() {
+            const resp = await fetchJson("/api/marathon/delete/" + this.prompt.prompt_id, "DELETE");
+
+            if (resp.status == 200) this.$emit('delete-prompt')
+            else alert(await resp.text())
+
+            app.getPrompts();
+        },
+    },
+
+    template: (`
+    <li>
+        <strong>{{prompt.prompt_id}}</strong>: {{prompt.start}}
+        <div>{{prompt.initcheckpoints}}</div>
+        <div>{{prompt.checkpoints}}</div>
+        <button v-on:click="deletePrompt" type="button" class="btn btn-default" >
+            <i class="bi bi-trash"></i>
+        </button>
+    </li>`)
+});
+
+
 // TODO maybe these should load the date stuff themselves (At least on update)
 Vue.component('prompt-set', {
     props: ['start', 'end', 'rated', 'prompts'],

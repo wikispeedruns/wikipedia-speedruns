@@ -30,10 +30,20 @@ def register_async_endpoint(bp, baseUrl, task, parse_request):
         result = task.AsyncResult(task_id)
 
         if result.ready():
-            return {
-                "status": "complete",
-                "result": result.get()
-            }
+
+            try:
+                res = result.get()
+
+                return {
+                    "status": "complete",
+                    "result": res
+                }
+
+            except Exception as e:
+                return {
+                    "status": "error",
+                    "error": str(e)
+                }, 200
 
         else:
             return {

@@ -50,3 +50,15 @@ def generate_prompt():
 
 
 register_async_endpoint(scraper_api, "/gen_prompts", generate_prompt, generate_prompt_parse)
+
+# Test
+
+def test_parse(task, request):
+    return task.delay()
+
+@celery.task(time_limit=1)
+def test():
+    while(True):
+        pass
+
+register_async_endpoint(scraper_api, "/test", test, test_parse)

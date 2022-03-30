@@ -34,10 +34,19 @@ async function fetchAsync(basePath, method='GET', body=null)
                 "task_id": task_id,
             });
 
-            const resp = await response.json();
-            console.log(resp);
+            if (resp.status !== 200) {
+                clearInterval(interval);
+                reject("Unknown Error");
+            }
 
-            if (resp["status"] == "complete") {
+            const resp = await response.json();
+
+            if (resp["status"] === "error") {
+                clearInterval(interval);
+                reject(resp["error"]);
+            }
+
+            if (resp["status"] === "complete") {
                 clearInterval(interval);
                 resolve(resp["result"]);
             }
