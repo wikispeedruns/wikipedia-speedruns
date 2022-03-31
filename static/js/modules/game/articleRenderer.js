@@ -5,47 +5,43 @@ export class ArticleRenderer {
     /* frame: DOM element (i.e. through getElementById) to render article in
      * pageCallback: Called upon loading an article, should expect new page and load time
      */
-    constructor(frame, pageCallback, setupPreviews) {
+    constructor(frame, pageCallback, mouseEnter, mouseLeave) {
         this.frame = frame;
         this.pageCallback = pageCallback;
-        this.setupPreviews = setupPreviews;
+        this.mouseEnter = mouseEnter;
+        this.mouseLeave = mouseLeave;
     }
 
     async loadPage(page) {
-
-        const body = await getArticle(page);
-
-        this.frame.innerHTML = body["text"]["*"];
-
-        // Create title
-        let titleEl = document.createElement("div");
-        titleEl.innerHTML = "<h1><i>" + body["title"] + "</i></h1>";
-        this.frame.insertBefore(titleEl, this.frame.firstChild);
-
-
-        hideElements(this.frame);
-        // disableFindableLinks(this.frame);
-        stripNamespaceLinks(this.frame);
-
-
-        this.frame.querySelectorAll("a, area").forEach((el) => {
-            // Arrow function to prevent this from being overwritten
-            el.onclick = (e) => this.handleWikipediaLink(e);
-        });
-
-        window.scrollTo(0, 0);
-
-        return body["title"]
-    }
-
-    async loadPageWrapper(page) {
-
         try {
             const startTime = Date.now();
-            const title = await this.loadPage(page);
+            const body = await getArticle(page);
 
-            this.setupPreviews();
-            this.pageCallback(title, Date.now() - startTime);
+            this.frame.innerHTML = body["text"]["*"];
+
+            // Create title
+            let titleEl = document.createElement("div");
+            titleEl.innerHTML = "<h1><i>" + body["title"] + "</i></h1>";
+            this.frame.insertBefore(titleEl, this.frame.firstChild);
+
+
+            hideElements(this.frame);
+            // disableFindableLinks(this.frame);
+            stripNamespaceLinks(this.frame);
+
+
+            this.frame.querySelectorAll("a, area").forEach((el) => {
+                // Arrow function to prevent this from being overwritten
+                el.onclick = (e) => this.handleWikipediaLink(e);
+                if (window.screen.width >= 768 && el.hasAttribute("href") && el.getAttribute("href").startsWith("/wiki/")) {
+                    el.onmouseenter = this.mouseEnter;
+                    el.onmouseleave = this.mouseLeave;
+                }
+            });
+
+            window.scrollTo(0, 0);
+
+            this.pageCallback(body["title"], Date.now() - startTime);
 
         } catch (error) {
 
@@ -59,15 +55,13 @@ export class ArticleRenderer {
     }
 
 
-    handleWikipediaLink(e)
-    {
+    handleWikipediaLink(e) {
         e.preventDefault();
 
         const linkEl = e.currentTarget;
 
         if (linkEl.getAttribute("href").substring(0, 1) === "#") {
             let a = linkEl.getAttribute("href").substring(1);
-            //console.log(a);
             document.getElementById(a).scrollIntoView();
 
         } else {
@@ -86,12 +80,10 @@ export class ArticleRenderer {
             });
 
             // Remove "/wiki/" from string
-            this.loadPageWrapper(linkEl.getAttribute("href").substring(6))
+            this.loadPage(linkEl.getAttribute("href").substring(6))
         }
     }
 }
-
-
 
 function hideElements(frame) {
 
@@ -146,7 +138,6 @@ function hideElements(frame) {
     }
 
 }
-
 
 function stripNamespaceLinks(frame) {
 

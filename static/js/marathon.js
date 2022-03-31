@@ -1,12 +1,13 @@
 //JS module imports
 import { serverData } from "./modules/serverData.js";
-
+import { getArticleSummary } from "./modules/wikipediaAPI/util.js";
 import { submitRun, saveRun, loadRun, removeSave } from "./modules/game/marathon/runs.js";
 
 import { CountdownTimer } from "./modules/game/marathon/countdown.js";
 import { MarathonHelp } from "./modules/game/marathon/help.js";
 import { FinishPage } from "./modules/game/marathon/finish.js";
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
+import { PagePreview } from "./modules/game/pagePreview.js";
 
 import { basicCannon, fireworks, side } from "./modules/confetti.js";
 
@@ -21,6 +22,7 @@ let app = new Vue({
         'countdown-timer': CountdownTimer,
         'finish-page': FinishPage,
         'marathon-help': MarathonHelp,
+        'page-preview': PagePreview
     },
     data: {
 
@@ -34,6 +36,7 @@ let app = new Vue({
         startArticle: "",    //For all game modes, this is the first article to load
         lastArticle: "",
         currentArticle: "",
+        articlePreview: null,
         path: [],             //array to store the user's current path so far, submitted with run
 
         promptId: 0,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
@@ -57,6 +60,11 @@ let app = new Vue({
         saved: false,
 
         renderer: null,
+        showPreview: false,
+        showPreviewBgUnderlay: false,
+
+        clientX: 0,
+        clientY: 0
     },
 
     computed: {
@@ -122,13 +130,16 @@ let app = new Vue({
         }
 
         this.startArticle = prompt['start'];
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.setupPreview);
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.mouseEnter, this.mouseLeave);
     },
 
 
     methods : {
 
-        async pageCallback(page, loadTime) {
+        pageCallback: function(page, loadTime) {
+
+            this.showPreview = false;
+            this.articlePreview = null;
 
             if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
                 this.path.push(page);
@@ -152,13 +163,6 @@ let app = new Vue({
                     this.visitedCheckpoints.push(page);
                 }
             }
-                       
-            if (this.clicksRemaining === 0) {
-                await this.finish(1);
-            }
-
-            setMargin();
-            
             
             if (hitcheckpoint) {
                 let el = this.checkpoints.shift()
@@ -166,11 +170,14 @@ let app = new Vue({
                 this.activeCheckpoints[checkpointindex] = el
 
                 conf();
-            }
 
-            if (!this.reachedstop && this.checkpointMarkReached) {
-                this.showStop = true
-                this.reachedstop = !this.reachedstop
+                if (!this.reachedstop && this.checkpointMarkReached) {
+                    this.showStop = true
+                    this.reachedstop = true
+                }
+
+            } else if (this.clicksRemaining === 0) {
+                this.finish(1);
             }
         },
 
@@ -186,10 +193,8 @@ let app = new Vue({
 
             if (load_save) {
                 await this.renderer.loadPage(this.lastArticle);
-                await this.pageCallback(this.lastArticle, Date.now() - this.startTime)
             } else {
                 await this.renderer.loadPage(this.startArticle);
-                await this.pageCallback(this.startArticle, Date.now() - this.startTime)
             }
 
             this.started = true;
@@ -226,24 +231,24 @@ let app = new Vue({
         
         },
 
-        formatActiveCheckpoints: function() {
-            let output = ""
-            for (let i = 0; i < this.activeCheckpoints.length - 1; i++) {
-                output += String(i+1) + ": <strong>"
-                output += this.activeCheckpoints[i]
-                output += "</strong><br>"
-            }
-            output += String(this.activeCheckpoints.length) + ": <strong>"
-            output += this.activeCheckpoints[this.activeCheckpoints.length - 1]
-            output += "</strong>"
-
-            return output
+        mouseEnter: function(e) {
+            this.showPreview = true;
+            const href = e.currentTarget.getAttribute("href");
+            const title = href.split('/wiki/').pop();
+            // const promise1 = getArticleSummary(title);
+            // const promise2 = new Promise(resolve => setTimeout(resolve, 500));
+            getArticleSummary(title).then(resp => {
+                if (this.showPreview) {
+                    this.articlePreview = resp;
+                    this.clientX = e.clientX;
+                    this.clientY = e.clientY;
+                }
+            });
         },
 
-
-
-        setupPreview: function () {
-            return;
+        mouseLeave: function() {
+            this.showPreview = false;
+            this.articlePreview = null;
         }
 
     }
@@ -296,13 +301,6 @@ function conf() {
     });
 
 }
-
-function setMargin() {
-    const element = document.getElementById("time-box");
-    let margin = (element.offsetHeight + 25) > 250 ? (element.offsetHeight + 25) : 250
-    document.getElementById("main").style.marginBottom = margin +"px";
-}
-
 
 // Prevent accidental leaves
 window.onbeforeunload = function() {
