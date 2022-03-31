@@ -159,6 +159,8 @@ let app = new Vue({
             }, 50);
 
             await this.renderer.loadPage(this.startArticle);
+
+            this.started = true;
         },
 
         async finish() {
