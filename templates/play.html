@@ -67,7 +67,7 @@
         <div v-if="loading && hover" v-html="displayPreview()" class="tooltip-container" :style="computePosition()"></div>
     </div>
 
-    <countdown-timer id="time-box"
+    <countdown-timer id="countdown-box"
         v-bind:start-article="startArticle"
         v-bind:end-article="endArticle"
         v-on:start-game="start"
