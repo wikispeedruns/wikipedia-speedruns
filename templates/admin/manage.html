@@ -96,24 +96,9 @@
         </div>
     </div> 
     
-    <marathon-generator></marathon-generator>
+    <marathon-section v-bind:marathonprompts="marathon" v-on:reload-prompts="getPrompts"
+    ></marathon-section>
 
-    <div class="row">
-        <div class="col px-0"> <div class="card"> <div class="card-body">
-           
-            <h4> Marathon prompts: </h4>
-            
-            <ul>
-                <marathon-item
-                    v-for="p in marathon"
-                    v-bind:prompt="p"
-                    v-bind:key="p.prompt_id"
-                    v-on:change="getPrompts"
-                >
-                </marathon-item>
-            </ul>
-        </div></div></div> 
-    </div>
 </div>
 
 {% endblock %}
