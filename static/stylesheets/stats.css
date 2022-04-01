@@ -1,28 +1,12 @@
-stat-box {
-    /* border: 5px solid black;
-    padding: 50px;
-    margin: 20px;
-    top: 50px;
-    position: relative;
-    /* margin: auto; */
-    /* margin-top: 50px;
-    max-width: 100%;
-    height: auto; */
-    /* width: auto\9; */
-    height: auto;
-    width: 100%;
-    max-width: 300px;
-    border: 0.5vh solid black;
-    padding: 5vh;
-    top: 5vh;
+.col-xs-6 {
+    width: 50%;
+    float: right;
 }
 
-.chart-container {
-position: relative;
-margin-top: 50px;
-top: 100px;
-height: 40vh;
-width: 40vw;
+canvas {
+   float: left; 
+   margin-left: 2em;
+   margin-bottom: 5em;
 }
 
 .box-wrapper {
@@ -93,26 +77,13 @@ width: 40vw;
 }
 
 .stats__change {
-	position: absolute;
-	top: 10px;
-	right: 0;
-	text-align: right;
-	color: #B1B7C8;
+    font-weight: bold; 
 }
 
-.stats__value {
-	font-size: 18px;
+.positive {
+	color: #7dffa0;
 }
 
-.stats__period {
-	font-size: 14px;
+.mid {
+	color: #ede53b;
 }
-
-.stats__value--positive {
-	color: #AEDC6F;
-}
-
-.stats__value--negative {
-	color: #FB5055;
-}
-

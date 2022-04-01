@@ -59,7 +59,6 @@ let app = new Vue({
         startArticle: "",    //For all game modes, this is the first article to load
         endArticle: "",      //For sprint games. Reaching this article will trigger game finishing sequence
         currentArticle: "",
-        articlePreview: null,
         path: [],             //array to store the user's current path so far, submitted with run
 
         promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
@@ -79,9 +78,12 @@ let app = new Vue({
 
         showPreview: false,       // Flag for whether or not to show the preview
         showPreviewBgUnderlay: false,     // Flag for whether to create a clickable overlay that allows a player to close the preview box by clicking anywhere outside it, only used for mobile
+        previewContent: null,
 
-        clientX: 0,
-        clientY: 0
+        eventTimestamp: null,
+        eventType: null,
+        eventX: 0,
+        eventY: 0
     },
 
     mounted: async function() {
@@ -114,15 +116,14 @@ let app = new Vue({
             //console.log(this.runId)
         }
 
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.mouseEnter, this.mouseLeave);
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview);
     },
 
 
     methods : {
         pageCallback: function(page, loadTime) {
 
-            this.showPreview = false;
-            this.articlePreview = null;
+            this.hidePreview();
             // Game logic for sprint mode:
 
             if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
@@ -174,24 +175,29 @@ let app = new Vue({
             fireworks();
         },
 
-        mouseEnter: function(e) {
-            this.showPreview = true;
+        showPreview: function(e) {
+            this.eventTimestamp = e.timeStamp;
+            this.eventType = e.type;
+            this.eventX = e.clientX;
+            this.eventY = e.clientY;
             const href = e.currentTarget.getAttribute("href");
             const title = href.split('/wiki/').pop();
+            const promises = [ getArticleSummary(title) ];
+            if (e.type !== "click") {
+                promises.push(new Promise(resolve => setTimeout(resolve, 600)));
+            }
             // const promise1 = getArticleSummary(title);
             // const promise2 = new Promise(resolve => setTimeout(resolve, 500));
-            getArticleSummary(title).then(resp => {
-                if (this.showPreview) {
-                    this.articlePreview = resp;
-                    this.clientX = e.clientX;
-                    this.clientY = e.clientY;
+            Promise.all(promises).then((values) => {
+                if (e.timeStamp === this.eventTimestamp) {
+                    this.previewContent = values[0];
                 }
             });
         },
 
-        mouseLeave: function() {
-            this.showPreview = false;
-            this.articlePreview = null;
+        hidePreview: function() {
+            this.eventTimestamp = null;
+            this.previewContent = null;
         }
 
     }
