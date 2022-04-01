@@ -93,14 +93,41 @@ async function draw_graphs() {
         data: {
           labels: app.daily.runs.map(({day}) => day),
           datasets: [{ 
+              data: app.daily.runs.map(({total}) => total),
+              label: "Total Runs",
+              borderColor: "#3e95cd",
+              fill: false
+            },
+            { 
+                data: app.daily.finished_runs.map(({total}) => total),
+                label: "Total Finished Plays",
+                borderColor: "#ff9e1f",
+                fill: false
+            }
+          ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+        }
+    });
+
+    new Chart("daily-new-runs", {
+        type: 'line',
+        data: {
+          labels: app.daily.runs.map(({day}) => day),
+          datasets: [{ 
               data: app.daily.runs.map(({daily_plays}) => daily_plays),
-              label: "Daily Plays",
+              label: "New Plays",
               borderColor: "#3e95cd",
               fill: false
             },
             { 
                 data: app.daily.finished_runs.map(({daily_plays}) => daily_plays),
-                label: "Daily Finished Plays",
+                label: "New Finished Plays",
                 borderColor: "#ff9e1f",
                 fill: false
             }
@@ -115,7 +142,7 @@ async function draw_graphs() {
             plugins: {
                 subtitle: {
                     display: true,
-                    text: 'Note: We stopped submitting start time data for unfinished runs around ~2/17',
+                    text: 'Note: We stopped submitting start time data for unfinished runs on 2/20',
                     color: 'red',
                     font: {
                         weight: 'bold',
@@ -131,7 +158,7 @@ async function draw_graphs() {
           labels: app.daily.active_users.map(({day}) => day),
           datasets: [{ 
               data: app.daily.active_users.map(({active_users}) => active_users),
-              label: "Daily Active Users",
+              label: "Active Users",
               borderColor: "#3e95cd",
               fill: false
             }
