@@ -74,6 +74,12 @@ async function draw_graphs() {
               label: "Daily Plays",
               borderColor: "#3e95cd",
               fill: false
+            },
+            { 
+                data: app.daily.finished_runs.map(({daily_plays}) => daily_plays),
+                label: "Daily Finished Plays",
+                borderColor: "#ff9e1f",
+                fill: false
             }
           ]
         },
@@ -83,30 +89,18 @@ async function draw_graphs() {
                     beginAtZero: true
                 }
             },
-        }
-    });   
-
-
-    new Chart("daily-finished-runs", {
-        type: 'line',
-        data: {
-          labels: app.daily.finished_runs.map(({day}) => day),
-          datasets: [{ 
-              data: app.daily.finished_runs.map(({daily_plays}) => daily_plays),
-              label: "Daily Finished Plays",
-              borderColor: "#3e95cd",
-              fill: false
-            }
-          ]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
+            plugins: {
+                subtitle: {
+                    display: true,
+                    text: 'Note: We stopped submitting start time data for unfinished runs around ~2/17',
+                    color: 'red',
+                    font: {
+                        weight: 'bold',
+                      },
                 }
-            },
+            }
         }
-    });   
+    });
 
     new Chart("daily-active-users", {
         type: 'line',
