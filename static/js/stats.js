@@ -14,6 +14,8 @@ function update_totals(totals) {
 
 function update_daily(daily_totals) {
     app.daily.users = daily_totals['daily_new_users'];
+     // remove the first day, an outlier
+    app.daily.users.shift();
     app.daily.runs = daily_totals['daily_plays'];
     app.daily.finished_runs = daily_totals['daily_finished_plays'];
     app.daily.plays_per_user = daily_totals['avg_user_plays'];
@@ -34,13 +36,13 @@ async function get_data() {
 
 function calculate_weekly_change() {
     let last_week_users = app.daily.users[app.daily.users.length - 7]['total'];
-    app.weekly.user_change = (((app.totals.users - last_week_users) / last_week_users) * 100).toFixed(2);
+    app.weekly.user_change = app.totals.users - last_week_users;
 
     let last_week_runs = app.daily.runs[app.daily.runs.length - 7]['total'];
-    app.weekly.runs_change = (((app.totals.runs - last_week_runs) / last_week_runs) * 100).toFixed(2);
+    app.weekly.runs_change = app.totals.runs - last_week_runs;
 
     let last_week_finished_runs = app.daily.finished_runs[app.daily.finished_runs.length - 7]['total'];
-    app.weekly.finished_runs_change = (((app.totals.finished_runs - last_week_finished_runs) / last_week_finished_runs) * 100).toFixed(2);
+    app.weekly.finished_runs_change = app.totals.finished_runs - last_week_finished_runs;
 }
 
 async function draw_graphs() {
