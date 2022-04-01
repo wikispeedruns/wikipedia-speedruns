@@ -77,26 +77,6 @@ canvas {
 }
 
 .stats__change {
-	position: absolute;
-	top: 10px;
-	right: 0;
-	text-align: right;
-	color: #B1B7C8;
+	color: #7dffa0;
+    font-weight: bold;
 }
-
-.stats__value {
-	font-size: 18px;
-}
-
-.stats__period {
-	font-size: 14px;
-}
-
-.stats__value--positive {
-	color: #AEDC6F;
-}
-
-.stats__value--negative {
-	color: #FB5055;
-}
-

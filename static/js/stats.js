@@ -4,12 +4,12 @@ function update_totals(totals) {
     app.totals.finished_runs = totals['sprints_finished'];
 }
 
-function update_daily(d_totals) {
-    app.daily.users = d_totals['daily_new_users'];
-    app.daily.runs = d_totals['daily_plays'];
-    app.daily.finished_runs = d_totals['daily_finished_plays'];
-    app.daily.plays_per_user = d_totals['avg_user_plays'];
-    app.daily.active_users = d_totals['active_users'];
+function update_daily(daily_totals) {
+    app.daily.users = daily_totals['daily_new_users'];
+    app.daily.runs = daily_totals['daily_plays'];
+    app.daily.finished_runs = daily_totals['daily_finished_plays'];
+    app.daily.plays_per_user = daily_totals['avg_user_plays'];
+    app.daily.active_users = daily_totals['active_users'];
 }
 
 async function get_data() {
@@ -18,8 +18,18 @@ async function get_data() {
     update_totals(totals);
 
     response = await fetch("/api/stats/daily");
-    const d_totals = await response.json();
-    update_daily(d_totals);
+    const daily_totals = await response.json();
+    update_daily(daily_totals);
+
+    calculate_weekly_change();
+}
+
+function calculate_weekly_change() {
+    let last_week_users = app.daily.users[app.daily.users.length - 7]['total'];
+    app.weekly.user_change = (((app.totals.users - last_week_users) / last_week_users) * 100).toFixed(2);
+
+    let last_week_runs = app.daily.runs[app.daily.runs.length - 7]['total'];
+    app.weekly.runs_change = (((app.totals.runs - last_week_runs) / last_week_runs) * 100).toFixed(2);
 }
 
 async function draw_graphs() {
@@ -153,6 +163,10 @@ var app = new Vue({
             users: 0,
             runs: 0,
             finished_runs: 0,
+        },
+        weekly: {
+            user_change: 0.0,
+            runs_change: 0.0,
         },
         daily: {
             users: [],
