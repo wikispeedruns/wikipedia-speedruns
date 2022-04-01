@@ -1,11 +1,13 @@
 function update_totals(totals) {
     app.totals.users = totals['users_total'];
+    app.totals.google_users = totals['goog_total'];
     app.totals.runs = totals['sprints_total'];
     app.totals.finished_runs = totals['sprints_finished'];
    
     let user_runs = totals['user_runs'];
     let user_finished_runs = totals['user_finished_runs'];
 
+    app.totals.pct_goog_users = ((app.totals.google_users / app.totals.users) * 100).toFixed(2);
     app.totals.pct_user_runs = ((user_runs / app.totals.runs) * 100).toFixed(2);
     app.totals.pct_user_finished_runs = ((user_finished_runs / app.totals.finished_runs) * 100).toFixed(2);
 }
@@ -170,8 +172,10 @@ var app = new Vue({
     data: {
         totals: {
             users: 0,
+            google_users: 0,
             runs: 0,
             finished_runs: 0,
+            pct_goog_users: 0.0,
             pct_user_runs: 0.0,
             pct_user_finished_runs: 0.0,
         },
