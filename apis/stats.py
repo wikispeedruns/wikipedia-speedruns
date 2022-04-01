@@ -15,9 +15,11 @@ stats_api = Blueprint("stats", __name__, url_prefix="/api/stats")
 def get_total_stats():
     queries = {}
     queries['total_users'] = "SELECT COUNT(*) AS users_total FROM users"
+    queries['total_google_users'] = 'SELECT COUNT(*) AS goog_total FROM users WHERE hash=""'
     queries['total_runs'] = "SELECT COUNT(*) AS sprints_total FROM sprint_runs"
     queries['total_finished_runs'] = "SELECT COUNT(*) AS sprints_finished FROM sprint_runs WHERE end_time IS NOT NULL"
-
+    queries['total_user_runs'] = "SELECT COUNT(*) AS user_runs FROM sprint_runs WHERE user_id IS NOT NULL"
+    queries['total_finished_user_runs'] = "SELECT COUNT(*) AS user_finished_runs FROM sprint_runs WHERE user_id IS NOT NULL AND end_time IS NOT NULL"
     results = {}
 
     db = get_db()

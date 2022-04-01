@@ -14,6 +14,8 @@
             <div class="stats">
                 <div class="stats__amount">[[totals.users]]</div>
                 <div class="stats__caption">users</div>
+                <div class="stats__change positive">+[[weekly.user_change]]% <span style="font-weight:normal;color: white;">since last week</span></div>
+                <div class="stats__change mid">[[totals.pct_goog_users]]% <span style="font-weight:normal;color: white;">google sign-ups</span></div>
             </div>
         </div>
 
@@ -21,6 +23,8 @@
             <div class="stats">
                 <div class="stats__amount">[[totals.runs]]</div>
                 <div class="stats__caption">runs</div>
+                <div class="stats__change positive">+[[weekly.runs_change]]% <span style="font-weight:normal;color: white;">since last week</span></div>
+                <div class="stats__change mid">[[totals.pct_user_runs]]% <span style="font-weight:normal;color: white;">registered users</span></div>
             </div>
         </div>
     
@@ -28,34 +32,29 @@
             <div class="stats">
                 <div class="stats__amount">[[totals.finished_runs]]</div>
                 <div class="stats__caption">finished runs</div>
+                <div class="stats__change positive">+[[weekly.finished_runs_change]]% <span style="font-weight:normal;color: white;">since last week</span></div>
+                <div class="stats__change mid">[[totals.pct_user_finished_runs]]% <span style="font-weight:normal;color: white;">registered users</span></div>
             </div>
         </div>
     </div>
    
-    <div class="chart-container" style="position: relative; height:80vh; width:80vw">
-        <canvas id="daily-users"></canvas>
+    <div class="col-xs-6">
+        <canvas id="daily-users" width="400" height="450"></canvas>
+    </div>
+    
+    <div class="col-xs-6">
+        <canvas id="daily-new-users" width="400" height="450"></canvas>
+    </div>
+        
+    <canvas id="daily-runs"></canvas>
+
+    <div class="col-xs-6">
+        <canvas id="daily-active-users" width="400" height="450"></canvas>
     </div>
 
-    <div class="chart-container" style="position: relative; height:80vh; width:80vw">
-        <canvas id="daily-new-users"></canvas>
+    <div class="col-xs-6">
+        <canvas id="daily-average-user-plays" width="400" height="450"></canvas>
     </div>
 
-    <div class="chart-container" style="position: relative; height:80vh; width:80vw">
-        <canvas id="daily-runs"></canvas>
-    </div>
-    <br/>
-    Note: We stopped submitting start times for unfinished runs, so we don't have data for unfinished runs after ~2/17.
-
-    <div class="chart-container" style="position: relative; height:80vh; width:80vw">
-        <canvas id="daily-finished-runs"></canvas>
-    </div>
-
-    <div class="chart-container" style="position: relative; height:80vh; width:80vw">
-        <canvas id="daily-active-users"></canvas>
-    </div>
-
-    <div class="chart-container" style="position: relative; height:80vh; width:80vw">
-        <canvas id="daily-average-user-plays"></canvas>
-    </div>
 </div>
 {% endblock %}
