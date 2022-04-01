@@ -2,6 +2,12 @@ function update_totals(totals) {
     app.totals.users = totals['users_total'];
     app.totals.runs = totals['sprints_total'];
     app.totals.finished_runs = totals['sprints_finished'];
+   
+    let user_runs = totals['user_runs'];
+    let user_finished_runs = totals['user_finished_runs'];
+
+    app.totals.pct_user_runs = ((user_runs / app.totals.runs) * 100).toFixed(2);
+    app.totals.pct_user_finished_runs = ((user_finished_runs / app.totals.finished_runs) * 100).toFixed(2);
 }
 
 function update_daily(daily_totals) {
@@ -30,6 +36,9 @@ function calculate_weekly_change() {
 
     let last_week_runs = app.daily.runs[app.daily.runs.length - 7]['total'];
     app.weekly.runs_change = (((app.totals.runs - last_week_runs) / last_week_runs) * 100).toFixed(2);
+
+    let last_week_finished_runs = app.daily.finished_runs[app.daily.finished_runs.length - 7]['total'];
+    app.weekly.finished_runs_change = (((app.totals.finished_runs - last_week_finished_runs) / last_week_finished_runs) * 100).toFixed(2);
 }
 
 async function draw_graphs() {
@@ -163,10 +172,13 @@ var app = new Vue({
             users: 0,
             runs: 0,
             finished_runs: 0,
+            pct_user_runs: 0.0,
+            pct_user_finished_runs: 0.0,
         },
         weekly: {
             user_change: 0.0,
             runs_change: 0.0,
+            finished_runs_change: 0.0,
         },
         daily: {
             users: [],

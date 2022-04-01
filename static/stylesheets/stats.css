@@ -77,6 +77,13 @@ canvas {
 }
 
 .stats__change {
+    font-weight: bold; 
+}
+
+.positive {
 	color: #7dffa0;
-    font-weight: bold;
+}
+
+.mid {
+	color: #ede53b;
 }
