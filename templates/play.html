@@ -16,7 +16,7 @@
 {% block content %}
 
 <div id="app">
-
+<template v-cloak> <!--Top level v-cloak to hide stuff when loading vue-->
     <div v-show="started && !finished">
 
         <div class="show-on-desktop">
@@ -43,7 +43,7 @@
                         Current Article<br><strong>[[currentArticle]]</strong>
                     </div>
                 </div>
-            </div>    
+            </div>
         </div>
 
         <div class="show-on-mobile">
@@ -103,6 +103,6 @@
             <hr class="mb-3">
         </div>
     </div>
-
+</template>
 </div>
 {% endblock %}
