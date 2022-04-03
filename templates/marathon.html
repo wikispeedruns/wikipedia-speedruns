@@ -13,6 +13,8 @@
 {% block content %}
 
 <div id="app">
+<template v-cloak> <!--Top level v-cloak to hide stuff when loading vue-->
+
     <canvas id="confettiCanvas" style="pointer-events:none;"></canvas>
 
     <div v-show="started && !finished" id="time-box" class="HUDwrapper container" v-cloak>
@@ -50,7 +52,7 @@
             </div>
             <div class="col-sm-auto">
                 <button v-on:click="finish(0)" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">End my suffering</button>
-            </div> 
+            </div>
         </div>
     </div>
 
@@ -85,10 +87,10 @@
                 </div>
                 <div class="col-sm-auto">
                     <button v-on:click="finish(0)" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Just end my suffering already</button>
-                </div> 
+                </div>
                 <div class="col-sm-auto">
                     <button v-on:click="showStop = !showStop" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Continue</button>
-                </div> 
+                </div>
             </div>
         </div>
     </div>
@@ -131,7 +133,13 @@
 
     <div v-show="started && !finished" id="main">
         <div id="wikipedia-frame" class="main-text"></div>
+        <div id="article-end-marker">
+            <hr class="mt-5">
+            <div class="text-center font-weight-light"><strong>- End of Article -</strong></div>
+            <hr class="mb-3">
+        </div>
     </div>
 
+</template>
 </div>
 {% endblock %}

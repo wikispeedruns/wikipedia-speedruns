@@ -147,7 +147,7 @@ let app = new Vue({
 
         async start() {
             //Toggle the `started` render flag, which will hide all other elements, and display the rendered wikipage
-            this.started = true;
+            
             //start timer
             this.startTime = Date.now();
 
@@ -158,6 +158,8 @@ let app = new Vue({
             }, 50);
 
             await this.renderer.loadPage(this.startArticle);
+
+            this.started = true;
         },
 
         async finish() {
