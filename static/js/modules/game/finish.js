@@ -6,11 +6,12 @@ var FinishPage = {
         "lobbyId",
         "runId",
 
-
         "startArticle",
         "endArticle",
         "finalTime",
-        "path"
+        "path",
+
+        "loggedIn",
     ],
 
     methods: {
@@ -53,7 +54,8 @@ var FinishPage = {
     template: (`
     <div v-cloak class="text-left">
         <p><h4>You found it!</h4></p>
-        <p>Your run was submitted to the leaderboard.</p>
+        <p v-if="loggedIn">Your run was submitted to the leaderboard.</p>
+        <p v-else>You are not logged in, but your run has been saved locally. Log in to upload your runs to the leaderboard!</p>
         <p><h4>Here's how you did:</h4></p>
         <div class="card md">
             <div class="card-body">

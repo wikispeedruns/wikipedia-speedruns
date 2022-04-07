@@ -11,6 +11,8 @@ import { PagePreview } from "./modules/game/pagePreview.js";
 
 import { basicCannon, fireworks, side } from "./modules/confetti.js";
 
+import { submitLocalRun } from "./modules/localStorage/localStorageMarathon.js";
+
 //retrieve the unique prompt_id of the prompt to load
 const PROMPT_ID = serverData["prompt_id"];
 const load_save = serverData["load_save"] === '1';
@@ -25,7 +27,7 @@ let app = new Vue({
         'page-preview': PagePreview
     },
     data: {
-
+        loggedIn: false,
         username: serverData["username"],
 
         checkpoints: [],
@@ -88,6 +90,7 @@ let app = new Vue({
 
 
     mounted: async function() {
+        this.loggedIn = "username" in serverData;
         this.promptId = PROMPT_ID;
 
         const response = await fetch("/api/marathon/prompt/" + this.promptId);
@@ -226,6 +229,10 @@ let app = new Vue({
             this.endTime = Date.now();
 
             this.runId = await submitRun(this.promptId, this.endTime - this.startTime + this.lastTime, this.visitedCheckpoints, this.path, finished);
+            if (!this.loggedIn) {
+                submitLocalRun(this.runId, this.promptId, this.endTime - this.startTime + this.lastTime, this.visitedCheckpoints, this.path, finished);
+            }
+
             removeSave(PROMPT_ID);
         
         },
