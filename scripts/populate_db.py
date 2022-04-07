@@ -40,6 +40,27 @@ def populate_sprints(cursor):
         VALUES (%s, %s)
     '''
     cursor.executemany(query, [(start, end) for (start, end, _, _) in prompts[30:]])
+    
+    
+def populate_marathon_prompts(cursor):
+    # Create a bunch of marathon prompts
+    prompts = []
+    checkpoints = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+    
+    for i in range(40):
+        checkpoints.append(f"{20 + i} (number)")
+        
+    for i in range(10):
+        reordered = checkpoints[2*i:] + checkpoints[:2*i] 
+        start = reordered[0]
+        startcps = reordered[1:6]
+        cps = reordered[6:]
+        seed = i
+        prompts.append((start, json.dumps(startcps), seed, json.dumps(cps)))    
+
+    query = "INSERT INTO `marathonprompts` (start, initcheckpoints, seed, checkpoints) VALUES (%s, %s, %s, %s);"
+    cursor.executemany(query, prompts)
+
 
 def populate_users(cursor):
     # Create 40 users with username/password of testuser[i]/testuser[i] for i 1-40
@@ -100,6 +121,61 @@ def populate_runs(cursor):
 
 
     cursor.executemany(runs_query, runs)
+    
+    
+def populate_marathon_runs(cursor):
+    # Create a run for each user on all marathon prompts
+    users_query = "SELECT user_id FROM users"
+    prompts_query = """
+        SELECT prompt_id, start, initcheckpoints, checkpoints FROM marathonprompts
+    """
+    runs_query = "INSERT INTO `marathonruns` (`path`, `prompt_id`, `user_id`, `checkpoints`, `total_time`, `finished`) VALUES (%s, %s, %s, %s, %s, %s)"
+
+    cursor.execute(users_query)
+    users = cursor.fetchall()
+
+    cursor.execute(prompts_query)
+    prompts = cursor.fetchall()
+
+    runs = []
+    count = 0
+    
+    for p in prompts:
+
+        run_time = 10000
+        startcp = json.loads(p['initcheckpoints'])
+        cp = json.loads(p['checkpoints'])
+
+        for u in users:
+            
+            path1 = json.dumps([p["start"], startcp[0], startcp[1], cp[0]])
+            checkpoints1 = json.dumps([startcp[0], startcp[1], cp[0]])
+            
+            path2 = json.dumps([p["start"], startcp[0], startcp[1]] + cp[:5])
+            checkpoints2 = json.dumps([startcp[0], startcp[1]] + cp[:5])
+
+            runs.append((
+                path1,
+                p["prompt_id"],
+                u["user_id"],
+                checkpoints1,
+                run_time,
+                count%2
+            ))
+            
+            count += 1
+            run_time += 200
+            runs.append((
+                path2,
+                p["prompt_id"],
+                u["user_id"],
+                checkpoints2,
+                run_time,
+                count%2
+            ))
+            count += 1
+
+    cursor.executemany(runs_query, runs)
 
 
 
@@ -123,6 +199,8 @@ def populate_database(db_name, recreate=False):
         populate_sprints(cursor)
         populate_users(cursor)
         populate_runs(cursor)
+        populate_marathon_prompts(cursor)
+        populate_marathon_runs(cursor)
 
         conn.commit()
         conn.close()

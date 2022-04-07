@@ -28,7 +28,7 @@
                     </div>
                     <div class="col-sm-auto text-nowrap px-4 py-2">
                         End Article<br><strong>[[endArticle]] </strong>
-                        <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="mouseEnter" @mouseleave="mouseLeave">
+                        <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
                             ⓘ
                         </small>
                     </div>
@@ -45,7 +45,7 @@
                     Start Article: <strong>[[startArticle]]</strong>
                     <br>
                     End Article: <strong>[[endArticle]]</strong>
-                    <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="(e) => { showPreviewBgUnderlay=true; mouseEnter(e); }">
+                    <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="showPreview">
                         ⓘ
                     </small>
                     <br>
@@ -57,12 +57,12 @@
         </div>
     </div>
 
-    <div v-if="showPreview && articlePreview">
-        <div v-if="showPreviewBgUnderlay" class="blocker" @click="showPreviewBgUnderlay=false; mouseLeave();"></div>
+    <div v-if="previewContent">
+        <div v-if="eventType === 'click'" class="blocker" @click="hidePreview"></div>
         <page-preview
-            :article-preview="articlePreview"
-            :client-x="clientX"
-            :client-y="clientY"
+            :article-preview="previewContent"
+            :client-x="eventX"
+            :client-y="eventY"
         ></page-preview>
     </div>
 
