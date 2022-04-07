@@ -32,7 +32,7 @@ async function submitRun(promptId, lobbyId,  runId, startTime, endTime, path) {
 
 async function updateAnonymousRun(runId) {
     const reqBody = {
-        run_id: runId
+        "run_id": parseInt(runId)
     };
 
     try {

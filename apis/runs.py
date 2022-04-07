@@ -1,4 +1,5 @@
 from flask import jsonify, request, Blueprint, session
+from util.decorators import check_user, check_request_json
 
 from db import get_db
 from pymysql.cursors import DictCursor
@@ -69,6 +70,8 @@ def finish_run(id):
 
 
 @run_api.patch('/update_anonymous')
+@check_user
+@check_request_json({"run_id": int})
 def update_anonymous_sprint_run():
     '''
     Updates the user_id of a given run_id, only if the associated run_id is an anonymous run
@@ -76,15 +79,9 @@ def update_anonymous_sprint_run():
 
     query = 'UPDATE `sprint_runs` SET `user_id`=%s WHERE `run_id`=%s AND `user_id` IS NULL' 
     
-    if ('user_id' in session):
-        user_id = session['user_id']
-    else:
-        return f'Error updating runs, user not logged in', 500
-    
+    user_id = session['user_id']
     run_id = request.json['run_id']
     
-    print(user_id, run_id)
-
     db = get_db()
     with db.cursor() as cursor:
         cursor.execute(query, (user_id, run_id))

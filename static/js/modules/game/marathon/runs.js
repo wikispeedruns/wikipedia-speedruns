@@ -56,7 +56,7 @@ async function submitRun(prompt_id, time, checkpoints, path, finished) {
 
 async function updateAnonymousRun(runId) {
     const reqBody = {
-        run_id: runId
+        "run_id": parseInt(runId)
     };
 
     try {
