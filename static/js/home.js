@@ -99,14 +99,13 @@ var app = new Vue({
             }, 1000);
 
         }
-
-        //console.log(getLocalSprints())
-        //console.log(getLocalMarathons())
-
         
         if (!this.loggedIn) {
 
             const localSprints = getLocalSprints();
+
+            //console.log("Locally stored sprints: ")
+            //console.log(localSprints)
             
             for (let prompt of this.dailyPrompts){
                 for (let run_id of Object.keys(localSprints)) {

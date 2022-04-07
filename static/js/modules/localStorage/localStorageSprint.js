@@ -38,10 +38,13 @@ async function uploadLocalSprints() {
 
     let runIds = [];
 
+    //console.log("Logged in, updating runs")
+
     for (let runId of runs) {
         try {
             await updateAnonymousRun(runId);
             runIds.push(runId);
+            //console.log(`RUNID: ${runId}`)
         } catch (e) {
             console.log(e);
         }

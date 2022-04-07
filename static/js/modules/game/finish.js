@@ -30,10 +30,8 @@ var FinishPage = {
         finishPrompt: function (event) {
             if (this.lobbyId) {
                 window.location.replace(`/lobby/${this.lobbyId}/prompt/${this.promptId}?run_id=${this.runId}`);
-            } else if (this.loggedIn) {
+            } else {
                 window.location.replace(`/prompt/${this.promptId}?run_id=${this.runId}`);
-            } else if (!this.loggedIn) {
-                window.location.replace(`/prompt/${this.promptId}`);
             }
         },
 
