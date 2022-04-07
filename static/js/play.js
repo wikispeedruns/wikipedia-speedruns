@@ -76,8 +76,6 @@ let app = new Vue({
         renderer: null,
         loggedIn: false,
 
-        showPreview: false,       // Flag for whether or not to show the preview
-        showPreviewBgUnderlay: false,     // Flag for whether to create a clickable overlay that allows a player to close the preview box by clicking anywhere outside it, only used for mobile
         previewContent: null,
 
         eventTimestamp: null,
@@ -135,7 +133,7 @@ let app = new Vue({
             this.startTime += loadTime;
 
             //if the page's title matches that of the end article, finish the game, and submit the run
-          
+
             if (page === this.endArticle) {
                 this.finish();
             }
@@ -144,7 +142,7 @@ let app = new Vue({
 
         async start() {
             //Toggle the `started` render flag, which will hide all other elements, and display the rendered wikipage
-            
+
             //start timer
             this.startTime = Date.now();
 
@@ -173,7 +171,7 @@ let app = new Vue({
                 console.log("Not logged in, submitting run to local storage")
                 //console.log(this.runId)
             }
-          
+
             fireworks();
         },
 
