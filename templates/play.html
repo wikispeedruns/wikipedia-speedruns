@@ -22,25 +22,31 @@
         <div class="show-on-desktop">
             <div class="HUDwrapper container" id="time-box">
                 <div class="row flex-row">
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
+                    <div class="col-sm-3 text-nowrap px-4 pt-2">
                         Start Article<br><strong>[[startArticle]]</strong>
                     </div>
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
+                    <div class="col-sm-3 text-nowrap px-4 pt-2">
                         End Article<br><strong>[[endArticle]] </strong>
                         <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
                             ⓘ
                         </small>
                     </div>
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
+                    <div class="col-sm-3 text-nowrap px-4 pt-2">
                         Links clicked<br><strong>[[path.length - 1]]</strong>
                     </div>
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
+                    <div class="col-sm-3 text-nowrap px-4 pt-2">
                         Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
                     </div>
                 </div>
                 <div class="row flex-row">
-                    <div class="col-lg-auto text-nowrap px-4 py-2">
+                    <div class="col-sm-3 text-nowrap px-4 py-2">
                         Current Article<br><strong>[[currentArticle]]</strong>
+                    </div>
+
+                    <div v-if="promptRated" class="col-sm-3 text-nowrap px-4 py-2">
+                        Mode: <br>
+                        <b v-if="!promptPlayed && promptActive">Rated</b>
+                        <b v-else>Practice</b>
                     </div>
                 </div>
             </div>
@@ -78,6 +84,7 @@
     <countdown-timer id="countdown-box"
         v-bind:start-article="startArticle"
         v-bind:end-article="endArticle"
+        v-bind:rated-run="promptRated && promptActive && !promptPlayed"
         v-on:start-game="start"
     ></countdown-timer>
 
