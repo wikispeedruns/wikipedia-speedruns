@@ -34,7 +34,7 @@ async function fetchAsync(basePath, method='GET', body=null)
                 "task_id": task_id,
             });
 
-            if (resp.status !== 200) {
+            if (response.status !== 200) {
                 clearInterval(interval);
                 reject("Unknown Error");
             }
