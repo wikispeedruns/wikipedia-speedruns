@@ -6,6 +6,7 @@ var CountdownTimer = {
     props: [
         "startArticle",
         "endArticle",
+        "ratedPrompt",
         "ratedRun",
     ],
 
@@ -63,6 +64,7 @@ var CountdownTimer = {
             <p>Good Luck!</p>
 
             <p v-if="ratedRun" class="text-danger">This is your rated attempt, leaving this page will count as a forfeit!</p>
+            <p v-else-if="ratedPrompt">This is a practice attempt: your score will not appear on the public leaderboard</p>
 
             <div><button id="start-btn" class="btn btn-outline-secondary">(Don't want to wait? Start immediately!)</button></div>
         </div>

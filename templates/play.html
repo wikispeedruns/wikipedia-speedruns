@@ -45,7 +45,7 @@
 
                     <div v-if="promptRated" class="col-sm-3 text-nowrap px-4 py-2">
                         Mode: <br>
-                        <b v-if="!promptPlayed && promptActive">Rated</b>
+                        <b class="text-danger" v-if="!promptPlayed && promptActive">Rated</b>
                         <b v-else>Practice</b>
                     </div>
                 </div>
@@ -85,6 +85,7 @@
         v-bind:start-article="startArticle"
         v-bind:end-article="endArticle"
         v-bind:rated-run="promptRated && promptActive && !promptPlayed"
+        v-bind:rated-prompt="promptRated"
         v-on:start-game="start"
     ></countdown-timer>
 
