@@ -56,12 +56,16 @@ let app = new Vue({
         'page-preview': PagePreview
     },
     data: {
-        startArticle: "",    //For all game modes, this is the first article to load
-        endArticle: "",      //For sprint games. Reaching this article will trigger game finishing sequence
+        startArticle: "",    // For all game modes, this is the first article to load
+        endArticle: "",      // For sprint games. Reaching this article will trigger game finishing sequence
         currentArticle: "",
-        path: [],             //array to store the user's current path so far, submitted with run
+        path: [],             // array to store the user's current path so far, submitted with run
 
         promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
+        promptRated: false,
+        promptPlayed: false,
+        promptActive: false,
+
         lobbyId: null,
         runId: -1,          //unique ID for the current run. This gets populated upon start of run
 
@@ -96,16 +100,12 @@ let app = new Vue({
         this.startArticle = prompt["start"];
         this.endArticle = prompt["end"];
 
-        this.currentArticle = this.startArticle;
+        // !! forces bool if played is not a field
+        this.promptPlayed = !!prompt["played"];
+        this.promptActive = !!prompt["active"];
+        this.promptRated = !!prompt["rated"];
 
-        /*
-        if (this.loggedIn || this.lobbyId != null) {
-            this.runId = await startRun(PROMPT_ID, LOBBY_ID);
-        } else {
-            this.runId = startLocalRun(PROMPT_ID);
-            console.log("Not logged in, adding to local storage")
-            //console.log(this.runId);
-        }*/
+        this.currentArticle = this.startArticle;
 
         this.runId = await startRun(PROMPT_ID, LOBBY_ID);
         if (!this.loggedIn && this.lobbyId == null) {
