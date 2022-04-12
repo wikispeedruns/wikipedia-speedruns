@@ -14,8 +14,9 @@ export class ArticleRenderer {
 
     async loadPage(page) {
         try {
+            const isMobile = window.screen.width < 768;
             const startTime = Date.now();
-            const body = await getArticle(page);
+            const body = await getArticle(page, isMobile);
 
             this.frame.innerHTML = body["text"]["*"];
 
@@ -24,7 +25,9 @@ export class ArticleRenderer {
             titleEl.innerHTML = "<h1><i>" + body["title"] + "</i></h1>";
             this.frame.insertBefore(titleEl, this.frame.firstChild);
 
-
+            if (isMobile) {
+                disableLazyLoading(this.frame);
+            }
             hideElements(this.frame);
             // disableFindableLinks(this.frame);
             stripNamespaceLinks(this.frame);
@@ -83,6 +86,15 @@ export class ArticleRenderer {
             this.loadPage(linkEl.getAttribute("href").substring(6))
         }
     }
+}
+
+function disableLazyLoading(frame) {
+    frame.querySelectorAll('.lazy-image-placeholder').forEach(el => {
+        el.remove();
+    });
+    frame.querySelectorAll('noscript').forEach(el => {
+        el.outerHTML = el.innerHTML;
+    });
 }
 
 function hideElements(frame) {

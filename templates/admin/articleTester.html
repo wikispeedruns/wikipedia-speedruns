@@ -1,5 +1,13 @@
 {% extends 'base.html' %}
-<link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
+<!-- wiki desktop stylesheet -->
+<link rel="stylesheet" href="https://en.wikipedia.org/w/load.php?lang=en&modules=site.styles&only=styles" media="screen and (min-width: 768px)">
+
+<!-- wiki mobile stylesheets -->
+<link rel="stylesheet" href="https://meta.wikimedia.org/api/rest_v1/data/css/mobile/base" media="screen and (max-width: 767px)">
+<link rel="stylesheet" href="https://en.wikipedia.org/api/rest_v1/data/css/mobile/site" media="screen and (max-width: 767px)">
+<link rel="stylesheet" href="https://meta.wikimedia.org/api/rest_v1/data/css/mobile/pcs" media="screen and (max-width: 767px)">
+
+<!-- play.js stylesheet -->
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/play.css')}}">
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>

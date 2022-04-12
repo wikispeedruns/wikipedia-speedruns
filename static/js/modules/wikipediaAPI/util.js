@@ -1,6 +1,6 @@
-async function getArticle(page) {
+async function getArticle(page, isMobile) {
     const resp = await fetch(
-        `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&page=${page}`,
+        `https://en.wikipedia.org/w/api.php?redirects=1&format=json&origin=*&action=parse&prop=text&page=${page}${isMobile ? '&mobileformat=1' : ''}`,
         {
             mode: "cors"
         }
@@ -16,7 +16,7 @@ async function getArticle(page) {
 
 async function getArticleTitle(title) {
     const resp = await fetch(
-        `https://en.wikipedia.org/w/api.php?redirects=true&format=json&origin=*&action=parse&prop=displaytitle&page=${title}`, {
+        `https://en.wikipedia.org/w/api.php?redirects=1&format=json&origin=*&action=parse&prop=displaytitle&page=${title}`, {
             mode: "cors"
         }
     )

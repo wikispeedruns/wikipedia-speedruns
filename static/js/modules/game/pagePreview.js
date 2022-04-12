@@ -18,14 +18,13 @@ var PagePreview = {
                 } else {
                     styleObject['right'] = `${vw-this.clientX+10}px`;
                 }
-                if (this.clientY < vh / 2.0) {
-                    styleObject['top'] = `${this.clientY+10}px`;
-                } else {
-                    styleObject['bottom'] = `${vh-this.clientY+10}px`;
-                }
             } else {
                 styleObject['left'] = `${Math.floor((vw-360)/2)}px`;
-                styleObject['bottom'] = `${vh-this.clientY+25}px`;
+            }
+            if (this.clientY < vh / 2.0) {
+                styleObject['top'] = `${this.clientY+10}px`;
+            } else {
+                styleObject['bottom'] = `${vh-this.clientY+10}px`;
             }
             return styleObject;
         }

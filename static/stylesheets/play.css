@@ -167,12 +167,6 @@
 	left: 0;
 }
 
-@media (max-width: 767px) {
-    .main-text {
-        font-size: 14px;
-    }
-}
-
 #article-end-marker {
 	margin-bottom: 40vh;
 }

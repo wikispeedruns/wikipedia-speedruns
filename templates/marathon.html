@@ -2,7 +2,15 @@
 
 {% block head %}
 
-<link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}">
+<!-- wiki desktop stylesheet -->
+<link rel="stylesheet" href="https://en.wikipedia.org/w/load.php?lang=en&modules=site.styles&only=styles" media="screen and (min-width: 768px)">
+
+<!-- wiki mobile stylesheets -->
+<link rel="stylesheet" href="https://meta.wikimedia.org/api/rest_v1/data/css/mobile/base" media="screen and (max-width: 767px)">
+<link rel="stylesheet" href="https://en.wikipedia.org/api/rest_v1/data/css/mobile/site" media="screen and (max-width: 767px)">
+<link rel="stylesheet" href="https://meta.wikimedia.org/api/rest_v1/data/css/mobile/pcs" media="screen and (max-width: 767px)">
+
+<!-- play.js stylesheet -->
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/play.css')}}">
 <script type="module" src="{{url_for('static', filename='js/marathon.js')}}"></script>
 
@@ -133,7 +141,7 @@
 
 
     <div v-show="started && !finished" id="main">
-        <div id="wikipedia-frame" class="main-text"></div>
+        <div id="wikipedia-frame" class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output content"></div>
         <div id="article-end-marker">
             <hr class="mt-5">
             <div class="text-center font-weight-light"><strong>- End of Article -</strong></div>
