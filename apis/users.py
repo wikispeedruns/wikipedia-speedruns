@@ -10,9 +10,9 @@ from flask_mail import Message
 from db import get_db
 from mail import mail
 from tokens import (
-    create_reset_token, 
-    verify_reset_token, 
-    create_confirm_token, 
+    create_reset_token,
+    verify_reset_token,
+    create_confirm_token,
     verify_confirm_token
 )
 
@@ -23,10 +23,10 @@ from wikispeedruns.auth import passwords
 user_api = Blueprint("users", __name__, url_prefix="/api/users")
 
 # Setup OAuth
-google_bp = oauth_google.make_google_blueprint(redirect_url="/api/users/auth/google/check", 
+google_bp = oauth_google.make_google_blueprint(redirect_url="/api/users/auth/google/check",
     scope=[
-        "https://www.googleapis.com/auth/userinfo.profile", 
-        "https://www.googleapis.com/auth/userinfo.email", 
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
         "openid"
     ]
 )
@@ -68,6 +68,7 @@ def _login_session(user):
     session["user_id"] = user["user_id"]
     session["username"] = user["username"]
     session["admin"] = user["admin"] != 0
+    session.permanent = True
 
 
 def _logout_session():
@@ -160,7 +161,7 @@ def create_user():
 
             cursor.execute(get_id_query)
             (id,) = cursor.fetchone()
-            
+
             _send_confirmation_email(id, email, username, request.url_root, on_signup=True)
 
             db.commit()
@@ -168,7 +169,7 @@ def create_user():
         except pymysql.IntegrityError:
             return (f'User {username} already exists, or email {email} in use', 409)
         except pymysql.Error as e:
-            return ("Unknown error", 500) 
+            return ("Unknown error", 500)
 
     return (f'User {username} ({id}) added', 201)
 
@@ -205,7 +206,7 @@ def login():
         "password" : "lmao"
     }
 
-    OR 
+    OR
 
     {
         "email" : "echoingsins@gmail.com"
@@ -225,7 +226,7 @@ def login():
 
     if ("password" not in request.json):
         return ("Password not in request", 400)
-    
+
     password = request.json["password"]
 
     db = get_db()
@@ -264,7 +265,7 @@ def change_password():
 
     if ("old_password" not in request.json or "new_password" not in request.json):
         return ("Password(s) not in request", 400)
-    
+
     id = session["user_id"]
     old_password = request.json["old_password"]
     new_password = request.json["new_password"]
@@ -277,7 +278,7 @@ def change_password():
         # TODO , should be found
 
         user = cursor.fetchone()
-        
+
         if not passwords.check_password(user, old_password):
             return "Incorrect password", 401
 
@@ -298,7 +299,7 @@ def confirm_email_request():
     '''
     id = session["user_id"]
     query = "SELECT `email`, `username` FROM `users` WHERE `user_id`=%s"
-    
+
     db = get_db()
     with db.cursor() as cursor:
         cursor.execute(query, (id, ))
@@ -313,10 +314,10 @@ def confirm_email_request():
 def confirm_email():
     token = request.json["token"]
     id = verify_confirm_token(token)
-    
+
     if (id is None):
         return ("Invalid email confirmation link, could be outdated", 400)
-   
+
     query = "UPDATE `users` SET `email_confirmed` = 1 WHERE `user_id`=%s"
 
     db = get_db()
@@ -339,7 +340,7 @@ def reset_password_request():
     email = request.json['email']
 
     query = "SELECT `user_id`, `username`, `hash` FROM `users` WHERE `email`=%s"
-    
+
     db = get_db()
     with db.cursor() as cursor:
         res = cursor.execute(query, (email, ))
@@ -362,10 +363,10 @@ def reset_password():
 
     if not all([field in request.json for field in ["user_id", "password", "token"]]):
         return "Invalid request", 400
-    
+
     if type(request.json["user_id"]) != int:
         return "`user_id` should be an int"
-    
+
     id = request.json["user_id"]
     password = request.json["password"]
     token = request.json["token"]
