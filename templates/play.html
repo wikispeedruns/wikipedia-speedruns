@@ -31,10 +31,7 @@
             <div class="HUDwrapper container" id="time-box">
                 <div class="row flex-row">
                     <div class="col-sm-auto text-nowrap px-4 pt-2">
-                        Start Article<br><strong>[[startArticle]]</strong>
-                    </div>
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
-                        End Article<br><strong>[[endArticle]] </strong>
+                        Goal Article<br><strong>[[endArticle]] </strong>
                         <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
                             ⓘ
                         </small>
@@ -63,16 +60,10 @@
         <div class="show-on-mobile">
             <div class="HUDwrapper-mobile" id="time-box-mobile">
                 <div class="HUDwrapper-mobile-inner-container">
-                    Start Article: <strong>[[startArticle]]</strong>
-                    <br>
-                    End Article: <strong>[[endArticle]]</strong>
+                    Goal Article: <strong>[[endArticle]]</strong>
                     <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="showPreview">
                         ⓘ
                     </small>
-                    <br>
-                    Current Article: <strong>[[currentArticle]]</strong>
-                    <br>
-                    Links clicked: <strong>[[path.length - 1]]</strong>
                     <br>
                     Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
 
