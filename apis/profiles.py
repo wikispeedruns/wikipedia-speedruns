@@ -1,5 +1,6 @@
 from pymysql.cursors import DictCursor
-from flask import session, request, abort, Blueprint
+from flask import session, request, abort, Blueprint, jsonify
+from util.decorators import check_user
 
 from db import get_db
 
@@ -62,3 +63,36 @@ def get_total_stats(username):
 
 
     return result, 200
+
+
+@profile_api.get("/streak")
+@check_user
+def get_current_streak():
+    
+    user_id = session['user_id']
+    ## NASTY NASTY SQL QUERY, COULD USE CLEAN UP
+    query = """
+    SELECT IF(run_date=CURDATE(), 1, 0) as done_today, count(*) as streak FROM ( 
+        SELECT 
+            run_date, 
+            DATEDIFF(CURDATE(), run_date) AS Diff, 
+            ROW_NUMBER() OVER(ORDER BY(run_date) DESC) AS rown 
+        FROM (  
+            SELECT 
+                CAST(start_time AS DATE) as run_date
+            FROM sprint_runs
+            INNER JOIN sprint_prompts ON sprint_prompts.prompt_id = sprint_runs.prompt_id
+            WHERE
+                user_id=%s 
+                AND sprint_runs.start_time BETWEEN sprint_prompts.active_start AND sprint_prompts.active_end
+                AND rated
+                AND end_time IS NOT NULL
+            GROUP BY run_date
+            ORDER BY run_date DESC ) 
+        as temp) 
+    as temp2 WHERE Diff <= rown
+    """ 
+    
+    with get_db().cursor(cursor=DictCursor) as cursor:
+        result = cursor.execute(query, (user_id,))
+        return jsonify(cursor.fetchone())

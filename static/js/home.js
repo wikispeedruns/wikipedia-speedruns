@@ -2,6 +2,7 @@ import { MarathonPrompts } from "./modules/game/marathon/marathonPrompts.js";
 import { serverData } from "./modules/serverData.js";
 import { uploadLocalSprints, getLocalSprints } from "./modules/localStorage/localStorageSprint.js";
 import { uploadLocalMarathons, getLocalMarathons } from "./modules/localStorage/localStorageMarathon.js";
+import { generateStreakText } from "./modules/streaks.js";
 
 async function getPrompts()
 {
@@ -33,6 +34,11 @@ async function getMarathonPrompts()
     return await response.json();
 }
 
+async function getStreak() {
+    const response = await fetch("/api/profiles/streak");
+    return await response.json();
+}
+
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
@@ -48,12 +54,14 @@ var app = new Vue({
         timeLeft: "",
         username: serverData["username"],
         loggedIn: false,
+
+        streakText: '',
     },
     methods: {
         alertLogin: (e) => {
             e.preventDefault();
             alert("Please login if you would like to play the prompt of the day!");
-        }
+        },
     },
 
     created: async function() {
@@ -123,8 +131,9 @@ var app = new Vue({
                 }
             }
 
+        } else {
+            const resp = await getStreak();
+            this.streakText = generateStreakText(resp);
         }
-
-        
     }
 })
