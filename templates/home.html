@@ -15,7 +15,7 @@
 
     <h3 class="mb-4">Welcome<span v-if="username"> back</span> to Wikipedia Speedruns<span  v-cloak v-if="username">, [[username]]</span>! <a href="/about#beta"><span class="beta">BETA*</span></a></h3>
 
-    <div class="alert alert-warning" v-cloak role="alert" v-html="streakText" v-if="loggedIn"></div>
+    <div class="alert alert-warning" v-cloak role="alert" v-html="streakText" v-if="loggedIn && streakText"></div>
 
     <p>The goal of this game is simple. Try to get from one wikipedia page to another as fast as possible by clicking on the links in the page. </p>
     <p >There are a few simple rules:<br>
