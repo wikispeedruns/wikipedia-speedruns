@@ -41,14 +41,14 @@
             </div>
             <div class="col-lg-auto px-4">
                 Checkpoints<br>
-                <ol style="padding-left: 1rem;">
-                    <li v-for="checkpoint in activeCheckpoints">
+                <div>
+                    <div v-for="checkpoint in activeCheckpoints">
                         <strong>[[checkpoint]] </strong>
                         <small style="cursor: help;" :href="`/wiki/${checkpoint}`" @mouseenter="showPreview" @mouseleave="hidePreview">
                             ⓘ
                         </small>
-                    </li>
-                </ol>
+                    </div>
+                </div>
             </div>
         </div>
         <div v-show="!showStop" class="row flex-row flex-nowrap justify-content-end py-2">
@@ -79,14 +79,14 @@
                 </div>
                 <div class="col-lg-auto px-4">
                     Checkpoints<br>
-                    <ol style="padding-left: 1rem;">
-                        <li v-for="checkpoint in activeCheckpoints">
+                    <div>
+                        <div v-for="checkpoint in activeCheckpoints">
                             <strong>[[checkpoint]] </strong>
                             <small style="cursor: help;" :href="`/wiki/${checkpoint}`" @mouseenter="showPreview" @mouseleave="hidePreview">
                                 ⓘ
                             </small>
-                        </li>
-                    </ol>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row flex-row flex-nowrap justify-content-end py-2">
