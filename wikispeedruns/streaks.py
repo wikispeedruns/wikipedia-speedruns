@@ -1,11 +1,10 @@
 from db import get_db
 from pymysql.cursors import DictCursor
 
-
 def get_current_streak(user_id):
 
     query = """
-    SELECT IF(run_date=CURDATE(), 1, 0) as done_today, count(*) OVER () AS streak FROM (
+    SELECT IF(MAX(run_date)=CURDATE(), 1, 0) as done_today, COUNT(*) AS streak FROM (
         SELECT
             run_date,
             DATEDIFF(CURDATE(), run_date) AS Diff,
@@ -25,7 +24,6 @@ def get_current_streak(user_id):
         as temp)
     as temp2 WHERE Diff <= rown
     """
-
     with get_db().cursor(cursor=DictCursor) as cursor:
         result = cursor.execute(query, (user_id,))
         return cursor.fetchone()
