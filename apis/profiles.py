@@ -2,6 +2,8 @@ from pymysql.cursors import DictCursor
 from flask import session, request, abort, Blueprint, jsonify
 from util.decorators import check_user
 
+from wikispeedruns import streaks
+
 from db import get_db
 
 # TODO figure out a better name for this
@@ -45,15 +47,15 @@ def get_total_stats(username):
     '''
 
     query = """
-    SELECT 
-        users.user_id, 
-        COUNT(run_id) AS total_runs, 
+    SELECT
+        users.user_id,
+        COUNT(run_id) AS total_runs,
         COUNT(DISTINCT prompt_id) as total_prompts
     FROM users
-    LEFT JOIN sprint_runs ON sprint_runs.user_id=users.user_id 
+    LEFT JOIN sprint_runs ON sprint_runs.user_id=users.user_id
     WHERE users.username=%s
     """
-    
+
     with get_db().cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (username, ))
 
@@ -68,31 +70,6 @@ def get_total_stats(username):
 @profile_api.get("/streak")
 @check_user
 def get_current_streak():
-    
+
     user_id = session['user_id']
-    ## NASTY NASTY SQL QUERY, COULD USE CLEAN UP
-    query = """
-    SELECT IF(run_date=CURDATE(), 1, 0) as done_today, count(*) as streak FROM ( 
-        SELECT 
-            run_date, 
-            DATEDIFF(CURDATE(), run_date) AS Diff, 
-            ROW_NUMBER() OVER(ORDER BY(run_date) DESC) AS rown 
-        FROM (  
-            SELECT 
-                CAST(start_time AS DATE) as run_date
-            FROM sprint_runs
-            INNER JOIN sprint_prompts ON sprint_prompts.prompt_id = sprint_runs.prompt_id
-            WHERE
-                user_id=%s 
-                AND sprint_runs.start_time BETWEEN sprint_prompts.active_start AND sprint_prompts.active_end
-                AND rated
-                AND end_time IS NOT NULL
-            GROUP BY run_date
-            ORDER BY run_date DESC ) 
-        as temp) 
-    as temp2 WHERE Diff <= rown
-    """ 
-    
-    with get_db().cursor(cursor=DictCursor) as cursor:
-        result = cursor.execute(query, (user_id,))
-        return jsonify(cursor.fetchone())
+    return jsonify(streaks.get_current_streak(user_id))
