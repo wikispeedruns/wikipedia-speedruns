@@ -13,9 +13,9 @@
 
 <div id="app">
 
-    <h3 class="mb-4">Welcome<span v-if="username"> back</span> to Wikipedia Speedruns<span v-if="username">, [[username]]</span>! <a href="/about#beta"><span class="beta">BETA*</span></a></h3>
+    <h3 class="mb-4">Welcome<span v-if="username"> back</span> to Wikipedia Speedruns<span  v-cloak v-if="username">, [[username]]</span>! <a href="/about#beta"><span class="beta">BETA*</span></a></h3>
 
-    <div class="alert alert-warning" role="alert" v-html="streakText" v-if="loggedIn"></div>
+    <div class="alert alert-warning" v-cloak role="alert" v-html="streakText" v-if="loggedIn"></div>
 
     <p>The goal of this game is simple. Try to get from one wikipedia page to another as fast as possible by clicking on the links in the page. </p>
     <p >There are a few simple rules:<br>
@@ -40,7 +40,7 @@
             <div class="card">
                 <div class="card-body">
                     <h4>Prompt of the Day</h4>
-                    
+
                     <template v-if="dailyPrompts.length > 0">
                         <h6 >Time Remaining: [[timeLeft]]</h6>
 
