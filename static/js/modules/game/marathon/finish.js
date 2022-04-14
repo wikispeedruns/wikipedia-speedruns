@@ -42,24 +42,15 @@ var FinishPage = {
 
         generateResults: function(event) {
 
-            let ranks = {
-                0: "bruh 💀", //0
-                3: "Wiki Noob ", //1-3
-                6: "Wiki Apprentice", //4-6
-                9: "Wiki Enjoyer", //7-9
-                14: "Winner", //10-14
-                20: "Tryhard", //15-19
-                35: "Overachiever", //20-34
-                100: "We didn't plan for anyone to get this far" //35+
-            };
-
-            let rank = "We didn't plan for anyone to get this far"
-            for (const threshold in ranks) {
-                if (this.numCheckpointsVisited <= threshold) {
-                    rank = ranks[threshold];
-                    break;
-                }
-            }
+            let rank = ''
+            if (this.numCheckpointsVisited == 0) rank = "bruh 💀"
+            else if (this.numCheckpointsVisited <= 3) rank = "Wiki Noob "
+            else if (this.numCheckpointsVisited <= 6) rank = "Wiki Apprentice"
+            else if (this.numCheckpointsVisited <= 9) rank = "Wiki Enjoyer"
+            else if (this.numCheckpointsVisited <= 14) rank = "Winner"
+            else if (this.numCheckpointsVisited <= 20) rank = "Tryhard"
+            else if (this.numCheckpointsVisited <= 35) rank = "Overachiever"
+            else rank = "We didn't plan for anyone to get this far"
 
             return `Wiki Speedruns Marathon ${this.promptId}\n${this.startArticle}\n${this.numCheckpointsVisited} 🚩\nStatus: ${rank}`
         },

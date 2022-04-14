@@ -76,7 +76,6 @@ def user_with_outbox(client, mail, cursor):
     user["user_id"] = cursor.fetchone()["user_id"]
 
     yield user, outbox
-
     cursor.execute("DELETE FROM users WHERE username=%s", (user["username"],))
 
 @pytest.fixture()

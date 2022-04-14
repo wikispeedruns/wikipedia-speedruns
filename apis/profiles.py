@@ -1,5 +1,8 @@
 from pymysql.cursors import DictCursor
-from flask import session, request, abort, Blueprint
+from flask import session, request, abort, Blueprint, jsonify
+from util.decorators import check_user
+
+from wikispeedruns import streaks
 
 from db import get_db
 
@@ -44,15 +47,15 @@ def get_total_stats(username):
     '''
 
     query = """
-    SELECT 
-        users.user_id, 
-        COUNT(run_id) AS total_runs, 
+    SELECT
+        users.user_id,
+        COUNT(run_id) AS total_runs,
         COUNT(DISTINCT prompt_id) as total_prompts
     FROM users
-    LEFT JOIN sprint_runs ON sprint_runs.user_id=users.user_id 
+    LEFT JOIN sprint_runs ON sprint_runs.user_id=users.user_id
     WHERE users.username=%s
     """
-    
+
     with get_db().cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (username, ))
 
@@ -62,3 +65,11 @@ def get_total_stats(username):
 
 
     return result, 200
+
+
+@profile_api.get("/streak")
+@check_user
+def get_current_streak():
+
+    user_id = session['user_id']
+    return jsonify(streaks.get_current_streak(user_id))
