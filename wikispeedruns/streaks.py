@@ -5,7 +5,7 @@ from pymysql.cursors import DictCursor
 def get_current_streak(user_id):
 
     query = """
-    SELECT IF(run_date=CURDATE(), 1, 0) as done_today, count(*) as streak FROM (
+    SELECT IF(run_date=CURDATE(), 1, 0) as done_today, count(*) OVER () AS streak FROM (
         SELECT
             run_date,
             DATEDIFF(CURDATE(), run_date) AS Diff,
