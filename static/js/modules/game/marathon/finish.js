@@ -13,7 +13,8 @@ var FinishPage = {
         "runId",
         "saved",
         "checkpointLimit",
-        "username"
+        "username",
+        "loggedIn"
     ],
 
     methods: {
@@ -77,7 +78,8 @@ var FinishPage = {
     `<div v-cloak class="text-left">
         <div v-if="!saved">
             <p v-if="!saved"><h4>Game Over! <span v-if="forfeited">You chose the easy way out.</span></h4></p>
-            <p>Your run was submitted to the leaderboard.</p>
+            <p v-if="loggedIn">Your run was submitted to the leaderboard.</p>
+            <p v-else>You are not logged in, but your run has been saved locally. Log in to upload your runs to your personal leaderboard!</p>
             <p><h4>Here's how you did:</h4></p>
         </div>
         <div v-else>
@@ -105,7 +107,7 @@ var FinishPage = {
                 </div>
                 <div><button @click="home" class="btn btn-outline-secondary">Return to home page</button></div>
                 <br/>
-                <div v-if="username"><button @click="finishPrompt" class="btn btn-outline-secondary">Check your marathon run history</button></div>
+                <div v-if="loggedIn"><button @click="finishPrompt" class="btn btn-outline-secondary">Check your marathon run history</button></div>
             </div>
         </div>
     </div>`

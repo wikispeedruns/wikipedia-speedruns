@@ -4,7 +4,7 @@ const pg = serverData["pg"];
 const sortMode = serverData["sortMode"];
 const profile_name = serverData["profile_name"];
 
-const runsPerPage = 5;
+const runsPerPage = 10;
 
 var app = new Vue({
     delimiters: ['[[', ']]'],

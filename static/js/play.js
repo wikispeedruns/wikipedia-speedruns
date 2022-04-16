@@ -9,6 +9,7 @@ these components should be as modular/generic as possible.
 //JS module imports
 import { serverData } from "./modules/serverData.js";
 import { fetchJson } from "./modules/fetch.js";
+import { startRun, submitRun } from "./modules/game/runs.js";
 import { getArticleSummary } from "./modules/wikipediaAPI/util.js";
 
 import { CountdownTimer } from "./modules/game/countdown.js";
@@ -17,6 +18,8 @@ import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 import { PagePreview } from "./modules/game/pagePreview.js";
 
 import { basicCannon, fireworks, side } from "./modules/confetti.js";
+
+import { startLocalRun, submitLocalRun } from "./modules/localStorage/localStorageSprint.js";
 
 
 // retrieve the unique prompt_id of the prompt to load
@@ -42,34 +45,6 @@ async function getPrompt(promptId, lobbyId=null) {
     return await response.json();
 }
 
-async function startRun(promptId, lobbyId=null) {
-    // No need to record unfinished private runs
-    if (lobbyId) {
-        return -1;
-    }
-
-    const response = await fetchJson("/api/runs", "POST", {
-        "prompt_id": promptId,
-    });
-    return await response.json();
-}
-
-async function submitRun(promptId, lobbyId,  runId, startTime, endTime, path) {
-    const reqBody = {
-        "start_time": startTime,
-        "end_time": endTime,
-        "path": path,
-    }
-
-    if (lobbyId) {
-        const response = await fetchJson(`/api/lobbys/${lobbyId}/prompts/${promptId}/runs`, 'POST', reqBody);
-        return (await response.json())["run_id"];
-    } else {
-        // Send results to API
-        const response = await fetchJson(`/api/runs/${runId}`, 'PATCH', reqBody);
-        return runId;
-    }
-}
 
 //Vue container. This contains data, rendering flags, and functions tied to game logic and rendering. See play.html
 let app = new Vue({
@@ -99,6 +74,8 @@ let app = new Vue({
         started: false,      //Flag for whether a game has started (countdown finished), used for rendering
 
         renderer: null,
+        loggedIn: false,
+
         previewContent: null,
 
         eventTimestamp: null,
@@ -108,6 +85,9 @@ let app = new Vue({
     },
 
     mounted: async function() {
+
+        this.loggedIn = "username" in serverData;
+
         this.promptId = PROMPT_ID;
         this.lobbyId = LOBBY_ID;
 
@@ -118,7 +98,21 @@ let app = new Vue({
 
         this.currentArticle = this.startArticle;
 
+        /*
+        if (this.loggedIn || this.lobbyId != null) {
+            this.runId = await startRun(PROMPT_ID, LOBBY_ID);
+        } else {
+            this.runId = startLocalRun(PROMPT_ID);
+            console.log("Not logged in, adding to local storage")
+            //console.log(this.runId);
+        }*/
+
         this.runId = await startRun(PROMPT_ID, LOBBY_ID);
+        if (!this.loggedIn && this.lobbyId == null) {
+            startLocalRun(PROMPT_ID, this.runId);
+            console.log("Not logged in, uploading start of run to local storage")
+            //console.log(this.runId)
+        }
 
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview);
     },
@@ -139,6 +133,7 @@ let app = new Vue({
             this.startTime += loadTime;
 
             //if the page's title matches that of the end article, finish the game, and submit the run
+
             if (page === this.endArticle) {
                 this.finish();
             }
@@ -147,7 +142,7 @@ let app = new Vue({
 
         async start() {
             //Toggle the `started` render flag, which will hide all other elements, and display the rendered wikipage
-            this.started = true;
+
             //start timer
             this.startTime = Date.now();
 
@@ -158,6 +153,8 @@ let app = new Vue({
             }, 50);
 
             await this.renderer.loadPage(this.startArticle);
+
+            this.started = true;
         },
 
         async finish() {
@@ -169,7 +166,12 @@ let app = new Vue({
             this.endTime = Date.now();
 
             this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
-          
+            if (!this.loggedIn && this.lobbyId == null) {
+                submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, this.path);
+                console.log("Not logged in, submitting run to local storage")
+                //console.log(this.runId)
+            }
+
             fireworks();
         },
 

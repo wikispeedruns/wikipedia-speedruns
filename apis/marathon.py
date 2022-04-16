@@ -1,4 +1,4 @@
-from util.decorators import check_admin
+from util.decorators import check_admin, check_user, check_request_json
 from flask import Flask, jsonify, request, Blueprint, session, abort
 import json
 
@@ -44,50 +44,27 @@ def create_run():
         return jsonify(id)
 
     return "Error submitting prompt"
+    
+@marathon_api.patch('/update_anonymous')
+@check_user
+@check_request_json({"run_id": int})
+def update_anonymous_marathon_run():
+    '''
+    Updates the user_id of a given run_id, only if the associated run_id is an anonymous run
+    '''
 
-"""
-@marathon_api.post('/gen/')
-@check_admin
-def create_marathon_prompt():
+    query = 'UPDATE `marathonruns` SET `user_id`=%s WHERE `run_id`=%s AND `user_id` IS NULL' 
     
-    print("Received marathon prompt req")
-    print(request.json)
+    user_id = session['user_id']
+    run_id = request.json['run_id']
     
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute(query, (user_id, run_id))
+        db.commit()
 
-    nbucket = int(request.json.get("nbucket"))
-    nbatch = int(request.json.get("nbatch"))
-    nperbatch = int(request.json.get("nperbatch"))
-    
-    if nbucket < 1 or nbatch < 1 or nperbatch < 1:
-        raise ValueError("Bad input")
-    
-    
-    start = request.json.get("start")
-    cp1 = request.json.get("cp1")
-    cp2 = request.json.get("cp2")
-    cp3 = request.json.get("cp3")
-    cp4 = request.json.get("cp4")
-    cp5 = request.json.get("cp5")
-    seed = request.json.get("seed")
-    
-    initcheckpoints = [cp1, cp2, cp3, cp4, cp5]
-    
-    print("Starting prompt generation")
-    
-    checkpoints = genPrompts(initcheckpoints, batches=nbatch, nPerBatch=nperbatch, buckets=nbucket)
-    
-    print(checkpoints)
+        return f'Updated marathon run {run_id} to user {user_id}', 200
 
-    print("Finished prompt generation")
-    
-    output = {'start': start,
-              'seed': seed,
-              'initcheckpoints': initcheckpoints,
-              'checkpoints': checkpoints}
-    
-    return json.dumps(output)
-"""
-    
 
 @marathon_api.post('/add/')
 @check_admin
@@ -102,15 +79,6 @@ def add_marathon_prompt():
     initcheckpoints = data['startcp']
     seed = data['seed']
     checkpoints = data['cp']
-    
-    print(start)
-    print(type(start))
-    print(initcheckpoints)
-    print(type(initcheckpoints))
-    print(seed)
-    print(type(seed))
-    print(checkpoints)
-    print(type(checkpoints))
     
     query = "INSERT INTO `marathonprompts` (start, initcheckpoints, seed, checkpoints) VALUES (%s, %s, %s, %s);"
     db = get_db()

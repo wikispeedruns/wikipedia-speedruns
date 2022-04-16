@@ -1,4 +1,6 @@
 import { serverData } from "./modules/serverData.js";
+import { getLocalSprints } from "./modules/localStorage/localStorageSprint.js";
+
 
 /* This really would be better if we had a SPA huh */
 
@@ -16,7 +18,8 @@ var app = new Vue({
 
         limit: limit,
         offset: offset,
-        sort_desc: sort_desc
+        sort_desc: sort_desc,
+        loggedIn: false,
     },
 
     methods : {
@@ -44,6 +47,8 @@ var app = new Vue({
     },
 
     created: async function() {
+        this.loggedIn = "username" in serverData;
+
         const response = await fetch(`/api/sprints/archive?limit=${limit}&offset=${offset}&sort_desc=${sort_desc}`);
         const resp = await response.json();
 
@@ -55,5 +60,19 @@ var app = new Vue({
         this.limit = limit;
         this.offset = offset;
         this.sort_desc = sort_desc;
+
+        if (!this.loggedIn) {
+
+            const localSprints = getLocalSprints();
+            
+            for (let prompt of this.prompts){
+                for (let run_id of Object.keys(localSprints)) {
+                    if (parseInt(localSprints[run_id].prompt_id) === prompt.prompt_id) {
+                        prompt.played = true
+                    }
+                }
+            }
+        }
+
     }
 })

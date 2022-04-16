@@ -28,7 +28,7 @@ var MarathonPrompts = {
         <div class="col px-0">
             <div class="card">
                 <div class="alert alert-info my-0" role="alert">
-                    <strong>Introducing our new <a href="#marathon-block" class="alert-link">Marathon</a> game mode</strong>: 
+                    <strong>**NEW**: Introducing our new <a href="#marathon-block" class="alert-link"><u>Marathon</u></a> game mode</strong>! 
                     Every article you visit will costs one 'click', but every checkpoint you reach will get you five more clicks. 
                     Think strategically, and see how far you can go!
                 </div>
