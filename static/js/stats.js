@@ -1,9 +1,9 @@
 const USERS_COLOR = "#347aeb";
-const USERS_SUBCOLOR = "#4585ED";
+const USERS_SUBCOLOR = "#f2a257";
 const SPRINTS_COLOR = "#9E58EE";
-const SPRINTS_SUBCOLOR = "#B47DF2";
+const SPRINTS_SUBCOLOR = "#ffdb99";
 const MARATHON_COLOR = "#EB8258";
-const MARATHON_SUBCOLOR = "#F09F7F";
+const MARATHON_SUBCOLOR = "#58ebbf";
 
 function update_totals(totals) {
     app.totals.users = totals['users_total'];
