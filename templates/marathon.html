@@ -74,26 +74,6 @@
                 <div><h4>Congrats! You reached [[numCheckpointsToStop]] checkpoints</h4></div>
                 <div><p>You can now consider this prompt complete, but you can continue this run to see how far you can go.</p></div>
                 <div><p>The amount of clicks awarded for each checkpoint will decrease</p></div>
-                <div class="row flex-row flex-nowrap py-2">
-                    <div class="col-sm-auto px-4">
-                        Clicks Remaining<br><strong class="text-size-3" v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
-                    </div>
-                    <div class="col-sm px-4">
-                        Checkpoints Visited<br>[[numCheckpointsVisited]]
-                        <br>Unique Articles Visited<br>[[numVisitedUnique]]
-                    </div>
-                    <div class="col-lg-auto px-4">
-                        Checkpoints<br>
-                        <div>
-                            <div v-for="checkpoint in activeCheckpoints">
-                                <strong>[[checkpoint]] </strong>
-                                <small style="cursor: help;" :href="`/wiki/${checkpoint}`" @mouseenter="showPreview" @mouseleave="hidePreview">
-                                    ⓘ
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <div class="row flex-row flex-nowrap justify-content-end py-2">
                     <div class="col-sm-auto">
                         <button v-on:click="showStop = !showStop" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Continue</button>
