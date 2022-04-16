@@ -28,7 +28,7 @@
     <div v-show="started && !finished">
 
         <div class="show-on-desktop">
-            <div class="HUDwrapper container" id="time-box">
+            <div class="HUDwrapper container animated-transition" id="time-box">
                 <div class="row flex-row">
                     <div class="col-sm-auto text-nowrap px-4 pt-2">
                         Goal Article<br><strong>[[endArticle]] </strong>
@@ -48,6 +48,14 @@
                         <b class="text-danger" v-if="!promptPlayed && promptActive">Rated</b>
                         <b v-else>Practice</b>
                     </div>
+
+                    <div class="col-sm-auto text-nowrap py-2">
+                        <button @click="toggleTimebox('time-box', '65')" 
+                                class="btn btn-outline-secondary"
+                                style="padding: 8px 8px">
+                            <i class="bi bi-chevron-down" id="time-box-toggle-button"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="row flex-row">
                     <div class="col-lg-auto text-nowrap px-4 py-2">
@@ -58,21 +66,31 @@
         </div>
 
         <div class="show-on-mobile">
-            <div class="HUDwrapper-mobile" id="time-box-mobile">
-                <div class="HUDwrapper-mobile-inner-container">
-                    Goal Article: <strong>[[endArticle]]</strong>
-                    <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="showPreview">
-                        ⓘ
-                    </small>
-                    <br>
-                    Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
+            <div class="HUDwrapper-mobile container animated-transition" id="time-box-mobile">
+                <div class="HUDwrapper-mobile-inner-container row">
+                    <div class="col">
+                        Goal Article: <strong>[[endArticle]]</strong>
+                        <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="showPreview">
+                            ⓘ
+                        </small>
+                        <br>
+                        Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
 
-                    <br>
-                    <template v-if="promptRated" class="col-sm-auto text-nowrap px-4 py-2">
-                        Mode:
-                        <b class="text-danger" v-if="!promptPlayed && promptActive">Rated</b>
-                        <b v-else>Practice</b>
-                    </template>
+                        <br>
+                        <template v-if="promptRated" class="col-sm-auto text-nowrap px-4 py-2">
+                            Mode:
+                            <b class="text-danger" v-if="!promptPlayed && promptActive">Rated</b>
+                            <b v-else>Practice</b>
+                        </template>
+                    </div>
+
+                    <div class="col-auto px-2">
+                        <button @click="toggleTimebox('time-box-mobile', '55')" 
+                                class="btn btn-outline-secondary"
+                                style="font-size: 0.75rem; padding: 5px 5px">
+                            <i class="bi bi-chevron-down" id="time-box-mobile-toggle-button"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
