@@ -107,6 +107,23 @@ def get_daily_stats():
     GROUP BY day
     '''
 
+    queries['avg_user_finished_plays'] = '''
+    WITH data AS (
+        SELECT user_id,
+        DATE(start_time) AS day,
+        COUNT(*) AS plays
+        FROM sprint_runs
+        WHERE user_id IS NOT NULL AND start_time IS NOT NULL AND end_time IS NOT NULL
+        GROUP BY user_id, day
+    )
+
+    SELECT
+        day,
+        AVG(plays) AS "plays_per_user"
+    FROM data
+    GROUP BY day
+    '''
+
     queries['active_users'] = '''
     WITH data AS (
         SELECT

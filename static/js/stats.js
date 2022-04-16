@@ -35,6 +35,7 @@ function update_daily(daily_totals) {
     app.daily.finished_sprint_runs = daily_totals['daily_finished_sprints'];
 
     app.daily.sprint_runs_per_user = daily_totals['avg_user_plays'];
+    app.daily.finished_sprint_runs_per_user = daily_totals['avg_user_finished_plays'];
     app.daily.active_users = daily_totals['active_users'];
 }
 
@@ -198,7 +199,13 @@ async function draw_graphs() {
               label: "Average User Sprint Runs",
               borderColor: SPRINTS_COLOR,
               fill: false
-            }
+            },
+            { 
+                data: app.daily.finished_sprint_runs_per_user.map(({finished_sprint_runs_per_user}) => finished_sprint_runs_per_user),
+                label: "Average Finished User Sprint Runs",
+                borderColor: SPRINTS_SUBCOLOR,
+                fill: false
+              }
           ]
         },
         options: {
@@ -238,6 +245,7 @@ var app = new Vue({
             sprint_runs: [],
             finished_sprint_runs: [],
             sprint_runs_per_user: [],
+            finished_sprint_runs_per_user: [],
             active_users: []
         },
     },
