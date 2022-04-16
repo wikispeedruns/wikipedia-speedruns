@@ -49,7 +49,7 @@ let app = new Vue({
         elapsed: 0,
         timerInterval: null,
 
-        numCheckpointsToStop: 10,
+        numCheckpointsToStop: 1,
         startingNumClicksToAdd: 5,
 
         finished: false,     //Flag for whether a game has finished, used for rendering
@@ -260,6 +260,18 @@ let app = new Vue({
         hidePreview: function() {
             this.eventTimestamp = null;
             this.previewContent = null;
+        },
+
+        toggleTimebox: function(id, p) {
+            let el = document.getElementById(id);
+            let icon = document.getElementById(id+'-toggle-button');
+            icon.classList.toggle("bi-chevron-down");
+            icon.classList.toggle("bi-chevron-up");
+            if (icon.classList.contains("bi-chevron-down")) {
+                el.style.transform = 'translateY(0)';
+            } else {
+                el.style.transform = `translateY(${p}%)`;
+            }
         }
 
     }
