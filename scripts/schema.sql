@@ -1,3 +1,12 @@
+/*
+    This file should have parity with the actual database.
+    For any changes to the database, those changes should be reflected here.
+
+    Schema Version: 2.0
+    This version number should be incremented with any change to the schema.
+    Keep this up-to-date in db.py
+*/
+
 -- TODO Might want to do this at some point/
 -- http://jan.kneschke.de/projects/mysql/order-by-rand/
 -- TODO add indexes
@@ -30,6 +39,7 @@ CREATE TABLE IF NOT EXISTS `sprint_runs` (
     `run_id` INT NOT NULL AUTO_INCREMENT,
     `start_time` TIMESTAMP(3) NULL,
     `end_time` TIMESTAMP(3) NULL,
+    `finished` BOOLEAN DEFAULT 0,
     `path` JSON NULL,
     `prompt_id` INT NOT NULL,
     `user_id` INT,
@@ -101,6 +111,7 @@ CREATE TABLE IF NOT EXISTS `lobby_runs` (
 
     `start_time` TIMESTAMP(3) NOT NULL,
     `end_time` TIMESTAMP(3) NOT NULL,
+    `finished` BOOLEAN DEFAULT 0,
     `path` JSON NOT NULL,
 
     PRIMARY KEY (`run_id`),

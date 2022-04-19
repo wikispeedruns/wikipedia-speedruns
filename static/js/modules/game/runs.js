@@ -13,10 +13,11 @@ async function startRun(promptId, lobbyId=null) {
     return await response.json();
 }
 
-async function submitRun(promptId, lobbyId,  runId, startTime, endTime, path) {
+async function submitRun(promptId, lobbyId,  runId, startTime, endTime, finished, path) {
     const reqBody = {
         "start_time": startTime,
         "end_time": endTime,
+        "finished": finished,
         "path": path,
     }
 

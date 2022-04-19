@@ -4,6 +4,10 @@ from flask import current_app, g
 def init_app(app):
     app.teardown_appcontext(close_db)
 
+# Keep up to date with scripts/schema.sql
+def get_db_version():
+    return '2.0'
+
 def get_db():
     if 'db' not in g:
         g.db = pymysql.connect(

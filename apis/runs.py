@@ -47,21 +47,22 @@ def create_run():
 
 
 @run_api.patch('/<id>')
-def finish_run(id):
+def update_run(id):
     '''
-    Updates an existing run given a run, start time, end time, and a path.
+    Updates an existing run given a run, start time, end time, a finished flag, and a path.
 
     Returns the user ID of the run updated.
     '''
-    query = 'UPDATE `sprint_runs` SET `start_time`=%s, `end_time`=%s, `path`=%s WHERE `run_id`=%s'
+    query = 'UPDATE `sprint_runs` SET `start_time`=%s, `end_time`=%s, `finished`=%s, `path`=%s WHERE `run_id`=%s'
 
     start_time = datetime.fromtimestamp(request.json['start_time']/1000)
     end_time = datetime.fromtimestamp(request.json['end_time']/1000)
+    finished = json.loads(request.json['finished'])
     path = json.dumps(request.json['path'])
 
     db = get_db()
     with db.cursor() as cursor:
-        cursor.execute(query, (start_time, end_time, path, id))
+        cursor.execute(query, (start_time, end_time, finished, path, id))
         db.commit()
 
         return f'Updated run {id}', 200

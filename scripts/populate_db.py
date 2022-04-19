@@ -89,8 +89,8 @@ def populate_runs(cursor):
         WHERE used=1 AND active_start <= NOW()
     """
     runs_query = """
-        INSERT INTO sprint_runs (prompt_id, user_id, start_time, end_time, path)
-        VALUES (%(prompt_id)s, %(user_id)s, %(start_time)s, %(end_time)s, %(path)s)
+        INSERT INTO sprint_runs (prompt_id, user_id, start_time, end_time, finished, path)
+        VALUES (%(prompt_id)s, %(user_id)s, %(start_time)s, %(end_time)s, %(finished)s, %(path)s)
     """
 
     cursor.execute(users_query)
@@ -115,6 +115,7 @@ def populate_runs(cursor):
                 "user_id": u["user_id"],
                 "start_time": start_time,
                 "end_time": end_time,
+                "finished": True,
                 "path": path,
             })
             run_time += 20

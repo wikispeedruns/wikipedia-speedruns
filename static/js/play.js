@@ -165,9 +165,9 @@ let app = new Vue({
 
             this.endTime = Date.now();
 
-            this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
+            this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, true, this.path);
             if (!this.loggedIn && this.lobbyId == null) {
-                submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, this.path);
+                submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, true, this.path);
                 console.log("Not logged in, submitting run to local storage")
                 //console.log(this.runId)
             }
