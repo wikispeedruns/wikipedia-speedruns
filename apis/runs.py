@@ -1,7 +1,7 @@
 from flask import jsonify, request, Blueprint, session
 from util.decorators import check_user, check_request_json
 
-from db import get_db
+from db import get_db, get_db_version
 from pymysql.cursors import DictCursor
 
 import json
@@ -35,7 +35,6 @@ def create_run():
 
     db = get_db()
     with db.cursor() as cursor:
-        print(cursor.mogrify(query, (prompt_id, user_id)))
         cursor.execute(query, (prompt_id, user_id))
         cursor.execute(sel_query)
         id = cursor.fetchone()[0]
@@ -46,7 +45,7 @@ def create_run():
     return "Error creating run", 500
 
 
-@run_api.patch('/<id>')
+@run_api.post('/<id>')
 def update_run(id):
     '''
     Updates an existing run given a run, start time, end time, a finished flag, and a path.
@@ -57,8 +56,12 @@ def update_run(id):
 
     start_time = datetime.fromtimestamp(request.json['start_time']/1000)
     end_time = datetime.fromtimestamp(request.json['end_time']/1000)
-    finished = json.loads(request.json['finished'])
-    path = json.dumps(request.json['path'])
+    finished = request.json['finished']
+    path = json.dumps({
+        'version': get_db_version(),
+        'path': request.json['path']
+    })
+
 
     db = get_db()
     with db.cursor() as cursor:

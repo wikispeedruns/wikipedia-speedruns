@@ -8,7 +8,6 @@ these components should be as modular/generic as possible.
 
 //JS module imports
 import { serverData } from "./modules/serverData.js";
-import { fetchJson } from "./modules/fetch.js";
 import { startRun, submitRun } from "./modules/game/runs.js";
 import { getArticleSummary } from "./modules/wikipediaAPI/util.js";
 
@@ -17,7 +16,7 @@ import { FinishPage } from "./modules/game/finish.js";
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 import { PagePreview } from "./modules/game/pagePreview.js";
 
-import { basicCannon, fireworks, side } from "./modules/confetti.js";
+import { fireworks } from "./modules/confetti.js";
 
 import { startLocalRun, submitLocalRun } from "./modules/localStorage/localStorageSprint.js";
 
@@ -59,7 +58,14 @@ let app = new Vue({
         startArticle: "",    // For all game modes, this is the first article to load
         endArticle: "",      // For sprint games. Reaching this article will trigger game finishing sequence
         currentArticle: "",
-        path: [],             // array to store the user's current path so far, submitted with run
+        path: [],             // List of objects to store granular run data, submitted on exit/finish
+        /* path object format:
+        {
+            "article": string,
+            "timeReached": number,
+            "loadTime": number
+        }
+        */
 
         promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
         promptRated: false,
@@ -73,6 +79,7 @@ let app = new Vue({
         endTime: null,       //For all game modes, the end time of run (mm elapsed since January 1, 1970)
         elapsed: 0,
         timerInterval: null,
+        totalLoadTime: 0,    // Cumulative load time in seconds
 
         finished: false,     //Flag for whether a game has finished, used for rendering
         started: false,      //Flag for whether a game has started (countdown finished), used for rendering
@@ -86,6 +93,34 @@ let app = new Vue({
         eventType: null,
         eventX: 0,
         eventY: 0
+    },
+
+    created: async function() {
+        const updateRun = () => {
+            if (!this.finished) {
+                this.endTime = Date.now();
+            }
+            
+            // Will be non-blocking for browsers that support Beacon, otherwise uses Fetch
+            submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path, !!navigator.sendBeacon);
+        };
+
+        // Update run info on exit/page hide
+        document.addEventListener("visibilitychange", function() {
+            if (document.visibilityState === "hidden") {
+                updateRun();
+            }  
+        });
+
+        // Use pagehide for browsers that don't support visibilitychange
+        if ("onpagehide" in self) {
+            document.addEventListener("pagehide", updateRun, {capture: true});
+        } else {
+            // Only register beforeunload/unload for browsers that don't support pagehide
+            // Avoids breaking bfcache
+            document.addEventListener("unload", updateRun, {capture: true});
+            document.addEventListener("beforeunload", updateRun, {capture: true});
+        }
     },
 
     mounted: async function() {
@@ -124,13 +159,21 @@ let app = new Vue({
             this.hidePreview();
             // Game logic for sprint mode:
 
-            if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
-                this.path.push(page);
+            let loadTimeSeconds = loadTime / 1000;
+
+            if (this.path.length == 0 || this.path[this.path.length - 1]["article"] != page) {
+                // Update path
+                let timeElapsed = (Date.now() - this.startTime) / 1000;
+                this.path.push({
+                    "article": page,
+                    "timeReached": timeElapsed,
+                    "loadTime": loadTimeSeconds
+                });
             }
 
             this.currentArticle = page;
 
-            this.startTime += loadTime;
+            this.totalLoadTime += loadTimeSeconds;
 
             //if the page's title matches that of the end article, finish the game, and submit the run
 
@@ -149,7 +192,7 @@ let app = new Vue({
             //set the timer update interval
             this.timerInterval = setInterval(() => {
                 const seconds = (Date.now() - this.startTime) / 1000;
-                this.elapsed = seconds;
+                this.elapsed = seconds - this.totalLoadTime;
             }, 50);
 
             await this.renderer.loadPage(this.startArticle);
@@ -165,9 +208,9 @@ let app = new Vue({
 
             this.endTime = Date.now();
 
-            this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, true, this.path);
+            this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
             if (!this.loggedIn && this.lobbyId == null) {
-                submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, true, this.path);
+                submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
                 console.log("Not logged in, submitting run to local storage")
                 //console.log(this.runId)
             }

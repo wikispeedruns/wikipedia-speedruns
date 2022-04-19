@@ -1,4 +1,4 @@
-
+import { sendBeaconJson } from "../beacon.js";
 import { fetchJson } from "../fetch.js";
 
 async function startRun(promptId, lobbyId=null) {
@@ -13,7 +13,7 @@ async function startRun(promptId, lobbyId=null) {
     return await response.json();
 }
 
-async function submitRun(promptId, lobbyId,  runId, startTime, endTime, finished, path) {
+async function submitRun(promptId, lobbyId,  runId, startTime, endTime, finished, path, beacon=false) {
     const reqBody = {
         "start_time": startTime,
         "end_time": endTime,
@@ -22,12 +22,19 @@ async function submitRun(promptId, lobbyId,  runId, startTime, endTime, finished
     }
 
     if (lobbyId) {
+        if (beacon) {
+            sendBeaconJson(`/api/lobbys/${lobbyId}/prompts/${promptId}/runs`, reqBody);
+        } else {
         const response = await fetchJson(`/api/lobbys/${lobbyId}/prompts/${promptId}/runs`, 'POST', reqBody);
         return (await response.json())["run_id"];
+        }
     } else {
-        // Send results to API
-        const response = await fetchJson(`/api/runs/${runId}`, 'PATCH', reqBody);
+        if (beacon) {
+            sendBeaconJson(`/api/runs/${runId}`, reqBody);
+        } else {
+            const response = await fetchJson(`/api/runs/${runId}`, 'POST', reqBody);
         return runId;
+        }
     }
 }
 

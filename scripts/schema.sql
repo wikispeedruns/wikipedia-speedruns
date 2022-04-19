@@ -41,6 +41,20 @@ CREATE TABLE IF NOT EXISTS `sprint_runs` (
     `end_time` TIMESTAMP(3) NULL,
     `finished` BOOLEAN DEFAULT 0,
     `path` JSON NULL,
+    /*
+    {
+        "version": number
+        "path": [
+            ...
+            {
+                "article": string,
+                "timeReached": number, 
+                "loadTime": number,
+            },
+            ...
+        ]
+    }
+    */
     `prompt_id` INT NOT NULL,
     `user_id` INT,
     PRIMARY KEY (`run_id`),
@@ -113,6 +127,20 @@ CREATE TABLE IF NOT EXISTS `lobby_runs` (
     `end_time` TIMESTAMP(3) NOT NULL,
     `finished` BOOLEAN DEFAULT 0,
     `path` JSON NOT NULL,
+    /*
+    {
+        "version": number
+        "path": [
+            ...
+            {
+                "article": string,
+                "timeReached": number, 
+                "loadTime": number,
+            },
+            ...
+        ]
+    }
+    */
 
     PRIMARY KEY (`run_id`),
     FOREIGN KEY (`lobby_id`, `prompt_id`) REFERENCES `lobby_prompts`(`lobby_id`, `prompt_id`),
