@@ -16,10 +16,16 @@ def get_total_stats():
     queries = {}
     queries['total_users'] = "SELECT COUNT(*) AS users_total FROM users"
     queries['total_google_users'] = 'SELECT COUNT(*) AS goog_total FROM users WHERE hash=""'
+
     queries['total_runs'] = "SELECT COUNT(*) AS sprints_total FROM sprint_runs"
     queries['total_finished_runs'] = "SELECT COUNT(*) AS sprints_finished FROM sprint_runs WHERE end_time IS NOT NULL"
     queries['total_user_runs'] = "SELECT COUNT(*) AS user_runs FROM sprint_runs WHERE user_id IS NOT NULL"
     queries['total_finished_user_runs'] = "SELECT COUNT(*) AS user_finished_runs FROM sprint_runs WHERE user_id IS NOT NULL AND end_time IS NOT NULL"
+
+    queries['total_marathons'] = "SELECT COUNT(*) AS marathons_total FROM marathonruns"
+    queries['total_finished_marathons'] = "SELECT COUNT(*) AS marathons_finished FROM marathonruns where finished=TRUE"
+    queries['total_user_marathons'] = "SELECT COUNT(*) AS user_marathons FROM marathonruns WHERE user_id IS NOT NULL"
+    queries['total_finished_user_marathons'] = "SELECT COUNT(*) AS user_finished_marathons FROM marathonruns WHERE user_id IS NOT NULL AND finished=TRUE"
     results = {}
 
     db = get_db()
@@ -50,7 +56,7 @@ def get_daily_stats():
     FROM data
     '''
 
-    queries['daily_plays'] = '''
+    queries['daily_sprints'] = '''
     WITH data AS (
         SELECT 
             DATE(start_time) AS day,
@@ -67,7 +73,7 @@ def get_daily_stats():
     FROM data
     '''
         
-    queries['daily_finished_plays'] = '''
+    queries['daily_finished_sprints'] = '''
     WITH data AS (
         SELECT 
             DATE(start_time) AS day,
@@ -91,6 +97,23 @@ def get_daily_stats():
         COUNT(*) AS plays
         FROM sprint_runs
         WHERE user_id IS NOT NULL AND start_time IS NOT NULL
+        GROUP BY user_id, day
+    )
+
+    SELECT
+        day,
+        AVG(plays) AS "plays_per_user"
+    FROM data
+    GROUP BY day
+    '''
+
+    queries['avg_user_finished_plays'] = '''
+    WITH data AS (
+        SELECT user_id,
+        DATE(start_time) AS day,
+        COUNT(*) AS plays
+        FROM sprint_runs
+        WHERE user_id IS NOT NULL AND start_time IS NOT NULL AND end_time IS NOT NULL
         GROUP BY user_id, day
     )
 
