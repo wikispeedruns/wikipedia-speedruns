@@ -53,7 +53,8 @@ async function handleLogin(event)
     if (response.ok) {
         document.getElementById("loginForm").reset();
         validationAlert("Successfully logged in!", false);
-        window.location.href = "/"; // Change this once we have a profile page
+
+        window.location.href = document.referrer || "/";
     } else if (response.status == 401) {
         validationAlert("Invalid username or password");
     } else {
