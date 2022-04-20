@@ -188,3 +188,8 @@ def get_test_article_page():
 @check_admin
 def get_stats_page():
     return render_with_data('admin/stats.html')
+
+
+@views.route('/labeler', methods=['GET'])
+def get_labeler_page():
+    return render_with_data('admin/categoryLabeler.html')
