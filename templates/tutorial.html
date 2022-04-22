@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+<!-- wiki desktop stylesheet -->
+<link rel="stylesheet" href="https://en.wikipedia.org/w/load.php?lang=en&modules=site.styles&only=styles" media="screen and (min-width: 768px)">
+
+<!-- wiki mobile stylesheets -->
+<link rel="stylesheet" href="https://meta.wikimedia.org/api/rest_v1/data/css/mobile/base" media="screen and (max-width: 767px)">
+<link rel="stylesheet" href="https://en.wikipedia.org/api/rest_v1/data/css/mobile/site" media="screen and (max-width: 767px)">
+<link rel="stylesheet" href="https://meta.wikimedia.org/api/rest_v1/data/css/mobile/pcs" media="screen and (max-width: 767px)">
+
+<!-- Reuse play.js stylesheet -->
+<link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/play.css')}}">
+
+<!-- But use tutorial.js -->
+<script type="module" src="{{url_for('static', filename='js/tutorial.js')}}"></script>
+
+{% endblock %}
+
+{% block content %}
+
+<div id="app">
+<template v-cloak> <!--Top level v-cloak to hide stuff when loading vue-->
+    <page-preview ref="pagePreview"></page-preview>
+
+    <div id="main">
+        <div id="wikipedia-frame" class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output content"></div>
+        <div id="article-end-marker">
+            <hr class="mt-5">
+            <div class="text-center font-weight-light"><strong>- End of Article -</strong></div>
+            <hr class="mb-3">
+        </div>
+    </div>
+
+    <div class="show-on-desktop">
+        <div class="HUDwrapper container" style="width: 40% !important;" id="time-box">
+            <div class="row flex-row">
+                <div class="col-sm-auto text-nowrap px-4 pt-2">
+                    Goal Article<br><strong>[[endArticle]] </strong>
+                    <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
+                        ⓘ
+                    </small>
+                </div>
+                <div class="col-sm-auto text-nowrap px-4 pt-2">
+                    Links clicked<br><strong>[[path.length - 1]]</strong>
+                </div>
+                <div class="col-sm-auto text-nowrap px-4 pt-2">
+                    Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
+                </div>
+            </div>
+            <div class="row flex-row">
+                <div class="col-lg-auto text-nowrap px-4 py-2">
+                    Current Article<br><strong>[[currentArticle]]</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="HUDwrapper container" style="left: 50% !important; width: 10px !important;" id="time-box">
+            <div class="px-2 py-2">
+                <tutorial-prompts></tutorial-prompts>
+            </div>
+        </div>
+    </div>
+
+    <div class="show-on-mobile">
+        <div class="HUDwrapper-mobile" id="time-box-mobile">
+            <div class="HUDwrapper-mobile-inner-container">
+
+                <div class="HUDwrapper-mobile-inner-container">
+                    Goal Article: <strong>[[endArticle]]</strong>
+                    <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="showPreview">
+                        ⓘ
+                    </small>
+                    <br>
+                    Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
+
+                    <hr>
+                    <tutorial-prompts></tutorial-prompts>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</template>
+</div>
+{% endblock %}

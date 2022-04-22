@@ -97,8 +97,8 @@ def get_confirm_page(token):
 
 # sprint pages
 @views.route('/play/tutorial', methods=['GET'])
-def get_tutorial_page(id):
-    return render_with_data('play.html', tutorial=True)
+def get_tutorial_page():
+    return render_with_data('tutorial.html')
 
 @views.route('/play/<int:id>', methods=['GET'])
 def get_sprint_play_page(id):

@@ -1,6 +1,8 @@
 
 import { getRandTip } from "./tips.js";
 
+
+// Maybe make this a higher order component?
 var CountdownTimer = {
 
     props: [
