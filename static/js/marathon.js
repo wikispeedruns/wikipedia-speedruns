@@ -59,8 +59,6 @@ let app = new Vue({
         showStop: false,
         reachedstop: false,  //This variable only gets flipped once, its to prevent the stop box from showing up everytime the page is loaded
         saved: false,
-
-        renderer: null,
     },
 
     computed: {
