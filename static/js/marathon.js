@@ -3,7 +3,7 @@ import { serverData } from "./modules/serverData.js";
 import { getArticleSummary } from "./modules/wikipediaAPI/util.js";
 import { submitRun, saveRun, loadRun, removeSave } from "./modules/game/marathon/runs.js";
 
-import { CountdownTimer } from "./modules/game/marathon/countdown.js";
+import { CountdownTimer } from "./modules/game/countdown.js";
 import { MarathonHelp } from "./modules/game/marathon/help.js";
 import { FinishPage } from "./modules/game/marathon/finish.js";
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
