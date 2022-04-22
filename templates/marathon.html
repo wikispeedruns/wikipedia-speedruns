@@ -106,14 +106,7 @@
     <marathon-help v-show="started && !finished && showHelp" v-cloak v-on:close-help="showHelp = !showHelp">
     </marathon-help>
 
-    <div v-if="previewContent">
-        <div v-if="eventType === 'click'" class="blocker" @click="hidePreview"></div>
-        <page-preview
-            :article-preview="previewContent"
-            :client-x="eventX"
-            :client-y="eventY"
-        ></page-preview>
-    </div>
+    <page-preview ref="pagePreview"></page-preview>
 
     <countdown-timer
         v-bind:start-article="startArticle"

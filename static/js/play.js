@@ -10,7 +10,6 @@ these components should be as modular/generic as possible.
 import { serverData } from "./modules/serverData.js";
 import { fetchJson } from "./modules/fetch.js";
 import { startRun, submitRun } from "./modules/game/runs.js";
-import { getArticleSummary } from "./modules/wikipediaAPI/util.js";
 
 import { CountdownTimer } from "./modules/game/countdown.js";
 import { FinishPage } from "./modules/game/finish.js";
@@ -82,13 +81,11 @@ let app = new Vue({
 
         previewContent: null,
 
-        eventTimestamp: null,
-        eventType: null,
-        eventX: 0,
-        eventY: 0
     },
 
     mounted: async function() {
+
+        console.log(this.$refs);
 
         this.loggedIn = "username" in serverData;
 
@@ -176,30 +173,11 @@ let app = new Vue({
         },
 
         showPreview: function(e) {
-            this.eventTimestamp = e.timeStamp;
-            this.eventType = e.type;
-            this.eventX = e.clientX;
-            this.eventY = e.clientY;
-            const href = e.currentTarget.getAttribute("href");
-            const title = href.split('/wiki/').pop();
-            const promises = [ getArticleSummary(title) ];
-            if (e.type !== "click") {
-                promises.push(new Promise(resolve => setTimeout(resolve, 600)));
-            }
-            // const promise1 = getArticleSummary(title);
-            // const promise2 = new Promise(resolve => setTimeout(resolve, 500));
-            Promise.all(promises).then((values) => {
-                if (e.timeStamp === this.eventTimestamp) {
-                    this.previewContent = values[0];
-                }
-            });
+            this.$refs.pagePreview.showPreview(e);
         },
-
-        hidePreview: function() {
-            this.eventTimestamp = null;
-            this.previewContent = null;
+        hidePreview: function(e) {
+            this.$refs.pagePreview.hidePreview(e);
         }
-
     }
 })
 
