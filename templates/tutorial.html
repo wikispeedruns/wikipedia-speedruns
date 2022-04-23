@@ -34,33 +34,35 @@
     </div>
 
     <div class="show-on-desktop">
-        <div class="HUDwrapper container" style="width: 40% !important;" id="time-box">
-            <div class="row flex-row">
-                <div class="col-sm-auto text-nowrap px-4 pt-2">
-                    Goal Article<br><strong>[[endArticle]] </strong>
-                    <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
-                        ⓘ
-                    </small>
+        <div class="HUDwrapper container-xxl" >
+            <div class="HUD" id="time-box" style="width: 45% !important; height: 8rem;">
+                <div class="row flex-row">
+                    <div class="col-sm-auto text-nowrap px-4 pt-2">
+                        Goal Article<br><strong>[[endArticle]] </strong>
+                        <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
+                            ⓘ
+                        </small>
+                    </div>
+                    <div class="col-sm-auto text-nowrap px-4 pt-2">
+                        Links clicked<br><strong>[[path.length - 1]]</strong>
+                    </div>
+                    <div class="col-sm-auto text-nowrap px-4 pt-2">
+                        Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
+                    </div>
                 </div>
-                <div class="col-sm-auto text-nowrap px-4 pt-2">
-                    Links clicked<br><strong>[[path.length - 1]]</strong>
-                </div>
-                <div class="col-sm-auto text-nowrap px-4 pt-2">
-                    Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
+                <div class="row flex-row">
+                    <div class="col-lg-auto text-nowrap px-4 py-2">
+                        Current Article<br><strong>[[currentArticle]]</strong>
+                    </div>
                 </div>
             </div>
-            <div class="row flex-row">
-                <div class="col-lg-auto text-nowrap px-4 py-2">
-                    Current Article<br><strong>[[currentArticle]]</strong>
+            <div class="HUD" style="right: 5%; width: 45% !important; height: 8rem;">
+                <div class="px-2 py-2" >
+                    <tutorial-prompts></tutorial-prompts>
                 </div>
             </div>
         </div>
 
-        <div class="HUDwrapper container" style="left: 50% !important; width: 10px !important;" id="time-box">
-            <div class="px-2 py-2">
-                <tutorial-prompts></tutorial-prompts>
-            </div>
-        </div>
     </div>
 
     <div class="show-on-mobile">

@@ -48,13 +48,29 @@ a:hover, a:hover * {
 .HUDwrapper {
     position: fixed;
     z-index: 1000;
+    bottom: 0;
+
+    left: 0;
+    right: 0;
+
+
+    height: 8rem;
+    margin: 0 auto;
+}
+
+.HUD {
+    position: absolute;
     min-width: 40%;
     width:auto !important;
-    height: 8em;
-    bottom: 0;
     background-color: #F8F8F8;
-    margin-bottom: 15px;
     border: 2px solid #000000 !important;
+
+    height: auto;
+    min-height: 100%;
+
+    bottom: 0;
+    margin-bottom: 15px;
+
 }
 
 .HUDwrapper-mobile {
