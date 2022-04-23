@@ -41,6 +41,8 @@ function highlight(element) {
     div.style.left = element.offsetLeft + (width - div.offsetWidth) / 2 + 'px';
     div.style.top = element.offsetTop + (height - div.offsetHeight) / 2 + 'px';
 
+    element.scrollIntoView();
+
     setTimeout(function() {
         div.style.transition = "background 2s";
         div.style.backgroundColor = "rgba(255,255,255,0)";
@@ -71,6 +73,7 @@ Vue.component('tutorial-prompts', {
         },
 
         prev() {
+            this.highlightElement("a[href=\"#History\"");
 
         }
     },
