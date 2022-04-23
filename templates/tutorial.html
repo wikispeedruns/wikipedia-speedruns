@@ -57,7 +57,7 @@
                 </div>
             </div>
             <div class="HUD" style="right: 5%; width: 45% !important; height: 8rem;">
-                <div class="px-2 py-2" >
+                <div class="px-2 py-2" style="height: 100%">
                     <tutorial-prompts></tutorial-prompts>
                 </div>
             </div>
@@ -68,19 +68,17 @@
     <div class="show-on-mobile">
         <div class="HUDwrapper-mobile" id="time-box-mobile">
             <div class="HUDwrapper-mobile-inner-container">
+                Goal Article: <strong>[[endArticle]]</strong>
+                <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="showPreview">
+                    ⓘ
+                </small>
+                <br>
+                Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
 
-                <div class="HUDwrapper-mobile-inner-container">
-                    Goal Article: <strong>[[endArticle]]</strong>
-                    <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="showPreview">
-                        ⓘ
-                    </small>
-                    <br>
-                    Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
+                <hr>
 
-                    <hr>
-                    <tutorial-prompts></tutorial-prompts>
+                <tutorial-prompts></tutorial-prompts>
 
-                </div>
             </div>
         </div>
     </div>

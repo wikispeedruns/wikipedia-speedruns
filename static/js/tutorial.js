@@ -10,15 +10,89 @@ these components should be as modular/generic as possible.
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 import { PagePreview } from "./modules/game/pagePreview.js";
 
+// overloay a div that highlights and element
+function highlight(element) {
+    if (!highlight.div) {
+        highlight.div = document.createElement('div');
+        highlight.div.style.position = 'absolute';
+        highlight.div.style.borderRadius = '8px';
+        highlight.div.style.pointerEvents = 'none';
+    }
+
+    var div = highlight.div; // only highlight one element per page
+
+    div.style.transition = 'background 2s';
+    div.style.backgroundColor = "rgba(241,231,64,.5)";
+
+    if(element === null) { // remove highlight via `highlight(null)`
+        if(div.parentNode)
+        return;
+    }
+
+    const width = element.offsetWidth;
+    const height = element.offsetHeight;
+
+    div.style.width = (width + 8) + 'px';
+    div.style.height = (height + 8) + 'px';
+    div.style.zIndex = element.style.zIndex + 1;
+
+    element.offsetParent.appendChild(div);
+
+    div.style.left = element.offsetLeft + (width - div.offsetWidth) / 2 + 'px';
+    div.style.top = element.offsetTop + (height - div.offsetHeight) / 2 + 'px';
+
+    setTimeout(function() {
+        div.style.transition = "background 2s";
+        div.style.backgroundColor = "rgba(255,255,255,0)";
+    }, 1000);
+}
+
 
 Vue.component('tutorial-prompts', {
+
+    data: function() {
+        return {
+            highlighting: false
+        };
+    },
+
+    mounted: function() {
+        this.highlightElement("#time-box");
+    },
+
+    methods: {
+        highlightElement(selector) {
+            let element = document.querySelector(selector);
+            highlight(element);
+        },
+
+        next() {
+            this.highlightElement(".infobox");
+        },
+
+        prev() {
+
+        }
+    },
+
     template: (`
-    <div>
-        <p>
-        Welcome to the Wikispeedruns tutorial!
-        </p>
+    <div style="height: 100%; display: flex; flex-direction: column; ">
+
+        <div style="flex-grow: 1">
+            <p>
+                Welcome to the Wikispeedruns tutorial!
+            </p>
+        </div>
 
 
+        <div style="margin-left: auto; margin-top:auto !important; zIndex: 100000000">
+            <a class="btn btn-outline-secondary" role="button" @click="prev">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            <a class="btn btn-outline-secondary" role="button" @click="next">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
     </div>
     `),
 });
