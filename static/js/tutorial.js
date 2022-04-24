@@ -1,17 +1,22 @@
-/* play.js is core of processing gameplay. This includes everything from retrieving information about a prompt,
-countdown to start, loading of each wikipedia page, parsing and filtering wikipedia links, processing game logic,
-and submitting runs.
+/*
+Logic for Tutorial Page
 
-With the new Marathon game mode, many of these components are being reused with different game logic. So many of
-these components should be as modular/generic as possible.
+The tutorial page has the same HUD as the normal play page, but with second
+"dialog box" to display the hints. The logic is also different, rather
+than getting the prompt and submitting a run, the prompt is hard coded
+and nothing happens at the end.
+
 */
 
 //JS module imports
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 import { PagePreview } from "./modules/game/pagePreview.js";
 
-// overloay a div that highlights and element
+/* Given a DOM element `element`, overlay a div with a transparent yellow
+ * background temporarily
+ */
 function highlight(element) {
+    // Reuse this div
     if (!highlight.div) {
         highlight.div = document.createElement('div');
         highlight.div.style.position = 'absolute';
@@ -19,15 +24,11 @@ function highlight(element) {
         highlight.div.style.pointerEvents = 'none';
     }
 
-    var div = highlight.div; // only highlight one element per page
+    var div = highlight.div;
 
     div.style.transition = 'background 2s';
     div.style.backgroundColor = "rgba(241,231,64,.5)";
 
-    if(element === null) { // remove highlight via `highlight(null)`
-        if(div.parentNode)
-        return;
-    }
 
     const width = element.offsetWidth;
     const height = element.offsetHeight;
@@ -49,7 +50,9 @@ function highlight(element) {
     }, 1000);
 }
 
-
+/* Component defining the content inside of the tutorial box
+ * same for desktop and mobile currently
+ */
 Vue.component('tutorial-prompts', {
 
     data: function() {
@@ -65,7 +68,9 @@ Vue.component('tutorial-prompts', {
     methods: {
         highlightElement(selector) {
             let element = document.querySelector(selector);
-            highlight(element);
+            if (element) {
+                highlight(element);
+            }
         },
 
         next() {
@@ -73,7 +78,7 @@ Vue.component('tutorial-prompts', {
         },
 
         prev() {
-            this.highlightElement("a[href=\"#History\"");
+            this.highlightElement("a[href=\"#History\"]");
 
         }
     },
@@ -101,7 +106,6 @@ Vue.component('tutorial-prompts', {
 });
 
 
-//Vue container. This contains data, rendering flags, and functions tied to game logic and rendering. See play.html
 let app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
@@ -111,20 +115,13 @@ let app = new Vue({
 
 
     data: {
-        startArticle: "",    // For all game modes, this is the first article to load
-        endArticle: "",      // For sprint games. Reaching this article will trigger game finishing sequence
+        startArticle: "United_States",
+        endArticle: "Pennsylvania",
         currentArticle: "",
-        path: [],             // array to store the user's current path so far, submitted with run
+        path: [],
 
-        startTime: null,     //For all game modes, the start time of run (mm elapsed since January 1, 1970)
-        endTime: null,       //For all game modes, the end time of run (mm elapsed since January 1, 1970)
+        startTime: null,
         elapsed: 0,
-        timerInterval: null,
-
-        finished: false,     //Flag for whether a game has finished, used for rendering
-        started: false,      //Flag for whether a game has started (countdown finished), used for rendering
-
-        loggedIn: false,
     },
 
     mounted: async function() {
@@ -135,27 +132,26 @@ let app = new Vue({
 
         this.renderer.loadPage("United_States");
 
+        this.startTime = Date.now();
+        setInterval(() => {
+            const seconds = (Date.now() - this.startTime) / 1000;
+            this.elapsed = seconds;
+        }, 50);
     },
 
 
     methods : {
         pageCallback: function(page, loadTime) {
-
             this.hidePreview();
-            // Game logic for sprint mode:
+
+            // TODO make other links besides tutorial unclickable
 
             if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
                 this.path.push(page);
             }
-
             this.currentArticle = page;
 
-            this.startTime += loadTime;
 
-            //if the page's title matches that of the end article, finish the game, and submit the run
-            if (page === this.endArticle) {
-                this.finish();
-            }
 
         },
 
