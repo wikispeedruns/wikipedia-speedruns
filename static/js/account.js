@@ -3,7 +3,7 @@ import { serverData } from "./modules/serverData.js";
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
-    el: '#nav',
+    el: '#app',
     
     data: {
         username: "",
@@ -25,10 +25,6 @@ var app = new Vue({
             await fetch("/api/users/logout", {method : "POST"});
             window.location.href = "/";
         },
-        async accountPage(event)
-        {
-            window.location.href = "/account"
-        }
     }
 
 });

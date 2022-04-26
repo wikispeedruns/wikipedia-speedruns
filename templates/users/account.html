@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+<!-- Account JS Code -->
+<script type="module" src="{{url_for('static', filename='js/account.js')}}"></script>
+
+{% endblock %}
+
+{% block content %}
+
+
+<div id="app">
+    <h3 class="mb-4">This is your account settings page.</h3>
+    <hr class="mt-4">
+    <p>Here is some sample content!</p>
+    <div class="list-group">
+        <button type="button" class="list-group-item list-group-item-action" v-on:click="handleLogout">Log Out</button>
+        <a href="#" class="list-group-item list-group-item-action">Reset your password</a>
+        <a href="#" class="list-group-item list-group-item-action">Change your email</a>
+        <a href="#" class="list-group-item list-group-item-action">Buy twitter</a>
+        <a href="#" class="list-group-item list-group-item-action">Populate nodules</a>
+      </div>
+</div>
+
+{% endblock %}
