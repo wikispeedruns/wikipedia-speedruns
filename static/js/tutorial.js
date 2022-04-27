@@ -70,6 +70,9 @@ Vue.component('tutorial-prompts', {
             curStep: 0,
 
             // defines the tutorial
+            // highlight: takes a query selector and highlights the element
+            // requried link: takes a link href (look at actual href) and enables that link. when clicked
+            //                 the article will be loaded and the next step is loaded.
             tutorial: [
                 {
                     text: "Welcome to the WikiSpeedruns Tutorial"
