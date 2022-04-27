@@ -79,18 +79,21 @@ Vue.component('tutorial-prompts', {
                     highlight: ".infobox"
                 },
                 {
+                    text: "Remember to use the Table of Contents. Try \"Political divisions\"!",
+                    highlight: "a[href=\"#Political_divisions\"]"
+                },
+                {
                     text: "Try clicking on \"North America\"!",
                     requiredLink: "North_America"
                 },
                 {
-                    text: "Congrats, you've finished!",
+                    text: "Congratulations, you've finished!",
                 }
             ]
         };
     },
 
     mounted: function() {
-
     },
 
     watch: {
@@ -229,11 +232,15 @@ let app = new Vue({
             let frame = document.getElementById("wikipedia-frame");
 
             frame.querySelectorAll("a, area").forEach((el) => {
+                // Don't prevent users from using TOC links
+                if (el.getAttribute("href") && el.getAttribute("href").substring(0, 1)  === "#") {
+                    return;
+                }
                 // Store the original handler so we can use it later
                 el.originalOnClick = el.onclick;
+
                 el.onclick = (e) => {
                     e.preventDefault();
-
                     // TODO put a real alert here, maybe in tutorial box.
                     // i.e. set a "wrong link clicked prop" so the tutorial can flash a message
                     alert("Not yet");
