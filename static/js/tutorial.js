@@ -57,12 +57,36 @@ Vue.component('tutorial-prompts', {
 
     data: function() {
         return {
-            highlighting: false
+            // Support mobile swipes
+            touchStartX: 0,
+
+            curStep: 0,
+
+            // defines the tutorial
+            tutorial: [
+                {
+                    text: "Welcome to the WikiSpeedruns Tutorial"
+                },
+                {
+                    text: "Look at the timebox!",
+                    highlight: "#time-box"
+                },
+                {
+                    text: "Welcome to the WikiSpeedruns Tutorial"
+                },
+                {
+                    text: "Welcome to the WikiSpeedruns Tutorial"
+                },
+            ]
+
         };
+
+
+
     },
 
     mounted: function() {
-        this.highlightElement("#time-box");
+
     },
 
     methods: {
@@ -74,26 +98,51 @@ Vue.component('tutorial-prompts', {
         },
 
         next() {
-            this.highlightElement(".infobox");
+            this.curStep++;
+
+            if (this.tutorial[this.curStep].highlight) {
+                highlight(this.tutorial[this.curStep].highlight);
+            }
+
         },
 
         prev() {
-            this.highlightElement("a[href=\"#History\"]");
+        },
 
-        }
+        handleTouchStart(e) {
+            e.preventDefault();
+            this.touchStartX = e.changedTouches[0].screenX;
+        },
+
+        handleTouchEnd(e) {
+            e.preventDefault();
+            const endX = e.changedTouches[0].screenX;
+
+            if (endX <= this.touchStartX - 80) {
+                this.next(); //swiping left
+            }
+            if (endX >= this.touchStartX + 80) {
+                this.prev(); // swiping right
+            }
+        },
     },
 
     template: (`
-    <div style="height: 100%; display: flex; flex-direction: column; ">
+    <div
+        v-on:touchstart="handleTouchStart"
+        v-on:touchend="handleTouchEnd"
+        style="height: 100%; display: flex; flex-direction: column; ">
 
         <div style="flex-grow: 1">
-            <p>
-                Welcome to the Wikispeedruns tutorial!
-            </p>
+            <template v-for="(step, index) in tutorial">
+                <p v-if="index == curStep"> {{step.text}} </p>
+            </template>
+
+            <p class="show-on-mobile" v-if="curStep == 0"> Swipe left/right at the bottom of the page to navigate </p>
         </div>
 
 
-        <div style="margin-left: auto; margin-top:auto !important; zIndex: 100000000">
+        <div class="show-on-desktop" style="margin-left: auto; margin-top:auto !important; zIndex: 100000000">
             <a class="btn btn-outline-secondary" role="button" @click="prev">
                 <i class="bi bi-chevron-left"></i>
             </a>
