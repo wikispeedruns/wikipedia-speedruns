@@ -58,7 +58,9 @@
             </div>
             <div class="HUD" style="right: 5%; width: 45% !important; height: 8rem;">
                 <div class="px-2 py-2" style="height: 100%">
-                    <tutorial-prompts></tutorial-prompts>
+                    <tutorial-prompts
+                        v-bind:current-article="currentArticle"
+                    ></tutorial-prompts>
                 </div>
             </div>
         </div>
@@ -77,7 +79,9 @@
 
                 <hr>
 
-                <tutorial-prompts></tutorial-prompts>
+                <tutorial-prompts
+                    v-bind:current-article="currentArticle"
+                ></tutorial-prompts>
 
             </div>
         </div>

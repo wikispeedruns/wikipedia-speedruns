@@ -6,6 +6,8 @@ The tutorial page has the same HUD as the normal play page, but with second
 than getting the prompt and submitting a run, the prompt is hard coded
 and nothing happens at the end.
 
+TODO maybe freeze the articles so wikipedia changing doesn't break this
+
 */
 
 //JS module imports
@@ -55,9 +57,14 @@ function highlight(element) {
  */
 Vue.component('tutorial-prompts', {
 
+    props: [
+        "currentArticle"
+    ],
+
     data: function() {
         return {
             // Support mobile swipes
+            // TODO maybe just make the entire box into 2 seciotns
             touchStartX: 0,
 
             curStep: 0,
@@ -70,16 +77,26 @@ Vue.component('tutorial-prompts', {
                 {
                     text: "Look at the infobox!",
                     highlight: ".infobox"
+                },
+                {
+                    text: "Try clicking on \"North America\"!",
+                    requiredLink: "North_America"
+                },
+                {
+                    text: "Congrats, you've finished!",
                 }
             ]
         };
-
-
-
     },
 
     mounted: function() {
 
+    },
+
+    watch: {
+        currentArticle: function(newVal, oldVal) {
+            console.log(oldVal + "->" + newVal);
+        }
     },
 
     methods: {
@@ -90,15 +107,31 @@ Vue.component('tutorial-prompts', {
             }
         },
 
+        // TODO prevent if we are waiting for a link? Or maybe call articleRender.loadPage()?
         next() {
             this.curStep++;
             const step = this.tutorial[this.curStep]
 
+            // TODO handle end
             if (!step) return;
-
 
             if (step.highlight) {
                 this.highlightElement(this.tutorial[this.curStep].highlight);
+            }
+
+            if (step.requiredLink) {
+                // Highlight the link
+                const selector = `a[href=\"/wiki/${step.requiredLink}\"]`
+                this.highlightElement(selector);
+
+                // Set onclick to use the handler provided by the articleRenderer
+                // but also calls next
+                // See pageCallback of main vue function
+                let linkEl = document.querySelector(selector);
+                linkEl.onclick = (e) => {
+                    this.next();
+                    linkEl.originalOnClick(e);
+                }
             }
 
         },
@@ -139,14 +172,15 @@ Vue.component('tutorial-prompts', {
             <p class="show-on-mobile" v-if="curStep == 0"> Swipe left/right at the bottom of the page to navigate </p>
         </div>
 
-
-        <div class="show-on-desktop" style="margin-left: auto; margin-top:auto !important; zIndex: 100000000">
-            <a class="btn btn-outline-secondary" role="button" @click="prev">
-                <i class="bi bi-chevron-left"></i>
-            </a>
-            <a class="btn btn-outline-secondary" role="button" @click="next">
-                <i class="bi bi-chevron-right"></i>
-            </a>
+        <div class="show-on-desktop">
+            <div style="margin-left: auto; margin-top:auto !important; zIndex: 100000000">
+                <a class="btn btn-outline-secondary" role="button" @click="prev">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+                <a class="btn btn-outline-secondary" role="button" @click="next">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
         </div>
     </div>
     `),
@@ -192,6 +226,20 @@ let app = new Vue({
             this.hidePreview();
 
             // TODO make other links besides tutorial unclickable
+            let frame = document.getElementById("wikipedia-frame");
+
+            frame.querySelectorAll("a, area").forEach((el) => {
+                // Store the original handler so we can use it later
+                el.originalOnClick = el.onclick;
+                el.onclick = (e) => {
+                    e.preventDefault();
+
+                    // TODO put a real alert here, maybe in tutorial box.
+                    // i.e. set a "wrong link clicked prop" so the tutorial can flash a message
+                    alert("Not yet");
+                };
+            });
+
 
             if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
                 this.path.push(page);
