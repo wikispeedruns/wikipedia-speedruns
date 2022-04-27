@@ -68,17 +68,10 @@ Vue.component('tutorial-prompts', {
                     text: "Welcome to the WikiSpeedruns Tutorial"
                 },
                 {
-                    text: "Look at the timebox!",
-                    highlight: "#time-box"
-                },
-                {
-                    text: "Welcome to the WikiSpeedruns Tutorial"
-                },
-                {
-                    text: "Welcome to the WikiSpeedruns Tutorial"
-                },
+                    text: "Look at the infobox!",
+                    highlight: ".infobox"
+                }
             ]
-
         };
 
 
@@ -99,14 +92,19 @@ Vue.component('tutorial-prompts', {
 
         next() {
             this.curStep++;
+            const step = this.tutorial[this.curStep]
 
-            if (this.tutorial[this.curStep].highlight) {
-                highlight(this.tutorial[this.curStep].highlight);
+            if (!step) return;
+
+
+            if (step.highlight) {
+                this.highlightElement(this.tutorial[this.curStep].highlight);
             }
 
         },
 
         prev() {
+            if (this.curStep > 0) this.curStep--;
         },
 
         handleTouchStart(e) {
