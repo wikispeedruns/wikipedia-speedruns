@@ -14,7 +14,7 @@
             <div class="stats">
                 <div class="stats__amount">[[totals.users]]</div>
                 <div class="stats__caption">users</div>
-                <div class="stats__change positive">+[[weekly.user_change]]% <span style="font-weight:normal;color: white;">since last week</span></div>
+                <div class="stats__change positive">+[[weekly.user_change]] <span style="font-weight:normal;color: white;">since last week</span></div>
                 <div class="stats__change mid">[[totals.pct_goog_users]]% <span style="font-weight:normal;color: white;">google sign-ups</span></div>
             </div>
         </div>
@@ -23,7 +23,7 @@
             <div class="stats">
                 <div class="stats__amount">[[totals.runs]]</div>
                 <div class="stats__caption">runs</div>
-                <div class="stats__change positive">+[[weekly.runs_change]]% <span style="font-weight:normal;color: white;">since last week</span></div>
+                <div class="stats__change positive">+[[weekly.runs_change]] <span style="font-weight:normal;color: white;">since last week</span></div>
                 <div class="stats__change mid">[[totals.pct_user_runs]]% <span style="font-weight:normal;color: white;">registered users</span></div>
             </div>
         </div>
@@ -32,8 +32,28 @@
             <div class="stats">
                 <div class="stats__amount">[[totals.finished_runs]]</div>
                 <div class="stats__caption">finished runs</div>
-                <div class="stats__change positive">+[[weekly.finished_runs_change]]% <span style="font-weight:normal;color: white;">since last week</span></div>
+                <div class="stats__change positive">+[[weekly.finished_runs_change]] <span style="font-weight:normal;color: white;">since last week</span></div>
                 <div class="stats__change mid">[[totals.pct_user_finished_runs]]% <span style="font-weight:normal;color: white;">registered users</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="box-wrapper">
+        <div class="box">
+            <div class="stats">
+                <div class="stats__amount">[[totals.marathon_runs]]</div>
+                <div class="stats__caption">marathons</div>
+                <!-- <div class="stats__change positive">+[[weekly.marathons_change]] <span style="font-weight:normal;color: white;">since last week</span></div> -->
+                <div class="stats__change mid">[[totals.pct_user_marathons]]% <span style="font-weight:normal;color: white;">registered users</span></div>
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="stats">
+                <div class="stats__amount">[[totals.finished_marathons]]</div>
+                <div class="stats__caption">finished marathons</div>
+                <!-- <div class="stats__change positive">+[[weekly.finished_marathons_change]] <span style="font-weight:normal;color: white;">since last week</span></div> -->
+                <div class="stats__change mid">[[totals.pct_user_finished_marathons]]% <span style="font-weight:normal;color: white;">registered users</span></div>
             </div>
         </div>
     </div>
@@ -46,7 +66,13 @@
         <canvas id="daily-new-users" width="400" height="450"></canvas>
     </div>
         
-    <canvas id="daily-runs"></canvas>
+    <div class="col-xs-6">
+        <canvas id="daily-runs" width="400" height="450"></canvas>
+    </div>
+
+    <div class="col-xs-6">
+        <canvas id="daily-new-runs" width="400" height="450"></canvas>
+    </div>
 
     <div class="col-xs-6">
         <canvas id="daily-active-users" width="400" height="450"></canvas>
