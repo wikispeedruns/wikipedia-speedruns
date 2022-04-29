@@ -26,7 +26,7 @@
     <canvas id="confettiCanvas" style="pointer-events:none;"></canvas>
 
     <div class="show-on-desktop">
-        <div v-show="started && !finished" id="time-box" class="HUDwrapper container animated-transition" v-cloak>
+        <div v-if="started && !finished && expandedTimebox" id="time-box" class="HUDwrapper container animated-transition" v-cloak>
             <div class="row flex-row flex-nowrap py-2">
                 <div class="col-sm-auto px-4 flex-wrap">
                     Clicks Remaining<br><strong class="text-size-3" style="transform: translateY(-10%)" v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
@@ -49,10 +49,10 @@
                     </div>
                 </div>
                 <div class="col-sm-auto text-nowrap py-2">
-                    <button @click="toggleTimebox('time-box', '65')" 
+                    <button @click="expandedTimebox = !expandedTimebox" 
                             class="btn btn-outline-secondary"
                             style="padding: 8px 8px">
-                        <i class="bi bi-chevron-down" id="time-box-toggle-button"></i>
+                        <i class="bi bi-chevron-down"></i>
                     </button>
                 </div>
             </div>
@@ -66,6 +66,33 @@
                 </div>
                 <div class="col-sm-auto">
                     <button v-on:click="finish(0)" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">End my suffering</button>
+                </div>
+            </div>
+        </div>
+        <div v-if="started && !finished && !expandedTimebox" id="time-box" class="HUDwrapper container animated-transition" v-cloak>
+            <div class="row flex-row flex-nowrap py-2">
+                <div class="col container">
+                    <div class="row flex-row flex-nowrap pt-2">
+                        <div class="col-sm-auto px-4 flex-wrap">
+                            Clicks Remaining: <strong v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
+                        </div>
+                        <div class="col-sm px-4">
+                            Checkpoints Visited: <b>[[numCheckpointsVisited]]</b> <span style="font-size: 0.75rem">(Goal: [[numCheckpointsToStop]])</span>
+                        </div>
+                    </div>
+                    <!--
+                    <div class="row flex-row flex-nowrap pb-2">
+                        <div class="col-sm px-4">
+                            Expand panel to see active checkpoints and menu.
+                        </div>
+                    </div>-->
+                </div>
+                <div class="col-sm-auto text-nowrap py-2">
+                    <button @click="expandedTimebox = !expandedTimebox" 
+                            class="btn btn-outline-secondary"
+                            style="padding: 8px 8px">
+                        <i class="bi bi-chevron-up"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -84,7 +111,7 @@
     </div>
 
     <div class="show-on-mobile">
-        <div v-show="started && !finished" id="time-box-mobile" class="HUDwrapper-mobile container animated-transition" v-cloak>
+        <div v-show="started && !finished && expandedTimebox" id="time-box-mobile" class="HUDwrapper-mobile container animated-transition" v-cloak>
             <div class="HUDwrapper-mobile-inner-container row">
                 <div v-if="!(showStop && !finished && !saved)" class="col">
                     Clicks Remaining: <strong v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
@@ -104,11 +131,11 @@
                     <div>You can now consider this prompt complete, but you can continue this run to see how far you can go.</div>
                     <div>The amount of clicks awarded for each checkpoint will decrease</div>
                 </div>
-                <div class="col-auto px-2">
-                    <button @click="toggleTimebox('time-box-mobile', '78')" 
+                <div v-if="!(showStop && !finished && !saved)" class="col-auto px-2">
+                    <button @click="expandedTimebox = !expandedTimebox" 
                             class="btn btn-outline-secondary"
                             style="font-size: 0.75rem; padding: 5px 5px">
-                        <i class="bi bi-chevron-down" id="time-box-mobile-toggle-button"></i>
+                        <i class="bi bi-chevron-down"></i>
                     </button>
                 </div>
             </div>
@@ -121,6 +148,21 @@
                 </div>
                 <div class="col text-center" v-if="showStop && !finished && !saved">
                     <button v-on:click="showStop = !showStop" class="btn btn-primary mt-auto" style="font-size: 0.75rem">Continue</button>
+                </div>
+            </div>
+        </div>
+        <div v-show="started && !finished && !expandedTimebox" id="time-box-mobile" class="HUDwrapper-mobile container animated-transition" v-cloak>
+            <div class="HUDwrapper-mobile-inner-container row">
+                <div v-if="!(showStop && !finished && !saved)" class="col">
+                    Clicks Remaining: <strong v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
+                    <br>Checkpoints Visited: [[numCheckpointsVisited]] / [[numCheckpointsToStop]]</span>
+                </div>
+                <div class="col-auto px-2">
+                    <button @click="expandedTimebox = !expandedTimebox" 
+                            class="btn btn-outline-secondary"
+                            style="font-size: 0.75rem; padding: 5px 5px">
+                        <i class="bi bi-chevron-up"></i>
+                    </button>
                 </div>
             </div>
         </div>

@@ -49,7 +49,7 @@ let app = new Vue({
         elapsed: 0,
         timerInterval: null,
 
-        numCheckpointsToStop: 1,
+        numCheckpointsToStop: 10,
         startingNumClicksToAdd: 5,
 
         finished: false,     //Flag for whether a game has finished, used for rendering
@@ -66,7 +66,9 @@ let app = new Vue({
         eventTimestamp: null,
         eventType: null,
         eventX: 0,
-        eventY: 0
+        eventY: 0,
+
+        expandedTimebox: true,
     },
 
     computed: {
@@ -176,6 +178,7 @@ let app = new Vue({
                 if (!this.reachedstop && this.checkpointMarkReached) {
                     this.showStop = true
                     this.reachedstop = true
+                    this.expandedTimebox = true
                 }
 
             } else if (this.clicksRemaining === 0) {
@@ -261,18 +264,6 @@ let app = new Vue({
             this.eventTimestamp = null;
             this.previewContent = null;
         },
-
-        toggleTimebox: function(id, p) {
-            let el = document.getElementById(id);
-            let icon = document.getElementById(id+'-toggle-button');
-            icon.classList.toggle("bi-chevron-down");
-            icon.classList.toggle("bi-chevron-up");
-            if (icon.classList.contains("bi-chevron-down")) {
-                el.style.transform = 'translateY(0)';
-            } else {
-                el.style.transform = `translateY(${p}%)`;
-            }
-        }
 
     }
 });

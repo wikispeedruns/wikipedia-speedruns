@@ -28,7 +28,7 @@
     <div v-show="started && !finished">
 
         <div class="show-on-desktop">
-            <div class="HUDwrapper container animated-transition" id="time-box">
+            <div v-if="expandedTimebox" class="HUDwrapper container animated-transition" id="time-box">
                 <div class="row flex-row">
                     <div class="col-sm-auto text-nowrap px-4 pt-2">
                         Goal Article<br><strong>[[endArticle]] </strong>
@@ -50,10 +50,10 @@
                     </div>
 
                     <div class="col-sm-auto text-nowrap py-2">
-                        <button @click="toggleTimebox('time-box', '65')" 
+                        <button @click="expandedTimebox = !expandedTimebox" 
                                 class="btn btn-outline-secondary"
                                 style="padding: 8px 8px">
-                            <i class="bi bi-chevron-down" id="time-box-toggle-button"></i>
+                            <i class="bi bi-chevron-down"></i>
                         </button>
                     </div>
                 </div>
@@ -63,10 +63,31 @@
                     </div>
                 </div>
             </div>
+            <div v-else class="HUDwrapper container animated-transition" id="time-box">
+                <div class="row flex-row">
+                    <div class="col-sm-auto text-nowrap px-4 pt-2">
+                        Goal Article: <strong>[[endArticle]] </strong>
+                        <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
+                            ⓘ
+                        </small>
+                    </div>
+                    <div class="col-sm-auto text-nowrap px-4 pt-2">
+                        Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
+                    </div>
+
+                    <div class="col-sm-auto text-nowrap py-2">
+                        <button @click="expandedTimebox = !expandedTimebox" 
+                                class="btn btn-outline-secondary"
+                                style="padding: 8px 8px">
+                            <i class="bi bi-chevron-up"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="show-on-mobile">
-            <div class="HUDwrapper-mobile container animated-transition" id="time-box-mobile">
+            <div v-if="expandedTimebox" class="HUDwrapper-mobile container animated-transition" id="time-box-mobile">
                 <div class="HUDwrapper-mobile-inner-container row">
                     <div class="col">
                         Goal Article: <strong>[[endArticle]]</strong>
@@ -85,10 +106,27 @@
                     </div>
 
                     <div class="col-auto px-2">
-                        <button @click="toggleTimebox('time-box-mobile', '55')" 
+                        <button @click="expandedTimebox = !expandedTimebox" 
                                 class="btn btn-outline-secondary"
                                 style="font-size: 0.75rem; padding: 5px 5px">
-                            <i class="bi bi-chevron-down" id="time-box-mobile-toggle-button"></i>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div v-else class="HUDwrapper-mobile container animated-transition" id="time-box-mobile">
+                <div class="HUDwrapper-mobile-inner-container row">
+                    <div class="col">
+                        Goal Article: <strong>[[endArticle]]</strong>
+                        <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="showPreview">
+                            ⓘ
+                        </small>
+                    </div>
+                    <div class="col-auto px-2">
+                        <button @click="expandedTimebox = !expandedTimebox" 
+                                class="btn btn-outline-secondary"
+                                style="font-size: 0.75rem; padding: 5px 5px">
+                            <i class="bi bi-chevron-up"></i>
                         </button>
                     </div>
                 </div>

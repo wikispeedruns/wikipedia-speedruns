@@ -85,7 +85,9 @@ let app = new Vue({
         eventTimestamp: null,
         eventType: null,
         eventX: 0,
-        eventY: 0
+        eventY: 0,
+
+        expandedTimebox: true,
     },
 
     mounted: async function() {
@@ -199,19 +201,6 @@ let app = new Vue({
             this.eventTimestamp = null;
             this.previewContent = null;
         },
-
-        toggleTimebox: function(id, p) {
-            let el = document.getElementById(id);
-            let icon = document.getElementById(id+'-toggle-button');
-            icon.classList.toggle("bi-chevron-down");
-            icon.classList.toggle("bi-chevron-up");
-            if (icon.classList.contains("bi-chevron-down")) {
-                el.style.transform = 'translateY(0)';
-            } else {
-                el.style.transform = `translateY(${p}%)`;
-            }
-        }
-
     }
 })
 
