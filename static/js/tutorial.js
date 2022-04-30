@@ -97,12 +97,7 @@ Vue.component('tutorial-prompts', {
     },
 
     mounted: function() {
-    },
 
-    watch: {
-        currentArticle: function(newVal, oldVal) {
-            console.log(oldVal + "->" + newVal);
-        }
     },
 
     methods: {
@@ -115,11 +110,11 @@ Vue.component('tutorial-prompts', {
 
         // TODO prevent if we are waiting for a link? Or maybe call articleRender.loadPage()?
         next() {
+            if (this.curStep === this.tutorial.length - 1) {
+                return;
+            }
             this.curStep++;
             const step = this.tutorial[this.curStep]
-
-            // TODO handle end
-            if (!step) return;
 
             if (step.highlight) {
                 this.highlightElement(this.tutorial[this.curStep].highlight);
@@ -140,22 +135,25 @@ Vue.component('tutorial-prompts', {
                 }
             }
 
+            // Disable are you sure you want to leave warning
+            if (this.curStep === this.tutorial.length - 1) {
+                window.onbeforeunload = () => false;
+            }
         },
 
         prev() {
-            if (this.curStep > 0) this.curStep--;
+            if (this.curStep > 0)  {
+                this.curStep--;
+            }
         },
 
         handleTouchStart(e) {
-            e.preventDefault();
             this.touchStartX = e.changedTouches[0].screenX;
         },
 
         handleTouchEnd(e) {
-            e.preventDefault();
             const endX = e.changedTouches[0].screenX;
-
-            if (endX <= this.touchStartX - 80) {
+            if (endX <= this.touchStartX - 80 && !this.tutorial[this.curStep].requiredLink) {
                 this.next(); //swiping left
             }
             if (endX >= this.touchStartX + 80) {
@@ -176,18 +174,26 @@ Vue.component('tutorial-prompts', {
             </template>
 
             <p class="show-on-mobile" v-if="curStep == 0"> Swipe left/right at the bottom of the page to navigate </p>
+
+            <p v-if="curStep === this.tutorial.length - 1"> <a href="/">Click here to go home</a> </p>
         </div>
 
         <div class="show-on-desktop">
-            <div style="margin-left: auto; margin-top:auto !important; zIndex: 100000000">
-                <a class="btn btn-outline-secondary" role="button" @click="prev">
+            <div style="margin-left: auto; margin-top:auto !important;">
+                <button v-bind:disabled="curStep === 0"
+                        @click="prev"
+                        class="btn btn-outline-secondary">
                     <i class="bi bi-chevron-left"></i>
-                </a>
-                <a class="btn btn-outline-secondary" role="button" @click="next">
+                </button>
+                <button v-bind:disabled="curStep === tutorial.length - 1  || tutorial[curStep].requiredLink"
+                        @click="next"
+                        class="btn btn-outline-secondary" >
                     <i class="bi bi-chevron-right"></i>
-                </a>
+                </button>
             </div>
         </div>
+
+
     </div>
     `),
 });
