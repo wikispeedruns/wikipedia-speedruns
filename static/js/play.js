@@ -8,9 +8,7 @@ these components should be as modular/generic as possible.
 
 //JS module imports
 import { serverData } from "./modules/serverData.js";
-import { fetchJson } from "./modules/fetch.js";
 import { startRun, submitRun } from "./modules/game/runs.js";
-import { getArticleSummary } from "./modules/wikipediaAPI/util.js";
 
 import { CountdownTimer } from "./modules/game/countdown.js";
 import { FinishPage } from "./modules/game/finish.js";
@@ -23,7 +21,7 @@ import { startLocalRun, submitLocalRun } from "./modules/localStorage/localStora
 
 
 // retrieve the unique prompt_id of the prompt to load
-const PROMPT_ID = serverData["prompt_id"];
+const PROMPT_ID = serverData["prompt_id"] || null;
 
 // Get lobby if a lobby_prompt
 const LOBBY_ID = serverData["lobby_id"] || null;
@@ -77,18 +75,12 @@ let app = new Vue({
         finished: false,     //Flag for whether a game has finished, used for rendering
         started: false,      //Flag for whether a game has started (countdown finished), used for rendering
 
-        renderer: null,
         loggedIn: false,
-
-        previewContent: null,
-
-        eventTimestamp: null,
-        eventType: null,
-        eventX: 0,
-        eventY: 0
     },
 
     mounted: async function() {
+        // Prevent accidental leaves
+        window.onbeforeunload = () => true;
 
         this.loggedIn = "username" in serverData;
 
@@ -111,7 +103,6 @@ let app = new Vue({
         if (!this.loggedIn && this.lobbyId == null) {
             startLocalRun(PROMPT_ID, this.runId);
             console.log("Not logged in, uploading start of run to local storage")
-            //console.log(this.runId)
         }
 
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview);
@@ -133,7 +124,6 @@ let app = new Vue({
             this.startTime += loadTime;
 
             //if the page's title matches that of the end article, finish the game, and submit the run
-
             if (page === this.endArticle) {
                 this.finish();
             }
@@ -159,7 +149,6 @@ let app = new Vue({
 
         async finish() {
             this.finished = true;
-
             // Disable popup
             window.onbeforeunload = null;
 
@@ -176,37 +165,14 @@ let app = new Vue({
         },
 
         showPreview: function(e) {
-            this.eventTimestamp = e.timeStamp;
-            this.eventType = e.type;
-            this.eventX = e.clientX;
-            this.eventY = e.clientY;
-            const href = e.currentTarget.getAttribute("href");
-            const title = href.split('/wiki/').pop();
-            const promises = [ getArticleSummary(title) ];
-            if (e.type !== "click") {
-                promises.push(new Promise(resolve => setTimeout(resolve, 600)));
-            }
-            // const promise1 = getArticleSummary(title);
-            // const promise2 = new Promise(resolve => setTimeout(resolve, 500));
-            Promise.all(promises).then((values) => {
-                if (e.timeStamp === this.eventTimestamp) {
-                    this.previewContent = values[0];
-                }
-            });
+            this.$refs.pagePreview.showPreview(e);
         },
-
-        hidePreview: function() {
-            this.eventTimestamp = null;
-            this.previewContent = null;
+        hidePreview: function(e) {
+            this.$refs.pagePreview.hidePreview(e);
         }
-
     }
 })
 
-// Prevent accidental leaves
-window.onbeforeunload = function() {
-    return true;
-};
 
 // Disable find hotkeys, players will be given a warning
 window.addEventListener("keydown", function(e) {

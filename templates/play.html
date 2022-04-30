@@ -28,30 +28,32 @@
     <div v-show="started && !finished">
 
         <div class="show-on-desktop">
-            <div class="HUDwrapper container" id="time-box">
-                <div class="row flex-row">
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
-                        Goal Article<br><strong>[[endArticle]] </strong>
-                        <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
-                            ⓘ
-                        </small>
-                    </div>
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
-                        Links clicked<br><strong>[[path.length - 1]]</strong>
-                    </div>
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
-                        Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
-                    </div>
+            <div class="HUDwrapper container-xxl">
+                <div class="HUD" id="time-box">
+                    <div class="row flex-row">
+                        <div class="col-sm-auto text-nowrap px-4 pt-2">
+                            Goal Article<br><strong>[[endArticle]] </strong>
+                            <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
+                                ⓘ
+                            </small>
+                        </div>
+                        <div class="col-sm-auto text-nowrap px-4 pt-2">
+                            Links clicked<br><strong>[[path.length - 1]]</strong>
+                        </div>
+                        <div class="col-sm-auto text-nowrap px-4 pt-2">
+                            Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
+                        </div>
 
-                    <div v-if="promptRated" class="col-sm-auto text-nowrap px-4 py-2">
-                        Mode: <br>
-                        <b class="text-danger" v-if="!promptPlayed && promptActive">Rated</b>
-                        <b v-else>Practice</b>
+                        <div v-if="promptRated" class="col-sm-auto text-nowrap px-4 py-2">
+                            Mode: <br>
+                            <b class="text-danger" v-if="!promptPlayed && promptActive">Rated</b>
+                            <b v-else>Practice</b>
+                        </div>
                     </div>
-                </div>
-                <div class="row flex-row">
-                    <div class="col-lg-auto text-nowrap px-4 py-2">
-                        Current Article<br><strong>[[currentArticle]]</strong>
+                    <div class="row flex-row">
+                        <div class="col-lg-auto text-nowrap px-4 py-2">
+                            Current Article<br><strong>[[currentArticle]]</strong>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -78,22 +80,14 @@
         </div>
     </div>
 
-    <div v-if="previewContent">
-        <div v-if="eventType === 'click'" class="blocker" @click="hidePreview"></div>
-        <page-preview
-            :article-preview="previewContent"
-            :client-x="eventX"
-            :client-y="eventY"
-        ></page-preview>
-    </div>
+    <page-preview ref="pagePreview"></page-preview>
 
-    <countdown-timer id="countdown-box"
-        v-bind:start-article="startArticle"
-        v-bind:end-article="endArticle"
-        v-bind:rated-run="promptRated && promptActive && !promptPlayed"
-        v-bind:rated-prompt="promptRated"
-        v-on:start-game="start"
-    ></countdown-timer>
+    <countdown-timer id="countdown-box" v-on:start-game="start">
+        <p>Starting Article: <strong>[[startArticle]]</strong></p>
+        <p>Goal Article: <strong>[[endArticle]]</strong></p>
+        <p v-if="promptRated && promptActive && !promptPlayed" class="text-danger">This is your rated attempt, leaving this page will count as a forfeit!</p>
+        <p v-else-if="promptRated">This is a practice attempt: your score will not appear on the public leaderboard</p>
+    </countdown-timer>
 
     <!-- TODO its a bit ugly passing all these in, should clean this up-->
     <finish-page

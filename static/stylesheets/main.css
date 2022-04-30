@@ -46,13 +46,31 @@ a:hover, a:hover * {
 }
 
 .HUDwrapper {
-    position:fixed;
+    position: fixed;
     z-index: 1000;
-    width:auto !important;
     bottom: 0;
+
+    left: 0;
+    right: 0;
+
+
+    height: 8rem;
+    margin: 0 auto;
+}
+
+.HUD {
+    position: absolute;
+    min-width: 40%;
+    width:auto !important;
     background-color: #F8F8F8;
-    margin-bottom: 15px;
     border: 2px solid #000000 !important;
+
+    height: auto;
+    min-height: 100%;
+
+    bottom: 0;
+    margin-bottom: 15px;
+
 }
 
 .HUDwrapper-mobile {
@@ -63,6 +81,9 @@ a:hover, a:hover * {
     left:0;
     background-color: #F8F8F8;
     border-top: 3px solid #000000 !important;
+
+    padding: 5px 10px;
+    font-size: 14px;
 }
 
 @media (max-width: 1200px) {
@@ -85,7 +106,7 @@ a:hover, a:hover * {
     }
 
     .show-on-mobile {
-        display: block;
+        display: contents;
     }
 
     .show-on-desktop {
@@ -104,7 +125,7 @@ a:hover, a:hover * {
     }
 
     .show-on-desktop {
-        display: block;
+        display: contents;
     }
 
     .tleft {
@@ -141,7 +162,7 @@ a:hover, a:hover * {
     font-weight: bold !important;
 }
 
-.table td.fit, 
+.table td.fit,
 .table th.fit {
     white-space: nowrap;
     width: 1%;
