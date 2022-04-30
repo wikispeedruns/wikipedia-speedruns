@@ -33,7 +33,10 @@
         </div>
     </div>
 
-    <div class="show-on-desktop">
+    <!-- Note, the v-if here is important, it prevents this from being rendered at all (rather than just displayed)
+         Most importantly the child tutorial component won't be created twice.
+    -->
+    <div class="show-on-desktop" v-if="!isMobile">
         <div class="HUDwrapper container-xxl" >
             <div class="HUD" id="time-box" style="width: 45% !important; height: 8rem;">
                 <div class="row flex-row">
@@ -58,16 +61,16 @@
             </div>
             <div class="HUD" style="right: 5%; width: 45% !important; height: 8rem;">
                 <div class="px-2 py-2" style="height: 100%">
-                    <tutorial-prompts
+                    <tutorial
                         v-bind:current-article="currentArticle"
-                    ></tutorial-prompts>
+                    ></tutorial>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <div class="show-on-mobile">
+    <div class="show-on-mobile" v-if="isMobile">
         <div class="HUDwrapper-mobile" id="time-box-mobile">
             <div class="HUDwrapper-mobile-inner-container">
                 Goal Article: <strong>[[endArticle]]</strong>
@@ -79,9 +82,9 @@
 
                 <hr>
 
-                <tutorial-prompts
+                <tutorial
                     v-bind:current-article="currentArticle"
-                ></tutorial-prompts>
+                ></tutorial>
 
             </div>
         </div>

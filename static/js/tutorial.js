@@ -55,7 +55,7 @@ function highlight(element) {
 /* Component defining the content inside of the tutorial box
  * same for desktop and mobile currently
  */
-Vue.component('tutorial-prompts', {
+Vue.component('tutorial', {
 
     props: [
         "currentArticle"
@@ -64,10 +64,12 @@ Vue.component('tutorial-prompts', {
     data: function() {
         return {
             // Support mobile swipes
-            // TODO maybe just make the entire box into 2 seciotns
+            // TODO maybe just make the entire box into 2 sections and tap?
             touchStartX: 0,
 
             curStep: 0,
+
+            message: "",
 
             // defines the tutorial
             // highlight: takes a query selector and highlights the element
@@ -96,11 +98,39 @@ Vue.component('tutorial-prompts', {
         };
     },
 
-    mounted: function() {
+    watch: {
+        currentArticle(newArticle, oldArticle) {
+            // Make other links besides tutorial unclickable
+            let frame = document.getElementById("wikipedia-frame");
 
+            frame.querySelectorAll("a, area").forEach((el) => {
+                // Don't prevent users from using TOC links
+                if (el.getAttribute("href") && el.getAttribute("href").substring(0, 1)  === "#") {
+                    return;
+                }
+                // Store the original handler so we can use it later
+                el.originalOnClick = el.onclick;
+
+                el.onclick = (e) => {
+                    e.preventDefault();
+                    this.flashMessage("Finish reading this before clicking!");
+                };
+            });
+        }
     },
 
     methods: {
+
+        flashMessage(message) {
+            this.message = message;
+            setTimeout(() => {
+                // Check so we don't overwrite a different message
+                if (this.message === message) {
+                    this.message = "";
+                }
+            }, 2000);
+        },
+
         highlightElement(selector) {
             let element = document.querySelector(selector);
             if (element) {
@@ -113,6 +143,8 @@ Vue.component('tutorial-prompts', {
             if (this.curStep === this.tutorial.length - 1) {
                 return;
             }
+
+            // Increment
             this.curStep++;
             const step = this.tutorial[this.curStep]
 
@@ -153,7 +185,11 @@ Vue.component('tutorial-prompts', {
 
         handleTouchEnd(e) {
             const endX = e.changedTouches[0].screenX;
-            if (endX <= this.touchStartX - 80 && !this.tutorial[this.curStep].requiredLink) {
+            if (endX <= this.touchStartX - 80) {
+                if (this.tutorial[this.curStep].requiredLink) {
+                    this.flashMessage("Click the link to continue!");
+                    return;
+                }
                 this.next(); //swiping left
             }
             if (endX >= this.touchStartX + 80) {
@@ -169,7 +205,12 @@ Vue.component('tutorial-prompts', {
         style="height: 100%; display: flex; flex-direction: column; ">
 
         <div style="flex-grow: 1">
-            <template v-for="(step, index) in tutorial">
+
+            <!-- Message if something goes wrong -->
+            <p v-if="message" class="text-danger">
+                {{message}}
+            </p>
+            <template v-else v-for="(step, index) in tutorial">
                 <p v-if="index == curStep"> {{step.text}} </p>
             </template>
 
@@ -218,6 +259,9 @@ let app = new Vue({
     },
 
     mounted: async function() {
+        // used to only render one version of tutorial
+        this.isMobile = window.screen.width < 768;
+
         // Prevent accidental leaves
         window.onbeforeunload = () => true;
 
@@ -237,33 +281,10 @@ let app = new Vue({
         pageCallback: function(page, loadTime) {
             this.hidePreview();
 
-            // TODO make other links besides tutorial unclickable
-            let frame = document.getElementById("wikipedia-frame");
-
-            frame.querySelectorAll("a, area").forEach((el) => {
-                // Don't prevent users from using TOC links
-                if (el.getAttribute("href") && el.getAttribute("href").substring(0, 1)  === "#") {
-                    return;
-                }
-                // Store the original handler so we can use it later
-                el.originalOnClick = el.onclick;
-
-                el.onclick = (e) => {
-                    e.preventDefault();
-                    // TODO put a real alert here, maybe in tutorial box.
-                    // i.e. set a "wrong link clicked prop" so the tutorial can flash a message
-                    alert("Not yet");
-                };
-            });
-
-
             if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
                 this.path.push(page);
             }
             this.currentArticle = page;
-
-
-
         },
 
 
