@@ -65,3 +65,19 @@ def test_streak_with_old_streak(cursor, user):
     res = streaks.get_current_streak(user_id)
     assert(res["streak"] == 4)
     assert(not res["done_today"])
+    
+    
+def test_streak_with_today_and_gap(cursor, user):
+    user_id = user["user_id"]
+    add_prompts(cursor, user_id, [0, 2, 3, 4, 10, 11, 12, 13])
+    res = streaks.get_current_streak(user_id)
+    assert(res["streak"] == 1)
+    assert(res["done_today"])
+    
+    
+def test_streak_without_today_and_gap(cursor, user):
+    user_id = user["user_id"]
+    add_prompts(cursor, user_id, [1, 3, 4, 10, 11, 12, 13])
+    res = streaks.get_current_streak(user_id)
+    assert(res["streak"] == 1)
+    assert(not res["done_today"])
