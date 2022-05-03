@@ -11,16 +11,17 @@
 
 
 <div id="app">
-    <h3 class="mb-4">This is your account settings page.</h3>
-    <hr class="mt-4">
-    <p>Here is some sample content!</p>
-    <div class="list-group">
-        <button type="button" class="list-group-item list-group-item-action" v-on:click="handleLogout">Log Out</button>
-        <a href="#" class="list-group-item list-group-item-action">Reset your password</a>
-        <a href="#" class="list-group-item list-group-item-action">Change your email</a>
-        <a href="#" class="list-group-item list-group-item-action">Buy twitter</a>
-        <a href="#" class="list-group-item list-group-item-action">Populate nodules</a>
-      </div>
+  <h3 class="mb-4">This is your account settings page.</h3>
+  <hr class="mt-4">
+  <p>Here is some sample content!</p>
+  <div class="list-group">
+      <button type="button" class="list-group-item list-group-item-action" v-on:click="handleLogout">Log Out</button>
+      <a href="/reset/request" class="list-group-item list-group-item-action">Change your password</a>
+      <a href="#" class="list-group-item list-group-item-action">Change your email</a>
+      <a href="#" class="list-group-item list-group-item-action">Buy twitter</a>
+      <a href="#" class="list-group-item list-group-item-action">Populate nodules</a>
+  </div>
+  <a>Email Confirmed: [[emailConfirmed]]</a>
 </div>
 
 {% endblock %}

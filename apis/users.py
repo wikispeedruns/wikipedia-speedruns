@@ -330,6 +330,27 @@ def confirm_email():
     return "Email Confirmed"
 
 
+@user_api.post("/check_email_confirmation")
+def check_email_confirmation():
+    username = request.json
+
+    # user must be logged in to access
+    if session["username"] != username:
+        return "false"
+
+    query = "SELECT `email_confirmed` FROM `users` WHERE `username`=%s"
+
+    db = get_db()
+    with db.cursor() as cursor:
+        res = cursor.execute(query, (username, ))
+        if (res != 0):
+            email_confirmed = cursor.fetchone()
+            if email_confirmed[0] == 1:
+                return "true"
+
+    return "false"
+
+
 @user_api.post("/reset_password_request")
 def reset_password_request():
     '''
