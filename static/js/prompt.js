@@ -380,7 +380,6 @@ var app = new Vue({
 
             this.runs.forEach(el => {
                 let date = Date.parse(el.end_time)
-                console.log((now - date) / (1000 * 60 * 60 * 24))
             });
 
             if (!['1', '7', '30', '100'].includes(this.timeFilter)) return;
@@ -389,7 +388,6 @@ var app = new Vue({
 
             this.runs.forEach(el => {
                 let date = Date.parse(el.end_time)
-                console.log((now - date) / (1000 * 60 * 60 * 24))
                 if ((now - date) / (1000 * 60 * 60 * 24) < parseInt(this.timeFilter)){
                     output.push(el);
                 }
