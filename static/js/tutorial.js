@@ -71,6 +71,11 @@ function highlight(element) {
     }, 1000);
 }
 
+const beforeUnloadListener = (event) => {
+    event.preventDefault();
+    return event.returnValue = "Are you sure you want to exit? Your progess will be lost";
+};
+
 /* Component defining the content inside of the tutorial box
  * same for desktop and mobile currently
  */
@@ -242,7 +247,7 @@ Vue.component('tutorial', {
 
             // Disable are you sure you want to leave
             if (this.curStep === this.tutorial.length - 1) {
-                window.onbeforeunload = null;
+                window.removeEventListener("beforeunload", beforeUnloadListener);
             }
         },
 
@@ -343,9 +348,6 @@ let app = new Vue({
         // used to only render one version of tutorial
         this.isMobile = window.screen.width < 768;
 
-        // Prevent accidental leaves
-        window.onbeforeunload = () => true;
-
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview);
 
         this.renderer.loadPage("Walt Whitman");
@@ -378,6 +380,8 @@ let app = new Vue({
     },
 })
 
+// Prevent accidental leaves
+window.addEventListener("beforeunload", beforeUnloadListener);
 
 // Disable find hotkeys, players will be given a warning
 window.addEventListener("keydown", function(e) {
