@@ -44,7 +44,7 @@ function highlight(element) {
     div.style.left = element.offsetLeft + (width - div.offsetWidth) / 2 + 'px';
     div.style.top = element.offsetTop + (height - div.offsetHeight) / 2 + 'px';
 
-    element.scrollIntoView();
+    element.scrollIntoView(true);
 
     setTimeout(function() {
         div.style.transition = "background 2s";
@@ -77,12 +77,19 @@ Vue.component('tutorial', {
             //                 the article will be loaded and the next step is loaded.
             tutorial: [
                 {
-                    text: "Welcome to the WikiSpeedruns Tutorial"
+                    text: "Welcome to the WikiSpeedruns Tutorial!"
                 },
                 {
-                    text: "Look at the infobox!",
-                    highlight: ".infobox"
+                    text: "The goal of the game is to get from one Wikipedia page to another as \
+                           fast as possible by clicking the links in the page",
                 },
+                {
+                    text: "It is also fun to try and use as few clicks as possible!",
+                },
+                // {
+                //     text: "The goal article, time, and number of clicks are all shown in the HUD",
+                //     highlight: "#time-box"
+                // },
                 {
                     text: "Remember to use the Table of Contents. Try \"Political divisions\"!",
                     highlight: "a[href=\"#Political_divisions\"]"
@@ -105,15 +112,28 @@ Vue.component('tutorial', {
 
             frame.querySelectorAll("a, area").forEach((el) => {
                 // Don't prevent users from using TOC links
-                if (el.getAttribute("href") && el.getAttribute("href").substring(0, 1)  === "#") {
+                if (!el.getAttribute("href") || el.getAttribute("href").substring(0, 1)  === "#") {
                     return;
                 }
+
                 // Store the original handler so we can use it later
                 el.originalOnClick = el.onclick;
+                const linkTitle = el.getAttribute("href").substring(6);
 
+                // User can only cause link to load page if it is the required link on links
                 el.onclick = (e) => {
                     e.preventDefault();
-                    this.flashMessage("Finish reading this before clicking!");
+
+                    if (linkTitle === this.tutorial[this.curStep].requiredLink) {
+                        // Call the original onclick (provided by ArticleRenderer) to load the next page
+                        el.originalOnClick(e);
+                        this.next();
+                    } else if (this.tutorial[this.curStep].requiredLink) {
+                        this.flashMessage("Please click the suggested link");
+                    } else {
+                        this.flashMessage("Please read this tutorial first");
+                    }
+
                 };
             });
         }
@@ -138,7 +158,6 @@ Vue.component('tutorial', {
             }
         },
 
-        // TODO prevent if we are waiting for a link? Or maybe call articleRender.loadPage()?
         next() {
             if (this.curStep === this.tutorial.length - 1) {
                 return;
@@ -149,22 +168,13 @@ Vue.component('tutorial', {
             const step = this.tutorial[this.curStep]
 
             if (step.highlight) {
-                this.highlightElement(this.tutorial[this.curStep].highlight);
+                this.highlightElement(step.highlight);
             }
 
             if (step.requiredLink) {
                 // Highlight the link
                 const selector = `a[href=\"/wiki/${step.requiredLink}\"]`
                 this.highlightElement(selector);
-
-                // Set onclick to use the handler provided by the articleRenderer
-                // but also calls next
-                // See pageCallback of main vue function
-                let linkEl = document.querySelector(selector);
-                linkEl.onclick = (e) => {
-                    this.next();
-                    linkEl.originalOnClick(e);
-                }
             }
 
             // Disable are you sure you want to leave warning
@@ -256,6 +266,8 @@ let app = new Vue({
 
         startTime: null,
         elapsed: 0,
+
+        isMobile: false
     },
 
     mounted: async function() {
@@ -295,9 +307,6 @@ let app = new Vue({
             this.$refs.pagePreview.hidePreview(e);
         }
     },
-
-
-
 })
 
 

@@ -109,6 +109,7 @@ a:hover, a:hover * {
         display: contents;
     }
 
+
     .show-on-desktop {
         display: none;
     }
@@ -126,20 +127,6 @@ a:hover, a:hover * {
 
     .show-on-desktop {
         display: contents;
-    }
-
-    .tleft {
-        float: left;
-        margin: 15px 15px;
-        overflow: auto;
-        clear: left;
-    }
-
-    .tright {
-        float: right;
-        margin: 15px 15px;
-        overflow: auto;
-        clear: right;
     }
 
     .thumb {
