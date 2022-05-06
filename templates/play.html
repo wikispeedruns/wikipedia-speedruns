@@ -89,7 +89,7 @@
         <p v-else-if="promptRated">This is a practice attempt: your score will not appear on the public leaderboard</p>
     </countdown-timer>
 
-    <!-- TODO its a bit ugly passing all these in, should clean this up-->
+    <!-- REFACTORED OUT TO play_finish.html
     <finish-page
         v-bind:prompt-id="promptId"
         v-bind:lobby-id="lobbyId"
@@ -103,7 +103,7 @@
         v-bind:logged-in="loggedIn"
 
         v-show="finished"
-    ></finish-page>
+    ></finish-page>-->
 
     <div v-show="started && !finished" id="main">
         <div id="wikipedia-frame" class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output content"></div>

@@ -104,6 +104,29 @@ def get_tutorial_page():
 def get_sprint_play_page(id):
     return render_with_data('play.html', prompt_id=id)
 
+
+
+@views.route('/finish', methods=['GET'])
+def get_sprint_finish_page():
+    try:
+        run_id = int(request.args.get('run_id', -1))
+        played = request.args.get('played', False)
+        return render_with_data('play_finish.html', run_id=run_id, played=played)
+    except ValueError:
+        return "Page Not Found", 404
+    
+@views.route('/lobby/<int:lobby_id>/finish', methods=['GET'])
+def get_lobby_finish_page(lobby_id):
+    try:
+        run_id = int(request.args.get('run_id', -1))
+        played = request.args.get('played', False)
+        return render_with_data('play_finish.html', run_id=run_id, lobby_id=lobby_id, played=played)
+    except ValueError:
+        return "Page Not Found", 404
+
+
+
+
 @views.route('/prompt/<id>', methods=['GET'])
 def get_prompt_page(id):
     run_id = request.args.get('run_id', '')

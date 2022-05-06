@@ -11,7 +11,7 @@ import { serverData } from "./modules/serverData.js";
 import { startRun, submitRun } from "./modules/game/runs.js";
 
 import { CountdownTimer } from "./modules/game/countdown.js";
-import { FinishPage } from "./modules/game/finish.js";
+//import { FinishPage } from "./modules/game/finish.js";
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 import { PagePreview } from "./modules/game/pagePreview.js";
 
@@ -50,7 +50,7 @@ let app = new Vue({
     el: '#app',
     components: {
         'countdown-timer': CountdownTimer,
-        'finish-page': FinishPage,
+        //'finish-page': FinishPage,
         'page-preview': PagePreview
     },
     data: {
@@ -161,7 +161,13 @@ let app = new Vue({
                 //console.log(this.runId)
             }
 
-            fireworks();
+            //fireworks();
+            if (this.lobbyId == null) {
+                window.location.replace(`/finish?run_id=${this.runId}&played=true`);
+            } else {
+                window.location.replace(`/lobby/${this.lobbyId}/finish?run_id=${this.runId}&played=true`);
+            }
+            
         },
 
         showPreview: function(e) {
