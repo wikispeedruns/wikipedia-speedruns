@@ -99,42 +99,42 @@ Vue.component('tutorial', {
             //                 the article will be loaded and the next step is loaded.
             // currentArticle: A hint for if the user goes back to load the previous article
             tutorial: [
-                // {
-                //     text: "Welcome to the WikiSpeedruns Tutorial!"
-                // },
-                // {
-                //     text: "The goal of the game is to get from one Wikipedia page to another as \
-                //            fast as possible by clicking the links in the page",
-                // },
-                // {
-                //     text: "It's also fun to try and use as few clicks as possible!",
-                // },
-                // {
-                //     text: "The goal article, time, and number of clicks are all shown in the HUD",
-                //     highlight: "#time-box"
-                // },
-                // {
-                //     text: "Fun Fact: This prompt, 'Walt Whitman' to 'Walt Disney', was the first ever released on WikiSpeedruns",
-                // },
-                // {
-                //     text: "Before you get started, let's go over a few basic rules"
-                // },
-                // {
-                //     text: "1. Any link is fair game, however not all links may be present"
-                // },
-                // {
-                //     text: "2. Using any sort of find in page is prohibited"
-                // },
-                // {
-                //     text: "3. Going back is not allowed, you have to find your way back by clicking links! Going back \
-                //            in the browser will just quit the game"
-                // },
-                // {
-                //     text: "Now let us think about how to get to Walt Disney..."
-                // },
-                // {
-                //     text: "Walt Disney is a famous American cultural figure, so maybe we can find him in the 'United States' page"
-                // },
+                {
+                    text: "Welcome to the WikiSpeedruns Tutorial!"
+                },
+                {
+                    text: "The goal of the game is to get from one Wikipedia page to another as \
+                           fast as possible by clicking the links in the page",
+                },
+                {
+                    text: "It's also fun to try and use as few clicks as possible!",
+                },
+                {
+                    text: "The goal article, time, and number of clicks are all shown in the HUD",
+                    highlight: "#time-box"
+                },
+                {
+                    text: "Fun Fact: This prompt, 'Walt Whitman' to 'Walt Disney', was the first ever released on WikiSpeedruns",
+                },
+                {
+                    text: "Before you get started, let's go over a few basic rules"
+                },
+                {
+                    text: "1. Any link is fair game, however not all links may be present"
+                },
+                {
+                    text: "2. Using any sort of find in page is prohibited"
+                },
+                {
+                    text: "3. Going back is not allowed, you have to find your way back by clicking links! Going back \
+                           in the browser will just quit the game"
+                },
+                {
+                    text: "Now let us think about how to get to Walt Disney..."
+                },
+                {
+                    text: "Walt Disney is a famous American cultural figure, so maybe we can find him in the 'United States' page"
+                },
                 {
                     text: "Let's try getting there through 'Long Island'.",
                     requiredLink: "Long_Island",
