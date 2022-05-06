@@ -43,7 +43,6 @@ async function getPrompt(promptId, lobbyId=null) {
     return await response.json();
 }
 
-
 //Vue container. This contains data, rendering flags, and functions tied to game logic and rendering. See play.html
 let app = new Vue({
     delimiters: ['[[', ']]'],
