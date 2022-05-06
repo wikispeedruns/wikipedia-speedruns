@@ -9,6 +9,7 @@ and nothing happens at the end.
 TODO maybe freeze the articles so wikipedia changing doesn't break this
 TODO going back too far (i.e. after a page has been clicked breaks it)
 TODO highlighting info box is weird during transitions
+TODO end article disable prompt
 
 */
 
@@ -41,7 +42,23 @@ function highlight(element) {
     div.style.height = (height + 8) + 'px';
     div.style.zIndex = element.style.zIndex + 1;
 
-    element.offsetParent.appendChild(div);
+    // We need to handle the highlighting within a table specially
+    let parent = element.offsetParent;
+    if (parent.tagName === "TD") {
+        // Add wrapper around element
+        let wrapper = document.createElement('div');
+        wrapper.style.position = "relative"
+
+        element.parentNode.insertBefore(wrapper, element);
+        wrapper.appendChild(element);
+
+        // Use wrapper div as positioning parent
+        parent = wrapper;
+    }
+
+    parent.appendChild(div);
+
+
 
     div.style.left = element.offsetLeft + (width - div.offsetWidth) / 2 + 'px';
     div.style.top = element.offsetTop + (height - div.offsetHeight) / 2 + 'px';
@@ -117,6 +134,9 @@ Vue.component('tutorial', {
                 {
                     text: "Let's try getting there through 'Long Island'.",
                     requiredLink: "Long_Island"
+                },
+                {
+                    text: "Now we have to find a link to the 'United States'",
                 },
                 {
                     text: "Links in infobox or summaries are also valid, and a good place to find general information.",
@@ -220,9 +240,9 @@ Vue.component('tutorial', {
                 this.highlightElement(selector);
             }
 
-            // Disable are you sure you want to leave warning
+            // Disable are you sure you want to leave
             if (this.curStep === this.tutorial.length - 1) {
-                window.onbeforeunload = () => false;
+                window.onbeforeunload = null;
             }
         },
 
