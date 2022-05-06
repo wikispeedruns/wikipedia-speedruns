@@ -7,6 +7,8 @@ than getting the prompt and submitting a run, the prompt is hard coded
 and nothing happens at the end.
 
 TODO maybe freeze the articles so wikipedia changing doesn't break this
+TODO going back too far (i.e. after a page has been clicked breaks it)
+TODO highlighting info box is weird during transitions
 
 */
 
@@ -84,22 +86,63 @@ Vue.component('tutorial', {
                            fast as possible by clicking the links in the page",
                 },
                 {
-                    text: "It is also fun to try and use as few clicks as possible!",
-                },
-                // {
-                //     text: "The goal article, time, and number of clicks are all shown in the HUD",
-                //     highlight: "#time-box"
-                // },
-                {
-                    text: "Remember to use the Table of Contents. Try \"Political divisions\"!",
-                    highlight: "a[href=\"#Political_divisions\"]"
+                    text: "It's also fun to try and use as few clicks as possible!",
                 },
                 {
-                    text: "Try clicking on \"North America\"!",
-                    requiredLink: "North_America"
+                    text: "The goal article, time, and number of clicks are all shown in the HUD",
+                    highlight: "#time-box"
                 },
                 {
-                    text: "Congratulations, you've finished!",
+                    text: "Fun Fact: This prompt, 'Walt Whitman' to 'Walt Disney', was the first ever released on WikiSpeedruns",
+                },
+                {
+                    text: "Before you get started, let's go over a few basic rules"
+                },
+                {
+                    text: "1. Any link is fair game, however not all links may be present"
+                },
+                {
+                    text: "2. Using any sort of find in page is prohibited"
+                },
+                {
+                    text: "3. Going back is not allowed, you have to find your way back by clicking links! Going back \
+                           in the browser will just quit the game"
+                },
+                {
+                    text: "Now let us think about how to get to Walt Disney..."
+                },
+                {
+                    text: "Walt Disney is a famous American cultural figure, so maybe we can find him in the 'United States' page"
+                },
+                {
+                    text: "Let's try getting there through 'Long Island'.",
+                    requiredLink: "Long_Island"
+                },
+                {
+                    text: "Links in infobox or summaries are also valid, and a good place to find general information.",
+                    highlight: ".infobox"
+                },
+                {
+                    text: "For example, we can find the the link to the 'United States' article here",
+                    requiredLink: "United_States"
+                },
+                {
+                    text: "Hint: It's often good to think about a 'hub' page from where you can navigate to the goal article easily.\
+                           'United States' is often a good one."
+                },
+                {
+                    text: "Although you can't use ctrl + F, you can still use the table of contents",
+                },
+                {
+                    text: "Walt Disney is probably most famous for his movies, so let's try the cinema section",
+                    highlight: "a[href=\"#Cinema\"]"
+                },
+                {
+                    text: "There is \'Walt Disney\'!",
+                    requiredLink: "Walt_Disney"
+                },
+                {
+                    text: "Thank you for viewing the tutorial, and have fun!",
                 }
             ]
         };
@@ -265,8 +308,8 @@ let app = new Vue({
 
 
     data: {
-        startArticle: "United_States",
-        endArticle: "Pennsylvania",
+        startArticle: "Walt Whitman",
+        endArticle: "Walt Disney",
         currentArticle: "",
         path: [],
 
@@ -285,7 +328,7 @@ let app = new Vue({
 
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview);
 
-        this.renderer.loadPage("United_States");
+        this.renderer.loadPage("Walt Whitman");
 
         this.startTime = Date.now();
         setInterval(() => {
