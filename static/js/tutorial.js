@@ -157,7 +157,7 @@ Vue.component('tutorial', {
                            'United States' is often a good one."
                 },
                 {
-                    text: "Although you can't use ctrl + F, you can still use the table of contents",
+                    text: "Although you can't use find in page, you can still use the table of contents",
                 },
                 {
                     text: "Walt Disney is probably most famous for his movies, so let's try the cinema section",
@@ -199,7 +199,7 @@ Vue.component('tutorial', {
                         el.originalOnClick(e);
                         this.next();
                     } else if (this.tutorial[this.curStep].requiredLink) {
-                        this.flashMessage("Please click the suggested link");
+                        this.flashMessage(`Please click '${this.tutorial[this.curStep].requiredLink.replace("_", "  ")}' to continue`);
                     } else {
                         this.flashMessage("Please read this tutorial first");
                     }
@@ -290,14 +290,14 @@ Vue.component('tutorial', {
 
         handleTouchEnd(e) {
             const endX = e.changedTouches[0].screenX;
-            if (endX <= this.touchStartX - 80) {
+            if (endX <= this.touchStartX - 60) {
                 if (this.tutorial[this.curStep].requiredLink) {
-                    this.flashMessage("Click the link to continue!");
+                    this.flashMessage(`Click '${this.tutorial[this.curStep].requiredLink.replace("_", "  ")}' to continue!`);
                     return;
                 }
                 this.next(); //swiping left
             }
-            if (endX >= this.touchStartX + 80) {
+            if (endX >= this.touchStartX + 60) {
                 this.prev(); // swiping right
             }
         },
@@ -319,21 +319,30 @@ Vue.component('tutorial', {
                 <p v-if="index == curStep"> {{step.text}} </p>
             </template>
 
-            <p class="show-on-mobile" v-if="curStep == 0"> Swipe left/right at the bottom of the page to navigate </p>
 
             <p v-if="curStep === this.tutorial.length - 1"> <a href="/">Click here to go home</a> </p>
         </div>
+
+
+        <div class="show-on-mobile" v-if="curStep == 0">
+            Swipe left/right here (at the bottom of the page) to navigate
+
+            <!-- https://lottiefiles.com/7635-swipe-left -->
+            <img style="margin-left: auto; margin-right:auto; height:50px; width: 50px" src="/static/assets/swipe.gif">
+        </div>
+
+
 
         <div class="show-on-desktop">
             <div style="margin-left: auto; margin-top:auto !important;">
                 <button v-bind:disabled="curStep === 0"
                         @click="prev"
-                        class="btn btn-outline-secondary">
+                        class="btn btn-primary">
                     <i class="bi bi-chevron-left"></i>
                 </button>
                 <button v-bind:disabled="curStep === tutorial.length - 1  || tutorial[curStep].requiredLink"
                         @click="next"
-                        class="btn btn-outline-secondary" >
+                        class="btn btn- primary" >
                     <i class="bi bi-chevron-right"></i>
                 </button>
             </div>
