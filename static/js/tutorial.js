@@ -190,6 +190,12 @@ Vue.component('tutorial', {
         },
 
         handleTouchStart(e) {
+            // bit of a hack
+            // don't prevent default on the last message, so users can click on the link
+            if (this.curStep !== this.tutorial.length - 1) {
+                e.preventDefault();
+            }
+
             this.touchStartX = e.changedTouches[0].screenX;
         },
 
