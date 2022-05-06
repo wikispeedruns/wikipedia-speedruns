@@ -66,6 +66,7 @@
                 <div class="px-2 py-2" style="height: 100%">
                     <tutorial
                         v-bind:current-article="currentArticle"
+                        v-on:change-article="renderer.loadPage($event)"
                     ></tutorial>
                 </div>
             </div>
@@ -96,6 +97,7 @@
 
                 <tutorial
                     v-bind:current-article="currentArticle"
+                    v-on:change-article="renderer.loadPage($event)"
                 ></tutorial>
 
             </div>
