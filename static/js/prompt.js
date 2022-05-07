@@ -42,7 +42,7 @@ var LeaderboardRow = {
             <td class="l-col">{{(run.run_time/1000000).toFixed(3)}} s</td>
             <td>{{run.path.length}}</td>
 
-            <td>
+            <td style="min-width:400px">
                 {{run.path | pathArrow}}
                 <a v-if="!lobbyId" v-bind:href="'/replay?run_id=' + run.run_id" target="_blank" title="Replay" >
                     <i class="bi bi-play"></i>
@@ -230,7 +230,7 @@ var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     data: {
-        prompt: [],
+        prompt: {},
         runs: [],
         renderedRuns: [],
         renderedRunsRank: [],
@@ -402,9 +402,11 @@ var app = new Vue({
         if (lobby_id) {
             this.available = true;
 
-            const resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}/runs`);
+            let resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}/runs`);
             this.runs = await resp.json();
-            this.prompt = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}`);
+
+            resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}`);
+            this.prompt = await resp.json();
 
         }
         else {
