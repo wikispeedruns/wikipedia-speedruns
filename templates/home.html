@@ -131,33 +131,6 @@
 
     </div>
 
-
-    <hr class="mt-4">
-    <h4> Top 10 rated players:</h4> Note the <a href="/about#ratings">rating system</a> is based on each player's performance on daily prompts, and is still experimental.</p>
-
-    <div class="row justify-content-md-center">
-        <div class="col-6">
-            <table class="table">
-                <thead>
-                    <th>#</th>
-                    <th>Username</th>
-                    <th>Rating</th>
-                </thead>
-                <tbody>
-                    <tr v-for="(user, index) in topUsers" v-cloak>
-                        <td>[[index + 1]]</td>
-                        <td><a v-bind:href="'/profile/' + user.username">[[user.username]]</a></td>
-                        <td>[[user.rating]]</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-
-
-
-
     <hr class="mt-4">
 
     <div>
