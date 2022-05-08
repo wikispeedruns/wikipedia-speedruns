@@ -138,10 +138,8 @@ a:hover, a:hover * {
     }
 }
 
-@media (min-width: 500px) {
-    .l-col {
-        white-space: nowrap
-    }
+.l-col{
+    white-space: nowrap;
 }
 
 
