@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `sprint_runs` (
     `run_id` INT NOT NULL AUTO_INCREMENT,
     `start_time` TIMESTAMP(3) NULL,
     `end_time` TIMESTAMP(3) NULL,
-    `play_time` INT,
+    `play_time` FLOAT,
     `finished` BOOLEAN DEFAULT 0,
     `path` JSON NULL,
     /*
@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS `lobby_runs` (
 
     `start_time` TIMESTAMP(3) NULL,
     `end_time` TIMESTAMP(3) NULL,
-    `play_time` INT,
+    `play_time` FLOAT,
     `finished` BOOLEAN DEFAULT 0,
     `path` JSON NOT NULL,
     /*

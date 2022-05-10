@@ -21,7 +21,7 @@ def update_sprint_run(run_id: int, start_time: datetime, end_time: datetime,
 
     duration = (end_time - start_time).total_seconds()
     total_load_time = sum([entry.get('loadTime') for entry in path])
-    play_time = (duration - total_load_time) * 1000
+    play_time = duration - total_load_time
 
     query_args = {
         "run_id": run_id,
