@@ -158,3 +158,16 @@ def get_lobby_runs(lobby_id, prompt_id):
     runs = lobbys.get_lobby_runs(lobby_id, prompt_id)
 
     return jsonify(runs), 200
+
+
+# Run
+@lobby_api.get("/<int:lobby_id>/run/<int:run_id>")
+def get_lobby_run(lobby_id, run_id):
+    
+    print(lobby_id, run_id)
+    if not lobbys.check_membership(lobby_id, session):
+        return "You do not have access to this lobby", 401
+
+    runs = lobbys.get_lobby_run(lobby_id, run_id)
+
+    return jsonify(runs), 200

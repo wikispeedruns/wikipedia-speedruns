@@ -1,0 +1,502 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="container-xxl">
+    <div class="">
+    <div id="app">
+        <div class="container my-4">
+        <div class="row">
+            <div class="col">
+            <div class="row">
+                <div class="col-auto">
+                <h4>PRIMARY</h4>
+                <div
+                    v-for="(category, index) in categories"
+                    class="form-check"
+                >
+                    <input
+                    class="form-check-input"
+                    type="radio"
+                    name="categorySel1"
+                    v-bind:id="'primary_' + index"
+                    />
+                    <label
+                    class="form-check-label"
+                    v-bind:for="'primary_' + index"
+                    >
+                    [[category.disp]]
+                    </label>
+                </div>
+                </div>
+                <div class="col-auto">
+                <h4>SECONDARY</h4>
+                <div
+                    v-for="(category, index) in categories"
+                    class="form-check"
+                >
+                    <input
+                    class="form-check-input"
+                    type="radio"
+                    name="categorySel2"
+                    v-bind:id="'secondary_' + index"
+                    />
+                    <label
+                    class="form-check-label"
+                    v-bind:for="'secondary_' + index"
+                    >
+                    [[category.disp]]
+                    </label>
+                </div>
+                <button
+                    @click="clearSel('categorySel2')"
+                    class="btn btn-outline-secondary"
+                >
+                    <b>Clear Secondary</b>
+                </button>
+                </div>
+            </div>
+            <div class="row py-4 my-4">
+                <div class="col-auto py-2">
+                <button @click="submit" class="btn btn-outline-primary">
+                    <b>Submit and Get Next</b>
+                </button>
+                </div>
+                <div class="col-auto py-2">
+                <button @click="reset" class="btn btn-outline-secondary">
+                    <b>Skip and Get Next</b>
+                </button>
+                </div>
+                <div class="col-auto py-2">
+                <button @click="save" class="btn btn-outline-secondary">
+                    <b>Save local progress</b>
+                </button>
+                <div>
+                    [[this.articlesProcessed]] articles since last save/cache
+                </div>
+                </div>
+                <div class="col-auto py-2">
+                <div class="form-group">
+                    <label for="catName"></label>
+                    <input type="text" class="form-control" id="catName">
+                </div>
+                <button @click="getSpecificCat" class="btn btn-outline-secondary">
+                    <b>Load a specific 'Category:' article</b>
+                </button>
+                </div>
+            </div>
+            <div class="row py-4">
+                <div class="py-2">
+                <h4>Natural Sciences</h4>
+                <p>
+                    Concepts, important people, practices, and institutions
+                    related to the theoretical study of the many natural science
+                    fields. Including yet not limited to: Math, Physics,
+                    Chemistry, Astronomy, Geology, Microbiology, etc.
+                </p>
+                <p>
+                    Examples: famous physicists, math concepts such as numbers,
+                    chemical compounds and elements, research tools such as the
+                    Hubble Space Telescope
+                </p>
+                </div>
+                <div class="py-2">
+                <h4>Geography</h4>
+                <p>Natural and human geography.</p>
+                <p>
+                    Examples: Countries, continents, provinces, human settlements
+                    (cities/towns/villages), mountain ranges, oceans, rivers
+                </p>
+                </div>
+
+                <div class="py-2">
+                <h4>Ecology</h4>
+                <p>Plants, Animals, and ecosystems in which they live in.</p>
+                <p>
+                    Examples: birds, mammals, trees, flowers, ecology concepts
+                </p>
+                </div>
+                <div class="py-2">
+                <h4>Technology</h4>
+                <p>
+                    Application of science as products/tools/etc. Covers most of
+                    the Engineering field
+                </p>
+                <p>
+                    Examples: weapons, vehicles, energy, internet, computer
+                    engineering, etc.
+                </p>
+                </div>
+                <div class="py-2">
+                <h4>Human Health & Medicine</h4>
+                <p>
+                    Events, people, institutions, and concepts related to public
+                    health
+                </p>
+                <p>
+                    Examples: Health crises, diseases, hospitals, traditional
+                    medicine, government health departments, etc.
+                </p>
+                </div>
+                <div class="py-2">
+                <h4>Human Society</h4>
+                <p>
+                    Concepts and entities related to human society, as well as the
+                    study of human society. Including but not limited to:
+                    Sociology, Anthropology, Linguistics, Human institutions and
+                    organizations
+                </p>
+                <p>
+                    Examples: Schools, language groups, human settlement patterns,
+                    sociological concepts, group identities, occupations, etc.
+                </p>
+                </div>
+                <div class="py-2">
+                <h4>People</h4>
+                <p>Individuals or groups of people</p>
+                <p>
+                    Examples: Modern and historic influential figures, people
+                    grouped by one characteristic, etc.
+                </p>
+                </div>
+                <div class="py-2">
+                <h4>Government & Politics</h4>
+                <p>
+                    Events and entities related to global/regional government,
+                    politics, and law.
+                </p>
+                <p>
+                    Examples: Criminals, electoral candidates, political
+                    decisions, legislative entities, government agencies,
+                    protests, civil wars, etc.
+                </p>
+                </div>
+                <div class="py-2">
+                <h4>Economy & Business</h4>
+                <p>
+                    Institutions and concepts related to micro/macroeconomics,
+                    entrepreneurship, currency, etc.
+                </p>
+                <p>
+                    Examples: Companies and corporations, micro/macroeconomic
+                    concepts, banks, concept of unemployment, etc.
+                </p>
+                </div>
+
+                <div class="py-2">
+                <h4>Consumer Goods</h4>
+                <p>Everyday items that we as people use</p>
+                <p>Examples: furniture, beauty products, clothing, etc.</p>
+                </div>
+                <div class="py-2">
+                <h4>The Arts</h4>
+                <p>
+                    Fine arts, literature, architecture, as well as the history
+                    and influential figures of these concepts.
+                </p>
+                <p>Examples: Painters, writers, architectural styles, etc.</p>
+                </div>
+                <div class="py-2">
+                <h4>Human History</h4>
+                <p>Events, concepts, and people related to human history.</p>
+                <p>
+                    Example: wars and military history, notable figures, ancient
+                    civilization, “notable plantations on Espanola during the 18th
+                    century”, etc.
+                </p>
+                </div>
+                <div class="py-2">
+                <h4>Religion</h4>
+                <p>Religious figures, concepts, institutions, events</p>
+                <p>
+                    Examples: churches and congregations, head of faiths,
+                    scriptures, religious wars, etc.
+                </p>
+                </div>
+                <div class="py-2">
+                <h4>Food & Drinks</h4>
+                <p>Yum yum food drincc</p>
+                <p>
+                    Examples: Bread, pizza, regional cuisine, restaurants, spices,
+                    crops, fruits, etc.
+                </p>
+                </div>
+                <div class="py-2">
+                <h4>Sports & Games</h4>
+                <p>
+                    Individuals, teams, events, institutions, and concepts related
+                    to sports and any sort of game.
+                </p>
+                <p>
+                    Examples: sports teams, players, sports events, description of
+                    a sport/game, video games, board games, etc.
+                </p>
+                </div>
+                <div class="py-2">
+                <h4>Entertainment</h4>
+                <p>
+                    People, institutions, and concepts surrounding media and
+                    entertainment in general. Including but not limited to: Music,
+                    TV & film, Social media, performance arts, etc.
+                </p>
+                <p>
+                    Examples: celebrities, albums, TV stations, TV series, radio
+                    stations
+                </p>
+                </div>
+            </div>
+            </div>
+            <div class="col">
+            <div>
+                <h4>Category name</h4>
+                <div>[[categoryName]]</div>
+            </div>
+            <div class="py-3">
+                <h5>Subcategories</h5>
+                <ul>
+                <li v-for="sc in subcategories">[[sc]]</li>
+                </ul>
+            </div>
+            <div>
+                <h5>Articles</h5>
+                <ul>
+                <li v-for="sa in subarticles">[[sa.title]]</li>
+                </ul>
+            </div>
+            </div>
+        </div>
+
+        
+        </div>
+    </div>
+    </div>
+    <script>
+    async function getRandomArticles() {
+        const url =
+        "https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&list=random&rnlimit=15";
+        const resp = await fetch(url, { mode: "cors" });
+        const body = await resp.json();
+        return body["query"]["random"];
+    }
+
+    async function getArticlesUnderCategory(categoryTitle) {
+        let output = [];
+        let categoryNames = [];
+
+        let url = `https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&list=categorymembers&cmtitle=${categoryTitle}&cmtype=subcat`;
+        const resp = await fetch(url, { mode: "cors" });
+        const body = await resp.json();
+        const subcats = body["query"]["categorymembers"];
+        subcats.forEach((sc) => categoryNames.push(sc["title"]));
+        categoryNames.push(categoryTitle);
+
+        categoryNames.forEach(async function (sc) {
+        url = `https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&list=categorymembers&cmtitle=${sc}`;
+        const scresp = await fetch(url, { mode: "cors" });
+        const scbody = await scresp.json();
+        scbody["query"]["categorymembers"].forEach(function (m) {
+            if (m["ns"] == 0) output.push(m);
+        });
+        });
+
+        return { subcats: categoryNames, articles: output };
+    }
+
+    var app = new Vue({
+        delimiters: ["[[", "]]"],
+        el: "#app",
+
+        data: {
+        categories: [
+            { disp: "Natural Sciences", id: "NSCI" },
+            { disp: "Geography", id: "GEOG" },
+            { disp: "Ecology", id: "ECOL" },
+            { disp: "Technology", id: "TECH" },
+            { disp: "Human Health & Medicine", id: "HLTH" },
+            { disp: "Human Society", id: "SSCI" },
+            { disp: "People", id: "PPLE" },
+            { disp: "Government & Politics", id: "GOVM" },
+            { disp: "Economy & Business", id: "ECMY" },
+            { disp: "Consumer goods", id: "CSMR" },
+            { disp: "The Arts", id: "CULT" },
+            { disp: "Human History", id: "HIST" },
+            { disp: "Religion", id: "RELG" },
+            { disp: "Food & Drinks", id: "FOOD" },
+            { disp: "Sports & Games", id: "SPRT" },
+            { disp: "Entertainment", id: "ENTR" },
+        ],
+        categoryName: "",
+        subcategories: [],
+        subarticles: [],
+        cache: {},
+        articlesProcessed: 0,
+        },
+
+        methods: {
+        submit: async function () {
+            let labels = {};
+            let primaryFound = false;
+            for (let i = 0; i < this.categories.length; i++) {
+            if (document.getElementById("primary_" + String(i)).checked) {
+                labels[this.categories[i]["id"]] = 2;
+                primaryFound = true;
+            } else if (
+                document.getElementById("secondary_" + String(i)).checked
+            ) {
+                labels[this.categories[i]["id"]] = 1;
+            } else {
+                labels[this.categories[i]["id"]] = 0;
+            }
+            }
+
+            if (!primaryFound) {
+            alert("Must label at least one primary");
+            } else {
+            for (let i = 0; i < this.subarticles.length; i++) {
+                let article = this.subarticles[i];
+                let art = {
+                name: article["title"],
+                labels: labels,
+                };
+                this.cache[String(article["pageid"])] = art;
+                this.articlesProcessed += 1;
+            }
+
+            await this.reset();
+            }
+        },
+
+        getSpecificCat: async function() {
+            const title = document.getElementById("catName").value;
+            await this.updateWithCatName(title);
+        },
+
+        save: function () {
+            this.articlesProcessed = 0;
+            let data = [
+            [
+                "id",
+                "name",
+                "ENTR",
+                "HIST",
+                "NSCI",
+                "TECH",
+                "ECMY",
+                "SSCI",
+                "HLTH",
+                "CSMR",
+                "GOVM",
+                "RELG",
+                "CULT",
+                "FOOD",
+                "SPRT",
+                "GEOG",
+                "ECOL",
+                "PPLE",
+            ],
+            ];
+            let keys = Object.keys(this.cache);
+
+            for (let i = 0; i < keys.length; i++) {
+            let item = this.cache[keys[i]];
+            data.push([
+                keys[i],
+                JSON.stringify(item["name"]),
+                item["labels"]["ENTR"],
+                item["labels"]["HIST"],
+                item["labels"]["NSCI"],
+                item["labels"]["TECH"],
+                item["labels"]["ECMY"],
+                item["labels"]["SSCI"],
+                item["labels"]["HLTH"],
+                item["labels"]["CSMR"],
+                item["labels"]["GOVM"],
+                item["labels"]["RELG"],
+                item["labels"]["CULT"],
+                item["labels"]["FOOD"],
+                item["labels"]["SPRT"],
+                item["labels"]["GEOG"],
+                item["labels"]["ECOL"],
+                item["labels"]["PPLE"],
+            ]);
+            }
+            let csvContent =
+            "data:text/csv;charset=utf-8," +
+            data.map((e) => e.join(",")).join("\n");
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `data_${Date.now()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+        },
+
+        updateWithCatName: async function(name) {
+            const parse = await getArticlesUnderCategory(name);
+            
+            await new Promise(r => setTimeout(r, 300));
+            console.log(parse["articles"].length)
+            console.log(name)
+            
+            if (parse["articles"].length < 3) {  
+                return false;
+            } 
+            this.categoryName = name;
+            this.subarticles = parse["articles"];
+            this.subcategories = parse["subcats"];
+
+            return true;
+        },
+
+        reset: async function () {
+            
+            let outerCriteriaMet = false;
+
+            while (!outerCriteriaMet) {
+
+            let criteriaMet = false;
+            let name = '';
+
+            while (!criteriaMet) {
+                let articles = await getRandomArticles();
+                for (let i = 0; i < articles.length; i++) {
+                if (articles[i]["ns"] == 14) {
+                    name = articles[i]["title"];
+                    criteriaMet = true;
+                    break;
+                }
+                }
+            }
+
+            //this.categoryName = await getRandomCategory(article['title'])
+            outerCriteriaMet = await this.updateWithCatName(name)
+            }
+
+            this.resetSelections();
+        },
+
+        resetSelections: function () {
+            this.clearSel("categorySel1");
+            this.clearSel("categorySel2");
+        },
+
+        clearSel: function (tag) {
+            let ele = document.getElementsByName(tag);
+            for (let i = 0; i < ele.length; i++) {
+            ele[i].checked = false;
+            }
+        },
+        },
+
+        created: async function () {
+        await this.reset();
+        },
+    });
+    </script>
+</div>
+
+
+{% endblock %}
+

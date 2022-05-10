@@ -46,13 +46,36 @@ a:hover, a:hover * {
 }
 
 .HUDwrapper {
-    position:fixed;
+    position: fixed;
     z-index: 1000;
-    width:auto !important;
     bottom: 0;
+
+    left: 0;
+    right: 0;
+
+    height: auto;
+    margin: 0 auto;
+    padding-bottom: 1rem;
+
+    pointer-events: none;
+}
+
+.HUDwrapper-fade {
+    background-image: linear-gradient(#ffffff00, #ffffffbb, #ffffffbb, #ffffff);
+}
+
+.HUD {
+    display: inline-block;
+    min-width: 40%;
+    width:auto;
     background-color: #F8F8F8;
-    margin-bottom: 15px;
     border: 2px solid #000000 !important;
+
+    height: auto;
+    top: 0rem;
+
+    overflow-y: hidden;
+    pointer-events: auto;
 }
 
 .HUDwrapper-mobile {
@@ -63,6 +86,9 @@ a:hover, a:hover * {
     left:0;
     background-color: #F8F8F8;
     border-top: 3px solid #000000 !important;
+
+    padding: 5px 10px;
+    font-size: 14px;
 }
 
 @media (max-width: 1200px) {
@@ -85,8 +111,9 @@ a:hover, a:hover * {
     }
 
     .show-on-mobile {
-        display: block;
+        display: contents;
     }
+
 
     .show-on-desktop {
         display: none;
@@ -104,21 +131,7 @@ a:hover, a:hover * {
     }
 
     .show-on-desktop {
-        display: block;
-    }
-
-    .tleft {
-        float: left;
-        margin: 15px 15px;
-        overflow: auto;
-        clear: left;
-    }
-
-    .tright {
-        float: right;
-        margin: 15px 15px;
-        overflow: auto;
-        clear: right;
+        display: contents;
     }
 
     .thumb {
@@ -130,10 +143,8 @@ a:hover, a:hover * {
     }
 }
 
-@media (min-width: 500px) {
-    .l-col {
-        white-space: nowrap
-    }
+.l-col{
+    white-space: nowrap;
 }
 
 
@@ -141,7 +152,7 @@ a:hover, a:hover * {
     font-weight: bold !important;
 }
 
-.table td.fit, 
+.table td.fit,
 .table th.fit {
     white-space: nowrap;
     width: 1%;
