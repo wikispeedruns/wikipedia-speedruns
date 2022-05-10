@@ -45,7 +45,7 @@ def create_run():
     return "Error creating run", 500
 
 
-@run_api.post('/<id>')
+@run_api.patch('/<id>')
 def update_run(id):
     '''
     Updates an existing run given a run, start time, end time, a finished flag, and a path.
@@ -62,6 +62,7 @@ def update_run(id):
         'path': request.json['path']
     })
 
+    print(finished, path)
 
     db = get_db()
     with db.cursor() as cursor:

@@ -101,8 +101,7 @@ let app = new Vue({
                 this.endTime = Date.now();
             }
             
-            // Will be non-blocking for browsers that support Beacon, otherwise uses Fetch
-            submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path, !!navigator.sendBeacon);
+            submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
         };
 
         // Update run info on exit/page hide

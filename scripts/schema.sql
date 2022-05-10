@@ -2,9 +2,9 @@
     This file should have parity with the actual database.
     For any changes to the database, those changes should be reflected here.
 
-    Schema Version: 2.0
+    Schema Version: 2.1
     This version number should be incremented with any change to the schema.
-    Keep this up-to-date in db.py
+    Keep this up-to-date with db.py
 */
 
 -- TODO Might want to do this at some point/
@@ -123,8 +123,8 @@ CREATE TABLE IF NOT EXISTS `lobby_runs` (
 	`user_id` INT NULL,
     `name` VARCHAR(20)  NULL,
 
-    `start_time` TIMESTAMP(3) NOT NULL,
-    `end_time` TIMESTAMP(3) NOT NULL,
+    `start_time` TIMESTAMP(3) NULL,
+    `end_time` TIMESTAMP(3) NULL,
     `finished` BOOLEAN DEFAULT 0,
     `path` JSON NOT NULL,
     /*
