@@ -39,7 +39,7 @@ var LeaderboardRow = {
             </td>
             <td v-else><strong>You</strong></td>
 
-            <td class="l-col">{{(run.run_time/1000000).toFixed(3)}} s</td>
+            <td class="l-col">{{(run.play_time).toFixed(3)}} s</td>
             <td>{{run.path.length}}</td>
 
             <td style="min-width:400px">
@@ -420,7 +420,7 @@ var app = new Vue({
         this.filterByTime();
 
         if (this.sortMode === 'path') {
-            this.runs.sort((a, b) => (a.path.length > b.path.length) ? 1 : ((a.path.length === b.path.length) ? ((a.run_time > b.run_time) ? 1 : -1) : -1))
+            this.runs.sort((a, b) => (a.path.length > b.path.length) ? 1 : ((a.path.length === b.path.length) ? ((a.play_time > b.play_time) ? 1 : -1) : -1))
         }
 
         this.paginate();

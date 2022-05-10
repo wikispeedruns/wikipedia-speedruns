@@ -194,13 +194,13 @@ def get_prompt(id):
 def get_prompt_leaderboard(id, run_id):
     # TODO this could probably return details as well
     query = '''
-    SELECT run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
+    SELECT run_id, path, runs.user_id, username, play_time 
     FROM runs
     JOIN (
             SELECT users.user_id, username, MIN(start_time) AS first_run 
             FROM runs
             JOIN users ON users.user_id=runs.user_id
-            WHERE prompt_id=%s AND end_time IS NOT NULL
+            WHERE prompt_id=%s AND finished IS TRUE
             GROUP BY user_id
     ) firsts
     ON firsts.user_id=runs.user_id AND first_run=start_time
@@ -209,14 +209,14 @@ def get_prompt_leaderboard(id, run_id):
     args = [id]
 
     specificRunQuery = '''
-    SELECT runs.run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time
+    SELECT runs.run_id, path, runs.user_id, username, play_time
     FROM runs
     LEFT JOIN users
     ON runs.user_id=users.user_id
     WHERE runs.run_id=%s
     '''
 
-    ordering = f'\nORDER BY run_time'
+    ordering = f'\nORDER BY play_time'
 
     if run_id:
         query = f'({query}) UNION ({specificRunQuery})'
@@ -226,12 +226,11 @@ def get_prompt_leaderboard(id, run_id):
     
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        # print(cursor.mogrify(query, tuple(args)))         # debug
         cursor.execute(query, tuple(args))
         results = cursor.fetchall()
 
         for run in results:
-            run['path'] = json.loads(run['path'])
+            run['path'] = json.loads(run['path'])['path']
 
         return jsonify(results)
     
