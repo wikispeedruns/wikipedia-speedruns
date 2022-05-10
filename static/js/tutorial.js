@@ -100,7 +100,8 @@ Vue.component('tutorial', {
             // currentArticle: A hint for if the user goes back to load the previous article
             tutorial: [
                 {
-                    text: "Welcome to the WikiSpeedruns Tutorial!"
+                    text: "Welcome to the WikiSpeedruns Tutorial!",
+                    highlight: ".HUD"
                 },
                 {
                     text: "The goal of the game is to get from one Wikipedia page to another as \
@@ -114,16 +115,16 @@ Vue.component('tutorial', {
                     highlight: "#time-box"
                 },
                 {
-                    text: "Fun Fact: This prompt, 'Walt Whitman' to 'Walt Disney', was the first ever released on WikiSpeedruns.",
+                    text: "Fun Fact: 'Walt Whitman' to 'Walt Disney', was the first prompt ever released on WikiSpeedruns.",
                 },
                 {
                     text: "Before you get started, let's go over a few basic rules."
                 },
                 {
-                    text: "1. Any link is fair game, however not all links may be present."
+                    text: "1. Any link shown on the page is fair game. Note though that some links (e.g. disambiguation links) have been removed."
                 },
                 {
-                    text: "2. Using any sort of find in page is prohibited."
+                    text: "2. Using any sort of find in page through your browser is prohibited."
                 },
                 {
                     text: "3. Going back is not allowed, you have to find your way back by clicking links! Going back \
@@ -211,6 +212,10 @@ Vue.component('tutorial', {
                 };
             });
         }
+    },
+
+    mounted: function() {
+        this.highlightElement("#tutorial");
     },
 
     methods: {

@@ -62,7 +62,7 @@
                     </div>
                 </div>
             </div>
-            <div class="HUD" style="position:absolute; right: 0.75rem; width: 48% !important; height: 8rem;">
+            <div class="HUD" id="tutorial" style="position:absolute; right: 0.75rem; width: 48% !important; height: 8rem;">
                 <div class="px-2 py-2" style="height: 100%">
                     <tutorial
                         v-bind:current-article="currentArticle"
@@ -96,6 +96,7 @@
                 <hr>
 
                 <tutorial
+                    id="tutorial"
                     v-bind:current-article="currentArticle"
                     v-on:change-article="renderer.loadPage($event)"
                 ></tutorial>
