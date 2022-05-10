@@ -86,7 +86,11 @@
 
     <countdown-timer id="countdown-box" v-on:start-game="start">
         <p>Starting Article: <strong>[[startArticle]]</strong></p>
-        <p>Goal Article: <strong>[[endArticle]]</strong></p>
+        <p>Goal Article: <strong>[[endArticle]] </strong>
+            <small style="cursor: pointer;" :href="`/wiki/${endArticle}`" @click="showPreview">
+                ⓘ
+            </small>
+        </p>
         <p v-if="promptRated && promptActive && !promptPlayed" class="text-danger">This is your rated attempt, leaving this page will count as a forfeit!</p>
         <p v-else-if="promptRated">This is a practice attempt: your score will not appear on the public leaderboard</p>
     </countdown-timer>
