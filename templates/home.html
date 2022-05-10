@@ -21,13 +21,13 @@
     <p >There are a few simple rules:<br>
         <ul class="mb-4">
             <li>Any link shown on the page is fair game.</li>
-            <li>DO NOT use Ctrl+F/find in your browser!</li>
+            <li>DO NOT use the browser find tool!</li>
             <li>Live with your mistakes (the back button will end your run).</li>
             <li>Luck is king, so put on your lucky hat and lucky socks!</li>
         </ul>
     </p>
 
-    <p>Play the tutorial <a href="/play/tutorial">here</a></p>
+    <p>Play the <b>tutorial</b> <a href="/play/tutorial">here</a>!</p>
 
     <div class="alert alert-info my-0" role="alert" v-if="loggedIn">
         <b>**NEW**: </b> Try creating a private lobby <a href="/lobby/create" class="alert-link"><u>here</u></a>
@@ -60,10 +60,10 @@
 
                                     <td class="text-center">
                                         <template v-if="prompt.played">
-                                            <a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a>
+                                            <span><i class="bi bi-check-lg"></i></span>
                                         </template>
                                         <template v-else>
-                                            <span title="Play this prompt to see the results!">-</span>
+                                            <span>-</span>
                                         </template>
                                     </td>
                                 </tr>
@@ -78,7 +78,7 @@
                 </div>
 
                 <div class="card-footer text-muted">
-                    These prompts are <a href="/about#ratings">rated</a>. Only your <b>first run</b> counts!
+                    Play the daily prompt <span v-if="!loggedIn">while logged in</span> to start<span v-if="loggedIn">/continue</span> your streak! 🔥
                 </div>
             </div>
 
@@ -103,10 +103,10 @@
                                 <td>[[prompt.start]]</td>
                                 <td class="text-center">
                                     <template v-if="prompt.played">
-                                        <a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a>
+                                        <span><i class="bi bi-check-lg"></i></span>
                                     </template>
                                     <template v-else>
-                                        <span title="Play this prompt to see the results!">-</span>
+                                        <span>-</span>
                                     </template>
                                 </td>
 
