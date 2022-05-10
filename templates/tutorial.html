@@ -37,32 +37,32 @@
          Most importantly the child tutorial component won't be created twice.
     -->
     <div class="show-on-desktop" v-if="!isMobile">
-        <div class="HUDwrapper container-xxl" >
-            <div class="HUD" id="time-box" style="width: 45% !important; height: 8rem;">
-                <div class="row flex-row">
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
+        <div class="HUDwrapper HUDwrapper-fade container-xxl" >
+            <div class="HUD" id="time-box" style="width: 48% !important; height: 8rem;">
+                <div class="row flex-row m-0">
+                    <div class="col-sm-auto text-nowrap pe-8 pt-2">
                         Goal Article<br><strong id="endarticle">[[endArticle]]
-                            <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
+                            <small id="timebox-preview" style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
                                 ⓘ
                             </small>
 
                         </strong>
 
                     </div>
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
+                    <div class="col-sm-auto text-nowrap pe-8 pt-2">
                         Links clicked<br><strong>[[path.length - 1]]</strong>
                     </div>
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
+                    <div class="col-sm-auto text-nowrap pe-8 pt-2">
                         Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
                     </div>
                 </div>
-                <div class="row flex-row">
-                    <div class="col-lg-auto text-nowrap px-4 py-2">
+                <div class="row flex-row m-0">
+                    <div class="col-lg-auto text-nowrap pe-8 py-2">
                         Current Article<br><strong>[[currentArticle]]</strong>
                     </div>
                 </div>
             </div>
-            <div class="HUD" style="right: 5%; width: 45% !important; height: 8rem;">
+            <div class="HUD" id="tutorial" style="position:absolute; right: 0.75rem; width: 48% !important; height: 8rem;">
                 <div class="px-2 py-2" style="height: 100%">
                     <tutorial
                         v-bind:current-article="currentArticle"
@@ -96,6 +96,7 @@
                 <hr>
 
                 <tutorial
+                    id="tutorial"
                     v-bind:current-article="currentArticle"
                     v-on:change-article="renderer.loadPage($event)"
                 ></tutorial>

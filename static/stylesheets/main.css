@@ -53,24 +53,29 @@ a:hover, a:hover * {
     left: 0;
     right: 0;
 
-
-    height: 8rem;
+    height: auto;
     margin: 0 auto;
+    padding-bottom: 1rem;
+
+    pointer-events: none;
+}
+
+.HUDwrapper-fade {
+    background-image: linear-gradient(#ffffff00, #ffffffbb, #ffffffbb, #ffffff);
 }
 
 .HUD {
-    position: absolute;
+    display: inline-block;
     min-width: 40%;
-    width:auto !important;
+    width:auto;
     background-color: #F8F8F8;
     border: 2px solid #000000 !important;
 
     height: auto;
-    min-height: 100%;
+    top: 0rem;
 
-    bottom: 0;
-    margin-bottom: 15px;
-
+    overflow-y: hidden;
+    pointer-events: auto;
 }
 
 .HUDwrapper-mobile {
