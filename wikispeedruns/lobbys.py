@@ -6,8 +6,10 @@ from unittest import result
 
 import pymysql
 
-from db import get_db
+from db import get_db, get_db_version
 from pymysql.cursors import DictCursor
+
+from wikispeedruns import runs
 
 import secrets
 
@@ -150,16 +152,27 @@ def get_lobby_user_info(lobby_id: int, user_id: Optional[int]) -> Optional[dict]
 # Lobby Runs
 
 def add_lobby_run(lobby_id: int, prompt_id: int,
-                  start_time: datetime, end_time: datetime, path: str,
-                  user_id: Optional[int]=None, name: Optional[str]=None):
+                  start_time: datetime, end_time: datetime, path: List[runs.PathEntry],
+                  finished: bool, user_id: Optional[int]=None, name: Optional[str]=None):
 
+
+    pathStr = json.dumps({
+        'version': get_db_version(),
+        'path': path
+    })
+
+    duration = (end_time - start_time).total_seconds()
+    total_load_time = sum([entry.get('loadTime') for entry in path])
+    play_time = (duration - total_load_time) * 1000
 
     query_args = {
         "lobby_id": lobby_id,
         "prompt_id": prompt_id,
         "start_time": start_time,
         "end_time": end_time,
-        "path": path,
+        "play_time": play_time,
+        "finished": finished,
+        "path": pathStr,
         "user_id": None,
         "name": None
     }
@@ -175,8 +188,8 @@ def add_lobby_run(lobby_id: int, prompt_id: int,
 
     with db.cursor() as cursor:
         query = f"""
-        INSERT INTO lobby_runs (lobby_id, prompt_id, start_time, end_time, path, user_id, `name`)
-        VALUES (%(lobby_id)s, %(prompt_id)s, %(start_time)s, %(end_time)s, %(path)s, %(user_id)s, %(name)s);
+        INSERT INTO lobby_runs (lobby_id, prompt_id, start_time, end_time, play_time, finished, path, user_id, `name`)
+        VALUES (%(lobby_id)s, %(prompt_id)s, %(start_time)s, %(end_time)s, %(play_time)s, %(finished)s, %(path)s, %(user_id)s, %(name)s);
         """
         cursor.execute(query, query_args)
 
@@ -188,7 +201,7 @@ def add_lobby_run(lobby_id: int, prompt_id: int,
 
 def get_lobby_runs(lobby_id: int, prompt_id: Optional[int]=None):
     query = """
-        SELECT run_id, prompt_id, users.username, name, start_time, end_time, `path`,
+        SELECT run_id, prompt_id, users.username, name, start_time, end_time, play_time, finished, `path`,
         TIMESTAMPDIFF(MICROSECOND, start_time, end_time) AS run_time
         FROM lobby_runs
         LEFT JOIN users ON users.user_id=lobby_runs.user_id
@@ -208,7 +221,6 @@ def get_lobby_runs(lobby_id: int, prompt_id: Optional[int]=None):
     db = get_db()
 
     with db.cursor(cursor=DictCursor) as cursor:
-        print(cursor.mogrify(query, query_args))
         cursor.execute(query, query_args)
         results = cursor.fetchall()
         for run in results:

@@ -1,13 +1,13 @@
 from flask import jsonify, request, Blueprint, session
 from util.decorators import check_user, check_request_json
 
-from db import get_db, get_db_version
+from db import get_db
 from pymysql.cursors import DictCursor
 
 import json
 
 from datetime import datetime
-from wikispeedruns import prompts
+from wikispeedruns import prompts, runs
 
 
 run_api = Blueprint('runs', __name__, url_prefix='/api/runs')
@@ -45,33 +45,24 @@ def create_run():
     return "Error creating run", 500
 
 
-@run_api.patch('/<id>')
-def update_run(id):
+@run_api.patch('/<int:run_id>')
+@check_request_json({'start_time':int, 'end_time':int, 'finished':bool, 'path':list})
+def update_run(run_id):
     '''
     Updates an existing run given a run, start time, end time, a finished flag, and a path.
 
-    Returns the user ID of the run updated.
+    Returns the run ID of the run updated.
     '''
-    query = 'UPDATE `sprint_runs` SET `start_time`=%s, `end_time`=%s, `finished`=%s, `path`=%s WHERE `run_id`=%s'
 
-    start_time = datetime.fromtimestamp(request.json['start_time']/1000)
-    end_time = datetime.fromtimestamp(request.json['end_time']/1000)
-    finished = request.json['finished']
-    path = json.dumps({
-        'version': get_db_version(),
-        'path': request.json['path']
-    })
+    ret_run_id = runs.update_sprint_run(
+        run_id     = run_id,
+        start_time = datetime.fromtimestamp(request.json['start_time']/1000),
+        end_time   = datetime.fromtimestamp(request.json['end_time']/1000),
+        finished   = request.json['finished'],
+        path       = request.json['path']
+    )
 
-    print(finished, path)
-
-    db = get_db()
-    with db.cursor() as cursor:
-        cursor.execute(query, (start_time, end_time, finished, path, id))
-        db.commit()
-
-        return f'Updated run {id}', 200
-
-    return f'Error updating run {id}', 500
+    return jsonify({"run_id": ret_run_id})
 
 
 @run_api.patch('/update_anonymous')
@@ -115,7 +106,7 @@ def get_run(id):
     '''
 
     query = '''
-    SELECT run_id, start_time, end_time, path, prompt_id, user_id
+    SELECT run_id, start_time, end_time, play_time, finished, path, prompt_id, user_id
     FROM sprint_runs
     WHERE run_id=%s
     '''
@@ -130,7 +121,7 @@ def get_run(id):
         if not session.get("admin", False) and (not prompt.get("played", False)):
             return "Cannot view run until prompt has been completed", 401
 
-        if result["path"] is None:
+        if result["finished"] is False:
             return f'Run {id} has not been completed', 401
 
         result['path'] = json.loads(result['path'])

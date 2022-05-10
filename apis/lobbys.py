@@ -131,7 +131,7 @@ def get_lobby_prompts(lobby_id, prompt_id):
 
 # Runs
 @lobby_api.post("/<int:lobby_id>/prompts/<int:prompt_id>/runs")
-@check_request_json({"start_time": int, "end_time": int, "path": list})
+@check_request_json({"start_time": int, "end_time": int, "finished": bool, "path": list})
 def add_lobby_run(lobby_id, prompt_id):
     if not lobbys.check_membership(lobby_id, session):
         return "You do not have access to this lobby", 401
@@ -141,7 +141,8 @@ def add_lobby_run(lobby_id, prompt_id):
         prompt_id  = prompt_id,
         start_time = datetime.datetime.fromtimestamp(request.json['start_time']/1000),
         end_time   = datetime.datetime.fromtimestamp(request.json['end_time']/1000),
-        path       = json.dumps(request.json['path']),
+        finished   = request.json['finished'],
+        path       = request.json['path'],
         user_id    = session.get("user_id"),
         name       = session.get("lobbys", {}).get(str(lobby_id))
     )

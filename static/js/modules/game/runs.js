@@ -20,8 +20,6 @@ async function submitRun(promptId, lobbyId,  runId, startTime, endTime, finished
         "path": path,
     }
 
-    console.log(path);
-    
     if (lobbyId) {
         const response = await fetchJson(`/api/lobbys/${lobbyId}/prompts/${promptId}/runs`, 'POST', reqBody);
         return (await response.json())["run_id"];

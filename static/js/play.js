@@ -96,29 +96,21 @@ let app = new Vue({
     },
 
     created: async function() {
-        const updateRun = () => {
-            if (!this.finished) {
-                this.endTime = Date.now();
-            }
-            
-            submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
-        };
-
         // Update run info on exit/page hide
         document.addEventListener("visibilitychange", function() {
             if (document.visibilityState === "hidden") {
-                updateRun();
+                this.updateRun();
             }  
         });
 
         // Use pagehide for browsers that don't support visibilitychange
         if ("onpagehide" in self) {
-            document.addEventListener("pagehide", updateRun, {capture: true});
+            document.addEventListener("pagehide", this.updateRun, {capture: true});
         } else {
             // Only register beforeunload/unload for browsers that don't support pagehide
             // Avoids breaking bfcache
-            document.addEventListener("unload", updateRun, {capture: true});
-            document.addEventListener("beforeunload", updateRun, {capture: true});
+            document.addEventListener("unload", this.updateRun, {capture: true});
+            document.addEventListener("beforeunload", this.updateRun, {capture: true});
         }
     },
 
@@ -168,6 +160,11 @@ let app = new Vue({
                     "timeReached": timeElapsed,
                     "loadTime": loadTimeSeconds
                 });
+
+                // Update partial run information for non-lobby runs
+                if (this.lobbyId === null) {
+                    this.updateRun();
+                }
             }
 
             this.currentArticle = page;
@@ -240,8 +237,15 @@ let app = new Vue({
         hidePreview: function() {
             this.eventTimestamp = null;
             this.previewContent = null;
-        }
+        },
 
+        updateRun: function() {
+            if (!this.finished) {
+                this.endTime = Date.now();
+            }
+            
+            submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
+        }
     }
 })
 
