@@ -40,23 +40,23 @@ def populate_sprints(cursor):
         VALUES (%s, %s)
     '''
     cursor.executemany(query, [(start, end) for (start, end, _, _) in prompts[30:]])
-    
-    
+
+
 def populate_marathon_prompts(cursor):
     # Create a bunch of marathon prompts
     prompts = []
     checkpoints = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
-    
+
     for i in range(40):
         checkpoints.append(f"{20 + i} (number)")
-        
+
     for i in range(10):
-        reordered = checkpoints[2*i:] + checkpoints[:2*i] 
+        reordered = checkpoints[2*i:] + checkpoints[:2*i]
         start = reordered[0]
         startcps = reordered[1:6]
         cps = reordered[6:]
         seed = i
-        prompts.append((start, json.dumps(startcps), seed, json.dumps(cps)))    
+        prompts.append((start, json.dumps(startcps), seed, json.dumps(cps)))
 
     query = "INSERT INTO `marathonprompts` (start, initcheckpoints, seed, checkpoints) VALUES (%s, %s, %s, %s);"
     cursor.executemany(query, prompts)
@@ -89,8 +89,8 @@ def populate_runs(cursor):
         WHERE used=1 AND active_start <= NOW()
     """
     runs_query = """
-        INSERT INTO sprint_runs (prompt_id, user_id, start_time, end_time, finished, path)
-        VALUES (%(prompt_id)s, %(user_id)s, %(start_time)s, %(end_time)s, %(finished)s, %(path)s)
+        INSERT INTO sprint_runs (prompt_id, user_id, start_time, end_time, play_time, finished, path)
+        VALUES (%(prompt_id)s, %(user_id)s, %(start_time)s, %(end_time)s, %(play_time)s, %(finished)s, %(path)s)
     """
 
     cursor.execute(users_query)
@@ -108,13 +108,28 @@ def populate_runs(cursor):
         for u in users:
             start_time = p["active_start"] + datetime.timedelta(hours=4)
             end_time = p["active_start"] + datetime.timedelta(hours=4, seconds=run_time)
-            path = json.dumps([p["start"], p["end"]])
+            path = json.dumps({
+                "version": "2.1",
+                "path": [
+                    {
+                        "article": p["start"],
+                        "loadTime": 0,
+                        "timeReached": 0
+                    },
+                    {
+                        "article": p["end"],
+                        "loadTime": 0,
+                        "timeReached": 0
+                    }
+                ]
+            })
 
             runs.append({
                 "prompt_id": p["prompt_id"],
                 "user_id": u["user_id"],
                 "start_time": start_time,
                 "end_time": end_time,
+                "play_time": (end_time - start_time).total_seconds(),
                 "finished": True,
                 "path": path,
             })
@@ -122,8 +137,8 @@ def populate_runs(cursor):
 
 
     cursor.executemany(runs_query, runs)
-    
-    
+
+
 def populate_marathon_runs(cursor):
     # Create a run for each user on all marathon prompts
     users_query = "SELECT user_id FROM users"
@@ -140,7 +155,7 @@ def populate_marathon_runs(cursor):
 
     runs = []
     count = 0
-    
+
     for p in prompts:
 
         run_time = 10000
@@ -148,10 +163,10 @@ def populate_marathon_runs(cursor):
         cp = json.loads(p['checkpoints'])
 
         for u in users:
-            
+
             path1 = json.dumps([p["start"], startcp[0], startcp[1], cp[0]])
             checkpoints1 = json.dumps([startcp[0], startcp[1], cp[0]])
-            
+
             path2 = json.dumps([p["start"], startcp[0], startcp[1]] + cp[:5])
             checkpoints2 = json.dumps([startcp[0], startcp[1]] + cp[:5])
 
@@ -163,7 +178,7 @@ def populate_marathon_runs(cursor):
                 run_time,
                 count%2
             ))
-            
+
             count += 1
             run_time += 200
             runs.append((

@@ -36,7 +36,7 @@ def convert_paths(db_name):
                 if type(path) != list: continue
 
                 path = {
-                    "version": 1.0,
+                    "version": "1.0",
                     "path": [
                         {
                             "article": article,
