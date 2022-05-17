@@ -120,7 +120,7 @@ def get_run(id):
         if result["finished"] is False:
             return f'Run {id} has not been completed', 401
 
-        result['path'] = json.loads(result['path'])
+        result['path'] = json.loads(result['path'])['path']
         return jsonify(result)
 
     return f'Error fetching run {id}', 500

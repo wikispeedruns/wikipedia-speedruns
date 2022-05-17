@@ -1,11 +1,3 @@
-/* play.js is core of processing gameplay. This includes everything from retrieving information about a prompt,
-countdown to start, loading of each wikipedia page, parsing and filtering wikipedia links, processing game logic,
-and submitting runs.
-
-With the new Marathon game mode, many of these components are being reused with different game logic. So many of
-these components should be as modular/generic as possible.
-*/
-
 //JS module imports
 import { serverData } from "./modules/serverData.js";
 import { getRun, getLobbyRun } from "./modules/game/finish.js";
@@ -47,11 +39,11 @@ let app = new Vue({
         promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
 
         lobbyId: null,
-        runId: -1,          //unique ID for the current run. This gets populated upon start of run
+        runId: null,          //unique ID for the current run. This gets populated upon start of run
 
         startTime: null,     //For all game modes, the start time of run (mm elapsed since January 1, 1970)
         endTime: null,       //For all game modes, the end time of run (mm elapsed since January 1, 1970)
-        finalTime: null,
+        playTime: 0,
         loggedIn: false,
 
         played: PLAYED
@@ -62,6 +54,7 @@ let app = new Vue({
         this.loggedIn = "username" in serverData;
 
         this.lobbyId = LOBBY_ID;
+        this.runId = RUN_ID;
 
         let run = null;
         if (this.lobbyId != null) {
@@ -75,10 +68,7 @@ let app = new Vue({
 
         this.startArticle = prompt["start"];
         this.endArticle = prompt["end"];
-
-        var startDate = new Date(run['end_time']);
-        var endDate = new Date(run['start_time']);
-        this.finalTime = startDate.getTime() - endDate.getTime();
+        this.playTime = run["play_time"];
 
         this.path = run['path'].map((entry) => entry["article"])
 
@@ -121,7 +111,7 @@ let app = new Vue({
 
 
         generateResults: function(event) {
-            return `Wiki Speedruns ${this.promptId}\n${this.startArticle}\n${this.path.length - 1} 🖱️\n${(this.finalTime) / 1000} ⏱️`
+            return `Wiki Speedruns ${this.promptId}\n${this.startArticle}\n${this.path.length - 1} 🖱️\n${(this.playTime)} ⏱️`
         },
 
         generatePath: function(event) {
