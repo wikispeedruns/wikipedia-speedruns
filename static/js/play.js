@@ -11,14 +11,10 @@ import { serverData } from "./modules/serverData.js";
 import { startRun, submitRun } from "./modules/game/runs.js";
 
 import { CountdownTimer } from "./modules/game/countdown.js";
-//import { FinishPage } from "./modules/game/finish.js";
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 import { PagePreview } from "./modules/game/pagePreview.js";
 
-import { fireworks } from "./modules/confetti.js";
-
 import { startLocalRun, submitLocalRun } from "./modules/localStorage/localStorageSprint.js";
-
 
 // retrieve the unique prompt_id of the prompt to load
 const PROMPT_ID = serverData["prompt_id"] || null;
@@ -49,7 +45,6 @@ let app = new Vue({
     el: '#app',
     components: {
         'countdown-timer': CountdownTimer,
-        //'finish-page': FinishPage,
         'page-preview': PagePreview
     },
     data: {
@@ -73,14 +68,14 @@ let app = new Vue({
         lobbyId: null,
         runId: -1,          //unique ID for the current run. This gets populated upon start of run
 
-        startTime: null,     //For all game modes, the start time of run (mm elapsed since January 1, 1970)
-        endTime: null,       //For all game modes, the end time of run (mm elapsed since January 1, 1970)
+        startTime: null,     // The start time of run (ms elapsed since January 1, 1970)
+        endTime: null,       // The end time of run (ms elapsed since January 1, 1970)
         elapsed: 0,
         timerInterval: null,
         totalLoadTime: 0,    // Cumulative load time in seconds
 
-        finished: false,     //Flag for whether a game has finished, used for rendering
-        started: false,      //Flag for whether a game has started (countdown finished), used for rendering
+        finished: false,     // Flag for whether a game has finished, used for rendering
+        started: false,      // Flag for whether a game has started (countdown finished), used for rendering
 
         loggedIn: false,
     },
@@ -90,7 +85,7 @@ let app = new Vue({
         document.addEventListener("visibilitychange", function() {
             if (document.visibilityState === "hidden") {
                 this.updateRun();
-            }  
+            }
         });
 
         // Use pagehide for browsers that don't support visibilitychange
@@ -168,12 +163,10 @@ let app = new Vue({
         },
 
         async start() {
-            //Toggle the `started` render flag, which will hide all other elements, and display the rendered wikipage
-
-            //start timer
+            // start timer
             this.startTime = Date.now();
 
-            //set the timer update interval
+            // set the timer update interval
             this.timerInterval = setInterval(() => {
                 const seconds = (Date.now() - this.startTime) / 1000;
                 this.elapsed = seconds - this.totalLoadTime;
@@ -204,7 +197,7 @@ let app = new Vue({
             } else {
                 window.location.replace(`/lobby/${this.lobbyId}/finish?run_id=${this.runId}&played=true`);
             }
-            
+
         },
 
         showPreview: function(e) {
@@ -219,7 +212,7 @@ let app = new Vue({
             if (!this.finished) {
                 this.endTime = Date.now();
             }
-            
+
             submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
         }
     }
