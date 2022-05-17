@@ -155,7 +155,7 @@ def get_lobby_runs(lobby_id: int, prompt_id: Optional[int]=None):
         TIMESTAMPDIFF(MICROSECOND, start_time, end_time) AS run_time
         FROM lobby_runs
         LEFT JOIN users ON users.user_id=lobby_runs.user_id
-        WHERE lobby_id=%(lobby_id)s
+        WHERE lobby_id=%(lobby_id)s AND path IS NOT NULL
     """
 
     query_args = {

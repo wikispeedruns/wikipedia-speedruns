@@ -19,7 +19,7 @@ sprint_api = Blueprint('sprints', __name__, url_prefix='/api/sprints')
 @check_request_json({"start": str, "end": str})
 def create_prompt():
     #print(request.json)
-    
+
     start = request.json.get('start')
     end = request.json.get('end')
 
@@ -165,7 +165,7 @@ def get_prompt_leaderboard(id, run_id):
             GROUP BY user_id
     ) firsts
     ON firsts.user_id=runs.user_id AND first_run=run_id
-    WHERE finished IS TRUE
+    WHERE finished IS TRUE AND path IS NOT NULL
     '''
 
     args = [id]
@@ -193,8 +193,7 @@ def get_prompt_leaderboard(id, run_id):
 
         for run in results:
             pathJson = json.loads(run['path'])['path']
-            run['path'] = [entry['article'] for entry in pathJson]  
-            print(run['path'])
+            run['path'] = [entry['article'] for entry in pathJson]
             if run_id is None and user_id is not None and run['user_id'] == user_id:
                 run_id = run['run_id']
 

@@ -108,10 +108,11 @@ let app = new Vue({
         }
 
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview);
+        await this.renderer.loadPage(this.startArticle);
 
 
         // Update run info on exit/page hide
-        document.addEventListener("visibilitychange", function() {
+        document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === "hidden") {
                 this.updateRun();
             }
@@ -159,7 +160,6 @@ let app = new Vue({
             }
 
             this.currentArticle = page;
-
             this.totalLoadTime += loadTimeSeconds;
 
             //if the page's title matches that of the end article, finish the game, and submit the run
@@ -179,7 +179,6 @@ let app = new Vue({
                 this.elapsed = seconds - this.totalLoadTime;
             }, 50);
 
-            await this.renderer.loadPage(this.startArticle);
 
             this.started = true;
         },
