@@ -152,10 +152,8 @@ let app = new Vue({
                     "loadTime": loadTimeSeconds
                 });
 
-                // Update partial run information for non-lobby runs
-                if (this.lobbyId === null) {
-                    this.updateRun();
-                }
+                // Update partial run information
+                this.updateRun();
             }
 
             this.currentArticle = page;

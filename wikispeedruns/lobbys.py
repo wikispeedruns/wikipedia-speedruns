@@ -154,8 +154,7 @@ def get_lobby_user_info(lobby_id: int, user_id: Optional[int]) -> Optional[dict]
 def add_lobby_run(lobby_id: int, prompt_id: int,
                   start_time: datetime, end_time: datetime, path: List[runs.PathEntry],
                   finished: bool, user_id: Optional[int]=None, name: Optional[str]=None):
-
-
+    # TODO: Update to only create a new lobby run with given prompt_id, lobby_id
     pathStr = json.dumps({
         'version': get_db_version(),
         'path': path
@@ -252,3 +251,38 @@ def get_lobby_run(lobby_id: int, run_id: int):
         results['path'] = json.loads(results['path'])
         return results
 
+
+def update_lobby_run(lobby_id: int, run_id: int, start_time: datetime, end_time: datetime, 
+                      path: List[runs.PathEntry], finished: bool):
+                      
+    pathStr = json.dumps({
+        'version': get_db_version(),
+        'path': path
+    })
+
+    duration = (end_time - start_time).total_seconds()
+    total_load_time = sum([entry.get('loadTime') for entry in path])
+    play_time = duration - total_load_time
+
+    query_args = {
+        "lobby_id": lobby_id,
+        "run_id": run_id,
+        "start_time": start_time,
+        "end_time": end_time,
+        "play_time": play_time,
+        "finished": finished,
+        "path": pathStr
+    }
+    
+    db = get_db()
+    with db.cursor() as cursor:
+        query = f'''
+        UPDATE `lobby_runs` 
+        SET `start_time`=%(start_time)s, `end_time`=%(end_time)s, `play_time`=%(play_time)s, `finished`=%(finished)s, `path`=%(path)s
+        WHERE `run_id`=%(run_id)s AND `lobby_id`=%(lobby_id)s
+        '''
+
+        cursor.execute(query, query_args)
+        db.commit()
+
+    return run_id
