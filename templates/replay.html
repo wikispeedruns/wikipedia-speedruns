@@ -12,20 +12,21 @@
 
 <div id="app">
     <div class="HUDwrapper container">
-        <div class="row flex-row">
-            <div class="col-sm-auto my-auto text-nowrap px-4 py-2">
-                <button v-on:click="previous" class="btn btn-primary" :disabled="path[currentPathIndex] == firstArticle"><i class="bi bi-arrow-left"></i></button>
+        <div class="HUD">
+            <div class="row flex-row m-0">
+                <div class="col-sm-auto my-auto text-nowrap px-4 py-2">
+                    <button v-on:click="previous" class="btn btn-primary" :disabled="path[currentPathIndex] == firstArticle"><i class="bi bi-arrow-left"></i></button>
+                </div>
+                <div class="col-sm-auto text-nowrap px-4 py-2">
+                    Start Article<br><strong>[[firstArticle]]</strong>
+                </div>
+                <div class="col-sm-auto text-nowrap px-4 py-2">
+                    End Article<br><strong>[[lastArticle]]</strong>
+                </div>
+                <div class="col-sm-auto my-auto text-nowrap px-4 py-2">
+                    <button v-on:click="next" class="btn btn-primary" :disabled="path[currentPathIndex] == lastArticle"><i class="bi bi-arrow-right"></i></button>
+                </div>
             </div>
-            <div class="col-sm-auto text-nowrap px-4 py-2">
-                Start Article<br><strong>[[firstArticle]]</strong>
-            </div>
-            <div class="col-sm-auto text-nowrap px-4 py-2">
-                End Article<br><strong>[[lastArticle]]</strong>
-            </div>
-            <div class="col-sm-auto my-auto text-nowrap px-4 py-2">
-                <button v-on:click="next" class="btn btn-primary" :disabled="path[currentPathIndex] == lastArticle"><i class="bi bi-arrow-right"></i></button>
-            </div>
-
         </div>
     </div>
     <div id="wikipedia-frame"></div>
