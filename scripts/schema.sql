@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `sprint_runs` (
     `run_id` INT NOT NULL AUTO_INCREMENT,
     `start_time` TIMESTAMP(3) NULL,
     `end_time` TIMESTAMP(3) NULL,
-    `play_time` FLOAT,
+    `play_time` FLOAT NULL,
     `finished` BOOLEAN DEFAULT 0,
     `path` JSON NULL,
     /*
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `sprint_runs` (
             ...
             {
                 "article": string,
-                "timeReached": number, 
+                "timeReached": number,
                 "loadTime": number,
             },
             ...
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `marathonprompts` (
     `initcheckpoints` TEXT NOT NULL,
     `checkpoints` TEXT NOT NULL,
     `public` BOOLEAN NOT NULL DEFAULT 0,
-    `seed` INT NOT NULL, 
+    `seed` INT NOT NULL,
     PRIMARY KEY (`prompt_id`)
 );
 
@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS `lobby_runs` (
 
     `start_time` TIMESTAMP(3) NULL,
     `end_time` TIMESTAMP(3) NULL,
-    `play_time` FLOAT,
+    `play_time` FLOAT NULL,
     `finished` BOOLEAN DEFAULT 0,
     `path` JSON NOT NULL,
     /*
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `lobby_runs` (
             ...
             {
                 "article": string,
-                "timeReached": number, 
+                "timeReached": number,
                 "loadTime": number,
             },
             ...

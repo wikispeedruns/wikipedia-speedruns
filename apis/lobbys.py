@@ -133,7 +133,7 @@ def get_lobby_prompts(lobby_id, prompt_id):
 @lobby_api.post("/<int:lobby_id>/prompts/<int:prompt_id>/runs")
 def add_lobby_run(lobby_id, prompt_id):
     # TODO: Make this accept only a prompt id, lobby_id to create a new run, similar to sprint run api
-    # Lobby run will be populated in update_lobby_run 
+    # Lobby run will be populated in update_lobby_run
     if not lobbys.check_membership(lobby_id, session):
         return "You do not have access to this lobby", 401
 
@@ -164,7 +164,7 @@ def get_lobby_runs(lobby_id, prompt_id):
 # Run
 @lobby_api.get("/<int:lobby_id>/run/<int:run_id>")
 def get_lobby_run(lobby_id, run_id):
-    
+
     print(lobby_id, run_id)
     if not lobbys.check_membership(lobby_id, session):
         return "You do not have access to this lobby", 401

@@ -34,7 +34,6 @@ def check_membership(lobby_id: int, session: dict) -> bool:
     return False
 
 
-
 # TODO let non users also create lobbies?
 def create_lobby(user_id: int,
                  rules: str=None,
@@ -148,6 +147,7 @@ def get_lobby_user_info(lobby_id: int, user_id: Optional[int]) -> Optional[dict]
         cursor.execute(query, (lobby_id, user_id))
         return cursor.fetchone()
 
+<<<<<<< HEAD
 
 # Lobby Runs
 
@@ -286,3 +286,5 @@ def update_lobby_run(lobby_id: int, run_id: int, start_time: datetime, end_time:
         db.commit()
 
     return run_id
+=======
+>>>>>>> e0f9ade (begin refactoring)
