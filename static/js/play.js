@@ -142,9 +142,11 @@ let app = new Vue({
         pageCallback: function(page, loadTime) {
 
             this.hidePreview();
-            // Game logic for sprint mode:
 
             let loadTimeSeconds = loadTime / 1000;
+            this.totalLoadTime += loadTimeSeconds;
+
+            this.currentArticle = page;
 
             if (this.path.length == 0 || this.path[this.path.length - 1]["article"] != page) {
                 // Update path
@@ -155,16 +157,14 @@ let app = new Vue({
                     "loadTime": loadTimeSeconds
                 });
 
-                // Update partial run information
-                this.updateRun();
-            }
 
-            this.currentArticle = page;
-            this.totalLoadTime += loadTimeSeconds;
-
-            //if the page's title matches that of the end article, finish the game, and submit the run
-            if (page === this.endArticle) {
-                this.finish();
+                // If the page's title matches that of the end article, finish the game, and submit the run
+                // Otherwise update partial run information
+                if (page === this.endArticle) {
+                    this.finish();
+                } else {
+                    this.updateRun();
+                }
             }
 
         },

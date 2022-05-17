@@ -30,11 +30,11 @@ var LeaderboardRow = {
             <td>{{rank}}</td>
 
             <td class="l-col" v-if="run.username">
-                <strong v-if="run.run_id === currentRunId">{{run.username}}</strong>
+                <strong v-if="run.run_id == currentRunId">{{run.username}}</strong>
                 <span v-else>{{run.username}}</span>
             </td>
             <td class="l-col" v-else-if="run.name">
-                <strong v-if="run.run_id === currentRunId">{{run.name}}</strong>
+                <strong v-if="run.run_id == currentRunId">{{run.name}}</strong>
                 <span v-else>{{run.name}}</span>
             </td>
             <td v-else><strong>You</strong></td>
