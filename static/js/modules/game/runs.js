@@ -6,7 +6,7 @@ async function startRun(promptId, lobbyId, startTime) {
     };
 
     let endpoint = lobbyId == null
-        ? "/api/runs"
+        ? `/api/sprints/${promptId}/runs`
         : `/api/lobbys/${lobbyId}/prompts/${promptId}/runs`;
 
     const response = await fetchJson(endpoint, "POST", {
@@ -24,12 +24,10 @@ async function submitRun(promptId, lobbyId,  runId, startTime, endTime, finished
     }
 
     let endpoint = lobbyId == null
-        ? `/api/runs/${runId}`
+        ? `/api/sprints/${promptId}/runs/${runId}`
         : `/api/lobbys/${lobbyId}/prompts/${promptId}/runs/${runId}`;
 
-    const response = await fetchJson(endpoint, "PATCH", {
-        "prompt_id": promptId,
-    });
+    const response = await fetchJson(endpoint, "PATCH", reqBody);
     return (await response.json())["run_id"];
 }
 

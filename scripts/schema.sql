@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS `lobby_runs` (
     `end_time` TIMESTAMP(3) NULL,
     `play_time` FLOAT NULL,
     `finished` BOOLEAN DEFAULT 0,
-    `path` JSON NOT NULL,
+    `path` JSON NULL,
     /*
     {
         "version": number

@@ -147,3 +147,58 @@ def get_lobby_user_info(lobby_id: int, user_id: Optional[int]) -> Optional[dict]
         cursor.execute(query, (lobby_id, user_id))
         return cursor.fetchone()
 
+
+# Lobby Runs
+def get_lobby_runs(lobby_id: int, prompt_id: Optional[int]=None):
+    query = """
+        SELECT run_id, prompt_id, users.username, name, start_time, end_time, play_time, finished, `path`,
+        TIMESTAMPDIFF(MICROSECOND, start_time, end_time) AS run_time
+        FROM lobby_runs
+        LEFT JOIN users ON users.user_id=lobby_runs.user_id
+        WHERE lobby_id=%(lobby_id)s
+    """
+
+    query_args = {
+        "lobby_id": lobby_id
+    }
+
+    if (prompt_id):
+        query += " AND prompt_id=%(prompt_id)s"
+        query_args["prompt_id"] = prompt_id
+
+    query += " ORDER BY run_time"
+
+    db = get_db()
+
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, query_args)
+        results = cursor.fetchall()
+        for run in results:
+            run['path'] = json.loads(run['path'])
+
+        return results
+
+def get_lobby_run(lobby_id: int, run_id: int):
+    query = """
+        SELECT run_id, prompt_id, users.username, name, start_time, end_time, `path`,
+        TIMESTAMPDIFF(MICROSECOND, start_time, end_time) AS run_time
+        FROM lobby_runs
+        LEFT JOIN users ON users.user_id=lobby_runs.user_id
+        WHERE lobby_id=%(lobby_id)s AND run_id=%(run_id)s
+    """
+
+    query_args = {
+        "lobby_id": lobby_id,
+        "run_id": run_id
+    }
+
+    db = get_db()
+
+    with db.cursor(cursor=DictCursor) as cursor:
+        print(cursor.mogrify(query, query_args))
+        cursor.execute(query, query_args)
+        results = cursor.fetchone()
+
+        results['path'] = json.loads(results['path'])
+        return results
+

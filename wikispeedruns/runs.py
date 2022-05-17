@@ -58,7 +58,7 @@ def _create_run(prompt_id, lobby_id=None, user_id=None, name=None):
             raise ValueError("'user_id' should be defined for sprint prompt")
 
         query = "INSERT INTO `sprint_runs` (`prompt_id`,`user_id`) \
-                 VALUES (%(prompt_id)s, %(start_time)s, %(user_id)s);"
+                 VALUES (%(prompt_id)s, %(user_id)s);"
 
         query_args["user_id"] = user_id
 
@@ -69,7 +69,7 @@ def _create_run(prompt_id, lobby_id=None, user_id=None, name=None):
         if (user_id is None and name is None):
             raise ValueError("'user_id' or 'name' should be defined for lobby prompt")
 
-        query_args["lobby_id"] = user_id
+        query_args["lobby_id"] = lobby_id
         query_args["user_id"] = user_id
         query_args["name"] = name
 

@@ -80,25 +80,6 @@ let app = new Vue({
         loggedIn: false,
     },
 
-    created: async function() {
-        // Update run info on exit/page hide
-        document.addEventListener("visibilitychange", function() {
-            if (document.visibilityState === "hidden") {
-                this.updateRun();
-            }
-        });
-
-        // Use pagehide for browsers that don't support visibilitychange
-        if ("onpagehide" in self) {
-            document.addEventListener("pagehide", this.updateRun, {capture: true});
-        } else {
-            // Only register beforeunload/unload for browsers that don't support pagehide
-            // Avoids breaking bfcache
-            document.addEventListener("unload", this.updateRun, {capture: true});
-            document.addEventListener("beforeunload", this.updateRun, {capture: true});
-        }
-    },
-
     mounted: async function() {
         // Prevent accidental leaves
         window.onbeforeunload = () => true;
@@ -127,10 +108,36 @@ let app = new Vue({
         }
 
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview);
+
+
+        // Update run info on exit/page hide
+        document.addEventListener("visibilitychange", function() {
+            if (document.visibilityState === "hidden") {
+                this.updateRun();
+            }
+        });
+
+        // Use pagehide for browsers that don't support visibilitychange
+        if ("onpagehide" in self) {
+            document.addEventListener("pagehide", this.updateRun, {capture: true});
+        } else {
+            // Only register beforeunload/unload for browsers that don't support pagehide
+            // Avoids breaking bfcache
+            document.addEventListener("unload", this.updateRun, {capture: true});
+            document.addEventListener("beforeunload", this.updateRun, {capture: true});
+        }
     },
 
 
     methods : {
+        updateRun: function() {
+            if (!this.finished) {
+                this.endTime = Date.now();
+            }
+
+            submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
+        },
+
         pageCallback: function(page, loadTime) {
 
             this.hidePreview();
@@ -208,13 +215,6 @@ let app = new Vue({
             this.$refs.pagePreview.hidePreview(e);
         },
 
-        updateRun: function() {
-            if (!this.finished) {
-                this.endTime = Date.now();
-            }
-
-            submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
-        }
     }
 })
 

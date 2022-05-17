@@ -19,17 +19,20 @@ def create_sprint_run(prompt_id):
     run_id = runs.create_sprint_run(prompt_id, session.get("user_id"))
     return jsonify({"run_id": run_id})
 
-@run_api.post("/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/runs", defaults={'lobby_id' : None})
+@run_api.post("/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/runs")
 def create_lobby_run(prompt_id, lobby_id):
     if not lobbys.check_membership(lobby_id, session):
         return "You do not have access to this lobby", 401
 
-    run_id = runs.create_lobby_run(prompt_id, lobby_id, session.get)
+    run_id = runs.create_lobby_run(prompt_id, lobby_id,
+        user_id=session.get("user_id"),
+        name=session.get("lobbys", {}).get(str(lobby_id))
+    )
     return jsonify({"run_id": run_id})
 
 
-@run_api.post('/sprints/<int:prompt_id>/runs/<int:run_id>')
-@run_api.post("/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/runs/<int:run_id>", defaults={'lobby_id' : None})
+@run_api.patch('/sprints/<int:prompt_id>/runs/<int:run_id>', defaults={'lobby_id' : None})
+@run_api.patch("/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/runs/<int:run_id>")
 @check_request_json({'start_time': int, 'end_time': int, 'finished': bool, 'path': list})
 def update_run(prompt_id, lobby_id, run_id):
     '''
@@ -37,8 +40,6 @@ def update_run(prompt_id, lobby_id, run_id):
 
     Returns the run ID of the run updated.
     '''
-
-
     if lobby_id is None:
         ret_run_id = runs.update_sprint_run(
             run_id     = run_id,
