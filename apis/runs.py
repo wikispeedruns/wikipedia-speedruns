@@ -16,19 +16,21 @@ run_api = Blueprint('runs', __name__, url_prefix='/api')
 
 @run_api.post('/sprints/<int:prompt_id>/runs')
 def create_sprint_run(prompt_id):
-    runs.create_sprint_run(prompt_id, session.get("user_id"))
+    run_id = runs.create_sprint_run(prompt_id, session.get("user_id"))
+    return jsonify({"run_id": run_id})
 
 @run_api.post("/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/runs", defaults={'lobby_id' : None})
 def create_lobby_run(prompt_id, lobby_id):
     if not lobbys.check_membership(lobby_id, session):
         return "You do not have access to this lobby", 401
 
-    runs.create_lobby_run(prompt_id, lobby_id, session.get)
+    run_id = runs.create_lobby_run(prompt_id, lobby_id, session.get)
+    return jsonify({"run_id": run_id})
 
 
 @run_api.post('/sprints/<int:prompt_id>/runs/<int:run_id>')
 @run_api.post("/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/runs/<int:run_id>", defaults={'lobby_id' : None})
-@check_request_json({'start_time':int, 'end_time':int, 'finished':bool, 'path':list})
+@check_request_json({'start_time': int, 'end_time': int, 'finished': bool, 'path': list})
 def update_run(prompt_id, lobby_id, run_id):
     '''
     Updates an existing run given a run, start time, end time, a finished flag, and a path.
@@ -36,18 +38,30 @@ def update_run(prompt_id, lobby_id, run_id):
     Returns the run ID of the run updated.
     '''
 
-    ret_run_id = runs.update_sprint_run(
-        run_id     = run_id,
-        start_time = datetime.fromtimestamp(request.json['start_time']/1000),
-        end_time   = datetime.fromtimestamp(request.json['end_time']/1000),
-        finished   = request.json['finished'],
-        path       = request.json['path']
-    )
+
+    if lobby_id is None:
+        ret_run_id = runs.update_sprint_run(
+            run_id     = run_id,
+            start_time = datetime.fromtimestamp(request.json['start_time']/1000),
+            end_time   = datetime.fromtimestamp(request.json['end_time']/1000),
+            finished   = request.json['finished'],
+            path       = request.json['path']
+        )
+
+    else:
+        ret_run_id = runs.update_lobby_run(
+            run_id     = run_id,
+            start_time = datetime.fromtimestamp(request.json['start_time']/1000),
+            end_time   = datetime.fromtimestamp(request.json['end_time']/1000),
+            finished   = request.json['finished'],
+            path       = request.json['path']
+        )
+
 
     return jsonify({"run_id": ret_run_id})
 
 
-@run_api.patch('/update_anonymous')
+@run_api.patch('/runs/update_anonymous')
 @check_user
 @check_request_json({"run_id": int})
 def update_anonymous_sprint_run():
@@ -67,10 +81,8 @@ def update_anonymous_sprint_run():
 
         return f'Updated run {run_id} to user {user_id}', 200
 
-    return f'Error updating run {run_id} to user {user_id}', 500
 
-
-@run_api.get('')
+@run_api.get('/runs')
 def get_all_runs():
     # TODO this should probably be paginated, and return just ids
     query = "SELECT run_id FROM `sprint_runs`"
@@ -82,7 +94,7 @@ def get_all_runs():
         return jsonify(results)
 
 
-@run_api.get('/<id>')
+@run_api.get('/runs/<id>')
 def get_run(id):
     '''
     Returns the run details for a specific run_id if the user has done the corresponding prompt.

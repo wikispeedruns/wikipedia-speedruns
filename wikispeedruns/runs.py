@@ -85,12 +85,11 @@ def _create_run(prompt_id, lobby_id=None, user_id=None, name=None):
     return id
 
 
+def create_lobby_run(prompt_id: int, lobby_id: int, user_id: Optional[int] = None, name: Optional[str] = None) -> int:
+    return _create_run(prompt_id, lobby_id=lobby_id, user_id=user_id, name=name)
 
-def create_lobby_run(prompt_id: int, lobby_id: int, user_id: Optional[int] = None, name: Optional[str] = None):
-    _create_run(prompt_id, lobby_id=lobby_id, user_id=user_id, name=name)
-
-def create_sprint_run(prompt_id: int, user_id=Optional[int]):
-    _create_run(prompt_id=prompt_id, user_id=user_id, name=None)
+def create_sprint_run(prompt_id: int, user_id=Optional[int]) -> int:
+    return _create_run(prompt_id=prompt_id, user_id=user_id, name=None)
 
 
 # Updating runs
