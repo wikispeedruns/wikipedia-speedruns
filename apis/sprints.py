@@ -155,7 +155,7 @@ def get_prompt_leaderboard(id, run_id):
     }
 
     query = '''
-    SELECT run_id, path, runs.user_id, username, play_time
+    SELECT run_id, path, runs.user_id, username, play_time, start_time, end_time
     FROM sprint_runs AS runs
     JOIN (
             SELECT users.user_id, username, MIN(run_id) AS first_run
@@ -171,7 +171,7 @@ def get_prompt_leaderboard(id, run_id):
     args = [id]
 
     specificRunQuery = '''
-    SELECT runs.run_id, path, runs.user_id, username, play_time
+    SELECT runs.run_id, path, runs.user_id, username, play_time, start_time, end_time
     FROM sprint_runs AS runs
     LEFT JOIN users
     ON runs.user_id=users.user_id
