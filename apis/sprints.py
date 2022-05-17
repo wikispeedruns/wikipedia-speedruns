@@ -192,10 +192,7 @@ def get_prompt_leaderboard(id, run_id):
         results = cursor.fetchall()
 
         for run in results:
-            pathJson = json.loads(run['path'])['path']
-            run['path'] = [entry['article'] for entry in pathJson]
-            if run_id is None and user_id is not None and run['user_id'] == user_id:
-                run_id = run['run_id']
+            run['path'] = json.loads(run['path'])['path']
 
         resp["leaderboard"] = results
         resp["run_id"] = run_id

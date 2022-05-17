@@ -174,7 +174,7 @@ def get_lobby_runs(lobby_id: int, prompt_id: Optional[int]=None):
         cursor.execute(query, query_args)
         results = cursor.fetchall()
         for run in results:
-            run['path'] = json.loads(run['path'])
+            run['path'] = json.loads(run['path'])['path']
 
         return results
 
@@ -199,6 +199,6 @@ def get_lobby_run(lobby_id: int, run_id: int):
         cursor.execute(query, query_args)
         results = cursor.fetchone()
 
-        results['path'] = json.loads(results['path'])
+        results['path'] = json.loads(results['path'])['path']
         return results
 

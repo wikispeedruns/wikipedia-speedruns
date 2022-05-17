@@ -65,7 +65,7 @@ let app = new Vue({
 
         let run = null;
         if (this.lobbyId != null) {
-            run = await getLobbyRun(this.lobbyId, RUN_ID); 
+            run = await getLobbyRun(this.lobbyId, RUN_ID);
         } else {
             run = await getRun(RUN_ID);
         }
@@ -80,7 +80,7 @@ let app = new Vue({
         var endDate = new Date(run['start_time']);
         this.finalTime = startDate.getTime() - endDate.getTime();
 
-        this.path = run['path'];
+        this.path = run['path'].map((entry) => entry["article"])
 
         if (this.played) fireworks();
 
