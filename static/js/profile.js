@@ -7,7 +7,6 @@ function update_data(runs, user) {
         vm.totalratedruns.val = runs['total_prompts'];
         vm.emailverified.val = user['email_confirmed'] ? "Yes" : "No";
         vm.user_name.val = user['username'];
-        vm.skillrating.val = user['rating'];
 
         let date = new Date(user['join_date']);
         vm.profileage.val = date.toLocaleDateString();
@@ -34,10 +33,6 @@ let vm = new Vue({
         user_name: {
             field: "Username",
             val: "test1"
-        },
-        skillrating: {
-            field: "Skill Rating",
-            val: "test2"
         },
         totalratedruns: {
             field: "Total Runs",

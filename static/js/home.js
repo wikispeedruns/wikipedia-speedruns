@@ -72,7 +72,7 @@ var app = new Vue({
             await uploadLocalMarathons();
         }
 
-        this.topUsers = await getTopUsers();
+        //this.topUsers = await getTopUsers();
         this.marathonPrompts = await getMarathonPrompts(); 
 
         const prompts = await getPrompts();

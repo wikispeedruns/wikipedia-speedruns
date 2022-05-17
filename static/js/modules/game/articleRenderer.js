@@ -36,6 +36,8 @@ export class ArticleRenderer {
             this.frame.querySelectorAll("a, area").forEach((el) => {
                 // Arrow function to prevent this from being overwritten
                 el.onclick = (e) => this.handleWikipediaLink(e);
+                el.removeAttribute("title");
+
                 if (window.screen.width >= 768 && el.hasAttribute("href") && el.getAttribute("href").startsWith("/wiki/")) {
                     el.onmouseenter = this.mouseEnter;
                     el.onmouseleave = this.mouseLeave;

@@ -173,20 +173,13 @@
     <marathon-help v-show="started && !finished && showHelp" v-cloak v-on:close-help="showHelp = !showHelp">
     </marathon-help>-->
 
-    <div v-if="previewContent">
-        <div v-if="eventType === 'click'" class="blocker" @click="hidePreview"></div>
-        <page-preview
-            :article-preview="previewContent"
-            :client-x="eventX"
-            :client-y="eventY"
-        ></page-preview>
-    </div>
+    <page-preview ref="pagePreview"></page-preview>
 
-    <countdown-timer
-        v-bind:start-article="startArticle"
-        v-bind:active-checkpoints="activeCheckpoints"
-        v-on:start-game="start"
-    ></countdown-timer>
+    <countdown-timer v-on:start-game="start">
+        <p>Starting Article: <strong>[[startArticle]]</strong></p>
+        <p>Starting Checkpoints: <strong>[[activeCheckpoints]]</strong></p>
+
+    </countdown-timer>
 
     <finish-page
         v-bind:forfeited="forfeited"

@@ -43,10 +43,12 @@
                         Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
                     </div>
 
-                    <div v-if="promptRated" class="col-sm-auto text-nowrap px-4 py-2">
-                        Mode: <br>
-                        <b class="text-danger" v-if="!promptPlayed && promptActive">Rated</b>
-                        <b v-else>Practice</b>
+                        <!-- COMMENTING OUT FOR NOW, IN CASE WE NEED IT IN THE FUTURE FOR WHEN WE DO PERSONAL LEADERBOARDS
+                        <div v-if="promptRated" class="col-sm-auto text-nowrap pe-8 py-2">
+                            Mode: <br>
+                            <b class="text-danger" v-if="!promptPlayed && promptActive">Rated</b>
+                            <b v-else>Practice</b>
+                        </div>-->
                     </div>
 
                     <div class="col-sm-auto text-nowrap py-2">
@@ -96,13 +98,6 @@
                         </small>
                         <br>
                         Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
-
-                        <br>
-                        <template v-if="promptRated" class="col-sm-auto text-nowrap px-4 py-2">
-                            Mode:
-                            <b class="text-danger" v-if="!promptPlayed && promptActive">Rated</b>
-                            <b v-else>Practice</b>
-                        </template>
                     </div>
 
                     <div class="col-auto px-2">
@@ -134,38 +129,20 @@
         </div>
     </div>
 
-    <div v-if="previewContent">
-        <div v-if="eventType === 'click'" class="blocker" @click="hidePreview"></div>
-        <page-preview
-            :article-preview="previewContent"
-            :client-x="eventX"
-            :client-y="eventY"
-        ></page-preview>
-    </div>
+    <page-preview ref="pagePreview"></page-preview>
 
-    <countdown-timer id="countdown-box"
-        v-bind:start-article="startArticle"
-        v-bind:end-article="endArticle"
-        v-bind:rated-run="promptRated && promptActive && !promptPlayed"
-        v-bind:rated-prompt="promptRated"
-        v-on:start-game="start"
-    ></countdown-timer>
-
-    <!-- TODO its a bit ugly passing all these in, should clean this up-->
-    <finish-page
-        v-bind:prompt-id="promptId"
-        v-bind:lobby-id="lobbyId"
-        v-bind:run-id="runId"
-
-        v-bind:start-article="startArticle"
-        v-bind:end-article="endArticle"
-        v-bind:final-time="endTime - startTime"
-        v-bind:path="path"
-
-        v-bind:logged-in="loggedIn"
-
-        v-show="finished"
-    ></finish-page>
+    <countdown-timer id="countdown-box" v-on:start-game="start">
+        <p>Starting Article: <strong>[[startArticle]]</strong></p>
+        <p>Goal Article: <strong>[[endArticle]] </strong>
+            <small style="cursor: pointer;" :href="`/wiki/${endArticle}`" @click="showPreview">
+                ⓘ
+            </small>
+        </p>
+        <!-- COMMENTING OUT FOR NOW, IN CASE WE NEED IT IN THE FUTURE FOR WHEN WE DO PERSONAL LEADERBOARDS
+        <p v-if="promptRated && promptActive && !promptPlayed" class="text-danger">This is your rated attempt, leaving this page will count as a forfeit!</p>
+        <p v-else-if="promptRated">This is a practice attempt: your score will not appear on the public leaderboard</p>
+        -->
+    </countdown-timer>
 
     <div v-show="started && !finished" id="main">
         <div id="wikipedia-frame" class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output content"></div>
