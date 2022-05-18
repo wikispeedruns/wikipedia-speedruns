@@ -77,10 +77,13 @@ let app = new Vue({
         loggedIn: false,
 
         expandedTimebox: true,
+        isMobile: false
     },
 
     mounted: async function() {
         // Prevent accidental leaves
+        this.isMobile = window.screen.width < 768;
+
         window.onbeforeunload = () => true;
 
         this.loggedIn = "username" in serverData;

@@ -179,3 +179,7 @@
     transition: transform 0.25s;
 }
 
+.play-HUD {
+    min-width: 60%;
+    overflow-x: hidden;
+}

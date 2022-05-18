@@ -27,68 +27,70 @@
 <template v-cloak> <!--Top level v-cloak to hide stuff when loading vue-->
     <div v-show="started && !finished">
 
-        <div class="show-on-desktop">
-            <div v-if="expandedTimebox" class="HUDwrapper container animated-transition" id="time-box">
-                <div class="row flex-row">
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
-                        Goal Article<br><strong>[[endArticle]] </strong>
-                        <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
-                            ⓘ
-                        </small>
-                    </div>
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
-                        Links clicked<br><strong>[[path.length - 1]]</strong>
-                    </div>
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
-                        Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
-                    </div>
+        <div v-if="!isMobile">
+            <div v-if="expandedTimebox" class="HUDwrapper HUDwrapper-fade container-xxl">
+                <div class="HUD play-HUD" id="time-box">
+                    <div class="row flex-row">
+                        <div class="col-sm-auto text-nowrap px-4 pt-2">
+                            Goal Article<br><strong>[[endArticle]] </strong>
+                            <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
+                                ⓘ
+                            </small>
+                        </div>
+                        <div class="col-sm-auto text-nowrap px-4 pt-2">
+                            Links clicked<br><strong>[[path.length - 1]]</strong>
+                        </div>
+                        <div class="col text-nowrap px-2 pt-2">
+                            Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
+                        </div>
 
-                        <!-- COMMENTING OUT FOR NOW, IN CASE WE NEED IT IN THE FUTURE FOR WHEN WE DO PERSONAL LEADERBOARDS
-                        <div v-if="promptRated" class="col-sm-auto text-nowrap pe-8 py-2">
-                            Mode: <br>
-                            <b class="text-danger" v-if="!promptPlayed && promptActive">Rated</b>
-                            <b v-else>Practice</b>
-                        </div>-->
-                    </div>
+                            <!-- COMMENTING OUT FOR NOW, IN CASE WE NEED IT IN THE FUTURE FOR WHEN WE DO PERSONAL LEADERBOARDS
+                            <div v-if="promptRated" class="col-sm-auto text-nowrap pe-8 py-2">
+                                Mode: <br>
+                                <b class="text-danger" v-if="!promptPlayed && promptActive">Rated</b>
+                                <b v-else>Practice</b>
+                            </div>-->
 
-                    <div class="col-sm-auto text-nowrap py-2">
-                        <button @click="expandedTimebox = !expandedTimebox" 
-                                class="btn btn-outline-secondary"
-                                style="padding: 8px 8px">
-                            <i class="bi bi-chevron-down"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="row flex-row">
-                    <div class="col-lg-auto text-nowrap px-4 py-2">
-                        Current Article<br><strong>[[currentArticle]]</strong>
+                        <div class="col-sm-auto  text-nowrap py-2 mr-auto">
+                            <button @click="expandedTimebox = !expandedTimebox" 
+                                    class="btn btn-outline-secondary mx-2"
+                                    style="padding: 8px 8px">
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="w-100"></div>
+                        <div class="col-lg-auto text-nowrap px-4 py-2">
+                            Current Article<br><strong>[[currentArticle]]</strong>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div v-else class="HUDwrapper container animated-transition" id="time-box">
-                <div class="row flex-row">
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
-                        Goal Article: <strong>[[endArticle]] </strong>
-                        <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
-                            ⓘ
-                        </small>
-                    </div>
-                    <div class="col-sm-auto text-nowrap px-4 pt-2">
-                        Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
-                    </div>
+            <div v-else class="HUDwrapper HUDwrapper-fade container-xxl">
+                <div class="HUD play-HUD" id="time-box">
+                    <div class="row flex-row">
+                        <div class="col-sm-auto text-nowrap px-4 pt-2">
+                            Goal Article: <strong>[[endArticle]] </strong>
+                            <small style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
+                                ⓘ
+                            </small>
+                        </div>
+                        <div class="col text-nowrap px-4 pt-2">
+                            Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
+                        </div>
 
-                    <div class="col-sm-auto text-nowrap py-2">
-                        <button @click="expandedTimebox = !expandedTimebox" 
-                                class="btn btn-outline-secondary"
-                                style="padding: 8px 8px">
-                            <i class="bi bi-chevron-up"></i>
-                        </button>
+                        <div class="col-sm-auto text-nowrap py-2 mr-auto">
+                            <button @click="expandedTimebox = !expandedTimebox" 
+                                    class="btn btn-outline-secondary mx-2"
+                                    style="padding: 8px 8px">
+                                <i class="bi bi-chevron-up"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="show-on-mobile">
+        <div v-else>
             <div v-if="expandedTimebox" class="HUDwrapper-mobile container animated-transition" id="time-box-mobile">
                 <div class="HUDwrapper-mobile-inner-container row">
                     <div class="col">
