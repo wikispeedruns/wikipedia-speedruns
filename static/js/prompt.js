@@ -19,8 +19,15 @@ var LeaderboardRow = {
         "rank",
     ],
 
+    data: function() {
+        return {
+            lobbyId: 0,
+            currentRunId: 0,
+        }
+    },
+
+
     created: function() {
-        // Do it here cause these won't change
         this.lobbyId = lobby_id;
         this.currentRunId = run_id;
     },
