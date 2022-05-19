@@ -12,11 +12,12 @@ function startLocalRun(promptId, runId) {
     addRunToLocalStorage(key, data);
 }
 
-function submitLocalRun(promptId, runId, startTime, endTime, path) {
+function submitLocalRun(promptId, runId, startTime, endTime, finished, path) {
     let data = {
         prompt_id: promptId,
         start_time: startTime,
         end_time: endTime,
+        finished: finished,
         path: path
     };
 

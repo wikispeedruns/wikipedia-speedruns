@@ -1,3 +1,12 @@
+/*
+    This file should have parity with the actual database.
+    For any changes to the database, those changes should be reflected here.
+
+    Schema Version: 2.1
+    This version number should be incremented with any change to the schema.
+    Keep this up-to-date with db.py
+*/
+
 -- TODO Might want to do this at some point/
 -- http://jan.kneschke.de/projects/mysql/order-by-rand/
 -- TODO add indexes
@@ -30,7 +39,23 @@ CREATE TABLE IF NOT EXISTS `sprint_runs` (
     `run_id` INT NOT NULL AUTO_INCREMENT,
     `start_time` TIMESTAMP(3) NULL,
     `end_time` TIMESTAMP(3) NULL,
+    `play_time` FLOAT NULL,
+    `finished` BOOLEAN DEFAULT 0,
     `path` JSON NULL,
+    /*
+    {
+        "version": number
+        "path": [
+            ...
+            {
+                "article": string,
+                "timeReached": number,
+                "loadTime": number,
+            },
+            ...
+        ]
+    }
+    */
     `prompt_id` INT NOT NULL,
     `user_id` INT,
     PRIMARY KEY (`run_id`),
@@ -45,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `marathonprompts` (
     `initcheckpoints` TEXT NOT NULL,
     `checkpoints` TEXT NOT NULL,
     `public` BOOLEAN NOT NULL DEFAULT 0,
-    `seed` INT NOT NULL, 
+    `seed` INT NOT NULL,
     PRIMARY KEY (`prompt_id`)
 );
 
@@ -99,9 +124,25 @@ CREATE TABLE IF NOT EXISTS `lobby_runs` (
 	`user_id` INT NULL,
     `name` VARCHAR(20)  NULL,
 
-    `start_time` TIMESTAMP(3) NOT NULL,
-    `end_time` TIMESTAMP(3) NOT NULL,
-    `path` JSON NOT NULL,
+    `start_time` TIMESTAMP(3) NULL,
+    `end_time` TIMESTAMP(3) NULL,
+    `play_time` FLOAT NULL,
+    `finished` BOOLEAN DEFAULT 0,
+    `path` JSON NULL,
+    /*
+    {
+        "version": number
+        "path": [
+            ...
+            {
+                "article": string,
+                "timeReached": number,
+                "loadTime": number,
+            },
+            ...
+        ]
+    }
+    */
 
     PRIMARY KEY (`run_id`),
     FOREIGN KEY (`lobby_id`, `prompt_id`) REFERENCES `lobby_prompts`(`lobby_id`, `prompt_id`),

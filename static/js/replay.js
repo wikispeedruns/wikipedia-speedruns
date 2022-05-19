@@ -7,7 +7,7 @@ const div_name = "wikipedia-frame";
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
-    
+
     data: {
         firstArticle: "",
         lastArticle: "",
@@ -42,7 +42,7 @@ var app = new Vue({
         }
         const run = await response.json();
         console.log(run);
-        this.path = run["path"];
+        this.path = run['path'].map((entry) => entry["article"]);
         this.firstArticle  = this.path[0];
         this.lastArticle = this.path[this.path.length - 1];
 
