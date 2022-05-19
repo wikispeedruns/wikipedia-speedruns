@@ -75,10 +75,15 @@ let app = new Vue({
         started: false,      //Flag for whether a game has started (countdown finished), used for rendering
 
         loggedIn: false,
+
+        expandedTimebox: true,
+        isMobile: false
     },
 
     mounted: async function() {
         // Prevent accidental leaves
+        this.isMobile = window.screen.width < 768;
+
         window.onbeforeunload = () => true;
 
         this.loggedIn = "username" in serverData;

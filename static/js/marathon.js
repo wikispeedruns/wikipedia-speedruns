@@ -59,6 +59,9 @@ let app = new Vue({
         showStop: false,
         reachedstop: false,  //This variable only gets flipped once, its to prevent the stop box from showing up everytime the page is loaded
         saved: false,
+
+        expandedTimebox: true, 
+        isMobile: false
     },
 
     computed: {
@@ -82,6 +85,8 @@ let app = new Vue({
 
 
     mounted: async function() {
+        this.isMobile = window.screen.width < 768;
+
         this.loggedIn = "username" in serverData;
         this.promptId = PROMPT_ID;
 
@@ -168,6 +173,7 @@ let app = new Vue({
                 if (!this.reachedstop && this.checkpointMarkReached) {
                     this.showStop = true
                     this.reachedstop = true
+                    this.expandedTimebox = true
                 }
 
             } else if (this.clicksRemaining === 0) {
