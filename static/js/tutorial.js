@@ -99,56 +99,61 @@ Vue.component('tutorial', {
             //                 the article will be loaded and the next step is loaded.
             // currentArticle: A hint for if the user goes back to load the previous article
             tutorial: [
-                // {
-                //     text: "Welcome to the WikiSpeedruns Tutorial!"
-                // },
-                // {
-                //     text: "The goal of the game is to get from one Wikipedia page to another as \
-                //            fast as possible by clicking the links in the page",
-                // },
-                // {
-                //     text: "It's also fun to try and use as few clicks as possible!",
-                // },
-                // {
-                //     text: "The goal article, time, and number of clicks are all shown in the HUD",
-                //     highlight: "#time-box"
-                // },
-                // {
-                //     text: "Fun Fact: This prompt, 'Walt Whitman' to 'Walt Disney', was the first ever released on WikiSpeedruns",
-                // },
-                // {
-                //     text: "Before you get started, let's go over a few basic rules"
-                // },
-                // {
-                //     text: "1. Any link is fair game, however not all links may be present"
-                // },
-                // {
-                //     text: "2. Using any sort of find in page is prohibited"
-                // },
-                // {
-                //     text: "3. Going back is not allowed, you have to find your way back by clicking links! Going back \
-                //            in the browser will just quit the game"
-                // },
-                // {
-                //     text: "Now let us think about how to get to Walt Disney..."
-                // },
-                // {
-                //     text: "Walt Disney is a famous American cultural figure, so maybe we can find him in the 'United States' page"
-                // },
+                {
+                    text: "Welcome to the WikiSpeedruns Tutorial!",
+                    highlight: ".HUD"
+                },
+                {
+                    text: "The goal of the game is to get from one Wikipedia page to another as \
+                           fast as possible by clicking the links in the page.",
+                },
+                {
+                    text: "It's also fun to try and use as few clicks as possible!",
+                },
+                {
+                    text: "The goal article, time, and number of clicks are all shown in the HUD.",
+                    highlight: "#time-box"
+                },
+                {
+                    text: "Fun Fact: 'Walt Whitman' to 'Walt Disney', was the first prompt ever released on WikiSpeedruns.",
+                },
+                {
+                    text: "Before you get started, let's go over a few basic rules."
+                },
+                {
+                    text: "1. Any link shown on the page is fair game. Note though that some links (e.g. disambiguation links) have been removed."
+                },
+                {
+                    text: "2. Using any sort of find in page through your browser is prohibited."
+                },
+                {
+                    text: "3. Going back is not allowed, you have to find your way back by clicking links! Going back \
+                           in the browser will just quit the game."
+                },
+                {
+                    text: "Now let's think about how to get to 'Walt Disney'."
+                },
+                {
+                    text: "You can view a preview of the 'Walt Disney' page by hovering over the ⓘ next to the goal article.",
+                    highlight: "#timebox-preview"
+                },
+                {
+                    text: "As shown in the preview, Walt Disney is a famous American cultural figure, so maybe we can find him in the 'United States' page."
+                },
                 {
                     text: "Let's try getting there through 'Long Island'.",
                     requiredLink: "Long_Island",
                     currentArticle: "Walt_Whitman"
                 },
                 {
-                    text: "Now we have to find a link to the 'United States'",
+                    text: "Now we have to find a link to the 'United States'.",
                 },
                 {
                     text: "Links in infobox or summaries are also valid, and a good place to find general information.",
                     highlight: ".infobox"
                 },
                 {
-                    text: "For example, we can find the the link to the 'United States' article here",
+                    text: "For example, we can find the the link to the 'United States' article here.",
                     requiredLink: "United_States",
                     currentArticle: "Long_Island"
                 },
@@ -157,10 +162,10 @@ Vue.component('tutorial', {
                            'United States' is often a good one."
                 },
                 {
-                    text: "Although you can't use ctrl + F, you can still use the table of contents",
+                    text: "Although you can't use the browser find, you can still use the table of contents.",
                 },
                 {
-                    text: "Walt Disney is probably most famous for his movies, so let's try the cinema section",
+                    text: "Walt Disney is probably most famous for his movies, so let's try the cinema section.",
                     highlight: "a[href=\"#Cinema\"]"
                 },
                 {
@@ -169,7 +174,7 @@ Vue.component('tutorial', {
                     currentArticle: "United_States"
                 },
                 {
-                    text: "Thank you for viewing the tutorial, and have fun!",
+                    text: "Thank you for playing the tutorial, and have fun!",
                 }
             ]
         };
@@ -199,7 +204,7 @@ Vue.component('tutorial', {
                         el.originalOnClick(e);
                         this.next();
                     } else if (this.tutorial[this.curStep].requiredLink) {
-                        this.flashMessage("Please click the suggested link");
+                        this.flashMessage(`Please click '${this.tutorial[this.curStep].requiredLink.replace("_", "  ")}' to continue`);
                     } else {
                         this.flashMessage("Please read this tutorial first");
                     }
@@ -207,6 +212,10 @@ Vue.component('tutorial', {
                 };
             });
         }
+    },
+
+    mounted: function() {
+        this.highlightElement("#tutorial");
     },
 
     methods: {
@@ -290,14 +299,14 @@ Vue.component('tutorial', {
 
         handleTouchEnd(e) {
             const endX = e.changedTouches[0].screenX;
-            if (endX <= this.touchStartX - 80) {
+            if (endX <= this.touchStartX - 60) {
                 if (this.tutorial[this.curStep].requiredLink) {
-                    this.flashMessage("Click the link to continue!");
+                    this.flashMessage(`Click '${this.tutorial[this.curStep].requiredLink.replace("_", "  ")}' to continue!`);
                     return;
                 }
                 this.next(); //swiping left
             }
-            if (endX >= this.touchStartX + 80) {
+            if (endX >= this.touchStartX + 60) {
                 this.prev(); // swiping right
             }
         },
@@ -319,21 +328,30 @@ Vue.component('tutorial', {
                 <p v-if="index == curStep"> {{step.text}} </p>
             </template>
 
-            <p class="show-on-mobile" v-if="curStep == 0"> Swipe left/right at the bottom of the page to navigate </p>
 
             <p v-if="curStep === this.tutorial.length - 1"> <a href="/">Click here to go home</a> </p>
         </div>
+
+
+        <div class="show-on-mobile" v-if="curStep == 0">
+            Swipe left/right here (at the bottom of the page) to navigate
+
+            <!-- https://lottiefiles.com/7635-swipe-left -->
+            <img style="margin-left: auto; margin-right:auto; height:50px; width: 50px" src="/static/assets/swipe.gif">
+        </div>
+
+
 
         <div class="show-on-desktop">
             <div style="margin-left: auto; margin-top:auto !important;">
                 <button v-bind:disabled="curStep === 0"
                         @click="prev"
-                        class="btn btn-outline-secondary">
+                        class="btn btn-primary">
                     <i class="bi bi-chevron-left"></i>
                 </button>
                 <button v-bind:disabled="curStep === tutorial.length - 1  || tutorial[curStep].requiredLink"
                         @click="next"
-                        class="btn btn-outline-secondary" >
+                        class="btn btn-primary" >
                     <i class="bi bi-chevron-right"></i>
                 </button>
             </div>

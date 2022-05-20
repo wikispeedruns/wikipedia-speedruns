@@ -170,3 +170,16 @@
 	margin-bottom: 40vh;
 }
 
+.HUDwrapper-mobile-inner-container {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.animated-transition {
+    transition: transform 0.25s;
+}
+
+.play-HUD {
+    min-width: 60%;
+    overflow-x: hidden;
+}
