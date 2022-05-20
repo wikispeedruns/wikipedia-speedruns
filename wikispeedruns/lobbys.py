@@ -205,7 +205,7 @@ def get_lobby_run(lobby_id: int, run_id: int):
 def get_user_lobbys(user_id: int):
     
     query = """
-    select lobbys.lobby_id, `name`, `desc`, passcode, create_date, active_date, rules, user_lobbys.owner, count(*) as n_prompts from lobbys
+    select lobbys.lobby_id, `name`, `desc`, passcode, create_date, active_date, rules, user_lobbys.owner, count(prompt_id) as n_prompts from lobbys
     LEFT JOIN user_lobbys ON user_lobbys.lobby_id=lobbys.lobby_id
     LEFT JOIN lobby_prompts ON lobby_prompts.lobby_id=lobbys.lobby_id
     where user_id=%(user_id)s
