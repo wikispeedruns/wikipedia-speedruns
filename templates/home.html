@@ -36,23 +36,22 @@
 
     <p>Play the <b>tutorial</b> <a href="/play/tutorial">here</a>!</p>
 
-    <div class="row justify-content-md-center py-3">
+    <!--<hr class="my-4">-->
 
+    <div class="row justify-content-md-center py-2">
         <div class="col-lg-12">
-
-            <div class="card">
+            <div class="card"  v-if="lobbies.length > 0">
                 <div class="alert alert-info my-0" role="alert">
-                    <b>**NEW**: </b> Try creating a private lobby <a href="/lobby/create" class="alert-link"><u>here</u></a>
+                    <h5 class="my-0">Your Lobbies</h5>
                 </div>
-                <div class="card-body"  v-if="lobbies.length > 0">
-                    <h4>Your Lobbies</h4>
+                <div class="card-body">
 
-                    <table class="table table-hover">
+                    <table class="table table-hover py-2">
                         <thead>
                             <th scope="col">Name</th>
-                            <th scope="col">Date created</th>
+                            <th scope="col" v-if="!isMobile">Date created</th>
                             <th scope="col"># of prompts</th>
-                            <th scope="col">Owner</th>
+                            <th scope="col" v-if="!isMobile">Owner</th>
                             <th class="text-center"></th>
                         </thead>
                         <tbody>
@@ -63,14 +62,12 @@
                                     </a>
                                     <span v-if="lobby.desc" style="cursor: help;" :title="lobby.desc">ⓘ</span>
                                 </td>
-
-                                <td>[[getDate(lobby.create_date)]]</td>
+                                <td v-if="!isMobile">[[getDate(lobby.create_date)]]</td>
                                 <td>[[lobby.n_prompts]]</td>
-                                <td  class="align-middle">
+                                <td  class="align-middle" v-if="!isMobile">
                                     <span v-if="lobby.owner == 1"><i class="bi bi-check-lg"></i></span>
                                     <span v-else>-</span>
                                 </td>
-                                
                                 <td class="text-center" >
                                     <button v-bind:id="'custom-tooltip-'+lobby.lobby_id" v-on:click="copyInvite(lobby)" type="button" class="btn btn-default px-0 py-0" style="font-size: 12px !important">- Copy invite -</button>
                                 </td>
@@ -78,22 +75,27 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="card-footer text-muted">
+                    Create a new private lobby <a href="/lobby/create"><u>here</u></a>!
+                </div>
+            </div>
+            <div v-else>
+                <a href="/login"><b>Log in</b></a> to create a new private lobby and play with your friends!
             </div>
         </div>
     </div>
 
 
 
-    <hr class="mt-4">
+    <hr class="my-4">
 
-    <div class="row justify-content-md-center">
-
+    <div class="row justify-content-md-center py-4">
         <div class="col-sm-6">
-
             <div class="card">
+                <div class="alert alert-info my-0" role="alert">
+                    <h5 class="my-0">Prompt of the Day</h5>
+                </div>
                 <div class="card-body">
-                    <h4>Prompt of the Day</h4>
-
                     <template v-if="dailyPrompts.length > 0">
                         <h6 >Time Remaining: [[timeLeft]]</h6>
 
@@ -122,24 +124,21 @@
                         </table>
                     </template>
                     <template v-else>
-                        <hr>
                         <p>Currently unavailable</p>
                     </template>
-
                 </div>
-
                 <div class="card-footer text-muted">
                     Play the daily prompt <span v-if="!loggedIn">while logged in</span> to start<span v-if="loggedIn">/continue</span> your streak! 🔥
                 </div>
             </div>
-
         </div>
 
         <div class="col-sm-6">
             <div class="card">
-                <div class="card-body">
-
-                    <h4> Try some other Prompts </h4>
+                <div class="alert alert-info my-0" role="alert">
+                    <h5 class="my-0">Try some other Prompts</h5>
+                </div>
+                <div class="card-body">       
                     <table class="table table-hover">
                         <thead>
                             <th style="width:100px" scope="col">Prompt #</th>
@@ -160,13 +159,10 @@
                                         <span>-</span>
                                     </template>
                                 </td>
-
                             </tr>
                         </tbody>
                     </table>
                 </div>
-
-
             </div>
         </div>
 
@@ -174,15 +170,13 @@
 
     <p class="my-4"> Still want more? Checkout our <a href="/archive">archive</a> or click <a href="/random">here</a> to try a random prompt.</p>
 
-    <hr class="mt-4">
+    <hr class="my-4">
 
-    <div class="container-xxl" id="marathon-block">
+    <div class="container-xxl py-4" id="marathon-block">
 
         <marathon-prompts v-bind:prompts="marathonPrompts" v-bind:username="username"></marathon-prompts>
 
     </div>
-
-    <hr class="mt-4">
 
     <div>
         <p>

@@ -59,6 +59,8 @@ var app = new Vue({
         streakText: '',
 
         lobbies: [],
+
+        isMobile: false,
     },
     methods: {
         alertLogin: (e) => {
@@ -82,6 +84,7 @@ var app = new Vue({
     },
 
     created: async function() {
+        this.isMobile = window.screen.width < 768;
         this.loggedIn = "username" in serverData;
 
         if (this.loggedIn) {
