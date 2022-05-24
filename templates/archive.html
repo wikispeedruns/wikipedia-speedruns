@@ -29,6 +29,7 @@
                             <th scope="col">Ending Article</th>
                             <th class="text-center" scope="col">Played</th>
                             <th></th>
+                            <th></th>
                         </thead>
                         <tbody>
                             <tr v-for="prompt in prompts" v-cloak>
@@ -38,6 +39,7 @@
                                 <td>[[prompt.end || '-']]</td>
                                 <td class="text-center"><span v-if="prompt.played"><i class="bi bi-check-lg"></i></span></td>
                                 <td><a v-bind:href="'/play/' + prompt.prompt_id">Play</a></td>
+                                <td><a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a></td>
                             </tr>
                         </tbody>
                     </table>

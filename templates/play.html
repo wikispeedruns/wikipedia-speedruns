@@ -52,7 +52,7 @@
                             </div>-->
 
                         <div class="col-sm-auto  text-nowrap py-2 mr-auto">
-                            <button @click="expandedTimebox = !expandedTimebox" 
+                            <button @click="expandedTimebox = !expandedTimebox"
                                     class="btn btn-outline-secondary mx-2"
                                     style="padding: 8px 8px">
                                 <i class="bi bi-chevron-down"></i>
@@ -79,7 +79,7 @@
                         </div>
 
                         <div class="col-sm-auto text-nowrap py-2 mr-auto">
-                            <button @click="expandedTimebox = !expandedTimebox" 
+                            <button @click="expandedTimebox = !expandedTimebox"
                                     class="btn btn-outline-secondary mx-2"
                                     style="padding: 8px 8px">
                                 <i class="bi bi-chevron-up"></i>
@@ -103,7 +103,7 @@
                     </div>
 
                     <div class="col-auto px-2">
-                        <button @click="expandedTimebox = !expandedTimebox" 
+                        <button @click="expandedTimebox = !expandedTimebox"
                                 class="btn btn-outline-secondary"
                                 style="font-size: 0.75rem; padding: 5px 5px">
                             <i class="bi bi-chevron-down"></i>
@@ -120,7 +120,7 @@
                         </small>
                     </div>
                     <div class="col-auto px-2">
-                        <button @click="expandedTimebox = !expandedTimebox" 
+                        <button @click="expandedTimebox = !expandedTimebox"
                                 class="btn btn-outline-secondary"
                                 style="font-size: 0.75rem; padding: 5px 5px">
                             <i class="bi bi-chevron-up"></i>
@@ -140,10 +140,8 @@
                 ⓘ
             </small>
         </p>
-        <!-- COMMENTING OUT FOR NOW, IN CASE WE NEED IT IN THE FUTURE FOR WHEN WE DO PERSONAL LEADERBOARDS
         <p v-if="promptRated && promptActive && !promptPlayed" class="text-danger">This is your rated attempt, leaving this page will count as a forfeit!</p>
         <p v-else-if="promptRated">This is a practice attempt: your score will not appear on the public leaderboard</p>
-        -->
     </countdown-timer>
 
     <div v-show="started && !finished" id="main">
