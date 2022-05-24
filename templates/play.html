@@ -82,7 +82,7 @@
                             <button @click="expandedTimebox = !expandedTimebox"
                                     class="btn btn-outline-secondary mx-2"
                                     style="padding: 8px 8px">
-                                <i class="bi bi-chevron-up"></i>
+r                                <i class="bi bi-chevron-up"></i>
                             </button>
                         </div>
                     </div>
@@ -140,8 +140,6 @@
                 ⓘ
             </small>
         </p>
-        <p v-if="promptRated && promptActive && !promptPlayed" class="text-danger">This is your rated attempt, leaving this page will count as a forfeit!</p>
-        <p v-else-if="promptRated">This is a practice attempt: your score will not appear on the public leaderboard</p>
     </countdown-timer>
 
     <div v-show="started && !finished" id="main">
