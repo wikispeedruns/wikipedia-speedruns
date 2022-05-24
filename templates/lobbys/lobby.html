@@ -35,6 +35,8 @@ var app = new Vue({
 
         prompts: [],
 
+        link: "",
+
         lobbyInfo: {
             "name": null,
             "desc": null,
@@ -48,6 +50,10 @@ var app = new Vue({
     created: async function() {
         this.getPrompts();
         this.getLobbyInfo();
+    },
+
+    mounted: function() {
+        this.link = window.location.href;
     },
 
     methods: {
@@ -110,10 +116,11 @@ var app = new Vue({
 
     <p>[[lobbyInfo.desc]]</p>
 
-    <h4>Invite Others: </h4>
-    <!--<p> Link: [[window.location.href]]    </p>-->
-    <p> Passcode: [[lobbyInfo.passcode]]    </p>
-
+    <details>
+        <summary>Click Here to Show Lobby Link/Passcode: </summary>
+        <p> Link: [[link]]    </p>
+        <p> Passcode: [[lobbyInfo.passcode]]    </p>
+    </details>
 
     <div class="button-tooltip-container">
         <button @click="copyInviteLink" class="btn btn-light">Copy Invite</button>
@@ -122,7 +129,7 @@ var app = new Vue({
 
 
     <template v-if="lobbyInfo.user.owner">
-
+        <hr>
         <h4>Manage: Add a prompt</h4>
         <form id="newPrompt" v-on:submit.prevent="addPrompt">
             <label for="start">Start Article:</label>
