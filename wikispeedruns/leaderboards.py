@@ -1,10 +1,36 @@
-# TODO support finding results around a certain table
-
 from typing import Literal, Optional
 
+import pymysql
+
+
+# For local testing you can comment out this get_db import and use the below code to manually connect to the db
+# and run the file directly. Preferabley, you should use unit tests (which I have yet to write)
+
 from db import get_db
+'''
+import json
+
+def get_db():
+    config = json.load(open("../config/default.json"))
+    try:
+        config.update(json.load(open("../config/prod.json")))
+    except FileNotFoundError:
+        pass
+
+    conn = pymysql.connect(
+        user=config["MYSQL_USER"],
+        host=config["MYSQL_HOST"],
+        password=config["MYSQL_PASSWORD"],
+        database="wikipedia_speedruns"
+    )
+
+    return conn
+'''
 
 
+
+# Get runs for a prompt, with lots of options (described below)
+# See bottom of file for example usage
 def get_leaderboard_runs(
     ########### identifies prompt ###########
     prompt_id: int,
@@ -37,8 +63,8 @@ def get_leaderboard_runs(
     # How to sort the data
     #   'time': play_time
     #   'length': path length
-    #   'start': sorted by the recency of the attempt (newer ones first)
-    sort_mode: Literal['time', 'length', 'recent'] = 'time',
+    #   'start': start_time
+    sort_mode: Literal['time', 'length', 'start'] = 'time',
     sort_asc: bool = True,
 
     ########### pagination ###########
@@ -61,11 +87,11 @@ def get_leaderboard_runs(
 
 
     # Add prompt identification to conditions
-    conditions.append("prompt_id = %(prompt_id)s")
+    conditions.append("runs.prompt_id = %(prompt_id)s")
     query_args["prompt_id"] = prompt_id
     if lobby_id is not None:
-        conditions.append("lobby_id = %(lobby_id)s")
-        query_args["lobby_id"] = prompt_id
+        conditions.append("runs.lobby_id = %(lobby_id)s")
+        query_args["lobby_id"] = lobby_id
 
 
 
@@ -109,7 +135,7 @@ def get_leaderboard_runs(
             # TODO this also is a bit weird if user_id and name are both populated, check this
             group_subquery = f"""
                 JOIN (
-                    SELECT MIN(run_id) AS first_run
+                    SELECT MIN(run_id) AS run_id
                     FROM {base_table}
                     WHERE prompt_id=%(prompt_id)s {"AND lobby_id=%(lobby_id)s" if base_table == "lobby_runs" else ""}
                     GROUP BY user_id {", name" if base_table == "lobby_runs" else ""}
@@ -120,12 +146,12 @@ def get_leaderboard_runs(
         elif user_run_mode == 'shortest':
             group_subquery = f"""
                 JOIN (
-                    SELECT user_id, run_id, MIN(JSON_LENGTH(runs.`path`, '$.path')) AS path_length
+                    SELECT run_id, MAX(JSON_LENGTH(`path`, '$.path')) AS path_length
                     FROM {base_table}
                     WHERE prompt_id=%(prompt_id)s {"AND lobby_id=%(lobby_id)s" if base_table == "lobby_runs" else ""}
                     GROUP BY user_id {", name" if base_table == "lobby_runs" else ""}
-                ) AS first_runs
-                ON first_runs.run_id = runs.run_id
+                ) AS shortest_runs
+                ON shortest_runs.run_id = runs.run_id
                 """
         elif user_run_mode == 'all':
             group_subquery = ""
@@ -140,7 +166,7 @@ def get_leaderboard_runs(
         sort_exp = 'play_time'
     elif (sort_mode == 'length'):
         sort_exp = 'path_length' # note this relies on the select aliasing a path_length column below
-    elif (sort_mode == 'recent'):
+    elif (sort_mode == 'start'):
         sort_exp = 'start_time'
     else:
         raise ValueError(f"Invalid sort mode '{sort_mode}'")
@@ -169,10 +195,31 @@ def get_leaderboard_runs(
     """
 
     db = get_db()
-    with db.cursor() as cursor:
+    with db.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
+        # print(cursor.mogrify(query, query_args))
         cursor.execute(query, query_args)
         return cursor.fetchall()
 
 
+
+'''
 if __name__ == "__main__":
-    get_leaderboard_runs(prompt_id=20)
+
+    # Example usage
+
+    # Get normal leaderboard for prompt 22 (i.e. first playes within 24 hours of release)
+    get_leaderboard_runs(prompt_id=22, user_run_mode="all", sort_mode='length', played_before=24 * 60)
+
+    # Get the 10 longest (finished) runs for prompt 22
+    get_leaderboard_runs(prompt_id=22, user_run_mode="all", sort_mode='length', sort_asc=False, limit=10)
+
+    # Get the most recent runs, included unfinished, for prompt 22, within 1 day
+    get_leaderboard_runs(prompt_id=22, user_run_mode="all", sort_mode='start', sort_asc=False, limit=10, played_after=24 * 60)
+
+    # Get normal leaderboard for prompt 1 of lobby 4
+    get_leaderboard_runs(lobby_id=4, prompt_id=1)
+
+    # Get shortest path leaderboard for prompt 1 of lobby 4
+    get_leaderboard_runs(lobby_id=4, prompt_id=1, user_run_mode='shortest', sort_mode="length")
+
+'''
