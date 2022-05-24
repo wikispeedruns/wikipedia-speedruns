@@ -149,7 +149,7 @@ def get_lobby_run(lobby_id, run_id):
     return jsonify(runs), 200
 
 
-@lobby_api.get("/getuserlobbys")
+@lobby_api.get("/user_lobbys")
 @check_user
 def get_user_lobbies():
     

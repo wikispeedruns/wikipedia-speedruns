@@ -100,7 +100,7 @@ var app = new Vue({
         this.activePrompts = prompts.filter(p => !p.rated);
 
         this.lobbies = await getUserLobby(this.loggedIn);
-        console.log(this.lobbies);
+        //console.log(this.lobbies);
 
         if (this.activePrompts.length === 0) {
             this.activePrompts = await getBackupPrompts();
