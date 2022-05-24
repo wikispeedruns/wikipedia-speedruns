@@ -28,7 +28,7 @@
     <p >There are a few simple rules:<br>
         <ul class="mb-4">
             <li>Any link shown on the page is fair game.</li>
-            <li>DO NOT use Ctrl+F/find in your browser!</li>
+            <li>DO NOT use the browser find tool!</li>
             <li>Live with your mistakes (the back button will end your run).</li>
             <li>Luck is king, so put on your lucky hat and lucky socks!</li>
         </ul>
@@ -128,7 +128,7 @@
                     </template>
                 </div>
                 <div class="card-footer text-muted">
-                    These prompts are <a href="/about#ratings">rated</a>. Only your <b>first run</b> counts!
+                    Play the daily prompt <span v-if="!loggedIn">while logged in</span> to start<span v-if="loggedIn">/continue</span> your streak! 🔥
                 </div>
             </div>
         </div>
