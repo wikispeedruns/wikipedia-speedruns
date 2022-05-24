@@ -44,7 +44,6 @@
                             Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
                         </div>
 
-<<<<<<< HEAD
                             <!-- COMMENTING OUT FOR NOW, IN CASE WE NEED IT IN THE FUTURE FOR WHEN WE DO PERSONAL LEADERBOARDS
                             <div v-if="promptRated" class="col-sm-auto text-nowrap pe-8 py-2">
                                 Mode: <br>
@@ -53,7 +52,7 @@
                             </div>-->
 
                         <div class="col-sm-auto  text-nowrap py-2 mr-auto">
-                            <button @click="expandedTimebox = !expandedTimebox" 
+                            <button @click="expandedTimebox = !expandedTimebox"
                                     class="btn btn-outline-secondary mx-2"
                                     style="padding: 8px 8px">
                                 <i class="bi bi-chevron-down"></i>
@@ -61,16 +60,6 @@
                         </div>
                         <div class="w-100"></div>
                         <div class="col-lg-auto text-nowrap px-4 py-2">
-=======
-                        <div v-if="promptRated" class="col-sm-auto text-nowrap pe-8 py-2">
-                            Mode: <br>
-                            <b class="text-danger" v-if="!promptPlayed && promptActive">Rated</b>
-                            <b v-else>Practice</b>
-                        </div>
-                    </div>
-                    <div class="row flex-row m-0">
-                        <div class="col-lg-auto text-nowrap pe-8 py-2">
->>>>>>> parent of e113bf2 (removed leftover rating/leaderboard references (#344))
                             Current Article<br><strong>[[currentArticle]]</strong>
                         </div>
                     </div>
@@ -90,7 +79,7 @@
                         </div>
 
                         <div class="col-sm-auto text-nowrap py-2 mr-auto">
-                            <button @click="expandedTimebox = !expandedTimebox" 
+                            <button @click="expandedTimebox = !expandedTimebox"
                                     class="btn btn-outline-secondary mx-2"
                                     style="padding: 8px 8px">
                                 <i class="bi bi-chevron-up"></i>
@@ -101,7 +90,6 @@
             </div>
         </div>
 
-<<<<<<< HEAD
         <div v-else>
             <div v-if="expandedTimebox" class="HUDwrapper-mobile container animated-transition" id="time-box-mobile">
                 <div class="HUDwrapper-mobile-inner-container row">
@@ -115,7 +103,7 @@
                     </div>
 
                     <div class="col-auto px-2">
-                        <button @click="expandedTimebox = !expandedTimebox" 
+                        <button @click="expandedTimebox = !expandedTimebox"
                                 class="btn btn-outline-secondary"
                                 style="font-size: 0.75rem; padding: 5px 5px">
                             <i class="bi bi-chevron-down"></i>
@@ -132,32 +120,12 @@
                         </small>
                     </div>
                     <div class="col-auto px-2">
-                        <button @click="expandedTimebox = !expandedTimebox" 
+                        <button @click="expandedTimebox = !expandedTimebox"
                                 class="btn btn-outline-secondary"
                                 style="font-size: 0.75rem; padding: 5px 5px">
                             <i class="bi bi-chevron-up"></i>
                         </button>
                     </div>
-=======
-        <div class="show-on-mobile">
-            <div class="HUDwrapper-mobile" id="time-box-mobile">
-                <div class="HUDwrapper-mobile-inner-container">
-                    Goal Article: <strong>[[endArticle]]</strong>
-                    <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="showPreview">
-                        ⓘ
-                    </small>
-                    <br>
-                    Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
-                    <br>
-                    Links clicked: <strong>[[path.length - 1]]</strong>
-
-                    <br>
-                    <template v-if="promptRated" class="col-sm-auto text-nowrap pe-8 py-2">
-                        Mode:
-                        <b class="text-danger" v-if="!promptPlayed && promptActive">Rated</b>
-                        <b v-else>Practice</b>
-                    </template>
->>>>>>> parent of e113bf2 (removed leftover rating/leaderboard references (#344))
                 </div>
             </div>
         </div>
@@ -175,22 +143,6 @@
         <p v-if="promptRated && promptActive && !promptPlayed" class="text-danger">This is your rated attempt, leaving this page will count as a forfeit!</p>
         <p v-else-if="promptRated">This is a practice attempt: your score will not appear on the public leaderboard</p>
     </countdown-timer>
-
-    <!-- REFACTORED OUT TO play_finish.html
-    <finish-page
-        v-bind:prompt-id="promptId"
-        v-bind:lobby-id="lobbyId"
-        v-bind:run-id="runId"
-
-        v-bind:start-article="startArticle"
-        v-bind:end-article="endArticle"
-        v-bind:final-time="endTime - startTime"
-        v-bind:path="path"
-
-        v-bind:logged-in="loggedIn"
-
-        v-show="finished"
-    ></finish-page>-->
 
     <div v-show="started && !finished" id="main">
         <div id="wikipedia-frame" class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output content"></div>
