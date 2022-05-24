@@ -147,3 +147,13 @@ def get_lobby_run(lobby_id, run_id):
     runs = lobbys.get_lobby_run(lobby_id, run_id)
 
     return jsonify(runs), 200
+
+
+@lobby_api.get("/user_lobbys")
+@check_user
+def get_user_lobbies():
+    
+    user_id = session.get("user_id")
+    lobbies = lobbys.get_user_lobbys(user_id)
+    
+    return jsonify(lobbies), 200
