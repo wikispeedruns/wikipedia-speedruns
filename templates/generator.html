@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script type="module">
+import { PromptGenerator } from "/static/js/modules/generator.js"
+
+let app = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    components: {
+        'prompt-generator': PromptGenerator,
+    },
+
+});
+</script>
+{% endblock %}
+
+
+{% block content %}
+
+<div id ="app">
+    <h3>Prompt Generator</h3>
+
+
+    <prompt-generator></prompt-generator>
+
+    <hr>
+    <h5>About</h5>
+    <p>
+        This prompt generator chooses a start and end article based on a <a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a> of Wikipedia articles.
+        For more information, see our <a href="https://github.com/wikispeedruns/wikipedia-speedruns">github</a>.
+    </p>
+
+    <p>
+        This is still a work in progress.
+    </p>
+</div>
+
+
+
+{% endblock %}
