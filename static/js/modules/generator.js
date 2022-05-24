@@ -41,7 +41,6 @@ var PromptGenerator = {
 
 	methods: {
         async generatePrompt() {
-
             const prompt = await getGeneratedPrompt(this.difficulty);
             this.start = prompt["start"];
             this.end = prompt["end"];
@@ -70,9 +69,6 @@ var PromptGenerator = {
 
                     <button class="btn btn-primary" v-on:click="generatePrompt"> Click to generate a prompt! </button>
                 </div>
-
-
-
             </div>
 
 
