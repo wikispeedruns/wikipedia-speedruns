@@ -19,7 +19,7 @@ sprint_api = Blueprint('sprints', __name__, url_prefix='/api/sprints')
 @check_request_json({"start": str, "end": str})
 def create_prompt():
     #print(request.json)
-    
+
     start = request.json.get('start')
     end = request.json.get('end')
 
@@ -154,9 +154,8 @@ def get_prompt_leaderboard(id, run_id):
         "prompt": prompt
     }
 
-    # Then query the leaderboard (ew)
     query = '''
-    SELECT run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time, runs.end_time AS end_time
+    SELECT run_id, path, runs.user_id, username, play_time, start_time, end_time
     FROM sprint_runs AS runs
     JOIN (
             SELECT users.user_id, username, MIN(run_id) AS first_run
@@ -166,20 +165,20 @@ def get_prompt_leaderboard(id, run_id):
             GROUP BY user_id
     ) firsts
     ON firsts.user_id=runs.user_id AND first_run=run_id
-    WHERE end_time IS NOT NULL
+    WHERE finished IS TRUE AND path IS NOT NULL
     '''
 
     args = [id]
 
     specificRunQuery = '''
-    SELECT runs.run_id, path, runs.user_id, username, TIMESTAMPDIFF(MICROSECOND, runs.start_time, runs.end_time) AS run_time, runs.end_time AS end_time
+    SELECT runs.run_id, path, runs.user_id, username, play_time, start_time, end_time
     FROM sprint_runs AS runs
     LEFT JOIN users
     ON runs.user_id=users.user_id
     WHERE runs.run_id=%s
     '''
 
-    ordering = f'\nORDER BY run_time'
+    ordering = f'\nORDER BY play_time'
 
     if run_id:
         query = f'({query}) UNION ({specificRunQuery})'
@@ -193,9 +192,7 @@ def get_prompt_leaderboard(id, run_id):
         results = cursor.fetchall()
 
         for run in results:
-            run['path'] = json.loads(run['path'])
-            if run_id is None and user_id is not None and run['user_id'] == user_id:
-                run_id = run['run_id']
+            run['path'] = json.loads(run['path'])['path']
 
         resp["leaderboard"] = results
         resp["run_id"] = run_id

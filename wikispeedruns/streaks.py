@@ -16,7 +16,7 @@ def get_current_streak(user_id):
             user_id=%s
             AND sprint_runs.start_time BETWEEN sprint_prompts.active_start AND sprint_prompts.active_end
             AND rated
-            AND end_time IS NOT NULL
+            AND finished
         GROUP BY run_date
         ORDER BY run_date DESC )
     as date_diff
@@ -26,23 +26,23 @@ def get_current_streak(user_id):
         dates = cursor.fetchall()
 
     dates = [x['d'] for x in dates]
-        
+
     if len(dates) == 0:
         today = 0
         streak = 0
     else:
         if dates[0] == 0: today = 1
         else: today = 0
-        
-        
+
+
         if dates[0] == 0 or dates[0] == 1:
             streak = 0
             for i in range(len(dates)):
                 if dates[i] > i + dates[0]:
                     break
                 streak += 1
-        else: streak = 0        
-        
+        else: streak = 0
+
     res = {'done_today': today, 'streak': streak}
-    
+
     return res

@@ -1,3 +1,4 @@
+from click import prompt
 from flask import jsonify, request, Blueprint, session
 from util.decorators import check_user, check_request_json
 
@@ -7,69 +8,61 @@ from pymysql.cursors import DictCursor
 import json
 
 from datetime import datetime
-from wikispeedruns import prompts
+from wikispeedruns import prompts, lobbys, runs
+
+# Does not have its own prefix, instead part of the lobbys and sprints apis
+run_api = Blueprint('runs', __name__, url_prefix='/api')
 
 
-run_api = Blueprint('runs', __name__, url_prefix='/api/runs')
+@run_api.post('/sprints/<int:prompt_id>/runs')
+def create_sprint_run(prompt_id):
+    run_id = runs.create_sprint_run(prompt_id, session.get("user_id"))
+    return jsonify({"run_id": run_id})
+
+@run_api.post("/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/runs")
+def create_lobby_run(prompt_id, lobby_id):
+    if not lobbys.check_membership(lobby_id, session):
+        return "You do not have access to this lobby", 401
+
+    run_id = runs.create_lobby_run(prompt_id, lobby_id,
+        user_id=session.get("user_id"),
+        name=session.get("lobbys", {}).get(str(lobby_id))
+    )
+    return jsonify({"run_id": run_id})
 
 
-@run_api.post('')
-def create_run():
+@run_api.patch('/sprints/<int:prompt_id>/runs/<int:run_id>', defaults={'lobby_id' : None})
+@run_api.patch("/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/runs/<int:run_id>")
+@check_request_json({'start_time': int, 'end_time': int, 'finished': bool, 'path': list})
+def update_run(prompt_id, lobby_id, run_id):
     '''
-    Creates a new run given a prompt.
+    Updates an existing run given a run, start time, end time, a finished flag, and a path.
 
-    Returns the ID of the run created.
+    Returns the run ID of the run updated.
     '''
+    if lobby_id is None:
+        ret_run_id = runs.update_sprint_run(
+            run_id     = run_id,
+            start_time = datetime.fromtimestamp(request.json['start_time']/1000),
+            end_time   = datetime.fromtimestamp(request.json['end_time']/1000),
+            finished   = request.json['finished'],
+            path       = request.json['path']
+        )
 
-    query = "INSERT INTO `sprint_runs` (`prompt_id`,`user_id`) VALUES (%s, %s)"
-    sel_query = "SELECT LAST_INSERT_ID()"
-
-    prompt_id = request.json['prompt_id']
-
-    if ('user_id' in session):
-        user_id = session['user_id']
     else:
-        user_id = None
-
-    # TODO validate
-
-    db = get_db()
-    with db.cursor() as cursor:
-        print(cursor.mogrify(query, (prompt_id, user_id)))
-        cursor.execute(query, (prompt_id, user_id))
-        cursor.execute(sel_query)
-        id = cursor.fetchone()[0]
-        db.commit()
-
-        return jsonify(id), 200
-
-    return "Error creating run", 500
+        ret_run_id = runs.update_lobby_run(
+            run_id     = run_id,
+            start_time = datetime.fromtimestamp(request.json['start_time']/1000),
+            end_time   = datetime.fromtimestamp(request.json['end_time']/1000),
+            finished   = request.json['finished'],
+            path       = request.json['path']
+        )
 
 
-@run_api.patch('/<id>')
-def finish_run(id):
-    '''
-    Updates an existing run given a run, start time, end time, and a path.
-
-    Returns the user ID of the run updated.
-    '''
-    query = 'UPDATE `sprint_runs` SET `start_time`=%s, `end_time`=%s, `path`=%s WHERE `run_id`=%s'
-
-    start_time = datetime.fromtimestamp(request.json['start_time']/1000)
-    end_time = datetime.fromtimestamp(request.json['end_time']/1000)
-    path = json.dumps(request.json['path'])
-
-    db = get_db()
-    with db.cursor() as cursor:
-        cursor.execute(query, (start_time, end_time, path, id))
-        db.commit()
-
-        return f'Updated run {id}', 200
-
-    return f'Error updating run {id}', 500
+    return jsonify({"run_id": ret_run_id})
 
 
-@run_api.patch('/update_anonymous')
+@run_api.patch('/runs/update_anonymous')
 @check_user
 @check_request_json({"run_id": int})
 def update_anonymous_sprint_run():
@@ -77,11 +70,11 @@ def update_anonymous_sprint_run():
     Updates the user_id of a given run_id, only if the associated run_id is an anonymous run
     '''
 
-    query = 'UPDATE `sprint_runs` SET `user_id`=%s WHERE `run_id`=%s AND `user_id` IS NULL' 
-    
+    query = 'UPDATE `sprint_runs` SET `user_id`=%s WHERE `run_id`=%s AND `user_id` IS NULL'
+
     user_id = session['user_id']
     run_id = request.json['run_id']
-    
+
     db = get_db()
     with db.cursor() as cursor:
         cursor.execute(query, (user_id, run_id))
@@ -89,10 +82,8 @@ def update_anonymous_sprint_run():
 
         return f'Updated run {run_id} to user {user_id}', 200
 
-    return f'Error updating run {run_id} to user {user_id}', 500
 
-
-@run_api.get('')
+@run_api.get('/runs')
 def get_all_runs():
     # TODO this should probably be paginated, and return just ids
     query = "SELECT run_id FROM `sprint_runs`"
@@ -103,14 +94,15 @@ def get_all_runs():
         results = cursor.fetchall()
         return jsonify(results)
 
-@run_api.get('/<id>')
+
+@run_api.get('/runs/<id>')
 def get_run(id):
     '''
     Returns the run details for a specific run_id if the user has done the corresponding prompt.
     '''
 
     query = '''
-    SELECT run_id, start_time, end_time, path, prompt_id, user_id
+    SELECT run_id, start_time, end_time, play_time, finished, path, prompt_id, user_id
     FROM sprint_runs
     WHERE run_id=%s
     '''
@@ -125,10 +117,10 @@ def get_run(id):
         if not session.get("admin", False) and (not prompt.get("played", False)):
             return "Cannot view run until prompt has been completed", 401
 
-        if result["path"] is None:
+        if result["finished"] is False:
             return f'Run {id} has not been completed', 401
 
-        result['path'] = json.loads(result['path'])
+        result['path'] = json.loads(result['path'])['path']
         return jsonify(result)
 
     return f'Error fetching run {id}', 500
