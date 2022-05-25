@@ -134,7 +134,7 @@ def get_prompt(id):
         return "Prompt not yet available", 401
 
     if prompt["rated"] and prompt["active"] and "user_id" not in session:
-        return "You must be logged in to play this rated prompt", 401
+        return "You must be logged in to play this daily prompt", 401
 
     return prompt
 

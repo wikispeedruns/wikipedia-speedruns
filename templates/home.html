@@ -40,48 +40,16 @@
 
     <div class="row justify-content-md-center py-2">
         <div class="col-lg-12">
-            <div class="card"  v-if="lobbies.length > 0">
-                <div class="alert alert-info my-0" role="alert">
-                    <h5 class="my-0">Your Lobbies</h5>
-                </div>
-                <div class="card-body"  style="overflow-x: auto;">
-
-                    <table class="table table-hover py-2">
-                        <thead>
-                            <th scope="col">Name</th>
-                            <th scope="col">Date created</th>
-                            <th scope="col"># of prompts</th>
-                            <th scope="col">Owner</th>
-                            <th class="text-center"></th>
-                        </thead>
-                        <tbody>
-                            <tr v-for="lobby in lobbies" v-cloak>
-                                <td>
-                                    <a v-bind:href="'/lobby/' + lobby.lobby_id">
-                                        <template v-if="lobby.name">[[lobby.name]]</template><template v-else>Lobby [[lobby.lobby_id]]</template>
-                                    </a>
-                                    <span v-if="lobby.desc" style="cursor: help;" :title="lobby.desc">ⓘ</span>
-                                </td>
-                                <td>[[getDate(lobby.create_date)]]</td>
-                                <td>[[lobby.n_prompts]]</td>
-                                <td  class="align-middle">
-                                    <span v-if="lobby.owner == 1"><i class="bi bi-check-lg"></i></span>
-                                    <span v-else>-</span>
-                                </td>
-                                <td class="text-center text-nowrap" >
-                                    <button v-bind:id="'custom-tooltip-'+lobby.lobby_id" v-on:click="copyInvite(lobby)" type="button" class="btn btn-default px-0 py-0" style="font-size: 12px !important">- Copy invite -</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="card-footer text-muted">
-                    Create a new private lobby <a href="/lobby/create"><u>here</u></a>!
-                </div>
+            <div v-if="loggedIn && lobbies.length > 0">
+                See your active lobbies <a href="#user-lobbies">here</a> or <a href="/lobby/create">create a new private lobby</a>.
             </div>
-            <div v-else>
-                <a href="/login"><b>Log in</b></a> to create a new private lobby and play with your friends!
+            <div v-if="loggedIn && lobbies.length == 0">
+                Create a new private lobby <a href="/lobby/create">here</a>!
             </div>
+            <div v-if="!loggedIn">
+                <a href="/login"><b>Log in</b></a>/<a href="/register"><b>Register</b></a> to create a new private lobby and play with your friends!
+            </div>
+            
         </div>
     </div>
 
@@ -127,8 +95,11 @@
                         <p>Currently unavailable</p>
                     </template>
                 </div>
-                <div class="card-footer text-muted">
-                    Play the daily prompt <span v-if="!loggedIn">while logged in</span> to start<span v-if="loggedIn">/continue</span> your streak! 🔥
+                <div class="card-footer text-muted" v-if="loggedIn">
+                    Play the daily prompt to start/continue your streak! 🔥
+                </div>
+                <div class="card-footer text-muted" v-else>
+                    Log in to play this daily prompt and start your streak! 🔥
                 </div>
             </div>
         </div>
@@ -169,6 +140,52 @@
     </div>
 
     <p class="my-4"> Still want more? Checkout our <a href="/archive">archive</a> or click <a href="/random">here</a> to try a random prompt.</p>
+
+    <hr class="my-4"   v-if="lobbies.length > 0">
+
+    <div class="row justify-content-md-center py-2"   v-if="lobbies.length > 0" id="user-lobbies">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="alert alert-info my-0" role="alert">
+                    <h5 class="my-0">Your Lobbies</h5>
+                </div>
+                <div class="card-body"  style="overflow-x: auto;">
+
+                    <table class="table table-hover py-2">
+                        <thead>
+                            <th scope="col">Name</th>
+                            <th scope="col">Date created</th>
+                            <th scope="col"># of prompts</th>
+                            <th scope="col">Owner</th>
+                            <th class="text-center"></th>
+                        </thead>
+                        <tbody>
+                            <tr v-for="lobby in lobbies" v-cloak>
+                                <td>
+                                    <a v-bind:href="'/lobby/' + lobby.lobby_id">
+                                        <template v-if="lobby.name">[[lobby.name]]</template><template v-else>Lobby [[lobby.lobby_id]]</template>
+                                    </a>
+                                    <span v-if="lobby.desc" style="cursor: help;" :title="lobby.desc">ⓘ</span>
+                                </td>
+                                <td>[[getDate(lobby.create_date)]]</td>
+                                <td>[[lobby.n_prompts]]</td>
+                                <td  class="align-middle">
+                                    <span v-if="lobby.owner == 1"><i class="bi bi-check-lg"></i></span>
+                                    <span v-else>-</span>
+                                </td>
+                                <td class="text-center text-nowrap" >
+                                    <button v-bind:id="'custom-tooltip-'+lobby.lobby_id" v-on:click="copyInvite(lobby)" type="button" class="btn btn-default px-0 py-0" style="font-size: 12px !important">- Copy invite -</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer text-muted">
+                    Create a new private lobby <a href="/lobby/create"><u>here</u></a>!
+                </div>
+            </div>
+        </div>
+    </div>
 
     <hr class="my-4">
 
