@@ -183,3 +183,12 @@
     min-width: 60%;
     overflow-x: hidden;
 }
+
+/* fix to wikipedia css */
+img,
+picture,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}

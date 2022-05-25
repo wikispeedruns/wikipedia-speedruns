@@ -80,6 +80,7 @@ const beforeUnloadListener = (event) => {
 Vue.component('tutorial', {
 
     props: [
+        "isMobile",
         "currentArticle"
     ],
 
@@ -333,28 +334,24 @@ Vue.component('tutorial', {
         </div>
 
 
-        <div class="show-on-mobile" v-if="curStep == 0">
+        <div v-if="isMobile && curStep == 0">
             Swipe left/right here (at the bottom of the page) to navigate
-
             <!-- https://lottiefiles.com/7635-swipe-left -->
             <img style="margin-left: auto; margin-right:auto; height:50px; width: 50px" src="/static/assets/swipe.gif">
         </div>
 
 
-
-        <div class="show-on-desktop">
-            <div style="margin-left: auto; margin-top:auto !important;">
-                <button v-bind:disabled="curStep === 0"
-                        @click="prev"
-                        class="btn btn-primary">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <button v-bind:disabled="curStep === tutorial.length - 1  || tutorial[curStep].requiredLink"
-                        @click="next"
-                        class="btn btn-primary" >
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
+        <div v-if="!isMobile" style="margin-left: auto; margin-top:auto !important;">
+            <button v-bind:disabled="curStep === 0"
+                    @click="prev"
+                    class="btn btn-primary">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <button v-bind:disabled="curStep === tutorial.length - 1  || tutorial[curStep].requiredLink"
+                    @click="next"
+                    class="btn btn-primary" >
+                <i class="bi bi-chevron-right"></i>
+            </button>
         </div>
 
 
