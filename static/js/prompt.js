@@ -88,9 +88,11 @@ function populateGraph(runs, runId) {
         var cur = (runs[i]["run_id"] === Number(runId)) ? true : false;
 
         for (let j = 0; j < pathNodes.length; j++) {
-            var index = checkIncludeLabels(pathNodes[j], nodes);
+            const article = pathNodes[j]["article"]
+
+            var index = checkIncludeLabels(article, nodes);
             if (index === -1) {
-                let node = {type: 0, label: pathNodes[j], count: 1, current: cur};
+                let node = {type: 0, label: article, count: 1, current: cur};
                 if (j === 0) {
                     node.type = 1;
                     startNode = node;
@@ -127,12 +129,13 @@ function populateGraph(runs, runId) {
         var cur = (runs[i]["run_id"] === Number(runId)) ? true : false;
 
         for (let j = 0; j < pathNodes.length - 1; j++) {
+            const u = pathNodes[j]["article"]
+            const v = pathNodes[j + 1]["article"]
 
-
-            let index = checkIncludeEdgeLabels(pathNodes[j], pathNodes[j + 1], edges);
+            let index = checkIncludeEdgeLabels(u, v, edges);
 
             if (index === -1) {
-                let edge = {src: pathNodes[j], dest: pathNodes[j + 1], count: 1, current: cur};
+                let edge = {src: u, dest: v, count: 1, current: cur};
                 edges.push(edge);
             } else {
                 if (cur) {
