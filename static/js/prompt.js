@@ -17,12 +17,12 @@ var LeaderboardRow = {
     props: [
         "run",
         "rank",
+        "currentRunId",
     ],
 
     created: function() {
         // Do it here cause these won't change
         this.lobbyId = lobby_id;
-        this.currentRunId = run_id;
     },
 
     template: (`

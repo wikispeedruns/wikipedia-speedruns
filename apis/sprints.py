@@ -194,6 +194,9 @@ def get_prompt_leaderboard(id, run_id):
         for run in results:
             run['path'] = json.loads(run['path'])['path']
 
+            if run_id is None and user_id is not None and run['user_id'] == user_id:
+                run_id = run['run_id']
+
         resp["leaderboard"] = results
         resp["run_id"] = run_id
 
