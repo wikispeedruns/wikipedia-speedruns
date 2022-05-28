@@ -178,7 +178,9 @@ let app = new Vue({
 
         async start() {
 
-            this.totalLoadTime += (Date.now() - this.startTime) / 1000;
+            let countdownTime = (Date.now() - this.startTime) / 1000;
+            this.totalLoadTime = countdownTime;
+            this.path[0]['timeReached'] = countdownTime;
 
             // set the timer update interval
             this.timerInterval = setInterval(() => {
