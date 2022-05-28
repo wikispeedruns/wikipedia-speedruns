@@ -8,6 +8,7 @@ from itsdangerous import json
 
 generator_api = Blueprint("generator", __name__, url_prefix="/api/generator")
 
+OFFSET = 100
 LIMIT = 300000
 
 # Load in file when imported
@@ -37,14 +38,12 @@ def get_random_prompt():
     if (count != LIMIT):
         return "Prompt generation not setup", 500
 
+    num = int(request.args.get('num_articles', 1))
     difficulty = int(request.args.get('difficulty', 10000))
 
     if (difficulty >= LIMIT or difficulty < 10):
         return f"Invalid difficulty, should be between 10 and {LIMIT}", 400
 
 
-    prompt = random.choices(articles[:difficulty], weights[:difficulty], k=2)
-    return jsonify({
-        "start": prompt[0],
-        "end": prompt[1]
-    }), 200
+    prompts = random.choices(articles[:difficulty], weights[:difficulty], k=num)
+    return jsonify(prompts), 200

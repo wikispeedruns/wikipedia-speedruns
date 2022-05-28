@@ -1,29 +1,26 @@
 import { getArticleTitle } from "./wikipediaAPI/util.js";
 import { fetchJson } from "./fetch.js";
 
-async function getGeneratedPrompt(difficulty)
+async function getGeneratedPrompt(difficulty, num)
 {
-    const response = await fetchJson(`/api/generator/prompt?difficulty=${difficulty}` , "GET");
-    const prompt = await response.json();
+    const response = await fetchJson(`/api/generator/prompt?difficulty=${difficulty}&num_articles=${num}` , "GET");
+    const prompts = await response.json();
 
-
-    // Load start and end simultaneously
-    let start, end;
-    await Promise.all([
-        getArticleTitle(prompt["start"]).then((title) => {start = title}),
-        getArticleTitle(prompt["end"]).then((title) => {end = title})
-    ]);
-
-    return {start, end};
+    // Load prompts simultaneously
+    return await Promise.all(prompts.map(getArticleTitle));
 }
 
 var PromptGenerator = {
 
+    props: {
+        // Two way binding/v-model
+        start: String,
+        end: String
+    },
+
 	data: function () {
         return {
-            start: "Start Article",
-            end: "End Article",
-            logdifficulty: 3,
+            logdifficulty: 3.5,
         }
 	},
 
@@ -41,38 +38,33 @@ var PromptGenerator = {
 
 	methods: {
         async generatePrompt() {
-            const prompt = await getGeneratedPrompt(this.difficulty);
-            this.start = prompt["start"];
-            this.end = prompt["end"];
+            const [start, end] = await getGeneratedPrompt(this.difficulty, 2);
+            this.$emit('update:start', start);
+            this.$emit('update:end', end);
+        },
+        async generateStart() {
+            const [start] = await getGeneratedPrompt(this.difficulty, 1);
+            this.$emit('update:start', start);
+
+        },
+        async generateEnd() {
+            const [end] = await getGeneratedPrompt(this.difficulty, 1);
+            this.$emit('update:end', end);
         }
 	},
 
 	template: (`
-        <div class="card">
-        <div class="card-body">
+        <div>
+            <input type="range" min="2" max="5" v-model="logdifficulty" class="slider" step="0.1">
+            <p>Obscurity: {{Math.floor(33 * (logdifficulty - 2)) + 1}}  ({{approx_difficulty}} articles)</p>
 
-            <div class="row" >
-                <div class="col-sm-6 py-3 text-center">
-                    <h4>{{start}} </h4>
-                </div>
+            Generate a new:
+            <div class="btn-group">
+                <button class="btn btn-primary" v-on:click.prevent="generatePrompt"> Prompt </button>
+                <button class="btn btn-primary" v-on:click.prevent="generateStart"> Start </button>
+                <button class="btn btn-primary" v-on:click.prevent="generateEnd"> End </button>
 
-                <div class="col-sm-6 py-3 text-center" >
-                    <h4>{{end}} </h4>
-                </div>
             </div>
-
-            <div class="row">
-
-                <div class="col-sm-6">
-                    <input type="range" min="2" max="5" v-model="logdifficulty" class="slider" step="0.1">
-                    <p>Selecting from the {{approx_difficulty}} most reachable articles</p>
-
-                    <button class="btn btn-primary" v-on:click="generatePrompt"> Click to generate a prompt! </button>
-                </div>
-            </div>
-
-
-        </div>
         </div>
     `)
 };
