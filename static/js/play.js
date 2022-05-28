@@ -112,6 +112,8 @@ let app = new Vue({
             console.log("Not logged in, uploading start of run to local storage")
         }
 
+        this.startTime = Date.now();
+
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview);
         await this.renderer.loadPage(this.startArticle);
 
@@ -175,8 +177,8 @@ let app = new Vue({
         },
 
         async start() {
-            // start timer
-            this.startTime = Date.now();
+
+            this.totalLoadTime += (Date.now() - this.startTime) / 1000;
 
             // set the timer update interval
             this.timerInterval = setInterval(() => {
