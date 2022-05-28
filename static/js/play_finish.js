@@ -39,7 +39,7 @@ let app = new Vue({
         promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
 
         lobbyId: null,
-        runId: null,          //unique ID for the current run. This gets populated upon start of run
+        runId: RUN_ID,          //unique ID for the current run. This gets populated upon start of run
 
         startTime: null,     //For all game modes, the start time of run (mm elapsed since January 1, 1970)
         endTime: null,       //For all game modes, the end time of run (mm elapsed since January 1, 1970)
@@ -121,6 +121,10 @@ let app = new Vue({
         //redirect to the corresponding prompt page
         goToLobbyLeaderboard: function (event) {
             window.location.replace(`/lobby/${this.lobbyId}/prompt/${this.promptId}?run_id=${this.runId}`);
+        },
+
+        goToLeaderboard: function (event) {
+            window.location.replace(`/prompt/${this.promptId}?run_id=${this.runId}`);
         },
     }
 })

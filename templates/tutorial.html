@@ -3,7 +3,8 @@
 {% block head %}
 
 <!-- wiki desktop stylesheet -->
-<link rel="stylesheet" href="https://en.wikipedia.org/w/load.php?lang=en&modules=site.styles&only=styles" media="screen and (min-width: 768px)">
+<link rel="stylesheet" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}" media="(min-width: 768px)">
+<link rel="stylesheet" href="{{url_for('static', filename='stylesheets/wikipedia-vec.css')}}" media="(min-width: 768px)">
 
 <!-- wiki mobile stylesheets -->
 <link rel="stylesheet" href="https://meta.wikimedia.org/api/rest_v1/data/css/mobile/base" media="screen and (max-width: 767px)">
@@ -36,7 +37,7 @@
     <!-- Note, the v-if here is important, it prevents this from being rendered at all (rather than just displayed)
          Most importantly the child tutorial component won't be created twice.
     -->
-    <div class="show-on-desktop" v-if="!isMobile">
+    <div v-if="!isMobile">
         <div class="HUDwrapper HUDwrapper-fade container-xxl" >
             <div class="HUD" id="time-box" style="width: 48% !important; height: 8rem;">
                 <div class="row flex-row m-0">
@@ -65,6 +66,7 @@
             <div class="HUD" id="tutorial" style="position:absolute; right: 0.75rem; width: 48% !important; height: 8rem;">
                 <div class="px-2 py-2" style="height: 100%">
                     <tutorial
+                        v-bind:is-mobile="isMobile"
                         v-bind:current-article="currentArticle"
                         v-on:change-article="renderer.loadPage($event)"
                     ></tutorial>
@@ -74,7 +76,7 @@
 
     </div>
 
-    <div class="show-on-mobile" v-if="isMobile">
+    <div v-if="isMobile">
         <div class="HUDwrapper-mobile">
             <div class="HUDwrapper-mobile-inner-container">
                 <div id="time-box">
@@ -98,6 +100,7 @@
                 <tutorial
                     id="tutorial"
                     v-bind:current-article="currentArticle"
+                    v-bind:is-mobile="isMobile"
                     v-on:change-article="renderer.loadPage($event)"
                 ></tutorial>
 

@@ -134,7 +134,7 @@ def get_prompt(id):
         return "Prompt not yet available", 401
 
     if prompt["rated"] and prompt["active"] and "user_id" not in session:
-        return "You must be logged in to play this rated prompt", 401
+        return "You must be logged in to play this daily prompt", 401
 
     return prompt
 
@@ -193,6 +193,9 @@ def get_prompt_leaderboard(id, run_id):
 
         for run in results:
             run['path'] = json.loads(run['path'])['path']
+
+            if run_id is None and user_id is not None and run['user_id'] == user_id:
+                run_id = run['run_id']
 
         resp["leaderboard"] = results
         resp["run_id"] = run_id

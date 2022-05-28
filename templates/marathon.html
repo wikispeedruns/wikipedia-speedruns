@@ -3,7 +3,8 @@
 {% block head %}
 
 <!-- wiki desktop stylesheet -->
-<link rel="stylesheet" href="https://en.wikipedia.org/w/load.php?lang=en&modules=site.styles&only=styles" media="screen and (min-width: 768px)">
+<link rel="stylesheet" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}" media="(min-width: 768px)">
+<link rel="stylesheet" href="{{url_for('static', filename='stylesheets/wikipedia-vec.css')}}" media="(min-width: 768px)">
 
 <!-- wiki mobile stylesheets -->
 <link rel="stylesheet" href="https://meta.wikimedia.org/api/rest_v1/data/css/mobile/base" media="screen and (max-width: 767px)">
@@ -50,7 +51,7 @@
                         </div>
                     </div>
                     <div class="col-sm-auto  text-nowrap py-2 mr-auto">
-                        <button @click="expandedTimebox = !expandedTimebox" 
+                        <button @click="expandedTimebox = !expandedTimebox"
                                 class="btn btn-outline-secondary mx-2"
                                 style="padding: 8px 8px">
                             <i class="bi bi-chevron-down"></i>
@@ -91,7 +92,7 @@
                         </div>-->
                     </div>
                     <div class="col-sm-auto text-nowrap py-2 mr-auto">
-                        <button @click="expandedTimebox = !expandedTimebox" 
+                        <button @click="expandedTimebox = !expandedTimebox"
                                 class="btn btn-outline-secondary mx-2"
                                 style="padding: 8px 8px">
                             <i class="bi bi-chevron-up"></i>
@@ -136,7 +137,7 @@
                     <div>The amount of clicks awarded for each checkpoint will decrease</div>
                 </div>
                 <div v-if="!(showStop && !finished && !saved)" class="col-auto px-2">
-                    <button @click="expandedTimebox = !expandedTimebox" 
+                    <button @click="expandedTimebox = !expandedTimebox"
                             class="btn btn-outline-secondary"
                             style="font-size: 0.75rem; padding: 5px 5px">
                         <i class="bi bi-chevron-down"></i>
@@ -162,7 +163,7 @@
                     <br>Checkpoints Visited: [[numCheckpointsVisited]] / [[numCheckpointsToStop]]</span>
                 </div>
                 <div class="col-auto px-2">
-                    <button @click="expandedTimebox = !expandedTimebox" 
+                    <button @click="expandedTimebox = !expandedTimebox"
                             class="btn btn-outline-secondary"
                             style="font-size: 0.75rem; padding: 5px 5px">
                         <i class="bi bi-chevron-up"></i>
@@ -172,7 +173,7 @@
         </div>
     </div>
 
-    
+
     <!--
     <marathon-help v-show="started && !finished && showHelp" v-cloak v-on:close-help="showHelp = !showHelp">
     </marathon-help>-->
