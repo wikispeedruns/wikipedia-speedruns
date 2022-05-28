@@ -98,7 +98,7 @@ def _update_run(run_id: int, start_time: datetime, end_time: datetime,
     })
 
     duration = (end_time - start_time).total_seconds()
-    total_load_time = sum([entry.get('loadTime') for entry in path])
+    total_load_time = sum([entry.get('loadTime') for entry in path[1:]]) + path[0].get('timeReached')
     play_time = duration - total_load_time
 
     query_args = {

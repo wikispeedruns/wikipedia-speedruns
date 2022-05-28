@@ -21,6 +21,12 @@ function submitLocalRun(promptId, runId, startTime, endTime, finished, path) {
         path: path
     };
 
+    let totalloadtime = -path[0]['loadTime'] + path[0]['timeReached'];
+    path.forEach(function (el) {
+        totalloadtime += el['loadTime']
+    });
+    data['play_time'] = (endTime - startTime) / 1000 - totalloadtime;
+
     const key = "WS-S-sprint-runs";
 
     let ls = getLocalStorageRuns(key);
@@ -59,5 +65,9 @@ function getLocalSprints() {
     return getLocalStorageRuns(key);
 }
 
-export { startLocalRun, submitLocalRun, uploadLocalSprints, getLocalSprints };
+function getLocalRun(run_id) {
+    return getLocalSprints()[run_id];
+}
+
+export { startLocalRun, submitLocalRun, uploadLocalSprints, getLocalSprints, getLocalRun };
 
