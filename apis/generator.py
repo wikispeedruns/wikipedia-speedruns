@@ -29,13 +29,16 @@ def load_page_rank(app):
             weights.append(prob)
 
             count += 1
-            if (count >= LIMIT):
+            if (count >= LIMIT + OFFSET):
                 break
 
+    articles = articles[OFFSET:]
+    weights = weights[OFFSET:]
+    assert(len(articles) == LIMIT)
 
 @generator_api.get("prompt")
 def get_random_prompt():
-    if (count != LIMIT):
+    if (count == 0):
         return "Prompt generation not setup", 500
 
     num = int(request.args.get('num_articles', 1))

@@ -58,13 +58,17 @@ var PromptGenerator = {
             <input type="range" min="2" max="5" v-model="logdifficulty" class="slider" step="0.1">
             <p>Obscurity: {{Math.floor(33 * (logdifficulty - 2)) + 1}}  ({{approx_difficulty}} articles)</p>
 
-            Generate a new:
-            <div class="btn-group">
-                <button class="btn btn-primary" v-on:click.prevent="generatePrompt"> Prompt </button>
-                <button class="btn btn-primary" v-on:click.prevent="generateStart"> Start </button>
-                <button class="btn btn-primary" v-on:click.prevent="generateEnd"> End </button>
-
+            <div class="my-2">
+                Generate a new:
+                <div class="btn-group">
+                    <button class="btn btn-primary" v-on:click.prevent="generatePrompt"> Prompt </button>
+                    <button class="btn btn-primary" v-on:click.prevent="generateStart"> Start </button>
+                    <button class="btn btn-primary" v-on:click.prevent="generateEnd"> End </button>
+                </div>
             </div>
+            <p>
+                <small><a href="/generator#about"> How does this work? </a></small>
+            </p>
         </div>
     `)
 };
