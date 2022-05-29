@@ -1,33 +1,34 @@
-
 import { fetchJson } from "../fetch.js";
 
-async function startRun(promptId, lobbyId=null) {
-    // No need to record unfinished private runs
-    if (lobbyId) {
-        return -1;
-    }
+async function startRun(promptId, lobbyId, startTime) {
+    const reqBody = {
+        "start_time": startTime,
+    };
 
-    const response = await fetchJson("/api/runs", "POST", {
+    let endpoint = lobbyId == null
+        ? `/api/sprints/${promptId}/runs`
+        : `/api/lobbys/${lobbyId}/prompts/${promptId}/runs`;
+
+    const response = await fetchJson(endpoint, "POST", {
         "prompt_id": promptId,
     });
-    return await response.json();
+    return (await response.json())["run_id"];
 }
 
-async function submitRun(promptId, lobbyId,  runId, startTime, endTime, path) {
+async function submitRun(promptId, lobbyId,  runId, startTime, endTime, finished, path) {
     const reqBody = {
         "start_time": startTime,
         "end_time": endTime,
+        "finished": finished,
         "path": path,
     }
 
-    if (lobbyId) {
-        const response = await fetchJson(`/api/lobbys/${lobbyId}/prompts/${promptId}/runs`, 'POST', reqBody);
-        return (await response.json())["run_id"];
-    } else {
-        // Send results to API
-        const response = await fetchJson(`/api/runs/${runId}`, 'PATCH', reqBody);
-        return runId;
-    }
+    let endpoint = lobbyId == null
+        ? `/api/sprints/${promptId}/runs/${runId}`
+        : `/api/lobbys/${lobbyId}/prompts/${promptId}/runs/${runId}`;
+
+    const response = await fetchJson(endpoint, "PATCH", reqBody);
+    return (await response.json())["run_id"];
 }
 
 async function updateAnonymousRun(runId) {
@@ -43,4 +44,4 @@ async function updateAnonymousRun(runId) {
 }
 
 
-export { startRun, submitRun, updateAnonymousRun };
+export { startRun, submitRun, updateAnonymousRun};

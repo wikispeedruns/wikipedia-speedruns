@@ -11,14 +11,10 @@ import { serverData } from "./modules/serverData.js";
 import { startRun, submitRun } from "./modules/game/runs.js";
 
 import { CountdownTimer } from "./modules/game/countdown.js";
-import { FinishPage } from "./modules/game/finish.js";
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
 import { PagePreview } from "./modules/game/pagePreview.js";
 
-import { basicCannon, fireworks, side } from "./modules/confetti.js";
-
 import { startLocalRun, submitLocalRun } from "./modules/localStorage/localStorageSprint.js";
-
 
 // retrieve the unique prompt_id of the prompt to load
 const PROMPT_ID = serverData["prompt_id"] || null;
@@ -43,21 +39,26 @@ async function getPrompt(promptId, lobbyId=null) {
     return await response.json();
 }
 
-
 //Vue container. This contains data, rendering flags, and functions tied to game logic and rendering. See play.html
 let app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     components: {
         'countdown-timer': CountdownTimer,
-        'finish-page': FinishPage,
         'page-preview': PagePreview
     },
     data: {
         startArticle: "",    // For all game modes, this is the first article to load
         endArticle: "",      // For sprint games. Reaching this article will trigger game finishing sequence
         currentArticle: "",
-        path: [],             // array to store the user's current path so far, submitted with run
+        path: [],             // List of objects to store granular run data, submitted on exit/finish
+        /* path object format:
+        {
+            "article": string,
+            "timeReached": number,
+            "loadTime": number
+        }
+        */
 
         promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
         promptRated: false,
@@ -67,19 +68,25 @@ let app = new Vue({
         lobbyId: null,
         runId: -1,          //unique ID for the current run. This gets populated upon start of run
 
-        startTime: null,     //For all game modes, the start time of run (mm elapsed since January 1, 1970)
-        endTime: null,       //For all game modes, the end time of run (mm elapsed since January 1, 1970)
+        startTime: null,     // The start time of run (ms elapsed since January 1, 1970)
+        endTime: null,       // The end time of run (ms elapsed since January 1, 1970)
         elapsed: 0,
         timerInterval: null,
+        totalLoadTime: 0,    // Cumulative load time in seconds
 
-        finished: false,     //Flag for whether a game has finished, used for rendering
-        started: false,      //Flag for whether a game has started (countdown finished), used for rendering
+        finished: false,     // Flag for whether a game has finished, used for rendering
+        started: false,      // Flag for whether a game has started (countdown finished), used for rendering
 
         loggedIn: false,
+
+        expandedTimebox: true,
+        isMobile: false
     },
 
     mounted: async function() {
         // Prevent accidental leaves
+        this.isMobile = window.screen.width < 768;
+
         window.onbeforeunload = () => true;
 
         this.loggedIn = "username" in serverData;
@@ -105,44 +112,82 @@ let app = new Vue({
             console.log("Not logged in, uploading start of run to local storage")
         }
 
+        this.startTime = Date.now();
+
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview);
+        await this.renderer.loadPage(this.startArticle);
+
+
+        // Update run info on exit/page hide
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") {
+                this.updateRun();
+            }
+        });
+
+        // Use pagehide for browsers that don't support visibilitychange
+        if ("onpagehide" in self) {
+            document.addEventListener("pagehide", this.updateRun, {capture: true});
+        } else {
+            // Only register beforeunload/unload for browsers that don't support pagehide
+            // Avoids breaking bfcache
+            document.addEventListener("unload", this.updateRun, {capture: true});
+            document.addEventListener("beforeunload", this.updateRun, {capture: true});
+        }
     },
 
 
     methods : {
+        updateRun: function() {
+            if (!this.finished) {
+                this.endTime = Date.now();
+            }
+
+            submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
+        },
+
         pageCallback: function(page, loadTime) {
 
             this.hidePreview();
-            // Game logic for sprint mode:
 
-            if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
-                this.path.push(page);
-            }
+            let loadTimeSeconds = loadTime / 1000;
+            this.totalLoadTime += loadTimeSeconds;
 
             this.currentArticle = page;
 
-            this.startTime += loadTime;
+            if (this.path.length == 0 || this.path[this.path.length - 1]["article"] != page) {
+                // Update path
+                let timeElapsed = (Date.now() - this.startTime) / 1000;
+                this.path.push({
+                    "article": page,
+                    "timeReached": timeElapsed,
+                    "loadTime": loadTimeSeconds
+                });
 
-            //if the page's title matches that of the end article, finish the game, and submit the run
-            if (page === this.endArticle) {
-                this.finish();
+
+                // If the page's title matches that of the end article, finish the game, and submit the run
+                // Otherwise update partial run information
+                if (page === this.endArticle) {
+                    this.finish();
+                } else {
+                    this.updateRun();
+                }
             }
 
         },
 
         async start() {
-            //Toggle the `started` render flag, which will hide all other elements, and display the rendered wikipage
 
-            //start timer
-            this.startTime = Date.now();
+            let countdownTime = (Date.now() - this.startTime) / 1000;
+            this.totalLoadTime = countdownTime;
+            this.path[0]['timeReached'] = countdownTime;
 
-            //set the timer update interval
+            // set the timer update interval
             this.timerInterval = setInterval(() => {
                 const seconds = (Date.now() - this.startTime) / 1000;
-                this.elapsed = seconds;
+                this.elapsed = seconds - this.totalLoadTime;
             }, 50);
 
-            await this.renderer.loadPage(this.startArticle);
 
             this.started = true;
         },
@@ -154,22 +199,30 @@ let app = new Vue({
 
             this.endTime = Date.now();
 
-            this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.path);
+            this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
             if (!this.loggedIn && this.lobbyId == null) {
-                submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, this.path);
+                submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
                 console.log("Not logged in, submitting run to local storage")
                 //console.log(this.runId)
             }
 
-            fireworks();
+            //fireworks();
+            if (this.lobbyId == null) {
+                window.location.replace(`/finish?run_id=${this.runId}&played=true`);
+            } else {
+                window.location.replace(`/lobby/${this.lobbyId}/finish?run_id=${this.runId}&played=true`);
+            }
+
         },
 
         showPreview: function(e) {
             this.$refs.pagePreview.showPreview(e);
         },
+
         hidePreview: function(e) {
             this.$refs.pagePreview.hidePreview(e);
-        }
+        },
+
     }
 })
 

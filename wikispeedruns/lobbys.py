@@ -6,8 +6,10 @@ from unittest import result
 
 import pymysql
 
-from db import get_db
+from db import get_db, get_db_version
 from pymysql.cursors import DictCursor
+
+from wikispeedruns import runs
 
 import secrets
 
@@ -30,7 +32,6 @@ def check_membership(lobby_id: int, session: dict) -> bool:
         return True
 
     return False
-
 
 
 # TODO let non users also create lobbies?
@@ -148,51 +149,12 @@ def get_lobby_user_info(lobby_id: int, user_id: Optional[int]) -> Optional[dict]
 
 
 # Lobby Runs
-
-def add_lobby_run(lobby_id: int, prompt_id: int,
-                  start_time: datetime, end_time: datetime, path: str,
-                  user_id: Optional[int]=None, name: Optional[str]=None):
-
-
-    query_args = {
-        "lobby_id": lobby_id,
-        "prompt_id": prompt_id,
-        "start_time": start_time,
-        "end_time": end_time,
-        "path": path,
-        "user_id": None,
-        "name": None
-    }
-
-    if (user_id is not None):
-        query_args["user_id"] = user_id
-    elif (name is not None):
-        query_args["name"] = name
-    else:
-        raise ValueError("One of user_id or name should be defined")
-
-    db = get_db()
-
-    with db.cursor() as cursor:
-        query = f"""
-        INSERT INTO lobby_runs (lobby_id, prompt_id, start_time, end_time, path, user_id, `name`)
-        VALUES (%(lobby_id)s, %(prompt_id)s, %(start_time)s, %(end_time)s, %(path)s, %(user_id)s, %(name)s);
-        """
-        cursor.execute(query, query_args)
-
-        cursor.execute("SELECT LAST_INSERT_ID()")
-        run_id = cursor.fetchone()[0]
-        db.commit()
-
-    return run_id
-
 def get_lobby_runs(lobby_id: int, prompt_id: Optional[int]=None):
     query = """
-        SELECT run_id, prompt_id, users.username, name, start_time, end_time, `path`,
-        TIMESTAMPDIFF(MICROSECOND, start_time, end_time) AS run_time
+        SELECT run_id, prompt_id, users.username, name, start_time, end_time, play_time, finished, `path`
         FROM lobby_runs
         LEFT JOIN users ON users.user_id=lobby_runs.user_id
-        WHERE lobby_id=%(lobby_id)s
+        WHERE lobby_id=%(lobby_id)s AND path IS NOT NULL AND finished IS TRUE
     """
 
     query_args = {
@@ -203,16 +165,61 @@ def get_lobby_runs(lobby_id: int, prompt_id: Optional[int]=None):
         query += " AND prompt_id=%(prompt_id)s"
         query_args["prompt_id"] = prompt_id
 
-    query += " ORDER BY run_time"
+    query += " ORDER BY play_time"
+
+    db = get_db()
+
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, query_args)
+        results = cursor.fetchall()
+        for run in results:
+            run['path'] = json.loads(run['path'])['path']
+
+        return results
+
+def get_lobby_run(lobby_id: int, run_id: int):
+    query = """
+        SELECT run_id, prompt_id, users.username, name, start_time, end_time, play_time, `path`
+        FROM lobby_runs
+        LEFT JOIN users ON users.user_id=lobby_runs.user_id
+        WHERE lobby_id=%(lobby_id)s AND run_id=%(run_id)s
+    """
+
+    query_args = {
+        "lobby_id": lobby_id,
+        "run_id": run_id
+    }
 
     db = get_db()
 
     with db.cursor(cursor=DictCursor) as cursor:
         print(cursor.mogrify(query, query_args))
         cursor.execute(query, query_args)
-        results = cursor.fetchall()
-        for run in results:
-            run['path'] = json.loads(run['path'])
+        results = cursor.fetchone()
 
+        results['path'] = json.loads(results['path'])['path']
         return results
 
+
+
+def get_user_lobbys(user_id: int):
+    
+    query = """
+    select lobbys.lobby_id, `name`, `desc`, passcode, create_date, active_date, rules, user_lobbys.owner, count(prompt_id) as n_prompts from lobbys
+    LEFT JOIN user_lobbys ON user_lobbys.lobby_id=lobbys.lobby_id
+    LEFT JOIN lobby_prompts ON lobby_prompts.lobby_id=lobbys.lobby_id
+    where user_id=%(user_id)s
+    GROUP BY lobby_id;
+    """
+    
+    query_args = {
+        "user_id": user_id,
+    }
+    
+    db = get_db()
+
+    with db.cursor(cursor=DictCursor) as cursor:
+        print(cursor.mogrify(query, query_args))
+        cursor.execute(query, query_args)
+        results = cursor.fetchall()
+        return results

@@ -17,12 +17,12 @@ var LeaderboardRow = {
     props: [
         "run",
         "rank",
+        "currentRunId",
     ],
 
     created: function() {
         // Do it here cause these won't change
         this.lobbyId = lobby_id;
-        this.currentRunId = run_id;
     },
 
     template: (`
@@ -30,19 +30,19 @@ var LeaderboardRow = {
             <td>{{rank}}</td>
 
             <td class="l-col" v-if="run.username">
-                <strong v-if="run.run_id === currentRunId">{{run.username}}</strong>
+                <strong v-if="run.run_id == currentRunId">{{run.username}}</strong>
                 <span v-else>{{run.username}}</span>
             </td>
             <td class="l-col" v-else-if="run.name">
-                <strong v-if="run.run_id === currentRunId">{{run.name}}</strong>
+                <strong v-if="run.run_id == currentRunId">{{run.name}}</strong>
                 <span v-else>{{run.name}}</span>
             </td>
             <td v-else><strong>You</strong></td>
 
-            <td class="l-col">{{(run.run_time/1000000).toFixed(3)}} s</td>
+            <td class="l-col">{{(run.play_time).toFixed(3)}} s</td>
             <td>{{run.path.length}}</td>
 
-            <td>
+            <td style="min-width:400px">
                 {{run.path | pathArrow}}
                 <a v-if="!lobbyId" v-bind:href="'/replay?run_id=' + run.run_id" target="_blank" title="Replay" >
                     <i class="bi bi-play"></i>
@@ -88,9 +88,11 @@ function populateGraph(runs, runId) {
         var cur = (runs[i]["run_id"] === Number(runId)) ? true : false;
 
         for (let j = 0; j < pathNodes.length; j++) {
-            var index = checkIncludeLabels(pathNodes[j], nodes);
+            const article = pathNodes[j]["article"]
+
+            var index = checkIncludeLabels(article, nodes);
             if (index === -1) {
-                let node = {type: 0, label: pathNodes[j], count: 1, current: cur};
+                let node = {type: 0, label: article, count: 1, current: cur};
                 if (j === 0) {
                     node.type = 1;
                     startNode = node;
@@ -127,12 +129,13 @@ function populateGraph(runs, runId) {
         var cur = (runs[i]["run_id"] === Number(runId)) ? true : false;
 
         for (let j = 0; j < pathNodes.length - 1; j++) {
+            const u = pathNodes[j]["article"]
+            const v = pathNodes[j + 1]["article"]
 
-
-            let index = checkIncludeEdgeLabels(pathNodes[j], pathNodes[j + 1], edges);
+            let index = checkIncludeEdgeLabels(u, v, edges);
 
             if (index === -1) {
-                let edge = {src: pathNodes[j], dest: pathNodes[j + 1], count: 1, current: cur};
+                let edge = {src: u, dest: v, count: 1, current: cur};
                 edges.push(edge);
             } else {
                 if (cur) {
@@ -230,7 +233,7 @@ var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     data: {
-        prompt: [],
+        prompt: {},
         runs: [],
         renderedRuns: [],
         renderedRunsRank: [],
@@ -380,7 +383,6 @@ var app = new Vue({
 
             this.runs.forEach(el => {
                 let date = Date.parse(el.end_time)
-                console.log((now - date) / (1000 * 60 * 60 * 24))
             });
 
             if (!['1', '7', '30', '100'].includes(this.timeFilter)) return;
@@ -389,7 +391,6 @@ var app = new Vue({
 
             this.runs.forEach(el => {
                 let date = Date.parse(el.end_time)
-                console.log((now - date) / (1000 * 60 * 60 * 24))
                 if ((now - date) / (1000 * 60 * 60 * 24) < parseInt(this.timeFilter)){
                     output.push(el);
                 }
@@ -404,9 +405,11 @@ var app = new Vue({
         if (lobby_id) {
             this.available = true;
 
-            const resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}/runs`);
+            let resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}/runs`);
             this.runs = await resp.json();
-            this.prompt = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}`);
+
+            resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}`);
+            this.prompt = await resp.json();
 
         }
         else {
@@ -420,7 +423,7 @@ var app = new Vue({
         this.filterByTime();
 
         if (this.sortMode === 'path') {
-            this.runs.sort((a, b) => (a.path.length > b.path.length) ? 1 : ((a.path.length === b.path.length) ? ((a.run_time > b.run_time) ? 1 : -1) : -1))
+            this.runs.sort((a, b) => (a.path.length > b.path.length) ? 1 : ((a.path.length === b.path.length) ? ((a.play_time > b.play_time) ? 1 : -1) : -1))
         }
 
         this.paginate();

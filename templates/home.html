@@ -6,6 +6,13 @@
 <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/home.css')}}">
 <style>
     [v-cloak] { display: none }
+
+    /* Tooltip */
+    
+    .custom-tooltip {
+        display: none;
+        margin-left: 10px;
+    }
 </style>
 {% endblock %}
 
@@ -21,26 +28,42 @@
     <p >There are a few simple rules:<br>
         <ul class="mb-4">
             <li>Any link shown on the page is fair game.</li>
-            <li>DO NOT use Ctrl+F/find in your browser!</li>
+            <li>DO NOT use the browser find tool!</li>
             <li>Live with your mistakes (the back button will end your run).</li>
             <li>Luck is king, so put on your lucky hat and lucky socks!</li>
         </ul>
     </p>
 
-    <div class="alert alert-info my-0" role="alert" v-if="loggedIn">
-        <b>**NEW**: </b> Try creating a private lobby <a href="/lobby/create" class="alert-link"><u>here</u></a>
+    <p>Play the tutorial <a href="/play/tutorial">here</a>!</p>
+
+    <!--<hr class="my-4">-->
+
+    <div class="row justify-content-md-center py-2">
+        <div class="col-lg-12">
+            <div v-if="loggedIn && lobbies.length > 0">
+                See your active lobbies <a href="#user-lobbies">here</a> or <a href="/lobby/create">create a new private lobby</a>.
+            </div>
+            <div v-if="loggedIn && lobbies.length == 0">
+                Create a new private lobby <a href="/lobby/create">here</a>!
+            </div>
+            <div v-if="!loggedIn">
+                <a href="/login"><b>Log in</b></a>/<a href="/register"><b>Register</b></a> to create a new private lobby and play with your friends!
+            </div>
+            
+        </div>
     </div>
 
-    <hr class="mt-4">
 
-    <div class="row justify-content-md-center">
 
+    <hr class="my-4">
+
+    <div class="row justify-content-md-center py-4">
         <div class="col-sm-6">
-
             <div class="card">
+                <div class="alert alert-info my-0" role="alert">
+                    <h5 class="my-0">Prompt of the Day</h5>
+                </div>
                 <div class="card-body">
-                    <h4>Prompt of the Day</h4>
-
                     <template v-if="dailyPrompts.length > 0">
                         <h6 >Time Remaining: [[timeLeft]]</h6>
 
@@ -52,7 +75,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="prompt in dailyPrompts" v-cloak>
-                                    <td>[[prompt.prompt_id]]</span> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
+                                    <td>[[prompt.prompt_id]]</span><span v-if="loggedIn"> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</span></td>
 
                                     <td>[[prompt.start]]</td>
 
@@ -69,24 +92,24 @@
                         </table>
                     </template>
                     <template v-else>
-                        <hr>
                         <p>Currently unavailable</p>
                     </template>
-
                 </div>
-
-                <div class="card-footer text-muted">
-                    These prompts are <a href="/about#ratings">rated</a>. Only your <b>first run</b> counts!
+                <div class="card-footer text-muted" v-if="loggedIn">
+                    Play the daily prompt to start/continue your streak! 🔥
+                </div>
+                <div class="card-footer text-muted" v-else>
+                    Log in to play this daily prompt and start your streak! 🔥
                 </div>
             </div>
-
         </div>
 
         <div class="col-sm-6">
             <div class="card">
-                <div class="card-body">
-
-                    <h4> Try some other Prompts </h4>
+                <div class="alert alert-info my-0" role="alert">
+                    <h5 class="my-0">Try some other Prompts</h5>
+                </div>
+                <div class="card-body">       
                     <table class="table table-hover">
                         <thead>
                             <th style="width:100px" scope="col">Prompt #</th>
@@ -107,13 +130,10 @@
                                         <span title="Play this prompt to see the results!">-</span>
                                     </template>
                                 </td>
-
                             </tr>
                         </tbody>
                     </table>
                 </div>
-
-
             </div>
         </div>
 
@@ -121,42 +141,59 @@
 
     <p class="my-4"> Still want more? Checkout our <a href="/archive">archive</a> or click <a href="/random">here</a> to try a random prompt.</p>
 
-    <hr class="mt-4">
+    <hr class="my-4"   v-if="lobbies.length > 0">
 
-    <div class="container-xxl" id="marathon-block">
+    <div class="row justify-content-md-center py-2"   v-if="lobbies.length > 0" id="user-lobbies">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="alert alert-info my-0" role="alert">
+                    <h5 class="my-0">Your Lobbies</h5>
+                </div>
+                <div class="card-body"  style="overflow-x: auto;">
+
+                    <table class="table table-hover py-2">
+                        <thead>
+                            <th scope="col">Name</th>
+                            <th scope="col">Date created</th>
+                            <th scope="col"># of prompts</th>
+                            <th scope="col">Owner</th>
+                            <th class="text-center"></th>
+                        </thead>
+                        <tbody>
+                            <tr v-for="lobby in lobbies" v-cloak>
+                                <td>
+                                    <a v-bind:href="'/lobby/' + lobby.lobby_id">
+                                        <template v-if="lobby.name">[[lobby.name]]</template><template v-else>Lobby [[lobby.lobby_id]]</template>
+                                    </a>
+                                    <span v-if="lobby.desc" style="cursor: help;" :title="lobby.desc">ⓘ</span>
+                                </td>
+                                <td>[[getDate(lobby.create_date)]]</td>
+                                <td>[[lobby.n_prompts]]</td>
+                                <td  class="align-middle">
+                                    <span v-if="lobby.owner == 1"><i class="bi bi-check-lg"></i></span>
+                                    <span v-else>-</span>
+                                </td>
+                                <td class="text-center text-nowrap" >
+                                    <button v-bind:id="'custom-tooltip-'+lobby.lobby_id" v-on:click="copyInvite(lobby)" type="button" class="btn btn-default px-0 py-0" style="font-size: 12px !important">- Copy invite -</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer text-muted">
+                    Create a new private lobby <a href="/lobby/create"><u>here</u></a>!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="container-xxl py-4" id="marathon-block">
 
         <marathon-prompts v-bind:prompts="marathonPrompts" v-bind:username="username"></marathon-prompts>
 
     </div>
-
-
-    <hr class="mt-4">
-    <h4> Top 10 rated players:</h4> Note the <a href="/about#ratings">rating system</a> is based on each player's performance on daily prompts, and is still experimental.</p>
-
-    <div class="row justify-content-md-center">
-        <div class="col-6">
-            <table class="table">
-                <thead>
-                    <th>#</th>
-                    <th>Username</th>
-                    <th>Rating</th>
-                </thead>
-                <tbody>
-                    <tr v-for="(user, index) in topUsers" v-cloak>
-                        <td>[[index + 1]]</td>
-                        <td><a v-bind:href="'/profile/' + user.username">[[user.username]]</a></td>
-                        <td>[[user.rating]]</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-
-
-
-
-    <hr class="mt-4">
 
     <div>
         <p>

@@ -8,9 +8,9 @@
 	color: inherit;
 	background: #0e83cd;
 	cursor: pointer;
-	padding: 15px 50px;
+	padding: 10px 30px;
 	display: inline-block;
-	margin: 20px 0px;
+	/*margin: 20px 0px;*/
 	text-transform: uppercase;
 	letter-spacing: 1px;
 	font-weight: 700;
@@ -74,12 +74,11 @@
 .button-tooltip-container {
     display: flex;
     align-items: center;
-    margin-top: 16px;
     min-height: 30px;
 
 }
 
-#custom-tooltip {
+#custom-tooltip, #custom-tooltip-path {
     display: none;
     margin-left: 40px;
     padding: 5px 12px;
@@ -171,3 +170,25 @@
 	margin-bottom: 40vh;
 }
 
+.HUDwrapper-mobile-inner-container {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.animated-transition {
+    transition: transform 0.25s;
+}
+
+.play-HUD {
+    min-width: 60%;
+    overflow-x: hidden;
+}
+
+/* fix to wikipedia css */
+img,
+picture,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}

@@ -3,7 +3,8 @@
 {% block head %}
 
 <!-- wiki desktop stylesheet -->
-<link rel="stylesheet" href="https://en.wikipedia.org/w/load.php?lang=en&modules=site.styles&only=styles" media="screen and (min-width: 768px)">
+<link rel="stylesheet" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}" media="(min-width: 768px)">
+<link rel="stylesheet" href="{{url_for('static', filename='stylesheets/wikipedia-vec.css')}}" media="(min-width: 768px)">
 
 <!-- wiki mobile stylesheets -->
 <link rel="stylesheet" href="https://meta.wikimedia.org/api/rest_v1/data/css/mobile/base" media="screen and (max-width: 767px)">
@@ -25,23 +26,102 @@
 
     <canvas id="confettiCanvas" style="pointer-events:none;"></canvas>
 
-    <div v-show="started && !finished" class="HUDwrapper container-xxl" v-cloak>
-        <div class="HUD container" id="time-box">
-            <div class="row flex-row flex-nowrap py-2">
-                <div class="col-sm-auto px-4 flex-wrap">
-                    Start Article<br><strong>[[startArticle]]</strong>
-                    <br>Current Article<br><strong>[[currentArticle]]</strong>
+    <div v-if="!isMobile">
+        <div v-if="started && !finished && expandedTimebox" class="HUDwrapper HUDwrapper-fade container-xxl">
+            <div class="HUD play-HUD" id="time-box" v-cloak>
+                <div class="row flex-row flex-nowrap py-2">
+                    <div class="col-sm-auto px-4 flex-wrap">
+                        Clicks Remaining<br><strong class="text-size-3" style="transform: translateY(-10%)" v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
+                        <br>Current Article<br><strong>[[currentArticle]]</strong>
+                    </div>
+                    <div class="col-sm-auto px-4">
+                        Checkpoints Visited<br>[[numCheckpointsVisited]] <span style="font-size: 0.75rem">(Goal: [[numCheckpointsToStop]])</span>
+                        <br>Unique Articles Visited<br>[[numVisitedUnique]]
+                        <span v-show="!showStop"><br>Time Elapsed<br>[[parseInt(elapsed/60)]] mins</span>
+                    </div>
+                    <div class="col px-4">
+                        Checkpoints<br>
+                        <div>
+                            <div v-for="checkpoint in activeCheckpoints">
+                                <strong>[[checkpoint]] </strong>
+                                <small style="cursor: help;" :href="`/wiki/${checkpoint}`" @mouseenter="showPreview" @mouseleave="hidePreview">
+                                    ⓘ
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-auto  text-nowrap py-2 mr-auto">
+                        <button @click="expandedTimebox = !expandedTimebox"
+                                class="btn btn-outline-secondary mx-2"
+                                style="padding: 8px 8px">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="col-sm-auto px-4">
-                    Clicks Remaining<br><strong class="text-size-3" v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
+                <div class="row flex-row flex-nowrap py-2 mx-2">
+                    <!--
+                    <div class="col-sm-auto">
+                        <button v-on:click="showHelp = !showHelp" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Help</button>
+                    </div>-->
+                    <div class="col-sm-auto">
+                        <button v-on:click="saveRun()" class="btn btn-primary mt-auto" style="font-size: 0.75rem">Save and Quit</button>
+                    </div>
+                    <div class="col-sm-auto">
+                        <button v-on:click="finish(0)" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">End my suffering</button>
+                    </div>
                 </div>
-                <div class="col-sm px-4">
-                    Checkpoints Visited<br>[[numCheckpointsVisited]] <span style="font-size: 0.75rem">(Goal: [[numCheckpointsToStop]])</span>
-                    <br>Unique Articles Visited<br>[[numVisitedUnique]]
-                    <span v-show="!showStop"><br>Time Elapsed<br>[[parseInt(elapsed/60)]] mins</span>
+            </div>
+        </div>
+        <div v-if="started && !finished && !expandedTimebox" class="HUDwrapper HUDwrapper-fade container-xxl">
+            <div class="HUD play-HUD" id="time-box" v-cloak>
+                <div class="row flex-row flex-nowrap">
+                    <div class="col container">
+                        <div class="row flex-row flex-nowrap pt-2">
+                            <div class="col-sm-auto px-4 flex-wrap">
+                                Clicks Remaining: <strong v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
+                            </div>
+                            <div class="col-sm px-4">
+                                Checkpoints Visited: <b>[[numCheckpointsVisited]]</b> <span style="font-size: 0.75rem">(Goal: [[numCheckpointsToStop]])</span>
+                            </div>
+                        </div>
+                        <!--
+                        <div class="row flex-row flex-nowrap pb-2">
+                            <div class="col-sm px-4">
+                                Expand panel to see active checkpoints and menu.
+                            </div>
+                        </div>-->
+                    </div>
+                    <div class="col-sm-auto text-nowrap py-2 mr-auto">
+                        <button @click="expandedTimebox = !expandedTimebox"
+                                class="btn btn-outline-secondary mx-2"
+                                style="padding: 8px 8px">
+                            <i class="bi bi-chevron-up"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="col-lg-auto px-4">
-                    Checkpoints<br>
+            </div>
+        </div>
+        <div v-show="showStop && !finished && !saved" id="stop-box" class="centered" v-cloak>
+            <div class="px-4 py-2">
+                <div><h4>Congrats! You reached [[numCheckpointsToStop]] checkpoints</h4></div>
+                <div><p>You can now consider this prompt complete, but you can continue this run to see how far you can go.</p></div>
+                <div><p>The amount of clicks awarded for each checkpoint will decrease</p></div>
+                <div class="row flex-row flex-nowrap justify-content-end py-2">
+                    <div class="col-sm-auto">
+                        <button v-on:click="showStop = !showStop" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Continue</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div v-else>
+        <div v-show="started && !finished && expandedTimebox" id="time-box-mobile" class="HUDwrapper-mobile container animated-transition" v-cloak>
+            <div class="HUDwrapper-mobile-inner-container row">
+                <div v-if="!(showStop && !finished && !saved)" class="col">
+                    Clicks Remaining: <strong v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
+                    <br>Checkpoints Visited: [[numCheckpointsVisited]] / [[numCheckpointsToStop]]</span>
+                    <br>Checkpoints: <br>
                     <div>
                         <div v-for="checkpoint in activeCheckpoints">
                             <strong>[[checkpoint]] </strong>
@@ -51,62 +131,52 @@
                         </div>
                     </div>
                 </div>
+                <div v-else class="px-2 pt-2 col">
+                    <div><b>Congratulations! You reached [[numCheckpointsToStop]] checkpoints!</b></div>
+                    <div>You can now consider this prompt complete, but you can continue this run to see how far you can go.</div>
+                    <div>The amount of clicks awarded for each checkpoint will decrease</div>
+                </div>
+                <div v-if="!(showStop && !finished && !saved)" class="col-auto px-2">
+                    <button @click="expandedTimebox = !expandedTimebox"
+                            class="btn btn-outline-secondary"
+                            style="font-size: 0.75rem; padding: 5px 5px">
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                </div>
             </div>
-            <div v-show="!showStop" class="row flex-row flex-nowrap justify-content-end py-2">
-                <div class="col-sm-auto">
-                    <button v-on:click="showHelp = !showHelp" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Help</button>
+            <div class="row flex-row py-2">
+                <div class="col text-center">
+                    <button v-on:click="saveRun()" class="btn btn-primary mt-auto" style="font-size: 0.75rem">Save and Quit</button>
                 </div>
-                <div class="col-sm-auto">
-                    <button v-on:click="saveRun()" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Save and Quit</button>
+                <div class="col text-center">
+                    <button v-on:click="finish(0)" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">End game</button>
                 </div>
-                <div class="col-sm-auto">
-                    <button v-on:click="finish(0)" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">End my suffering</button>
+                <div class="col text-center" v-if="showStop && !finished && !saved">
+                    <button v-on:click="showStop = !showStop" class="btn btn-primary mt-auto" style="font-size: 0.75rem">Continue</button>
+                </div>
+            </div>
+        </div>
+        <div v-show="started && !finished && !expandedTimebox" id="time-box-mobile" class="HUDwrapper-mobile container animated-transition" v-cloak>
+            <div class="HUDwrapper-mobile-inner-container row">
+                <div v-if="!(showStop && !finished && !saved)" class="col">
+                    Clicks Remaining: <strong v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
+                    <br>Checkpoints Visited: [[numCheckpointsVisited]] / [[numCheckpointsToStop]]</span>
+                </div>
+                <div class="col-auto px-2">
+                    <button @click="expandedTimebox = !expandedTimebox"
+                            class="btn btn-outline-secondary"
+                            style="font-size: 0.75rem; padding: 5px 5px">
+                        <i class="bi bi-chevron-up"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div v-show="showStop && !finished && !saved" id="stop-box" class="centered" v-cloak>
-        <div class="px-4 py-2">
-            <div><h4>Congrats! You reached [[numCheckpointsToStop]] checkpoints</h4></div>
-            <div><p>You can now consider this prompt complete, but you can continue this run to see how far you can go.</p></div>
-            <div><p>The amount of clicks awarded for each checkpoint will decrease</p></div>
-            <div class="row flex-row flex-nowrap py-2">
-                <div class="col-sm-auto px-4">
-                    Clicks Remaining<br><strong class="text-size-3" v-bind:class="clicksRemaining < 4 ? 'color: red' : ''">[[clicksRemaining]]</strong>
-                </div>
-                <div class="col-sm px-4">
-                    Checkpoints Visited<br>[[numCheckpointsVisited]]
-                    <br>Unique Articles Visited<br>[[numVisitedUnique]]
-                </div>
-                <div class="col-lg-auto px-4">
-                    Checkpoints<br>
-                    <div>
-                        <div v-for="checkpoint in activeCheckpoints">
-                            <strong>[[checkpoint]] </strong>
-                            <small style="cursor: help;" :href="`/wiki/${checkpoint}`" @mouseenter="showPreview" @mouseleave="hidePreview">
-                                ⓘ
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row flex-row flex-nowrap justify-content-end py-2">
-                <div class="col-sm-auto">
-                    <button v-on:click="saveRun()" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Save and Continue Later</button>
-                </div>
-                <div class="col-sm-auto">
-                    <button v-on:click="finish(0)" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Just end my suffering already</button>
-                </div>
-                <div class="col-sm-auto">
-                    <button v-on:click="showStop = !showStop" class="btn btn-outline-secondary mt-auto" style="font-size: 0.75rem">Continue</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
+    <!--
     <marathon-help v-show="started && !finished && showHelp" v-cloak v-on:close-help="showHelp = !showHelp">
-    </marathon-help>
+    </marathon-help>-->
 
     <page-preview ref="pagePreview"></page-preview>
 

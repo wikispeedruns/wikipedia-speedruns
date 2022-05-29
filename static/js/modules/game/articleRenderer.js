@@ -32,7 +32,7 @@ export class ArticleRenderer {
             // disableFindableLinks(this.frame);
             stripNamespaceLinks(this.frame);
 
-
+            this.frame.classList.add("wiki-insert");
             this.frame.querySelectorAll("a, area").forEach((el) => {
                 // Arrow function to prevent this from being overwritten
                 el.onclick = (e) => this.handleWikipediaLink(e);
