@@ -53,10 +53,10 @@
                             <tr v-if="currentRunPosition === -1"><td colspan="5">...</td></tr>
 
                             <tr is="leaderboard-row"
-                                v-for="(run, index) in renderedRuns"
+                                v-for="run in runs"
                                 v-bind:key="run.run_id"
                                 v-bind:run="run"
-                                v-bind:rank="getRenderedRank(index)"
+                                v-bind:rank="run.rank"
                                 v-bind:current-run-id="runId"
                             ></tr>
 
@@ -70,7 +70,7 @@
 
                         </tbody>
                     </table>
-                    <p class="my-4" v-else>This prompt currently doesn't have any runs. <span v-if="available">Be the first to play it! <a v-bind:href="'/play/' + getPromptID()">Play</a></span></p>
+                    <p class="my-4" v-else>This prompt currently doesn't have any runs. <span v-if="available">Be the first to play it! <a v-bind:href="'/play/TODO'">Play</a></span></p>
                 </div>
             </div>
 

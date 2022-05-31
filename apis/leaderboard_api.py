@@ -7,7 +7,7 @@ from util.decorators import check_request_json, OptionalArg
 
 from wikispeedruns import leaderboards
 
-leaderboard_api = Blueprint('leaderboards', __name__, url_prefix='/api/')
+leaderboard_api = Blueprint('leaderboards', __name__, url_prefix='/api/leaderboards')
 
 LEADERBOARD_JSON = {
     field: OptionalArg(basetype)
@@ -28,27 +28,25 @@ LEADERBOARD_JSON = {
 }
 
 
-@leaderboard_api.get('/api/sprints/<int:prompt_id>/leaderboard/', defaults={'run_id' : None})
-@leaderboard_api.get('/api/sprints/<int:id>/leaderboard/<int:run_id>')
+@leaderboard_api.post('/sprints/<int:prompt_id>/leaderboard', defaults={'run_id' : None})
+@leaderboard_api.post('/sprints/<int:id>/leaderboard/<int:run_id>')
 @check_request_json(LEADERBOARD_JSON)
 def get_sprint_leaderboard(prompt_id, run_id):
-    return leaderboards.get_leaderboard_runs(
+    return jsonify(leaderboards.get_leaderboard_runs(
         prompt_id=prompt_id,
         run_id=run_id,
-        **request.json()
-    )
+        **request.json
+    )), 200
 
 
-
-
-@leaderboard_api.get('/api/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/leaderboard/', defaults={'run_id' : None})
-@leaderboard_api.get('/api/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/leaderboard/<int:run_id>')
+@leaderboard_api.post('/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/leaderboard', defaults={'run_id' : None})
+@leaderboard_api.post('/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/leaderboard/<int:run_id>')
 @check_request_json(LEADERBOARD_JSON)
 def get_lobby_leaderboard(lobby_id, prompt_id, run_id):
-    return leaderboards.get_leaderboard_runs(
+    return jsonify(leaderboards.get_leaderboard_runs(
         lobby_id=lobby_id,
         prompt_id=prompt_id,
         run_id=run_id,
-        **request.json()
-    )
+        **request.json
+    )), 200
 

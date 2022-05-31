@@ -127,7 +127,7 @@ def get_lobby_finish_page(lobby_id):
 
 @views.route('/leaderboard/<prompt_id>', methods=['GET'])
 def get_leaderboard_page(prompt_id):
-    return render_with_data('leaderboard.html', **request.args)
+    return render_with_data('leaderboard.html', prompt_id=prompt_id)
 
 @views.route('/replay', methods=['GET'])
 def get_replay_page():

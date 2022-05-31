@@ -1,15 +1,11 @@
 import { serverData } from "./modules/serverData.js"
-import {pathArrowFilter} from "./modules/game/filters.js";
+import { fetchJson } from "./modules/fetch.js"
 
-const prompt_id = serverData["prompt_id"];
-const lobby_id = serverData["lobby_id"] || null;
-const run_id = serverData["run_id"] || null;
+import { pathArrowFilter } from "./modules/game/filters.js";
 
-const pg = serverData["pg"];
-const sortMode = serverData["sortMode"];
-const timeFilter = serverData["timeFilter"]; //['all', '1', '7', '30', '100']
+const URL_PROMPT_ID = serverData["prompt_id"];
+const URL_LOBBY_ID = serverData["lobby_id"] || null;
 
-const runsPerPage = 10;
 
 Vue.filter('pathArrow', pathArrowFilter)
 
@@ -23,13 +19,12 @@ var LeaderboardRow = {
     data: function() {
         return {
             lobbyId: 0,
-            currentRunId: 0,
         }
     },
 
 
     created: function() {
-        this.lobbyId = lobby_id;
+        this.lobbyId = URL_LOBBY_ID;
     },
 
     template: (`
@@ -62,6 +57,16 @@ var LeaderboardRow = {
 
 
 function populateGraph(runs, runId) {
+
+    function componentToHex(c) {
+        var hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+    }
+
+    function rgbToHex(r, g, b) {
+        return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+    }
+
 
     var graph = new Springy.Graph();
 
@@ -226,14 +231,6 @@ function populateGraph(runs, runId) {
     return graph;
 }
 
-function componentToHex(c) {
-    var hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
-}
-
-function rgbToHex(r, g, b) {
-    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-}
 
 
 var app = new Vue({
@@ -242,20 +239,16 @@ var app = new Vue({
     data: {
         prompt: {},
         runs: [],
-        renderedRuns: [],
-        renderedRunsRank: [],
+
         currentRun: null,
         currentRunPosition: 0,
         currentRunRank: 0,
-        runsPerPage: runsPerPage,
-        available: false,
-        page: 0,
-        totalpages: 0,
-        sortMode: sortMode,
-        timeFilter: timeFilter,
 
-        lobbyId: lobby_id,
-        runId: run_id,
+        promptId: URL_PROMPT_ID,
+        lobbyId: URL_LOBBY_ID,
+        runId: 0,
+
+        available: false
     },
 
     components: {
@@ -264,94 +257,17 @@ var app = new Vue({
 
 
     methods : {
-        getLeaderboard: async function (mode) {
-            let path = "/api/sprints/" + prompt_id + "/leaderboard/";
-            if (this.runId) path += this.runId;
-
-            var response = await fetch(path);
-
-            if (response.status == 401) {
-                alert(await response.text());
-                window.location.replace("/");   // TODO error page
-            }
-
-            let resp = await response.json();
-
-            if (!this.runId && resp.run_id != null) {
-                this.runId = resp.run_id
-            }
-
-            return resp
-        },
-
         genGraph: function () {
-            var paths = this.renderedRuns;
-            if (this.currentRunPosition === -1 || this.currentRunPosition === 1) {
-                paths = paths.concat(this.currentRun)
-            }
-            var graph1 = populateGraph(paths, this.runId);
+            var graph1 = populateGraph(this.runs, this.runId);
             $('#springydemo').springy({ graph: graph1 });
         },
 
-        getPageNo: function () {
-            if (this.runs.length === 0) {
-                return 0;
-            }
-            return parseInt(pg)
-        },
-
-        getPromptID: function() {
-            return parseInt(prompt_id);
-        },
-
-
-        paginate: function () {
-            const first = (pg-1) * runsPerPage
-            const last = pg * runsPerPage
-            for (let i = 0; i < this.runs.length; i++) {
-                let run = this.runs[i]
-
-                if (this.runId) {
-                    if (run.run_id === parseInt(this.runId)) {
-                        this.currentRun = run;
-                        this.currentRunRank = i+1;
-                        if (i < first) {
-                            this.currentRunPosition = -1;
-                        } else if (i >= last) {
-                            this.currentRunPosition = 1;
-                        }
-                    }
-                }
-
-                if (i >= first && i < last) {
-                    this.renderedRuns.push(run)
-                    this.renderedRunsRank.push(i+1)
-                }
-
-            }
-        },
-
-        getRenderedRank: function (index) {
-            return this.renderedRunsRank[index];
-        },
 
         buildNewLink: function (page) {
 
             let url = new URL(window.location.href)
             url.searchParams.set('page', String(page))
             window.location.replace(url)
-        },
-
-        showPath: function(event, path) {
-
-            if (!event.target.parentElement.parentElement.nextSibling.firstChild || event.target.parentElement.parentElement.nextSibling.firstChild.colSpan != 5) {
-                let row = document.createElement("tr")
-                let col = document.createElement("td")
-                col.innerHTML = String(path)
-                col.colSpan = 5
-                row.appendChild(col)
-                event.target.parentElement.parentElement.parentElement.insertBefore(row, event.target.parentElement.parentElement.nextSibling)
-            }
         },
 
         sortStatus: function(tab) {
@@ -380,62 +296,29 @@ var app = new Vue({
             }
         },
 
-        runReplay: function(event) {
-            console.log(event)
-        },
 
-        filterByTime: function() {
-
-            let now = Date.now()
-
-            this.runs.forEach(el => {
-                let date = Date.parse(el.end_time)
-            });
-
-            if (!['1', '7', '30', '100'].includes(this.timeFilter)) return;
-
-            let output = []
-
-            this.runs.forEach(el => {
-                let date = Date.parse(el.end_time)
-                if ((now - date) / (1000 * 60 * 60 * 24) < parseInt(this.timeFilter)){
-                    output.push(el);
-                }
-            });
-
-            this.runs = output;
-        }
     },
 
     created: async function() {
 
-        if (lobby_id) {
+        if (this.lobbyId) {
             this.available = true;
 
-            let resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}/runs`);
+            let resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${this.promptId}/runs`);
             this.runs = await resp.json();
 
-            resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${prompt_id}`);
+            resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${this.promptId}`);
             this.prompt = await resp.json();
 
         }
         else {
-            const resp = await this.getLeaderboard();
 
-            this.available = resp['prompt']['available'];
-            this.prompt = resp["prompt"];
-            this.runs = resp["leaderboard"];
+            // this.available = resp['prompt']['available'];
+            // this.prompt = resp["prompt"];
+            this.runs = await (await fetchJson(`/api/leaderboards/sprints/${this.promptId}/leaderboard`, 'POST', {
+
+            })).json();
         }
-
-        this.filterByTime();
-
-        if (this.sortMode === 'path') {
-            this.runs.sort((a, b) => (a.path.length > b.path.length) ? 1 : ((a.path.length === b.path.length) ? ((a.play_time > b.play_time) ? 1 : -1) : -1))
-        }
-
-        this.paginate();
-        this.totalpages = Math.ceil(this.runs.length/this.runsPerPage);
-        this.page = pg;
 
         this.genGraph();
     }

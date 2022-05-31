@@ -1,14 +1,13 @@
 from typing import Literal, Optional
 
 import pymysql
+import json
 
 
 # For local testing you can comment out this get_db import and use the below code to manually connect to the db
 # and run the file directly. Preferabley, you should use unit tests (which I have yet to write)
-
 from db import get_db
 '''
-import json
 def get_db():
     config = json.load(open("../config/default.json"))
     try:
@@ -207,18 +206,22 @@ def get_leaderboard_runs(
         LEFT JOIN {prompts_table} AS prompts ON {prompts_join}
         LEFT JOIN users ON users.user_id=runs.user_id
         {group_subquery}
-        WHERE ({' AND '.join(conditions)}) OR runs.{current_run_clause}
+        WHERE ({' AND '.join(conditions)}) OR {current_run_clause}
         ORDER BY {sort_exp}
     ) AS t
     WHERE {pagination_clause} OR {current_run_clause}
-    ORDER BY {sort_exp}
     """
 
     db = get_db()
     with db.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
         print(cursor.mogrify(query, query_args))
         cursor.execute(query, query_args)
-        return cursor.fetchall()
+
+        results = cursor.fetchall()
+        for run in results:
+            run['path'] = json.loads(run['path'])['path']
+
+        return results
 
 
 
