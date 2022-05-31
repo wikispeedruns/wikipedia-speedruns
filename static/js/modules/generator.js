@@ -55,8 +55,11 @@ var PromptGenerator = {
 
 	template: (`
         <div>
-            <input type="range" min="2" max="5" v-model="logdifficulty" class="slider" step="0.1">
-            <p>Obscurity: {{Math.floor(33 * (logdifficulty - 2)) + 1}}  ({{approx_difficulty}} articles)</p>
+
+            Less Obscure <input type="range" min="2" max="5" v-model="logdifficulty" class="slider" step="0.1">
+            More Obscure  ({{approx_difficulty}} articles)</p>
+
+            <!-- expression for 1-100 scale {{Math.floor(33 * (logdifficulty - 2)) + 1}}-->
 
             <div class="my-2">
                 Generate a new:
