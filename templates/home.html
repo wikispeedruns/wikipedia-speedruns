@@ -8,7 +8,7 @@
     [v-cloak] { display: none }
 
     /* Tooltip */
-    
+
     .custom-tooltip {
         display: none;
         margin-left: 10px;
@@ -36,6 +36,8 @@
 
     <p>Play the tutorial <a href="/play/tutorial">here</a>!</p>
 
+    <p>Try our new prompt generator <a href="/generator">here</a>!</p>
+
     <!--<hr class="my-4">-->
 
     <div class="row justify-content-md-center py-2">
@@ -49,7 +51,7 @@
             <div v-if="!loggedIn">
                 <a href="/login"><b>Log in</b></a>/<a href="/register"><b>Register</b></a> to create a new private lobby and play with your friends!
             </div>
-            
+
         </div>
     </div>
 
@@ -109,7 +111,7 @@
                 <div class="alert alert-info my-0" role="alert">
                     <h5 class="my-0">Try some other Prompts</h5>
                 </div>
-                <div class="card-body">       
+                <div class="card-body">
                     <table class="table table-hover">
                         <thead>
                             <th style="width:100px" scope="col">Prompt #</th>
