@@ -9,7 +9,6 @@ import pymysql
 from db import get_db
 '''
 import json
-
 def get_db():
     config = json.load(open("../config/default.json"))
     try:
@@ -135,7 +134,7 @@ def get_leaderboard_runs(
             # We need to either always record start time or something when opening the prompt
             # TODO this also is a bit weird if user_id and name are both populated, check this
             group_subquery = f"""
-                JOIN (
+                LEFT JOIN (
                     SELECT MIN(run_id) AS run_id
                     FROM {base_table}
                     WHERE prompt_id=%(prompt_id)s {"AND lobby_id=%(lobby_id)s" if base_table == "lobby_runs" else ""}
@@ -144,9 +143,11 @@ def get_leaderboard_runs(
                 ON first_runs.run_id = runs.run_id
                 """
 
+            conditions.append("first_runs.run_id IS NOT NULL")
+
         elif user_run_mode == 'shortest':
             group_subquery = f"""
-                JOIN (
+                LEFT JOIN (
                     SELECT run_id, MAX(JSON_LENGTH(`path`, '$.path')) AS path_length
                     FROM {base_table}
                     WHERE prompt_id=%(prompt_id)s {"AND lobby_id=%(lobby_id)s" if base_table == "lobby_runs" else ""}
@@ -154,6 +155,8 @@ def get_leaderboard_runs(
                 ) AS shortest_runs
                 ON shortest_runs.run_id = runs.run_id
                 """
+            conditions.append("first_runs.run_id IS NOT NULL")
+
         elif user_run_mode == 'all':
             group_subquery = ""
         else:
@@ -176,33 +179,39 @@ def get_leaderboard_runs(
         sort_exp += ' DESC'
 
 
-    # Pagination
-    limit_exp = 'LIMIT %(offset)s, %(limit)s' if limit is not None else ''
-    query_args['offset'] = offset
-    query_args['limit'] = limit
+    # Pagination, default 1 so all articles are chose
+    pagination_clause = '1'
+    if limit is not None:
+        pagination_clause = ("(`rank` BETWEEN %(page_start)s AND %(page_end)s)")
+        query_args['page_start'] = offset
+        query_args['page_end'] = offset + limit - 1
 
 
-    # Specific Run
-    current_run_clause = ''
+    # Current Run
+    current_run_clause = '0'
     if run_id is not None:
-        current_run_clause = 'OR runs.run_id = %(run_id)s'
+        current_run_clause = 'run_id = %(run_id)s'
         query_args['run_id'] = run_id
-
 
     # Some specifics
     assert(len(conditions) > 0)
 
     # TODO maybe dont' use * here and instead select specific columns?
     # TODO save path length elsewhere?
+    # TODO query performance with row_number might not be great
+
     query = f"""
-    SELECT runs.*, users.username, JSON_LENGTH(runs.`path`, '$.path') AS path_length
-    FROM {base_table} AS runs
-    LEFT JOIN {prompts_table} AS prompts ON {prompts_join}
-    LEFT JOIN users ON users.user_id=runs.user_id
-    {group_subquery}
-    WHERE ({' AND '.join(conditions)}) {current_run_clause}
+    SELECT t.* FROM (
+        SELECT runs.*, users.username, ROW_NUMBER() OVER () AS `rank`, JSON_LENGTH(runs.`path`, '$.path') AS path_length
+        FROM {base_table} AS runs
+        LEFT JOIN {prompts_table} AS prompts ON {prompts_join}
+        LEFT JOIN users ON users.user_id=runs.user_id
+        {group_subquery}
+        WHERE ({' AND '.join(conditions)}) OR runs.{current_run_clause}
+        ORDER BY {sort_exp}
+    ) AS t
+    WHERE {pagination_clause} OR {current_run_clause}
     ORDER BY {sort_exp}
-    {limit_exp}
     """
 
     db = get_db()
@@ -217,20 +226,20 @@ def get_leaderboard_runs(
 if __name__ == "__main__":
 
     # Example usage
-    # Get normal leaderboard for prompt 22 (i.e. first playes within 24 hours of release)
-    # Along with current run_results
-    get_leaderboard_runs(prompt_id=22, run_id=1111, user_run_mode="all", sort_mode='length', played_before=24 * 60)
+    # Get normal leaderboard for prompt 22 (i.e. first playes within 24 hours of release) along with current run_results
+    runs = get_leaderboard_runs(prompt_id=22, run_id=1111, user_run_mode="all", sort_mode='length', played_before=24 * 60)
 
     # Get the 10 longest (finished) runs for prompt 22
-    get_leaderboard_runs(prompt_id=22, user_run_mode="all", sort_mode='length', sort_asc=False, limit=10)
+    runs = get_leaderboard_runs(prompt_id=22, user_run_mode="all", sort_mode='length', sort_asc=False, limit=10)
 
     # Get the most recent runs, included unfinished, for prompt 22, within 1 day
-    get_leaderboard_runs(prompt_id=22, user_run_mode="all", sort_mode='start', sort_asc=False, limit=10, played_after=24 * 60)
+    runs = get_leaderboard_runs(prompt_id=22, user_run_mode="all", sort_mode='start', sort_asc=False, limit=10, played_after=24 * 60)
 
     # Get normal leaderboard for prompt 1 of lobby 4
-    get_leaderboard_runs(lobby_id=4, prompt_id=1)
+    runs = get_leaderboard_runs(lobby_id=4, prompt_id=1)
 
     # Get shortest path leaderboard for prompt 1 of lobby 4
-    get_leaderboard_runs(lobby_id=4, prompt_id=1, user_run_mode='shortest', sort_mode="length")
+    runs = get_leaderboard_runs(lobby_id=4, prompt_id=1, user_run_mode='shortest', sort_mode="length")
 
+    # print([(run["rank"], run["run_id"]) for run in runs])
 '''
