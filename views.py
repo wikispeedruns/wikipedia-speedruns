@@ -189,6 +189,13 @@ def get_lobby_prompt_page(lobby_id, prompt_id):
     return render_with_data('prompt.html', **args)
 
 
+
+# Generator
+@views.route('/generator', methods=['GET'])
+def get_generator_page():
+    return render_with_data('generator.html')
+
+
 # Admin pages
 @views.route('/manage', methods=['GET'])
 @check_admin

@@ -1,6 +1,7 @@
 //JS module imports
 import { serverData } from "./modules/serverData.js";
 import { getRun, getLobbyRun } from "./modules/game/finish.js";
+import { getLocalRun } from "./modules/localStorage/localStorageSprint.js"
 
 import { basicCannon, fireworks, side } from "./modules/confetti.js";
 
@@ -39,7 +40,7 @@ let app = new Vue({
         promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
 
         lobbyId: null,
-        runId: null,          //unique ID for the current run. This gets populated upon start of run
+        runId: RUN_ID,          //unique ID for the current run. This gets populated upon start of run
 
         startTime: null,     //For all game modes, the start time of run (mm elapsed since January 1, 1970)
         endTime: null,       //For all game modes, the end time of run (mm elapsed since January 1, 1970)
@@ -59,8 +60,10 @@ let app = new Vue({
         let run = null;
         if (this.lobbyId != null) {
             run = await getLobbyRun(this.lobbyId, RUN_ID);
-        } else {
+        } else if (this.loggedIn) {
             run = await getRun(RUN_ID);
+        } else if (!this.loggedIn) {
+            run = getLocalRun(RUN_ID);
         }
 
         this.promptId = run['prompt_id'];
@@ -121,6 +124,10 @@ let app = new Vue({
         //redirect to the corresponding prompt page
         goToLobbyLeaderboard: function (event) {
             window.location.replace(`/lobby/${this.lobbyId}/prompt/${this.promptId}?run_id=${this.runId}`);
+        },
+
+        goToLeaderboard: function (event) {
+            window.location.replace(`/prompt/${this.promptId}?run_id=${this.runId}`);
         },
     }
 })

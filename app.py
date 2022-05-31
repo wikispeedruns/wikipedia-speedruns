@@ -53,6 +53,7 @@ def create_app(test_config=None):
     from apis.marathon import marathon_api
     from apis.lobbys import lobby_api
     from apis.leaderboard_api import leaderboard_api
+    from apis.generator import generator_api, load_page_rank
     from views import views
 
     app.register_blueprint(sprint_api)
@@ -64,7 +65,14 @@ def create_app(test_config=None):
     app.register_blueprint(stats_api)
     app.register_blueprint(marathon_api)
     app.register_blueprint(lobby_api)
+    app.register_blueprint(generator_api)
     app.register_blueprint(views)
     app.register_blueprint(leaderboard_api)
+
+    # Hacky way to load in
+    try:
+        load_page_rank(app)
+    except Exception as e:
+        print(e)
 
     return app

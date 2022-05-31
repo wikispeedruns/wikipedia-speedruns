@@ -3,6 +3,7 @@ import { serverData } from "./modules/serverData.js";
 import { uploadLocalSprints, getLocalSprints } from "./modules/localStorage/localStorageSprint.js";
 import { uploadLocalMarathons, getLocalMarathons } from "./modules/localStorage/localStorageMarathon.js";
 import { generateStreakText } from "./modules/streaks.js";
+import { getUserLobby } from "./modules/lobby/utils.js";
 
 async function getPrompts()
 {
@@ -53,18 +54,37 @@ var app = new Vue({
         marathonPrompts: [],
         timeLeft: "",
         username: serverData["username"],
-        loggedIn: false,
+        loggedIn: null,
 
         streakText: '',
+
+        lobbies: [],
+
+        isMobile: false,
     },
     methods: {
         alertLogin: (e) => {
             e.preventDefault();
             alert("Please login if you would like to play the prompt of the day!");
         },
+
+        copyInvite: function (lobby) {
+            const link = `Join my Wikispeedruns lobby\nhttps://wikispeedruns.com/lobby/${lobby.lobby_id}\nPasscode: ${lobby.passcode}`
+            navigator.clipboard.writeText(link);
+            document.getElementById("custom-tooltip-"+lobby.lobby_id).innerHTML = "Invite copied!";
+            setTimeout(function() {
+                document.getElementById("custom-tooltip-"+lobby.lobby_id).innerHTML = "- Copy invite -";
+            }, 1500);
+        },
+
+        getDate: function (string) {
+            let date = new Date(string);
+            return date.toLocaleDateString();
+        }
     },
 
     created: async function() {
+        this.isMobile = window.screen.width < 768;
         this.loggedIn = "username" in serverData;
 
         if (this.loggedIn) {
@@ -73,13 +93,14 @@ var app = new Vue({
         }
 
         //this.topUsers = await getTopUsers();
-        this.marathonPrompts = await getMarathonPrompts(); 
+        this.marathonPrompts = await getMarathonPrompts();
 
         const prompts = await getPrompts();
         this.dailyPrompts = prompts.filter(p => p.rated);
         this.activePrompts = prompts.filter(p => !p.rated);
 
-        
+        this.lobbies = await getUserLobby(this.loggedIn);
+        //console.log(this.lobbies);
 
         if (this.activePrompts.length === 0) {
             this.activePrompts = await getBackupPrompts();
@@ -107,14 +128,14 @@ var app = new Vue({
             }, 1000);
 
         }
-        
+
         if (!this.loggedIn) {
 
             const localSprints = getLocalSprints();
 
             //console.log("Locally stored sprints: ")
             //console.log(localSprints)
-            
+
             for (let prompt of this.dailyPrompts){
                 for (let run_id of Object.keys(localSprints)) {
                     if (parseInt(localSprints[run_id].prompt_id) === prompt.prompt_id) {
