@@ -52,6 +52,7 @@ def create_app(test_config=None):
     from apis.stats import stats_api
     from apis.marathon import marathon_api
     from apis.lobbys import lobby_api
+    from apis.leaderboard_api import leaderboard_api
     from views import views
 
     app.register_blueprint(sprint_api)
@@ -64,5 +65,6 @@ def create_app(test_config=None):
     app.register_blueprint(marathon_api)
     app.register_blueprint(lobby_api)
     app.register_blueprint(views)
+    app.register_blueprint(leaderboard_api)
 
     return app

@@ -28,13 +28,14 @@ def get_db():
 '''
 
 
-
 # Get runs for a prompt, with lots of options (described below)
 # See bottom of file for example usage
 def get_leaderboard_runs(
     ########### identifies prompt ###########
     prompt_id: int,
     lobby_id: Optional[int] = None,
+
+    run_id = None, # inlcude the current run
 
     ########### global filtering ###########
     show_unfinished: bool = False,
@@ -181,22 +182,32 @@ def get_leaderboard_runs(
     query_args['limit'] = limit
 
 
+    # Specific Run
+    current_run_clause = ''
+    if run_id is not None:
+        current_run_clause = 'OR runs.run_id = %(run_id)s'
+        query_args['run_id'] = run_id
+
+
+    # Some specifics
+    assert(len(conditions) > 0)
+
     # TODO maybe dont' use * here and instead select specific columns?
-    # TODO save apth length elsewhere?
+    # TODO save path length elsewhere?
     query = f"""
     SELECT runs.*, users.username, JSON_LENGTH(runs.`path`, '$.path') AS path_length
     FROM {base_table} AS runs
     LEFT JOIN {prompts_table} AS prompts ON {prompts_join}
     LEFT JOIN users ON users.user_id=runs.user_id
     {group_subquery}
-    WHERE {' AND '.join(conditions)}
+    WHERE ({' AND '.join(conditions)}) {current_run_clause}
     ORDER BY {sort_exp}
     {limit_exp}
     """
 
     db = get_db()
     with db.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
-        # print(cursor.mogrify(query, query_args))
+        print(cursor.mogrify(query, query_args))
         cursor.execute(query, query_args)
         return cursor.fetchall()
 
@@ -206,9 +217,9 @@ def get_leaderboard_runs(
 if __name__ == "__main__":
 
     # Example usage
-
     # Get normal leaderboard for prompt 22 (i.e. first playes within 24 hours of release)
-    get_leaderboard_runs(prompt_id=22, user_run_mode="all", sort_mode='length', played_before=24 * 60)
+    # Along with current run_results
+    get_leaderboard_runs(prompt_id=22, run_id=1111, user_run_mode="all", sort_mode='length', played_before=24 * 60)
 
     # Get the 10 longest (finished) runs for prompt 22
     get_leaderboard_runs(prompt_id=22, user_run_mode="all", sort_mode='length', sort_asc=False, limit=10)
