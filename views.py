@@ -114,7 +114,7 @@ def get_sprint_finish_page():
         return render_with_data('play_finish.html', run_id=run_id, played=played)
     except ValueError:
         return "Page Not Found", 404
-    
+
 @views.route('/lobby/<int:lobby_id>/finish', methods=['GET'])
 def get_lobby_finish_page(lobby_id):
     try:
@@ -125,9 +125,9 @@ def get_lobby_finish_page(lobby_id):
         return "Page Not Found", 404
 
 
-@views.route('/leaderboard/<id>', methods=['GET'])
-def get_leaderboard_page(id):
-    return render_with_data('leaderboard.html')
+@views.route('/leaderboard/<prompt_id>', methods=['GET'])
+def get_leaderboard_page(prompt_id):
+    return render_with_data('leaderboard.html', **request.args)
 
 @views.route('/replay', methods=['GET'])
 def get_replay_page():

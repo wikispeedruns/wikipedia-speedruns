@@ -6,7 +6,7 @@
 <script src="{{url_for('static', filename='js/springy-master/springy.js') }}"></script>
 <script src="{{url_for('static', filename='js/springy-master/springyui.js') }}"></script>
 
-<script defer type="module" src="{{url_for('static', filename='js/prompt.js') }}"></script>
+<script defer type="module" src="{{url_for('static', filename='js/leaderboard.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -23,7 +23,7 @@
             <div class="card-body">
 
 
-                <h4>Prompt #[[getPromptID()]]</h4>
+                <h4>Prompt TODO</h4>
 
                 <p>
                     <h6 v-if="available">
@@ -75,7 +75,7 @@
             </div>
 
             <div v-cloak class="card-footer text-center">
-                <button class="btn btn-outline-secondary"
+                <!-- <button class="btn btn-outline-secondary"
                     v-on:click="buildNewLink(1)"
                     v-bind:class="{invisible: getPageNo() === 1 || getPageNo()===0}">
 
@@ -103,7 +103,7 @@
                     v-bind:class="{invisible: getPageNo() === totalpages}">
 
                     <i class="bi bi-chevron-double-right"></i>
-                </button>
+                </button> -->
 
                 <div class="pt-4 pb-2">
                     <span class="px-3" >Show results from the past: </span>
