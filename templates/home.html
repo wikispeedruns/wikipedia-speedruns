@@ -8,7 +8,7 @@
     [v-cloak] { display: none }
 
     /* Tooltip */
-    
+
     .custom-tooltip {
         display: none;
         margin-left: 10px;
@@ -36,24 +36,23 @@
 
     <p>Play the tutorial <a href="/play/tutorial">here</a>!</p>
 
+    <p>Try our new prompt generator <a href="/generator">here</a>!</p>
+
     <!--<hr class="my-4">-->
 
-    <div class="row justify-content-md-center py-2">
-        <div class="col-lg-12">
-            <div v-if="loggedIn && lobbies.length > 0">
-                See your active lobbies <a href="#user-lobbies">here</a> or <a href="/lobby/create">create a new private lobby</a>.
-            </div>
-            <div v-if="loggedIn && lobbies.length == 0">
-                Create a new private lobby <a href="/lobby/create">here</a>!
-            </div>
-            <div v-if="!loggedIn">
-                <a href="/login"><b>Log in</b></a>/<a href="/register"><b>Register</b></a> to create a new private lobby and play with your friends!
-            </div>
-            
-        </div>
+    <!-- === true/false to ignore null case -->
+
+    <div v-cloak>
+        <p v-if="loggedIn === true && lobbies.length > 0">
+            See your active lobbies <a href="#user-lobbies">here</a> or <a href="/lobby/create">create a new private lobby</a>.
+        </p>
+        <p v-if="loggedIn === true && lobbies.length == 0">
+            Create a new private lobby <a href="/lobby/create">here</a>!
+        </p>
+        <p v-if="loggedIn === false">
+            <a href="/login"><b>Log in</b></a>/<a href="/register"><b>Register</b></a> to create a new private lobby and play with your friends!
+        </p>
     </div>
-
-
 
     <hr class="my-4">
 
@@ -109,7 +108,7 @@
                 <div class="alert alert-info my-0" role="alert">
                     <h5 class="my-0">Try some other Prompts</h5>
                 </div>
-                <div class="card-body">       
+                <div class="card-body">
                     <table class="table table-hover">
                         <thead>
                             <th style="width:100px" scope="col">Prompt #</th>

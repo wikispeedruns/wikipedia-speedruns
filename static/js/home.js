@@ -54,7 +54,7 @@ var app = new Vue({
         marathonPrompts: [],
         timeLeft: "",
         username: serverData["username"],
-        loggedIn: false,
+        loggedIn: null,
 
         streakText: '',
 
@@ -93,7 +93,7 @@ var app = new Vue({
         }
 
         //this.topUsers = await getTopUsers();
-        this.marathonPrompts = await getMarathonPrompts(); 
+        this.marathonPrompts = await getMarathonPrompts();
 
         const prompts = await getPrompts();
         this.dailyPrompts = prompts.filter(p => p.rated);
@@ -128,14 +128,14 @@ var app = new Vue({
             }, 1000);
 
         }
-        
+
         if (!this.loggedIn) {
 
             const localSprints = getLocalSprints();
 
             //console.log("Locally stored sprints: ")
             //console.log(localSprints)
-            
+
             for (let prompt of this.dailyPrompts){
                 for (let run_id of Object.keys(localSprints)) {
                     if (parseInt(localSprints[run_id].prompt_id) === prompt.prompt_id) {

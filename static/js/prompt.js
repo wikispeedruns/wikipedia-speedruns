@@ -17,7 +17,7 @@ var LeaderboardRow = {
     props: [
         "run",
         "rank",
-        "currentRunId",
+        "currentRunId"
     ],
 
     created: function() {

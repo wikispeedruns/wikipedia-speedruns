@@ -22,12 +22,16 @@
 import { fetchJson } from "/static/js/modules/fetch.js";
 import { serverData } from "/static/js/modules/serverData.js";
 import { getArticleTitle } from "/static/js/modules/wikipediaAPI/util.js";
+import { PromptGenerator } from "/static/js/modules/generator.js"
 
 const LOBBY_ID = serverData["lobby_id"];
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
+    components: {
+        'prompt-generator': PromptGenerator
+    },
     data: {
         startPrompt:"",
         endPrompt:"",
@@ -44,8 +48,9 @@ var app = new Vue({
                 "name": null,
                 "owner": null
             }
-        }
+        },
     },
+
 
     created: async function() {
         this.getPrompts();
@@ -76,6 +81,12 @@ var app = new Vue({
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}/prompts`);
             this.prompts = await resp.json();
 
+        },
+
+        async generatePrompt(e) {
+            const prompt = await getGeneratedPrompt(this.difficulty);
+            this.startPrompt = prompt["start"];
+            this.endPrompt = prompt["end"];
         },
 
 
@@ -131,16 +142,36 @@ var app = new Vue({
     <template v-if="lobbyInfo.user.owner">
         <hr>
         <h4>Manage: Add a prompt</h4>
-        <form id="newPrompt" v-on:submit.prevent="addPrompt">
-            <label for="start">Start Article:</label>
-            <input type="text" id="start" name="start" v-model="startPrompt">
-            <label for="end">End Article:</label>
-            <input type="text" id="end" name="end" v-model="endPrompt">
 
-            <input type="submit" value="Submit">
+        <form id="newPrompt" v-on:submit.prevent="addPrompt">
+            <div class="my-2 row">
+                <div class="col-md-4 col-sm-6">
+                    <input  class="form-control" type="text" id="start" name="start" placeholder="Start Article" v-model="startPrompt">
+                </div>
+            </div>
+
+            <div class="mb-2 row">
+                <div class="col-md-4 col-sm-6">
+                    <input class="form-control" type="text" id="end" name="end" placeholder="End Article" v-model="endPrompt">
+                </div>
+            </div>
+
+            <details class="mb-4">
+                <summary>Prompt Generation</summary>
+
+                <prompt-generator
+                    v-bind:start.sync="startPrompt"
+                    v-bind:end.sync="endPrompt"
+                ></prompt-generator>
+
+
+            </details>
+
+            <input class="btn btn-primary" type="submit" value="Submit">
         </form>
 
         <p>[[addPromptMessage]]</p>
+
 
         <hr>
 
