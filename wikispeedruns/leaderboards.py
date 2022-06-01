@@ -68,7 +68,7 @@ def get_leaderboard_runs(
 
     ########### pagination ###########
     offset: int = 0,
-    limit: Optional[int] = 100,
+    limit: Optional[int] = 20,
 ):
     # conditions is a set of templated SQL expressions to include in the final WHERE clause
     # query_args are the user inputs that will be filled by cursor.execute
@@ -183,7 +183,7 @@ def get_leaderboard_runs(
     if limit is not None:
         pagination_clause = ("(`rank` BETWEEN %(page_start)s AND %(page_end)s)")
         query_args['page_start'] = offset
-        query_args['page_end'] = offset + limit - 1
+        query_args['page_end'] = offset + limit
 
 
     # Current Run
@@ -201,7 +201,12 @@ def get_leaderboard_runs(
 
     query = f"""
     SELECT t.* FROM (
-        SELECT runs.*, users.username, ROW_NUMBER() OVER () AS `rank`, JSON_LENGTH(runs.`path`, '$.path') AS path_length
+        SELECT
+            runs.*,
+            users.username,
+            ROW_NUMBER() OVER () AS `rank`,
+            COUNT(*) OVER () AS numRuns,
+            JSON_LENGTH(runs.`path`, '$.path') AS path_length
         FROM {base_table} AS runs
         LEFT JOIN {prompts_table} AS prompts ON {prompts_join}
         LEFT JOIN users ON users.user_id=runs.user_id
@@ -218,11 +223,16 @@ def get_leaderboard_runs(
         cursor.execute(query, query_args)
 
         results = cursor.fetchall()
+        numRuns = 0
         for run in results:
+            numRuns = run["numRuns"]
+            del run['numRuns']
             run['path'] = json.loads(run['path'])['path']
 
-        return results
-
+        return {
+            "numRuns": numRuns,
+            "runs": results
+        }
 
 
 '''

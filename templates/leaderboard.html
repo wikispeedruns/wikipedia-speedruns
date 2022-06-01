@@ -23,14 +23,14 @@
             <div class="card-body">
 
 
-                <h4>Prompt TODO</h4>
+                <h4>Prompt [[prompt.prompt_id || ""]]</h4>
 
                 <p>
                     <h6 v-if="available">
                         <strong>[[prompt.start]]</strong> to <strong v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>
                     </h6>
                 </p>
-                <p>[[runs.length]] total runs</p>
+                <p>[[numRuns]] total runs</p>
 
                 <div class="table-responsive">
                     <table v-if="runs.length > 0" class="table table-hover">
@@ -75,35 +75,35 @@
             </div>
 
             <div v-cloak class="card-footer text-center">
-                <!-- <button class="btn btn-outline-secondary"
-                    v-on:click="buildNewLink(1)"
-                    v-bind:class="{invisible: getPageNo() === 1 || getPageNo()===0}">
+                <a class="btn btn-outline-secondary" role="button"
+                    v-on:click="goToPage(0)"
+                    v-bind:class="{invisible: page === 0}">
 
                     <i class="bi bi-chevron-double-left"></i>
-                </button>
+                </a>
 
-                <button class="btn btn-outline-secondary"
-                    v-on:click="buildNewLink(parseInt(page)-1)"
-                    v-bind:class="{invisible: getPageNo() === 1 || getPageNo()===0}">
+                <a class="btn btn-outline-secondary" role="button"
+                    v-on:click="goToPage(page - 1)"
+                    v-bind:class="{invisible: page === 0}">
 
                     <i class="bi bi-chevron-left" id="prev-page"></i>
-                </button>
+                </a>
 
-                <span>Page <strong>[[getPageNo()]]</strong> of [[totalpages]] </span>
+                <span class="mx-2">Page <strong>[[page + 1]]</strong> of [[numPages]] </span>
 
-                <button class="btn btn-outline-secondary"
-                    v-on:click="buildNewLink(parseInt(page)+1)"
-                    v-bind:class="{invisible: getPageNo() === totalpages}">
+                <a class="btn btn-outline-secondary" role="button"
+                    v-on:click="goToPage(page + 1)"
+                    v-bind:class="{invisible: page === numPages - 1}">
 
                     <i class="bi bi-chevron-right"></i>
-                </button>
+                </a>
 
-                <button class="btn btn-outline-secondary"
-                    v-on:click="buildNewLink(totalpages)"
-                    v-bind:class="{invisible: getPageNo() === totalpages}">
+                <a class="btn btn-outline-secondary" role="button"
+                    v-on:click="goToPage(numPages - 1)"
+                    v-bind:class="{invisible: page === numPages - 1}">
 
                     <i class="bi bi-chevron-double-right"></i>
-                </button> -->
+                </a>
 
                 <div class="pt-4 pb-2">
                     <span class="px-3" >Show results from the past: </span>

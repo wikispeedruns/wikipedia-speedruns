@@ -6,6 +6,7 @@ import { pathArrowFilter } from "./modules/game/filters.js";
 const URL_PROMPT_ID = serverData["prompt_id"];
 const URL_LOBBY_ID = serverData["lobby_id"] || null;
 
+const DEFAULT_PAGE_SIZE = 20;
 
 Vue.filter('pathArrow', pathArrowFilter)
 
@@ -18,13 +19,8 @@ var LeaderboardRow = {
 
     data: function() {
         return {
-            lobbyId: 0,
+            lobbyId: URL_LOBBY_ID,
         }
-    },
-
-
-    created: function() {
-        this.lobbyId = URL_LOBBY_ID;
     },
 
     template: (`
@@ -238,17 +234,28 @@ var app = new Vue({
     el: '#app',
     data: {
         prompt: {},
+        available: false,
+
         runs: [],
+        numRuns: 0,
 
         currentRun: null,
         currentRunPosition: 0,
-        currentRunRank: 0,
 
         promptId: URL_PROMPT_ID,
         lobbyId: URL_LOBBY_ID,
         runId: 0,
 
-        available: false
+        // Search params default values
+        limit: 20,
+        offset: 0,
+
+
+    },
+
+    computed: {
+        page: function() { return Math.floor(this.offset / this.limit); },
+        numPages: function() { return Math.max(1, Math.ceil(this.numRuns / this.limit)); }
     },
 
     components: {
@@ -258,17 +265,10 @@ var app = new Vue({
 
     methods : {
         genGraph: function () {
-            var graph1 = populateGraph(this.runs, this.runId);
-            $('#springydemo').springy({ graph: graph1 });
+            var graph = populateGraph(this.runs, this.runId);
+            $('#springydemo').springy({ graph: graph });
         },
 
-
-        buildNewLink: function (page) {
-
-            let url = new URL(window.location.href)
-            url.searchParams.set('page', String(page))
-            window.location.replace(url)
-        },
 
         sortStatus: function(tab) {
             if (this.sortMode === tab) {
@@ -277,21 +277,27 @@ var app = new Vue({
             return `<i class="bi bi-dash-lg"></i>`
         },
 
-        toggleSort: function(tab) {
-            let url = new URL(window.location.href)
-            if (tab === 'time' && this.sortMode === 'path') {
-                url.searchParams.set('sort', 'time')
-            } else if (tab === 'path' && this.sortMode === 'time') {
-                url.searchParams.set('sort', 'path')
-            }
 
-            window.location.replace(url)
+
+        goToPage: function(newPage)
+        {
+            let url = new URL(window.location.href);
+            url.searchParams.set('offset', newPage * this.limit);
+            url.searchParams.set('limit', this.limit);
+            window.location.replace(url);
         },
 
-        toggleTimeFilter: function(f) {
+
+        setSort: function(tab) {
+            let url = new URL(window.location.href);
+            url.searchParams.set('sort_mode', tab);
+            window.location.replace(url);
+        },
+
+        setTimeFilter: function(f) {
             if (f != this.timeFilter) {
                 let url = new URL(window.location.href)
-                url.searchParams.set('time_filter', f)
+                url.searchParams.set('played', f)
                 window.location.replace(url)
             }
         },
@@ -300,25 +306,29 @@ var app = new Vue({
     },
 
     created: async function() {
+        /* Parse url params */
+        let url = new URL(window.location.href);
 
-        if (this.lobbyId) {
-            this.available = true;
+        this.offset = Number(url.searchParams.get('offset') || 0);
+        this.limit = Number(url.searchParams.get('limit') || DEFAULT_PAGE_SIZE);
 
-            let resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${this.promptId}/runs`);
-            this.runs = await resp.json();
+        /* Make query */
+        let path = this.lobbyId === null
+            ? `/api/sprints/${this.promptId}/leaderboard`
+            : `/api/lobbys/${this.lobbyId}/prompts/${this.promptId}/leaderboard`;
 
-            resp = await fetch(`/api/lobbys/${lobby_id}/prompts/${this.promptId}`);
-            this.prompt = await resp.json();
+        let resp = await (await fetchJson(path, "POST", {
+            "limit": this.limit,
+            "offset": this.offset
+        })).json();
 
-        }
-        else {
 
-            // this.available = resp['prompt']['available'];
-            // this.prompt = resp["prompt"];
-            this.runs = await (await fetchJson(`/api/leaderboards/sprints/${this.promptId}/leaderboard`, 'POST', {
 
-            })).json();
-        }
+        /* Fill data structures */
+        this.available = !('available' in resp['prompt']) || resp["prompt"]["available"];
+        this.prompt = resp["prompt"];
+        this.runs = resp["runs"];
+        this.numRuns = resp["numRuns"];
 
         this.genGraph();
     }
