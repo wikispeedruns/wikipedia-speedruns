@@ -154,7 +154,7 @@ def get_leaderboard_runs(
                 ) AS shortest_runs
                 ON shortest_runs.run_id = runs.run_id
                 """
-            conditions.append("first_runs.run_id IS NOT NULL")
+            conditions.append("shortest_runs.run_id IS NOT NULL")
 
         elif user_run_mode == 'all':
             group_subquery = ""
@@ -182,14 +182,16 @@ def get_leaderboard_runs(
     pagination_clause = '1'
     if limit is not None:
         pagination_clause = ("(`rank` BETWEEN %(page_start)s AND %(page_end)s)")
-        query_args['page_start'] = offset
+        query_args['page_start'] = offset + 1
         query_args['page_end'] = offset + limit
 
 
     # Current Run
     current_run_clause = '0'
     if run_id is not None:
-        current_run_clause = 'run_id = %(run_id)s'
+        # TODO this is gross and hacky and relies on runs being the alias for both outer and
+        # actual table
+        current_run_clause = 'runs.run_id = %(run_id)s'
         query_args['run_id'] = run_id
 
     # Some specifics
@@ -200,7 +202,7 @@ def get_leaderboard_runs(
     # TODO query performance with row_number might not be great
 
     query = f"""
-    SELECT t.* FROM (
+    SELECT runs.* FROM (
         SELECT
             runs.*,
             users.username,
@@ -213,7 +215,7 @@ def get_leaderboard_runs(
         {group_subquery}
         WHERE ({' AND '.join(conditions)}) OR {current_run_clause}
         ORDER BY {sort_exp}
-    ) AS t
+    ) AS runs
     WHERE {pagination_clause} OR {current_run_clause}
     """
 

@@ -30,7 +30,7 @@ LEADERBOARD_JSON = {
 
 
 @leaderboard_api.post('/sprints/<int:prompt_id>/leaderboard', defaults={'run_id' : None})
-@leaderboard_api.post('/sprints/<int:id>/leaderboard/<int:run_id>')
+@leaderboard_api.post('/sprints/<int:prompt_id>/leaderboard/<int:run_id>')
 @check_request_json(LEADERBOARD_JSON)
 def get_sprint_leaderboard(prompt_id, run_id):
     resp = leaderboards.get_leaderboard_runs(

@@ -13,7 +13,6 @@ Vue.filter('pathArrow', pathArrowFilter)
 var LeaderboardRow = {
     props: [
         "run",
-        "rank",
         "currentRunId"
     ],
 
@@ -25,7 +24,7 @@ var LeaderboardRow = {
 
     template: (`
         <tr>
-            <td>{{rank}}</td>
+            <td>{{run.rank}}</td>
 
             <td class="l-col" v-if="run.username">
                 <strong v-if="run.run_id == currentRunId">{{run.username}}</strong>
@@ -239,12 +238,12 @@ var app = new Vue({
         runs: [],
         numRuns: 0,
 
+        runId: -1,
         currentRun: null,
         currentRunPosition: 0,
 
         promptId: URL_PROMPT_ID,
         lobbyId: URL_LOBBY_ID,
-        runId: 0,
 
         // Search params default values
         limit: 20,
@@ -312,10 +311,18 @@ var app = new Vue({
         this.offset = Number(url.searchParams.get('offset') || 0);
         this.limit = Number(url.searchParams.get('limit') || DEFAULT_PAGE_SIZE);
 
+        /* TODO find this by user if not provided in urlParams */
+        this.runId = Number(url.searchParams.get("run_id")) || -1;
+
         /* Make query */
         let path = this.lobbyId === null
             ? `/api/sprints/${this.promptId}/leaderboard`
             : `/api/lobbys/${this.lobbyId}/prompts/${this.promptId}/leaderboard`;
+
+        if (this.runId !== -1) {
+            path += "/" + this.runId;
+        }
+
 
         let resp = await (await fetchJson(path, "POST", {
             "limit": this.limit,
@@ -329,6 +336,24 @@ var app = new Vue({
         this.prompt = resp["prompt"];
         this.runs = resp["runs"];
         this.numRuns = resp["numRuns"];
+
+        // Find current run
+        const currRunIndex = this.runs.findIndex((run) => run["run_id"] === this.runId)
+        if (currRunIndex !== -1) {
+            this.currentRun = this.runs[currRunIndex];
+
+            // check if current run does not fall within range, remove and set positon if so
+            if (this.currentRun['rank'] - 1 < this.offset) {
+                this.currentRunPosition = -1 ;
+                this.runs.splice(currRunIndex, 1);
+            } else if (this.currentRun['rank'] - 1 >= this.offset + this.limit) {
+                this.currentRunPosition = 1;
+                this.runs.splice(currRunIndex, 1);
+            }
+        }
+
+
+
 
         this.genGraph();
     }
