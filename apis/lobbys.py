@@ -59,7 +59,8 @@ def join_lobby(lobby_id):
 
         if ("lobbys" not in session):
             session["lobbys"] = {}
-        session["lobbys"][lobby_id] = name
+        session["lobbys"][str(lobby_id)] = name
+        session.modified = True
 
     return "Joined lobby", 200
 

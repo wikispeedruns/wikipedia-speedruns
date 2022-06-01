@@ -69,7 +69,7 @@ var app = new Vue({
         },
 
         copyInvite: function (lobby) {
-            const link = `Join my Wikispeedruns lobby\nhttps://wikispeedruns.com/lobby/${lobby.lobby_id}\nPasscode: ${lobby.passcode}`
+            const link = `Join my Wikispeedruns lobby\n${window.location.origin}/lobby/${lobby.lobby_id}\nPasscode: ${lobby.passcode}`
             navigator.clipboard.writeText(link);
             document.getElementById("custom-tooltip-"+lobby.lobby_id).innerHTML = "Invite copied!";
             setTimeout(function() {
@@ -100,7 +100,6 @@ var app = new Vue({
         this.activePrompts = prompts.filter(p => !p.rated);
 
         this.lobbies = await getUserLobby(this.loggedIn);
-        //console.log(this.lobbies);
 
         if (this.activePrompts.length === 0) {
             this.activePrompts = await getBackupPrompts();
