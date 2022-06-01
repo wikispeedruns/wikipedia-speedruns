@@ -55,7 +55,7 @@ def get_lobby_leaderboard(lobby_id, prompt_id, run_id):
         **request.json
     )
 
-    prompts = lobbys.get_prompt(prompt_id=prompt_id, lobby_id=lobby_id)
+    prompts = lobbys.get_lobby_prompts(prompt_id=prompt_id, lobby_id=lobby_id)
     if len(prompts) == 0:
         return f"Prompt {prompt_id} not found for lobby {lobby_id}", 404
     resp["prompt"] = prompts[0]

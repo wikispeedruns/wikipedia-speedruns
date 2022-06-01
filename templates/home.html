@@ -80,7 +80,7 @@
 
                                     <td class="text-center">
                                         <template v-if="prompt.played">
-                                            <a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a>
+                                            <a v-bind:href="'/leaderboard/' + prompt.prompt_id">Results</a>
                                         </template>
                                         <template v-else>
                                             <span title="Play this prompt to see the results!">-</span>
@@ -123,7 +123,7 @@
                                 <td>[[prompt.start]]</td>
                                 <td class="text-center">
                                     <template v-if="prompt.played">
-                                        <a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a>
+                                        <a v-bind:href="'/leaderboard' + prompt.prompt_id">Results</a>
                                     </template>
                                     <template v-else>
                                         <span title="Play this prompt to see the results!">-</span>

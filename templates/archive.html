@@ -39,7 +39,7 @@
                                 <td>[[prompt.end || '-']]</td>
                                 <td class="text-center"><span v-if="prompt.played"><i class="bi bi-check-lg"></i></span></td>
                                 <td><a v-bind:href="'/play/' + prompt.prompt_id">Play</a></td>
-                                <td><a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a></td>
+                                <td><a v-bind:href="'/leaderboard/' + prompt.prompt_id">Results</a></td>
                             </tr>
                         </tbody>
                     </table>
