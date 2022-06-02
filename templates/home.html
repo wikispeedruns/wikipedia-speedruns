@@ -74,7 +74,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="prompt in dailyPrompts" v-cloak>
-                                    <td>[[prompt.prompt_id]]</span><span v-if="loggedIn"> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</span></td>
+                                    <td>[[prompt.prompt_id]]</span> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</td>
 
                                     <td>[[prompt.start]]</td>
 
@@ -98,7 +98,7 @@
                     Play the daily prompt to start/continue your streak! 🔥
                 </div>
                 <div class="card-footer text-muted" v-else>
-                    Log in to play this daily prompt and start your streak! 🔥
+                    Log in and play the daily prompt and start your streak! 🔥
                 </div>
             </div>
         </div>

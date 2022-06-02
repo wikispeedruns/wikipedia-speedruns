@@ -133,9 +133,6 @@ def get_prompt(id):
     if not prompt["available"]:
         return "Prompt not yet available", 401
 
-    if prompt["rated"] and prompt["active"] and "user_id" not in session:
-        return "You must be logged in to play this daily prompt", 401
-
     return prompt
 
 
@@ -146,9 +143,6 @@ def get_prompt_leaderboard(id, run_id):
     # First get the prompt details, and the string
     user_id = session.get("user_id")
     prompt = prompts.get_prompt(id, "sprint", user_id=user_id)
-
-    if not session.get("admin", False) and (prompt["active"] and prompt["rated"] and not prompt.get("played", False)):
-        return "Cannot view leaderboard of currently rated prompt until played", 401
 
     resp = {
         "prompt": prompt
