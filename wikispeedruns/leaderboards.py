@@ -39,6 +39,7 @@ def get_leaderboard_runs(
     show_unfinished: bool = False,
     show_anonymous: bool = False,
 
+    # for personal leaderboards
     user_id: int = None,
 
     # Whether the prompt was played before a number of minutes since release

@@ -30,15 +30,37 @@
                 <div class="my-4">
                     <h5>Leaderboard Options</h5>
 
-                    <div>
-                        Presets
-                        <input type="radio" id="ffa" value="ffa" v-model="preset" />
-                        <label for="ffa">Fastest First Attempt</label>
-
-                        <input type="radio" id="shortest" value="shortest" v-model="preset" />
-                        <label for="shortest">Shortest Path</label>
+                    <p>
+                    Presets
+                    </p>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="personal" value="personal" v-model="preset" />
+                        <label class="form-check-label" for="personal">Personal (default) </label>
                     </div>
+
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="ffa" value="ffa" v-model="preset" />
+                        <label class="form-check-label" for="ffa">Fastest First Attempt </label>
+                    </div>
+
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="shortest" value="shortest" v-model="preset" />
+                        <label class="form-check-label" for="shortest">Shortest Path</label>
+                    </div>
+
+
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" disabled type="radio" id="custom" value="custom" v-model="preset" />
+                        <label class="form-check-label" for="custom"> Custom (Coming soon) </label>
+                    </div>
+
+                    <!--Description of leaderboard -->
+
+
                 </div>
+
+
+
 
                 <p>
                     <h6 v-if="available">
@@ -55,8 +77,8 @@
                         <thead>
                             <th scope="col">Rank</th>
                             <th scope="col">Name</th>
-                            <th class="l-col" scope="col"><a v-on:click="toggleSort('time')">Time <span v-html="sortStatus('time')"></span></a></th>
-                            <th class="l-col" scope="col"><a v-on:click="toggleSort('path')">Links <span v-html="sortStatus('path')"></span></a></th>
+                            <th class="l-col" scope="col">Time</th>
+                            <th class="l-col" scope="col">Links</th>
                             <th scope="col">Path</th>
                         </thead>
                         <tbody>

@@ -16,6 +16,8 @@ LEADERBOARD_JSON = {
         "offset": int,
         "limit": int,
 
+        "user_id": int,
+
         "played_before": int,
         "played_after": int,
         "show_unfinished": bool,

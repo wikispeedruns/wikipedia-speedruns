@@ -6,6 +6,8 @@ import { pathArrowFilter } from "./modules/game/filters.js";
 const URL_PROMPT_ID = serverData["prompt_id"];
 const URL_LOBBY_ID = serverData["lobby_id"] || null;
 
+const USER_ID = serverData["user_id"];
+
 const DEFAULT_PAGE_SIZE = 20;
 
 Vue.filter('pathArrow', pathArrowFilter)
@@ -263,13 +265,22 @@ var app = new Vue({
         limit: 20,
         offset: 0,
 
-
-        preset: "ffa",
+        preset: "",
     },
 
     computed: {
         page: function() { return Math.floor(this.offset / this.limit); },
         numPages: function() { return Math.max(1, Math.ceil(this.numRuns / this.limit)); }
+    },
+
+    watch: {
+        preset: function(newValue, oldValue) {
+            if (oldValue === "") return; // Startup
+
+            let url = new URL(window.location.href);
+            url.searchParams.set('preset', newValue);
+            window.location.replace(url);
+        }
     },
 
     components: {
@@ -284,15 +295,6 @@ var app = new Vue({
         },
 
 
-        sortStatus: function(tab) {
-            if (this.sortMode === tab) {
-                return `<i class="bi bi-chevron-down"></i>`
-            }
-            return `<i class="bi bi-dash-lg"></i>`
-        },
-
-
-
         goToPage: function(newPage)
         {
             let url = new URL(window.location.href);
@@ -300,34 +302,43 @@ var app = new Vue({
             url.searchParams.set('limit', this.limit);
             window.location.replace(url);
         },
-
-
-        setSort: function(tab) {
-            let url = new URL(window.location.href);
-            url.searchParams.set('sort_mode', tab);
-            window.location.replace(url);
-        },
-
-        setTimeFilter: function(f) {
-            if (f != this.timeFilter) {
-                let url = new URL(window.location.href)
-                url.searchParams.set('played', f)
-                window.location.replace(url)
-            }
-        },
-
-
     },
 
     created: async function() {
         /* Parse url params */
         let url = new URL(window.location.href);
 
+
+        // TODO find this by user if not provided in urlParams
+        this.runId = Number(url.searchParams.get("run_id")) || -1;
+
         this.offset = Number(url.searchParams.get('offset') || 0);
         this.limit = Number(url.searchParams.get('limit') || DEFAULT_PAGE_SIZE);
 
-        /* TODO find this by user if not provided in urlParams */
-        this.runId = Number(url.searchParams.get("run_id")) || -1;
+        this.preset = url.searchParams.get('preset') || this.preset;
+        let args = {};
+        if (this.preset === "ffa") {
+            // default in api
+        } else if (this.preset === "shortest") {
+            args = {
+                "sort_mode": "length",
+                "user_run_mode": "shortest",
+                "show_anonymous": true,
+            };
+        } else {
+            if (this.preset !== "" && this.preset !== "personal") {
+                alert("Invalid preset, defaulting to 'Personal'");
+            }
+            this.preset = "personal";
+            args = {
+                "sort_mode": "start",
+                "sort_asc": false,
+                "user_run_mode": "all",
+                "show_unfinished": true,
+                "user_id": USER_ID,
+            };
+        }
+
 
         /* Make query */
         let path = this.lobbyId === null
@@ -341,7 +352,8 @@ var app = new Vue({
 
         let resp = await (await fetchJson(path, "POST", {
             "limit": this.limit,
-            "offset": this.offset
+            "offset": this.offset,
+            ...args
         })).json();
 
 
