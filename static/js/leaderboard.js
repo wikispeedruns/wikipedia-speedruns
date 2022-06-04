@@ -13,7 +13,8 @@ Vue.filter('pathArrow', pathArrowFilter)
 var LeaderboardRow = {
     props: [
         "run",
-        "currentRunId"
+        "currentRunId",
+        "pageToLink"
     ],
 
     data: function() {
@@ -22,10 +23,23 @@ var LeaderboardRow = {
         }
     },
 
+
     template: (`
         <tr>
-            <td>{{run.rank}}</td>
 
+            <td >
+                {{run.rank}}
+                <button
+                    v-if="pageToLink !== undefined"
+                    title="Go to page"
+                    type="button"
+                    class="btn btn-link"
+                    v-on:click="$emit('go-to-page', pageToLink);">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </td>
+
+            </td>
             <td class="l-col" v-if="run.username">
                 <strong v-if="run.run_id == currentRunId">{{run.username}}</strong>
                 <span v-else>{{run.username}}</span>
@@ -250,6 +264,7 @@ var app = new Vue({
         offset: 0,
 
 
+        preset: "ffa",
     },
 
     computed: {

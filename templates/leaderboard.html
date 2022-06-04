@@ -25,12 +25,30 @@
 
                 <h4>Prompt [[prompt.prompt_id || ""]]</h4>
 
+
+
+                <div class="my-4">
+                    <h5>Leaderboard Options</h5>
+
+                    <div>
+                        Presets
+                        <input type="radio" id="ffa" value="ffa" v-model="preset" />
+                        <label for="ffa">Fastest First Attempt</label>
+
+                        <input type="radio" id="shortest" value="shortest" v-model="preset" />
+                        <label for="shortest">Shortest Path</label>
+                    </div>
+                </div>
+
                 <p>
                     <h6 v-if="available">
                         <strong>[[prompt.start]]</strong> to <strong v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>
                     </h6>
                 </p>
                 <p>[[numRuns]] total runs</p>
+
+
+
 
                 <div class="table-responsive">
                     <table v-if="runs.length > 0" class="table table-hover">
@@ -47,6 +65,8 @@
                                 v-if="currentRunPosition === -1"
                                 v-bind:run="currentRun"
                                 v-bind:current-run-id="runId"
+                                v-bind:page-to-link="Math.floor((currentRun.rank - 1)/ limit)"
+                                v-on:go-to-page="goToPage"
                             ></tr>
 
                             <tr v-if="currentRunPosition === -1"><td colspan="5">...</td></tr>
@@ -63,10 +83,12 @@
                                 v-if="currentRunPosition === 1"
                                 v-bind:run="currentRun"
                                 v-bind:current-run-id="runId"
+                                v-bind:page-to-link="Math.floor((currentRun.rank - 1)/ limit)"
+                                v-on:go-to-page="goToPage"
                             ></tr>
-
                         </tbody>
                     </table>
+
                     <p class="my-4" v-else>
                         This prompt currently doesn't have any runs.
                         <span v-if="available">Be the first to play it!
@@ -111,14 +133,6 @@
                     <i class="bi bi-chevron-double-right"></i>
                 </a>
 
-                <div class="pt-4 pb-2">
-                    <span class="px-3" >Show results from the past: </span>
-                    <a class="px-3" v-on:click="toggleTimeFilter('1')">1 Day</a>
-                    <a class="px-3" v-on:click="toggleTimeFilter('7')">7 Days</a>
-                    <a class="px-3" v-on:click="toggleTimeFilter('30')">30 Days</a>
-                    <a class="px-3" v-on:click="toggleTimeFilter('100')">100 Days</a>
-                    <a class="px-3" v-on:click="toggleTimeFilter('all')">All runs</a>
-                </div>
             </div>
         </div>
     </div>
