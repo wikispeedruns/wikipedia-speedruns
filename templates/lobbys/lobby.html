@@ -21,7 +21,7 @@
 <script type="module">
 import { fetchJson } from "/static/js/modules/fetch.js";
 import { serverData } from "/static/js/modules/serverData.js";
-import { getArticleTitle } from "/static/js/modules/wikipediaAPI/util.js";
+import { getArticleTitle, articleCheck } from "/static/js/modules/wikipediaAPI/util.js";
 import { PromptGenerator } from "/static/js/modules/generator.js"
 
 const LOBBY_ID = serverData["lobby_id"];
@@ -105,6 +105,12 @@ var app = new Vue({
                 return;
             }
 
+            const checkRes = await articleCheck(this.endPrompt);
+            if ('warning' in checkRes) {
+                this.addPromptMessage = checkRes["warning"];
+                return;
+            }
+
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}/prompts`, "POST", {
                 "start": start,
                 "end": end
@@ -170,7 +176,7 @@ var app = new Vue({
             <input class="btn btn-primary" type="submit" value="Submit">
         </form>
 
-        <p>[[addPromptMessage]]</p>
+        <p class="text-danger">[[addPromptMessage]]</p>
 
 
         <hr>

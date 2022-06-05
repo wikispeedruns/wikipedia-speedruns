@@ -1,6 +1,6 @@
 import { fetchJson } from "./modules/fetch.js";
 import { getPath } from "./modules/scraper.js";
-import { getArticleTitle } from "./modules/wikipediaAPI/util.js";
+import { getArticleTitle, articleCheck } from "./modules/wikipediaAPI/util.js";
 
 Vue.component('prompt-item', {
     props: ['prompt'],
@@ -490,6 +490,12 @@ var app = new Vue({
             const end = await getArticleTitle(this.endPrompt);
             if (!end) {
                 alert(`Invalid article name "${this.endPrompt}"`);
+                return;
+            }
+
+            const checkRes = await articleCheck(this.endPrompt);
+            if ('warning' in checkRes) {
+                alert(checkRes["warning"]);
                 return;
             }
 
