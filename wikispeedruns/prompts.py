@@ -192,16 +192,12 @@ def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, of
     '''
     Get all prompts for archive, including currently active
     '''
-    if sort_desc:
-        sort = 'DESC'
-    else:
-        sort = 'ASC'
     if (prompt_type == "sprint"):
         query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts"
     # elif (prompt_type == "marathon")
 
     query, args = _construct_prompt_user_query(prompt_type, user_id)
-    query += f" WHERE used = 1 AND active_start <= NOW() ORDER BY active_start {sort}, prompt_id {sort} LIMIT %(offset)s, %(limit)s"
+    query += f" WHERE used = 1 AND active_start <= NOW() ORDER BY active_start DESC, prompt_id DESC LIMIT %(offset)s, %(limit)s"
 
     args["offset"] = offset
     args["limit"] = limit

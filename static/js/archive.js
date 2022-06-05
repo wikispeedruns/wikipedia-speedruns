@@ -7,6 +7,7 @@ import { getLocalSprints } from "./modules/localStorage/localStorageSprint.js";
 const limit = serverData['limit'];
 const offset = serverData['offset'];
 const sort_desc = serverData['sort_desc'];
+const sort_prompt = serverData['sort_prompt'];
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
@@ -19,26 +20,41 @@ var app = new Vue({
         limit: limit,
         offset: offset,
         sort_desc: sort_desc,
+        sort_prompt: sort_prompt,
         loggedIn: false,
     },
 
     methods : {
-        sortButton: function() {
-            if (this.sort_desc) {
+        sortButton: function(type='time') {
+            let sortBy = this.sort_desc;
+
+            if (type === 'prompt') {
+                sortBy = this.sort_prompt; 
+            }
+
+            if (sortBy) {
                 return `<i class="bi bi-chevron-down"></i>`
             } else {
                 return `<i class="bi bi-chevron-up"></i>`
             }
         },
 
-        toggleSort: async function() {
-            const dest = `?limit=${limit}&offset=0&sort_desc=${!this.sort_desc}`;
-            const response = await fetch("/api/sprints/archive" + dest);
-            const resp = await response.json();
-            this.prompts = resp['prompts'];
-            this.page = 1;
-            this.offset = 0;
-            this.sort_desc = !this.sort_desc;
+        toggleSort: async function(type) {
+            if (type === 'time') {
+                this.sort_desc = !this.sort_desc;
+                if (this.sort_desc) {
+                    this.prompts.sort((a, b) => new Date(a.active_start) - new Date(b.active_start));
+                } else {
+                    this.prompts.sort((a, b) => new Date(b.active_start) - new Date(a.active_start)); 
+                }
+            } else if (type === 'prompt') {
+                this.sort_prompt = !this.sort_prompt;
+                if (this.sort_prompt) {
+                    this.prompts.sort((a, b) => a.prompt_id - b.prompt_id);
+                } else {
+                    this.prompts.sort((a, b) => b.prompt_id - a.prompt_id);
+                }
+            }
         },
 
         runReplay: function(event) {

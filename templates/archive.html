@@ -13,7 +13,6 @@
     <div class="row justify-content-md-center">
 
     <p>Current prompts do not have the end article displayed </p>
-    <p>* =  the prompt is/was rated</p>
 
     <div class="col-md-12">
 
@@ -23,8 +22,8 @@
 
                     <table class="table table-hover">
                         <thead>
-                            <th scope="col"><a v-on:click="toggleSort('time')">Release Date <span v-html="sortButton()"></span></a></th>
-                            <th scope="col">Prompt #</th>
+                            <th scope="col"><a v-on:click="toggleSort('time')">Release Date <span v-html="sortButton('time')"></span></a></th>
+                            <th scope="col"><a v-on:click="toggleSort('prompt')">Prompt # <span v-html="sortButton('prompt')"></span></a></th>
                             <th scope="col">Starting Article</th>
                             <th scope="col">Ending Article</th>
                             <th class="text-center" scope="col">Played</th>
@@ -34,7 +33,7 @@
                         <tbody>
                             <tr v-for="prompt in prompts" v-cloak>
                                 <td>[[prompt.active_start.substring(0, 10)]]</td>
-                                <td>[[prompt.prompt_id]]<span v-if="prompt.rated">*</span> </td>
+                                <td>[[prompt.prompt_id]] </td>
                                 <td>[[prompt.start]]</td>
                                 <td>[[prompt.end || '-']]</td>
                                 <td class="text-center"><span v-if="prompt.played"><i class="bi bi-check-lg"></i></span></td>
