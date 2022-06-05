@@ -133,12 +133,12 @@ var app = new Vue({
         },
 
         async deletePrompts() {
-            console.log('deleting...')
-
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}/prompts`, "DELETE", {
-                "prompts": this.selectedPrompts,
+                "prompts": Array.from(this.selectedPrompts),
             }); 
 
+            this.editPrompts = false;
+            this.clearSelectedPrompts();
             this.getPrompts();
         }
     }
