@@ -5,15 +5,20 @@ export class ArticleRenderer {
     /* frame: DOM element (i.e. through getElementById) to render article in
      * pageCallback: Called upon loading an article, should expect new page and load time
      */
-    constructor(frame, pageCallback, mouseEnter, mouseLeave) {
+    constructor(frame, pageCallback, mouseEnter, mouseLeave, loadCallback=null) {
         this.frame = frame;
         this.pageCallback = pageCallback;
+        this.loadCallback = loadCallback;
         this.mouseEnter = mouseEnter;
         this.mouseLeave = mouseLeave;
     }
 
     async loadPage(page) {
         try {
+            if (this.loadCallback) {
+                this.loadCallback();
+            }
+            
             const isMobile = window.screen.width < 768;
             const startTime = Date.now();
             const body = await getArticle(page, isMobile);
