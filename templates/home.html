@@ -94,10 +94,10 @@
                         <p>Currently unavailable</p>
                     </template>
                 </div>
-                <div class="card-footer text-muted" v-if="loggedIn">
+                <div v-cloak class="card-footer text-muted" v-if="loggedIn === true">
                     Play the daily prompt to start/continue your streak! 🔥
                 </div>
-                <div class="card-footer text-muted" v-else>
+                <div v-cloak class="card-footer text-muted" v-else>
                     Log in to play this daily prompt and start your streak! 🔥
                 </div>
             </div>
