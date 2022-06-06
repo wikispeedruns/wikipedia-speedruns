@@ -1,12 +1,14 @@
 import { serverData } from "./modules/serverData.js"
 import { fetchJson } from "./modules/fetch.js"
 
+
 import { pathArrowFilter } from "./modules/game/filters.js";
 
 const URL_PROMPT_ID = serverData["prompt_id"];
 const URL_LOBBY_ID = serverData["lobby_id"] || null;
 
-const USER_ID = serverData["user_id"];
+// Hack, if USER_ID = -1 the server shouldn't return anything.
+const USER_ID = serverData["user_id"] === undefined ? -1 : serverData["user_id"];
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -22,6 +24,7 @@ var LeaderboardRow = {
     data: function() {
         return {
             lobbyId: URL_LOBBY_ID,
+            momentString: moment(this.run.start_time).fromNow(),
         }
     },
 
@@ -41,16 +44,20 @@ var LeaderboardRow = {
                 </button>
             </td>
 
+
+            <td class="l-col">
+                <template v-if="run.username">
+                    <strong v-if="run.run_id == currentRunId">{{run.username}}</strong>
+                    <span v-else>{{run.username}}</span>
+                </template>
+                <template class="l-col" v-else-if="run.name">
+                    <strong v-if="run.run_id == currentRunId">{{run.name}}</strong>
+                    <span v-else>{{run.name}}</span>
+                </template>
+                <template v-else><strong>You</strong></template>
+
+                <small class="text-muted">({{momentString}})</small>
             </td>
-            <td class="l-col" v-if="run.username">
-                <strong v-if="run.run_id == currentRunId">{{run.username}}</strong>
-                <span v-else>{{run.username}}</span>
-            </td>
-            <td class="l-col" v-else-if="run.name">
-                <strong v-if="run.run_id == currentRunId">{{run.name}}</strong>
-                <span v-else>{{run.name}}</span>
-            </td>
-            <td v-else><strong>You</strong></td>
 
             <td class="l-col">{{(run.play_time).toFixed(3)}} s</td>
             <td>{{run.path.length}}</td>
@@ -61,6 +68,8 @@ var LeaderboardRow = {
                     <i class="bi bi-play"></i>
                 </a>
             </td>
+
+
         </tr>
     `)
 }
@@ -248,6 +257,7 @@ var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     data: {
+        loggedIn: USER_ID !== -1,
         prompt: {},
         available: false,
 
@@ -279,6 +289,7 @@ var app = new Vue({
 
             let url = new URL(window.location.href);
             url.searchParams.set('preset', newValue);
+            url.searchParams.set('offset', 0); // Go back to first page
             window.location.replace(url);
         }
     },
