@@ -1,5 +1,6 @@
 import { serverData } from "./modules/serverData.js"
 import {pathArrowFilter} from "./modules/game/filters.js";
+import { promptLocallyPlayed } from "./modules/localStorage/localStorageSprint.js";
 
 const prompt_id = serverData["prompt_id"];
 const lobby_id = serverData["lobby_id"] || null;
@@ -249,6 +250,8 @@ var app = new Vue({
 
         lobbyId: lobby_id,
         runId: run_id,
+
+        loggedIn: null,
     },
 
     components: {
@@ -258,6 +261,13 @@ var app = new Vue({
 
     methods : {
         getLeaderboard: async function (mode) {
+
+            if (!this.loggedIn && !promptLocallyPlayed(prompt_id)) {
+                console.log("Test: not logged in and trying to access leaderboard")
+                alert("You must attempt the prompt before checking the leaderboard");
+                window.location.replace("/");   // TODO error page
+            }
+
             let path = "/api/sprints/" + prompt_id + "/leaderboard/";
             if (this.runId) path += this.runId;
 
@@ -401,6 +411,8 @@ var app = new Vue({
     },
 
     created: async function() {
+
+        this.loggedIn = "username" in serverData;
 
         if (lobby_id) {
             this.available = true;

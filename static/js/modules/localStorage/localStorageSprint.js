@@ -69,5 +69,16 @@ function getLocalRun(run_id) {
     return getLocalSprints()[run_id];
 }
 
-export { startLocalRun, submitLocalRun, uploadLocalSprints, getLocalSprints, getLocalRun };
+function promptLocallyPlayed(prompt_id) {
+    const runs = getLocalSprints();
+    for (const run in runs) {
+        if (runs[run]['prompt_id'] === parseInt(prompt_id)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+export { startLocalRun, submitLocalRun, uploadLocalSprints, getLocalSprints, getLocalRun, promptLocallyPlayed };
 

@@ -144,6 +144,9 @@ def get_prompt_leaderboard(id, run_id):
     user_id = session.get("user_id")
     prompt = prompts.get_prompt(id, "sprint", user_id=user_id)
 
+    if prompt["rated"] and prompt["active"] and not prompt["played"] and "user_id" in session: #"user_id" not in session:
+        return "You must attempt the prompt before checking the leaderboard", 401
+
     resp = {
         "prompt": prompt
     }
