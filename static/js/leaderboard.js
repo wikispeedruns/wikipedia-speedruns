@@ -30,7 +30,7 @@ var LeaderboardRow = {
 
 
     template: (`
-        <tr>
+        <tr v-bind:class="run.finished ? '' : 'text-danger'">
 
             <td >
                 {{run.rank}}
@@ -47,14 +47,14 @@ var LeaderboardRow = {
 
             <td class="l-col">
                 <template v-if="run.username">
-                    <strong v-if="run.run_id == currentRunId">{{run.username}}</strong>
+                    <strong v-if="run.run_id == currentRunId">Your Last Run</strong>
                     <span v-else>{{run.username}}</span>
                 </template>
                 <template class="l-col" v-else-if="run.name">
-                    <strong v-if="run.run_id == currentRunId">{{run.name}}</strong>
+                    <strong v-if="run.run_id == currentRunId">Your Last Run</strong>
                     <span v-else>{{run.name}}</span>
                 </template>
-                <template v-else><strong>You</strong></template>
+                <template v-else><strong>Your Last Run</strong></template>
 
                 <small class="text-muted">({{momentString}})</small>
             </td>
@@ -328,6 +328,14 @@ var app = new Vue({
 
         this.preset = url.searchParams.get('preset') || this.preset;
         let args = {};
+
+
+        if (this.preset === "")
+        {
+            // Default to personal for non lobby, ffa for lobbys
+            this.preset = this.lobbyId === null ? "personal" : "ffa";
+        }
+
         if (this.preset === "ffa") {
             // default in api
         } else if (this.preset === "shortest") {
@@ -337,10 +345,9 @@ var app = new Vue({
                 "show_anonymous": true,
             };
         } else {
-            if (this.preset !== "" && this.preset !== "personal") {
+            if (this.preset !== "personal") {
                 alert("Invalid preset, defaulting to 'Personal'");
             }
-            this.preset = "personal";
             args = {
                 "sort_mode": "start",
                 "sort_asc": false,

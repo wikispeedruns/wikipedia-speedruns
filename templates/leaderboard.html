@@ -23,19 +23,29 @@
         </p>
 
         <div class="card">
-            <div class="card-body">
-
+            <div class="card-header pt-3">
 
                 <h4>Prompt [[prompt.prompt_id || ""]]</h4>
 
+                <h6 v-if="available">
+                    <strong>[[prompt.start]]</strong> to <strong v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>
+                </h6>
 
+                <p>[[numRuns]] total runs</p>
+            </div>
 
-                <div class="my-4">
-                    <h5>Leaderboard Options</h5>
+            <div class="card-body">
+                <div class="mb-4">
 
-                    <p>
-                    Presets
-                    </p>
+                    <details :open="preset" v-cloak>
+
+                    <summary>
+                        Leaderboard Options (Current:
+                        <strong v-if="preset === 'personal'">Personal)</strong>
+                        <strong v-if="preset === 'ffa'">Fastest First Attempt)</strong>
+                        <strong v-if="preset === 'shortest'">Shortest Path)</strong>
+                    </summary>
+
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" id="personal" value="personal" v-model="preset" />
                         <label class="form-check-label" for="personal">Personal (default) </label>
@@ -59,20 +69,19 @@
 
                     <!--Description of leaderboard -->
 
+                    <div class="my-2">
+                        <p v-if="preset === 'personal'">
+                            A list of all your runs, including unfinished ones, sorted by recency.
+                        </p>
+                        <p v-if="preset === 'ffa'">
+                            Leaderboards of the fastest times, where only a user's first attempt is counted.
+                        </p>
+                        <p v-if="preset === 'shortest'">
+                            Leaderboards of the shortest paths, where a user's shortest path found is shown.
+                        </p>
+                    </details>
 
                 </div>
-
-
-
-
-                <p>
-                    <h6 v-if="available">
-                        <strong>[[prompt.start]]</strong> to <strong v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>
-                    </h6>
-                </p>
-                <p>[[numRuns]] total runs</p>
-
-
 
                 <div class="table-responsive">
                     <table v-if="runs.length > 0" class="table table-hover">

@@ -146,16 +146,26 @@ def get_leaderboard_runs(
             conditions.append("first_runs.run_id IS NOT NULL")
 
         elif user_run_mode == 'shortest':
+
+            # This is gross so let me explain this
+            # Basically, we want to figure out which (finished) run for a user is his shortest.
+            #   - In terms of colums, this is the MIN(finished, path_length)
+            #   - Instead of grouping by user (+ name for lobbies), we use a window function to calculate
+            #     the order of shortest path for all runs for each user
+            #   - Then in the outer query we only select the first.
+            # see https://stackoverflow.com/questions/7745609/sql-select-only-rows-with-max-value-on-a-column
+            # and https://stackoverflow.com/questions/3800551/select-first-row-in-each-group-by-group
             group_subquery = f"""
-                LEFT JOIN (
-                    SELECT run_id, MAX(JSON_LENGTH(`path`, '$.path')) AS path_length
+                JOIN (
+                    SELECT run_id,
+                    ROW_NUMBER() OVER (PARTITION BY user_id {", `name`" if base_table == "lobby_runs" else ""}
+                                    ORDER BY NOT finished, JSON_LENGTH(lobby_runs.`path`, '$.path')) AS shortest_path_rank
                     FROM {base_table}
                     WHERE prompt_id=%(prompt_id)s {"AND lobby_id=%(lobby_id)s" if base_table == "lobby_runs" else ""}
-                    GROUP BY user_id {", name" if base_table == "lobby_runs" else ""}
-                ) AS shortest_runs
-                ON shortest_runs.run_id = runs.run_id
+                ) AS grouped_runs
+                ON grouped_runs.run_id = runs.run_id
                 """
-            conditions.append("shortest_runs.run_id IS NOT NULL")
+            conditions.append("grouped_runs.shortest_path_rank = 1")
 
         elif user_run_mode == 'all':
             group_subquery = ""
