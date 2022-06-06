@@ -240,7 +240,12 @@ def get_leaderboard_runs(
         for run in results:
             numRuns = run["numRuns"]
             del run['numRuns']
-            run['path'] = json.loads(run['path'])['path']
+
+            # TODO temp fix
+            if (run['path'] is None):
+                run['path'] = []
+            else:
+                run['path'] = json.loads(run['path'])['path']
 
         return {
             "numRuns": numRuns,
