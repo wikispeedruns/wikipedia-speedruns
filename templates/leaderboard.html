@@ -9,14 +9,6 @@
 <!-- Some nice x minutes ago tags -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
 
-<script>
-    console.log(moment("20111031", "YYYYMMDD").fromNow()); // 11 years ago
-    moment("20120620", "YYYYMMDD").fromNow(); // 10 years ago
-    moment().startOf('day').fromNow();        // 15 hours ago
-    moment().endOf('day').fromNow();          // in 9 hours
-    moment().startOf('hour').fromNow();       // 16 minutes ago
-</script>
-
 <script defer type="module" src="{{url_for('static', filename='js/leaderboard.js') }}"></script>
 {% endblock %}
 
