@@ -159,7 +159,7 @@ def get_leaderboard_runs(
                 JOIN (
                     SELECT run_id,
                     ROW_NUMBER() OVER (PARTITION BY user_id {", `name`" if base_table == "lobby_runs" else ""}
-                                    ORDER BY NOT finished, JSON_LENGTH(lobby_runs.`path`, '$.path')) AS shortest_path_rank
+                                    ORDER BY NOT finished, JSON_LENGTH({base_table}.`path`, '$.path')) AS shortest_path_rank
                     FROM {base_table}
                     WHERE prompt_id=%(prompt_id)s {"AND lobby_id=%(lobby_id)s" if base_table == "lobby_runs" else ""}
                 ) AS grouped_runs
@@ -179,7 +179,7 @@ def get_leaderboard_runs(
     if (sort_mode == 'time'):
         sort_exp = 'play_time'
     elif (sort_mode == 'length'):
-        sort_exp = 'path_length' # note this relies on the select aliasing a path_length column below
+        sort_exp = "JSON_LENGTH(runs.`path`, '$.path')" # note this relies on the select aliasing a path_length column below
     elif (sort_mode == 'start'):
         sort_exp = 'start_time'
     else:
@@ -217,7 +217,7 @@ def get_leaderboard_runs(
         SELECT
             runs.*,
             users.username,
-            ROW_NUMBER() OVER () AS `rank`,
+            ROW_NUMBER() OVER (ORDER BY {sort_exp}) AS `rank`,
             COUNT(*) OVER () AS numRuns,
             JSON_LENGTH(runs.`path`, '$.path') AS path_length
         FROM {base_table} AS runs

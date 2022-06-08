@@ -41,24 +41,24 @@
 
                     <summary>
                         Leaderboard Options (Current:
-                        <strong v-if="preset === 'personal'">Personal)</strong>
+                        <strong v-if="preset === 'personal'">Personal History)</strong>
                         <strong v-if="preset === 'ffa'">Fastest First Attempt)</strong>
                         <strong v-if="preset === 'shortest'">Shortest Path)</strong>
                     </summary>
 
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" id="personal" value="personal" v-model="preset" />
-                        <label class="form-check-label" for="personal">Personal (default) </label>
+                        <label class="form-check-label" for="personal">Personal History (default) </label>
                     </div>
 
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" id="ffa" value="ffa" v-model="preset" />
-                        <label class="form-check-label" for="ffa">Fastest First Attempt </label>
+                        <label class="form-check-label" for="ffa">Fastest First Attempt (Global) </label>
                     </div>
 
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" id="shortest" value="shortest" v-model="preset" />
-                        <label class="form-check-label" for="shortest">Shortest Path</label>
+                        <label class="form-check-label" for="shortest">Shortest Path (Global) </label>
                     </div>
 
 
