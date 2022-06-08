@@ -119,6 +119,25 @@ def get_lobby_prompts(lobby_id: int, prompt_id: Optional[int]=None ) -> List[Lob
         cursor.execute(query, query_args)
         return cursor.fetchall()
 
+def delete_lobby_prompts(lobby_id: int, prompts: List[int]) -> bool:
+    tables = ['lobby_runs', 'lobby_prompts']
+
+    query_start = 'DELETE FROM'
+    query_body = 'WHERE lobby_id=%(lobby_id)s AND prompt_id IN %(prompts)s'
+    
+    query_args = {
+        "lobby_id": lobby_id,
+        "prompts": tuple(prompts)
+    }
+    
+    db = get_db()
+    with db.cursor() as cursor:
+        for table in tables:
+            query = f'{query_start} {table} {query_body}'
+            cursor.execute(query, query_args)
+        db.commit()
+
+        return True
 
 # Lobby user management
 

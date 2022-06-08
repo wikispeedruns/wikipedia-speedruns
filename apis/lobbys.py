@@ -127,6 +127,20 @@ def get_lobby_prompts(lobby_id, prompt_id):
 
         return jsonify(prompts[0])
 
+@lobby_api.delete("/<int:lobby_id>/prompts")
+@check_user
+@check_request_json({"prompts": list})
+def delete_lobby_prompts(lobby_id):
+    user_id = session.get("user_id")
+    user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
+
+    if user_info is None or not user_info["owner"]:
+        return "Only the owner can delete prompts from this lobby", 401
+
+    prompts = request.json["prompts"]
+
+    lobbys.delete_lobby_prompts(lobby_id, prompts)
+    return "Prompts Deleted!", 200
 
 # Runs
 @lobby_api.get("/<int:lobby_id>/prompts/<int:prompt_id>/runs")
