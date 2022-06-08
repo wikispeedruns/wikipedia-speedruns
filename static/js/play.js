@@ -70,6 +70,7 @@ let app = new Vue({
 
         startTime: null,     // The start time of run (ms elapsed since January 1, 1970)
         endTime: null,       // The end time of run (ms elapsed since January 1, 1970)
+        countdownTime: null,  // Time spent in countdown screen (seconds)
 
         elapsed: 0,             // Total time elapsed in ms (frontend)
         timerInterval: null,
@@ -78,8 +79,6 @@ let app = new Vue({
         isRunning: false,       // Whether the timer is running
         milliseconds: 0,        // Current ms since last pause (frontend)
         savedMilliseconds: 0,   // Cumulative pause times (frontend)
-
-        totalLoadTime: 0,    // Cumulative load time in seconds (backend)
 
         finished: false,     // Flag for whether a game has finished, used for rendering
         started: false,      // Flag for whether a game has started (countdown finished), used for rendering
@@ -163,8 +162,6 @@ let app = new Vue({
             this.startTimer();
 
             let loadTimeSeconds = loadTime / 1000;
-            this.totalLoadTime += loadTimeSeconds;
-
             this.currentArticle = page;
 
             if (this.path.length == 0 || this.path[this.path.length - 1]["article"] != page) {
@@ -176,6 +173,10 @@ let app = new Vue({
                     "loadTime": loadTimeSeconds
                 });
 
+                // Set first page timeReached if first page loaded after start() is called
+                if (this.path.length == 1 && this.started) {
+                    this.path[0]['timeReached'] = this.countdownTime;
+                }
 
                 // If the page's title matches that of the end article, finish the game, and submit the run
                 // Otherwise update partial run information
@@ -189,11 +190,13 @@ let app = new Vue({
         },
 
         async start() {
+            // Set first page timeReached if start() called after first page is loaded
+            if (this.path.length == 1) {
+                this.countdownTime = (Date.now() - this.startTime) / 1000;
+                this.path[0]['timeReached'] = this.countdownTime;
+            }
 
-            let countdownTime = (Date.now() - this.startTime) / 1000;
-            this.totalLoadTime = countdownTime;
-            this.path[0]['timeReached'] = countdownTime;
-
+            this.resetTimer();
             this.startTimer();
 
             this.timerInterval = setInterval(() => {
@@ -250,6 +253,12 @@ let app = new Vue({
             this.milliseconds = 0;
             this.isRunning = false;
         },
+
+        resetTimer() {
+            this.milliseconds = 0;
+            this.savedMilliseconds = 0;
+            this.offset = Date.now();
+        }
     }
 })
 
