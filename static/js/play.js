@@ -190,9 +190,10 @@ let app = new Vue({
         },
 
         async start() {
+            this.countdownTime = (Date.now() - this.startTime) / 1000;
+            
             // Set first page timeReached if start() called after first page is loaded
             if (this.path.length == 1) {
-                this.countdownTime = (Date.now() - this.startTime) / 1000;
                 this.path[0]['timeReached'] = this.countdownTime;
             }
 
