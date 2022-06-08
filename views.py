@@ -41,8 +41,7 @@ def get_archive_page():
     try:
         limit = int(request.args.get('limit', 20))
         offset = int(request.args.get('offset', 0))
-        sort_desc = request.args.get('sort_desc', "True") == "True"
-        return render_with_data('archive.html', limit=limit, offset=offset, sort_desc=sort_desc)
+        return render_with_data('archive.html', limit=limit, offset=offset)
     except ValueError:
         return "Page Not Found", 404
 

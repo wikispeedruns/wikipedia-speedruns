@@ -22,8 +22,8 @@
 
                     <table class="table table-hover">
                         <thead>
-                            <th scope="col"><a v-on:click="toggleSort('time')">Release Date <span v-html="sortButton('time')"></span></a></th>
-                            <th scope="col"><a v-on:click="toggleSort('prompt')">Prompt # <span v-html="sortButton('prompt')"></span></a></th>
+                            <th scope="col"><a v-on:click="toggleSort('time')">Release Date </a></th>
+                            <th scope="col"><a v-on:click="toggleSort('prompt')">Prompt # </a></th>
                             <th scope="col">Starting Article</th>
                             <th scope="col">Ending Article</th>
                             <th class="text-center" scope="col">Played</th>
@@ -48,14 +48,14 @@
 
             <div v-cloak class="card-footer text-center">
                 <a class="btn btn-outline-secondary" role="button"
-                    v-bind:href="'?limit=' + (limit) + '&offset=0' + '&sort_desc=' + (sort_desc)"
+                    v-bind:href="'?limit=' + (limit) + '&offset=0'"
                     v-bind:class="{invisible: page === 1}">
 
                     <i class="bi bi-chevron-double-left"></i>
                 </a>
 
                 <a class="btn btn-outline-secondary" role="button"
-                    v-bind:href="'?limit=' + limit + '&offset=' + (offset - limit) + '&sort_desc=' + (sort_desc)"
+                    v-bind:href="'?limit=' + limit + '&offset=' + (offset - limit)"
                     v-bind:class="{invisible: page === 1}">
 
                     <i class="bi bi-chevron-left" id="prev-page"></i>
@@ -64,14 +64,14 @@
                 <span>Page <strong>[[page]]</strong> of [[numPages]] </span>
 
                 <a class="btn btn-outline-secondary" role="button"
-                    v-bind:href="'?limit=' + limit + '&offset=' + (offset + limit) + '&sort_desc=' + (sort_desc)"
+                    v-bind:href="'?limit=' + limit + '&offset=' + (offset + limit)"
                     v-bind:class="{invisible: page === numPages}">
 
                     <i class="bi bi-chevron-right"></i>
                 </a>
 
                 <a class="btn btn-outline-secondary" role="button"
-                    v-bind:href="'?limit=' + (limit) + '&offset=' + ((numPages - 1) * limit) + '&sort_desc=' + (sort_desc)"
+                    v-bind:href="'?limit=' + (limit) + '&offset=' + ((numPages - 1) * limit)"
                     v-bind:class="{invisible: page === numPages}">
 
                     <i class="bi bi-chevron-double-right"></i>

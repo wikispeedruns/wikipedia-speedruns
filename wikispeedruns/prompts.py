@@ -188,7 +188,7 @@ def get_active_prompts(prompt_type: PromptType, user_id: Optional[int]=None,) ->
 
     return prompts
 
-def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, offset: int=0, limit: int=20, sort_desc: bool=True) -> Tuple[List[Prompt], int]:
+def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, offset: int=0, limit: int=20) -> Tuple[List[Prompt], int]:
     '''
     Get all prompts for archive, including currently active
     '''
