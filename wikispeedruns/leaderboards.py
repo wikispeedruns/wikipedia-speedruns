@@ -228,6 +228,7 @@ def get_leaderboard_runs(
         ORDER BY {sort_exp}
     ) AS runs
     WHERE {pagination_clause} OR {current_run_clause}
+    ORDER BY {sort_exp}
     """
 
     db = get_db()
