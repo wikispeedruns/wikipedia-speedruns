@@ -179,7 +179,7 @@ def get_leaderboard_runs(
     if (sort_mode == 'time'):
         sort_exp = 'play_time'
     elif (sort_mode == 'length'):
-        sort_exp = "JSON_LENGTH(runs.`path`, '$.path')" # note this relies on the select aliasing a path_length column below
+        sort_exp = "JSON_LENGTH(runs.`path`, '$.path'), play_time" # note this relies on the select aliasing a path_length column below
     elif (sort_mode == 'start'):
         sort_exp = 'start_time'
     else:
