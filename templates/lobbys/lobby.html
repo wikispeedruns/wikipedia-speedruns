@@ -11,6 +11,10 @@
 
 }
 
+.prompt-header h3 { 
+  display: inline;
+}
+
 #custom-tooltip {
     display: none;
     margin-left: 10px;
@@ -49,6 +53,9 @@ var app = new Vue({
                 "owner": null
             }
         },
+
+        editPrompts: false,
+        selectedPrompts: new Set(),
     },
 
 
@@ -70,6 +77,18 @@ var app = new Vue({
             setTimeout(function() {
                 document.getElementById("custom-tooltip").style.display = "none";
             }, 1500);
+        },
+
+        selectPrompt(prompt_id) {
+            if (this.selectedPrompts.has(prompt_id)) {
+                this.selectedPrompts.delete(prompt_id);
+            } else {
+                this.selectedPrompts.add(prompt_id);
+            }
+        },
+
+        clearSelectedPrompts() {
+            this.selectedPrompts.clear();
         },
 
         async getLobbyInfo() {
@@ -116,6 +135,20 @@ var app = new Vue({
                 "end": end
             });
 
+            this.getPrompts();
+        },
+
+        async deletePrompts() {
+            if (!confirm("Are you sure you want to delete the selected prompts and their runs?")) {
+               return; 
+            }
+
+            const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}/prompts`, "DELETE", {
+                "prompts": Array.from(this.selectedPrompts),
+            }); 
+
+            this.editPrompts = false;
+            this.clearSelectedPrompts();
             this.getPrompts();
         }
     }
@@ -184,8 +217,13 @@ var app = new Vue({
     </template>
 
 
-    <h3> Prompts </h3>
-
+    <div class="prompt-header">
+        <h3> Prompts </h3>
+        <template v-if="lobbyInfo.user.owner">
+            <a v-on:click="editPrompts = !editPrompts">(Edit)</a>
+        </template>
+    </div>
+    
     <div class="card">
         <div class="card-body">
             <table class="table table-hover">
@@ -205,9 +243,13 @@ var app = new Vue({
                         <td>[[prompt.end]]</td>
 
                         <td><a v-bind:href="'/lobby/' + lobbyInfo.lobby_id + '/leaderboard/' + prompt.prompt_id">Results</a></td>
+                        <td v-if="editPrompts">
+                            <input type="checkbox" @click="selectPrompt(prompt.prompt_id)">
+                        </td>
                     </tr>
                 </tbody>
             </table>
+            <input v-if="editPrompts" href="javascript:;" @click="deletePrompts" class="btn btn-danger" value="Delete Selected">
         </div>
     </div>
 
