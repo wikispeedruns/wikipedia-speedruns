@@ -21,14 +21,6 @@ async function getBackupPrompts()
     return resp["prompts"].filter(p => !p["active"]);
 }
 
-async function getTopUsers()
-{
-    const response = await fetch("/api/ratings");
-    const ratings = await response.json();
-
-    return ratings;
-}
-
 async function getMarathonPrompts()
 {
     const response = await fetch("/api/marathon/all");

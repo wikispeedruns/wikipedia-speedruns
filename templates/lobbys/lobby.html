@@ -242,7 +242,7 @@ var app = new Vue({
                         <td>[[prompt.start]]</td>
                         <td>[[prompt.end]]</td>
 
-                        <td><a v-bind:href="'/lobby/' + lobbyInfo.lobby_id + '/prompt/' + prompt.prompt_id">Results</a></td>
+                        <td><a v-bind:href="'/lobby/' + lobbyInfo.lobby_id + '/leaderboard/' + prompt.prompt_id">Results</a></td>
                         <td v-if="editPrompts">
                             <input type="checkbox" @click="selectPrompt(prompt.prompt_id)">
                         </td>

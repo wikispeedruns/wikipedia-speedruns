@@ -80,7 +80,7 @@
 
                                     <td class="text-center">
                                         <template v-if="prompt.played">
-                                            <a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a>
+                                            <a v-bind:href="'/leaderboard/' + prompt.prompt_id">Results</a>
                                         </template>
                                         <template v-else>
                                             <span title="Play this prompt to see the results!">-</span>
@@ -94,10 +94,10 @@
                         <p>Currently unavailable</p>
                     </template>
                 </div>
-                <div class="card-footer text-muted" v-if="loggedIn">
+                <div v-cloak class="card-footer text-muted" v-if="loggedIn === true">
                     Play the daily prompt to start/continue your streak! 🔥
                 </div>
-                <div class="card-footer text-muted" v-else>
+                <div v-cloak class="card-footer text-muted" v-else>
                     Log in to play this daily prompt and start your streak! 🔥
                 </div>
             </div>
@@ -123,7 +123,7 @@
                                 <td>[[prompt.start]]</td>
                                 <td class="text-center">
                                     <template v-if="prompt.played">
-                                        <a v-bind:href="'/prompt/' + prompt.prompt_id">Results</a>
+                                        <a v-bind:href="'/leaderboard/' + prompt.prompt_id">Results</a>
                                     </template>
                                     <template v-else>
                                         <span title="Play this prompt to see the results!">-</span>
