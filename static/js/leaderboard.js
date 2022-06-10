@@ -24,7 +24,7 @@ var LeaderboardRow = {
     data: function() {
         return {
             lobbyId: URL_LOBBY_ID,
-            momentString: moment(this.run.start_time).fromNow(),
+            momentString: moment.utc(this.run.start_time).fromNow(),
         }
     },
 
