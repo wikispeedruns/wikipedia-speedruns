@@ -248,6 +248,7 @@ def login():
     return "Logged in", 200
 
 
+
 @user_api.post("/logout")
 def logout():
     _logout_session()
@@ -288,6 +289,50 @@ def change_password():
         db.commit()
 
     return "Password Changed", 200
+
+
+
+@user_api.post("/change_username")
+@check_user
+def change_username():
+    '''
+    Given the old password and a new username, change the username
+    '''
+    get_query = "SELECT * FROM `users` WHERE `user_id`=%s"
+    update_query = "UPDATE `users` SET `username`=%s WHERE `user_id`=%s"
+    
+    #print(request.json)
+
+    if ("old_password" not in request.json or "new_username" not in request.json):
+        #print("Incomplete request")
+        return ("Incomplete request", 400)
+
+    id = session["user_id"]
+    old_password = request.json["old_password"]
+    new_username = request.json["new_username"]
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        
+        try:
+            # Query for user and check password
+            result = cursor.execute(get_query, (id, ))
+            user = cursor.fetchone()
+
+            if not passwords.check_password(user, old_password):
+                #print("Incorrect password")
+                return "Incorrect password", 401
+
+            cursor.execute(update_query, (new_username, id))
+            db.commit()
+        
+        except pymysql.IntegrityError:
+            print("dup username")
+            return (f'Username `{new_username}` already exists', 409)
+        except pymysql.Error as e:
+            return ("Unknown error", 500)
+
+    return "Username Changed", 200
 
 
 

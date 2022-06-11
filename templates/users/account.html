@@ -16,12 +16,25 @@
   <p>Here is some sample content!</p>
   <div class="list-group">
       <button type="button" class="list-group-item list-group-item-action" v-on:click="handleLogout">Log Out</button>
-      <a href="/reset/request" class="list-group-item list-group-item-action">Change your password</a>
-      <a href="#" class="list-group-item list-group-item-action">Change your email</a>
-      <a href="#" class="list-group-item list-group-item-action">Buy twitter</a>
-      <a href="#" class="list-group-item list-group-item-action">Populate nodules</a>
+      <button type="button" class="list-group-item list-group-item-action" v-on:click="load(`{{url_for('views.get_reset_request_page')}}`)">Change your password</button>
+      <a href="#" class="list-group-item list-group-item-action">Change your username</a>
   </div>
+
   <a>Email Confirmed: [[emailConfirmed]]</a>
+  
+  
+  <div id="username-change" class="py-3">
+    <div class="form-group">
+      <label for="username-password">Current password</label>
+      <input type="password" class="form-control" id="username-password">
+    </div>
+    <div class="form-group">
+      <label for="new-username">New username</label>
+      <input type="text" class="form-control" id="new-username">
+    </div>
+    <small class="text-danger">[[feedbackMsg]]</small>
+    <button class="btn btn-primary my-2" v-on:click="submitNewUsername">Submit</button>
+  </div>
 </div>
 
 {% endblock %}
