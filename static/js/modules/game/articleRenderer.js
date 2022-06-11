@@ -5,15 +5,20 @@ export class ArticleRenderer {
     /* frame: DOM element (i.e. through getElementById) to render article in
      * pageCallback: Called upon loading an article, should expect new page and load time
      */
-    constructor(frame, pageCallback, mouseEnter, mouseLeave) {
+    constructor(frame, pageCallback, mouseEnter, mouseLeave, loadCallback=null) {
         this.frame = frame;
         this.pageCallback = pageCallback;
+        this.loadCallback = loadCallback;
         this.mouseEnter = mouseEnter;
         this.mouseLeave = mouseLeave;
     }
 
     async loadPage(page) {
         try {
+            if (this.loadCallback) {
+                this.loadCallback();
+            }
+            
             const isMobile = window.screen.width < 768;
             const startTime = Date.now();
             const body = await getArticle(page, isMobile);
@@ -32,10 +37,12 @@ export class ArticleRenderer {
             // disableFindableLinks(this.frame);
             stripNamespaceLinks(this.frame);
 
-
+            this.frame.classList.add("wiki-insert");
             this.frame.querySelectorAll("a, area").forEach((el) => {
                 // Arrow function to prevent this from being overwritten
                 el.onclick = (e) => this.handleWikipediaLink(e);
+                el.removeAttribute("title");
+
                 if (window.screen.width >= 768 && el.hasAttribute("href") && el.getAttribute("href").startsWith("/wiki/")) {
                     el.onmouseenter = this.mouseEnter;
                     el.onmouseleave = this.mouseLeave;

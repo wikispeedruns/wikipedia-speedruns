@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+<!-- wiki desktop stylesheet -->
+<link rel="stylesheet" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}" media="(min-width: 768px)">
+<link rel="stylesheet" href="{{url_for('static', filename='stylesheets/wikipedia-vec.css')}}" media="(min-width: 768px)">
+
+<!-- wiki mobile stylesheets -->
+<link rel="stylesheet" href="https://meta.wikimedia.org/api/rest_v1/data/css/mobile/base" media="screen and (max-width: 767px)">
+<link rel="stylesheet" href="https://en.wikipedia.org/api/rest_v1/data/css/mobile/site" media="screen and (max-width: 767px)">
+<link rel="stylesheet" href="https://meta.wikimedia.org/api/rest_v1/data/css/mobile/pcs" media="screen and (max-width: 767px)">
+
+<!-- Reuse play.js stylesheet -->
+<link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/play.css')}}">
+
+<!-- But use tutorial.js -->
+<script type="module" src="{{url_for('static', filename='js/tutorial.js')}}"></script>
+
+{% endblock %}
+
+{% block content %}
+
+<div id="app">
+<template v-cloak> <!--Top level v-cloak to hide stuff when loading vue-->
+    <page-preview ref="pagePreview"></page-preview>
+
+    <div id="main">
+        <div id="wikipedia-frame" class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output content"></div>
+        <div id="article-end-marker">
+            <hr class="mt-5">
+            <div class="text-center font-weight-light"><strong>- End of Article -</strong></div>
+            <hr class="mb-3">
+        </div>
+    </div>
+
+    <!-- Note, the v-if here is important, it prevents this from being rendered at all (rather than just displayed)
+         Most importantly the child tutorial component won't be created twice.
+    -->
+    <div v-if="!isMobile">
+        <div class="HUDwrapper HUDwrapper-fade container-xxl" >
+            <div class="HUD" id="time-box" style="width: 48% !important; height: 8rem;">
+                <div class="row flex-row m-0">
+                    <div class="col-sm-auto text-nowrap pe-8 pt-2">
+                        Goal Article<br><strong id="endarticle">[[endArticle]]
+                            <small id="timebox-preview" style="cursor: help;" :href="`/wiki/${endArticle}`" @mouseenter="showPreview" @mouseleave="hidePreview">
+                                ⓘ
+                            </small>
+
+                        </strong>
+
+                    </div>
+                    <div class="col-sm-auto text-nowrap pe-8 pt-2">
+                        Links clicked<br><strong>[[path.length - 1]]</strong>
+                    </div>
+                    <div class="col-sm-auto text-nowrap pe-8 pt-2">
+                        Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
+                    </div>
+                </div>
+                <div class="row flex-row m-0">
+                    <div class="col-lg-auto text-nowrap pe-8 py-2">
+                        Current Article<br><strong>[[currentArticle]]</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="HUD" id="tutorial" style="position:absolute; right: 0.75rem; width: 48% !important; height: 8rem;">
+                <div class="px-2 py-2" style="height: 100%">
+                    <tutorial
+                        v-bind:is-mobile="isMobile"
+                        v-bind:current-article="currentArticle"
+                        v-on:change-article="renderer.loadPage($event)"
+                    ></tutorial>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div v-if="isMobile">
+        <div class="HUDwrapper-mobile">
+            <div class="HUDwrapper-mobile-inner-container">
+                <div id="time-box">
+                Goal Article:
+                <strong id="endarticle">
+                    [[endArticle]]
+                    <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="showPreview">
+                        ⓘ
+                    </small>
+                </strong>
+
+                <br>
+                Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
+                <br>
+                Links clicked: <strong>[[path.length - 1]]</strong>
+
+                </div>
+
+                <hr>
+
+                <tutorial
+                    id="tutorial"
+                    v-bind:current-article="currentArticle"
+                    v-bind:is-mobile="isMobile"
+                    v-on:change-article="renderer.loadPage($event)"
+                ></tutorial>
+
+            </div>
+        </div>
+    </div>
+
+</template>
+</div>
+{% endblock %}

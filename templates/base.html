@@ -16,8 +16,9 @@
         </script>
 
         <!-- Vue -->
-        <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+        <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
 
+        <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 
         <!-- Wikispeedruns styling -->
         <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/main.css')}}">
@@ -50,7 +51,7 @@
                         <li v-if="isAdmin" class="nav-item">
                             <a class="nav-link active" v-bind:href="'/stats'">Stats</a>
                         </li>
-                        
+
                         <li v-if="isAdmin" class="nav-item">
                             <a class="nav-link active" v-bind:href="'/manage'">Manage</a>
                         </li>

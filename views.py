@@ -23,7 +23,7 @@ def render_with_data(template, **kwargs):
     # only use for rendering non-data front-end UI elements
     if "admin" in session and session["admin"]:
         data["admin"] = True
-        
+
     return render_template(template, data=data)
 
 # Front end pages
@@ -41,8 +41,7 @@ def get_archive_page():
     try:
         limit = int(request.args.get('limit', 20))
         offset = int(request.args.get('offset', 0))
-        sort_desc = request.args.get('sort_desc', "True") == "True"
-        return render_with_data('archive.html', limit=limit, offset=offset, sort_desc=sort_desc)
+        return render_with_data('archive.html', limit=limit, offset=offset)
     except ValueError:
         return "Page Not Found", 404
 
@@ -81,31 +80,6 @@ def get_login_page():
 def get_profile_page(username):
     return render_with_data('profile.html', profile_name=username)
 
-
-@views.route('/prompt/<id>', methods=['GET'])
-def get_prompt_page(id):
-    run_id = request.args.get('run_id', '')
-    page = request.args.get('page', 1)
-    sortMode = request.args.get('sort', 'time')
-    timeFilter = request.args.get('time_filter', 'all')
-
-    if int(page) < 1:
-        page = 1
-
-    if len(run_id) != 0:
-        return render_with_data('prompt.html', prompt_id=id, run_id=run_id, pg = page, sortMode=sortMode, timeFilter=timeFilter)
-    else:
-        return render_with_data('prompt.html', prompt_id=id, pg = page, sortMode=sortMode, timeFilter=timeFilter)
-
-
-@views.route('/play/<id>', methods=['GET'])
-def get_play_page(id):
-    return render_with_data('play.html', prompt_id=id)
-
-@views.route('/confirm/<token>', methods=['GET'])
-def get_confirm_page(token):
-    return render_with_data('users/confirm_email.html', token=token)
-
 @views.route('/reset/request', methods=['GET'])
 def get_reset_request_page():
     return render_with_data('users/reset_password_request.html')
@@ -114,9 +88,32 @@ def get_reset_request_page():
 def get_reset_page(id, token):
     return render_with_data('users/reset_password.html', id=id, token=token)
 
-@views.route('/error', methods=['GET'])
-def get_gen_error_page():
-    return render_with_data('users/generic_error.html')
+@views.route('/confirm/<token>', methods=['GET'])
+def get_confirm_page(token):
+    return render_with_data('users/confirm_email.html', token=token)
+
+# sprint pages
+@views.route('/play/tutorial', methods=['GET'])
+def get_tutorial_page():
+    return render_with_data('tutorial.html')
+
+@views.route('/play/<int:id>', methods=['GET'])
+def get_sprint_play_page(id):
+    return render_with_data('play.html', prompt_id=id)
+
+@views.route('/lobby/<int:lobby_id>/play/<int:prompt_id>', methods=['GET'])
+def get_lobby_play_page(lobby_id, prompt_id):
+    return render_with_data('play.html', lobby_id=lobby_id, prompt_id=prompt_id)
+
+
+# leaderboard(s)
+@views.route('/leaderboard/<prompt_id>', methods=['GET'])
+def get_leaderboard_page(prompt_id):
+    return render_with_data('leaderboard.html', prompt_id=prompt_id)
+
+@views.route('/lobby/<int:lobby_id>/leaderboard/<int:prompt_id>', methods=['GET'])
+def get_lobby_leaderboard_page(lobby_id, prompt_id):
+    return render_with_data('leaderboard.html', prompt_id=prompt_id, lobby_id=lobby_id)
 
 @views.route('/replay', methods=['GET'])
 def get_replay_page():
@@ -126,6 +123,25 @@ def get_replay_page():
 @views.route('/account', methods=['GET'])
 def get_user_account_page():
     return render_with_data('users/account.html')
+
+# Finish pages
+@views.route('/finish', methods=['GET'])
+def get_sprint_finish_page():
+    try:
+        run_id = int(request.args.get('run_id', -1))
+        played = request.args.get('played', False)
+        return render_with_data('play_finish.html', run_id=run_id, played=played)
+    except ValueError:
+        return "Page Not Found", 404
+
+@views.route('/lobby/<int:lobby_id>/finish', methods=['GET'])
+def get_lobby_finish_page(lobby_id):
+    try:
+        run_id = int(request.args.get('run_id', -1))
+        played = request.args.get('played', False)
+        return render_with_data('play_finish.html', run_id=run_id, lobby_id=lobby_id, played=played)
+    except ValueError:
+        return "Page Not Found", 404
 
 # Marathon pages
 @views.route('/play/marathon/<id>', methods=['GET'])
@@ -154,27 +170,11 @@ def get_lobby_page(lobby_id):
     else:
         return render_with_data('lobbys/join.html', lobby_id=lobby_id)
 
-@views.route('/lobby/<int:lobby_id>/play/<int:prompt_id>', methods=['GET'])
-def get_lobby_play_page(lobby_id, prompt_id):
-    return render_with_data('play.html', lobby_id=lobby_id, prompt_id=prompt_id)
 
-@views.route('/lobby/<int:lobby_id>/prompt/<int:prompt_id>', methods=['GET'])
-def get_lobby_prompt_page(lobby_id, prompt_id):
-    run_id = request.args.get('run_id')
-    page = request.args.get('page', 1)
-    sortMode = request.args.get('sort', 'time')
-
-    args = {
-        "lobby_id": lobby_id,
-        "prompt_id": prompt_id,
-        "pg": page,
-        "sortMode": sortMode,
-    }
-
-    if (run_id):
-        args["run_id"] = run_id
-
-    return render_with_data('prompt.html', **args)
+# Generator
+@views.route('/generator', methods=['GET'])
+def get_generator_page():
+    return render_with_data('generator.html')
 
 
 # Admin pages
@@ -197,3 +197,9 @@ def get_stats_page():
 @views.route('/labeler', methods=['GET'])
 def get_labeler_page():
     return render_with_data('admin/categoryLabeler.html')
+
+# Error pages
+@views.route('/error', methods=['GET'])
+def get_gen_error_page():
+    return render_with_data('users/generic_error.html')
+

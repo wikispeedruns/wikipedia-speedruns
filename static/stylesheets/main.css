@@ -6,10 +6,6 @@
     font-size: 40px;
 }
 
-.thumbcaption {
-    margin: 5px 5px;
-}
-
 a {
     text-decoration: none !important;
 }
@@ -46,13 +42,36 @@ a:hover, a:hover * {
 }
 
 .HUDwrapper {
-    position:fixed;
+    position: fixed;
     z-index: 1000;
-    width:auto !important;
     bottom: 0;
+
+    left: 0;
+    right: 0;
+
+    height: auto;
+    margin: 0 auto;
+    padding-bottom: 1rem;
+
+    pointer-events: none;
+}
+
+.HUDwrapper-fade {
+    background-image: linear-gradient(#ffffff00, #ffffffbb, #ffffffbb, #ffffff);
+}
+
+.HUD {
+    display: inline-block;
+    min-width: 40%;
+    width:auto;
     background-color: #F8F8F8;
-    margin-bottom: 15px;
     border: 2px solid #000000 !important;
+
+    height: auto;
+    top: 0rem;
+
+    overflow-y: hidden;
+    pointer-events: auto;
 }
 
 .HUDwrapper-mobile {
@@ -63,6 +82,9 @@ a:hover, a:hover * {
     left:0;
     background-color: #F8F8F8;
     border-top: 3px solid #000000 !important;
+
+    padding: 5px 10px;
+    font-size: 14px;
 }
 
 @media (max-width: 1200px) {
@@ -84,56 +106,14 @@ a:hover, a:hover * {
         display: none;
     }
 
-    .show-on-mobile {
-        display: block;
-    }
-
-    .show-on-desktop {
-        display: none;
-    }
-
     .content span > img {
         max-width: 100%;
         height: auto;
     }
 }
 
-@media (min-width: 768px) {
-    .show-on-mobile {
-        display: none;
-    }
-
-    .show-on-desktop {
-        display: block;
-    }
-
-    .tleft {
-        float: left;
-        margin: 15px 15px;
-        overflow: auto;
-        clear: left;
-    }
-
-    .tright {
-        float: right;
-        margin: 15px 15px;
-        overflow: auto;
-        clear: right;
-    }
-
-    .thumb {
-        font-size: 80%;
-        text-align: center;
-        border-style: solid;
-        border-width: 1px;
-        border-color: black;
-    }
-}
-
-@media (min-width: 500px) {
-    .l-col {
-        white-space: nowrap
-    }
+.l-col{
+    white-space: nowrap;
 }
 
 
@@ -141,11 +121,24 @@ a:hover, a:hover * {
     font-weight: bold !important;
 }
 
-.table td.fit, 
+.table td.fit,
 .table th.fit {
     white-space: nowrap;
     width: 1%;
 }
+
+
+summary {
+    margin: -.5em -.5em 0;
+    padding: .5em;
+}
+
+
+details[open] summary {
+    border-bottom: 1px solid #aaa;
+    margin-bottom: .5em;
+}
+
 
 [v-cloak] { display: none }
 

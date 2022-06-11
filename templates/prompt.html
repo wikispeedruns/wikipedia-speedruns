@@ -32,44 +32,47 @@
                 </p>
                 <p>[[runs.length]] total runs</p>
 
-                <table v-if="runs.length > 0" class="table table-hover">
-                    <thead>
-                        <th scope="col">Rank</th>
-                        <th scope="col">Name</th>
-                        <th class="l-col" scope="col"><a v-on:click="toggleSort('time')">Time <span v-html="sortStatus('time')"></span></a></th>
-                        <th class="l-col" scope="col"><a v-on:click="toggleSort('path')">Links <span v-html="sortStatus('path')"></span></a></th>
-                        <th scope="col">Path</th>
-                    </thead>
-                    <tbody>
-                        <!-- See this https://v2.vuejs.org/v2/guide/components.html?redirect=true#DOM-Template-Parsing-Caveats -->
-                        <tr is="leaderboard-row"
-                            v-if="currentRunPosition === -1"
-                            v-bind:run="currentRun"
-                            v-bind:rank="currentRunRank"
-                        ></tr>
+                <div class="table-responsive">
+                    <table v-if="runs.length > 0" class="table table-hover">
+                        <thead>
+                            <th scope="col">Rank</th>
+                            <th scope="col">Name</th>
+                            <th class="l-col" scope="col"><a v-on:click="toggleSort('time')">Time <span v-html="sortStatus('time')"></span></a></th>
+                            <th class="l-col" scope="col"><a v-on:click="toggleSort('path')">Links <span v-html="sortStatus('path')"></span></a></th>
+                            <th scope="col">Path</th>
+                        </thead>
+                        <tbody>
+                            <!-- See this https://v2.vuejs.org/v2/guide/components.html?redirect=true#DOM-Template-Parsing-Caveats -->
+                            <tr is="leaderboard-row"
+                                v-if="currentRunPosition === -1"
+                                v-bind:run="currentRun"
+                                v-bind:rank="currentRunRank"
+                                v-bind:current-run-id="runId"
+                            ></tr>
 
-                        <tr v-if="currentRunPosition === -1"><td colspan="5">...</td></tr>
+                            <tr v-if="currentRunPosition === -1"><td colspan="5">...</td></tr>
 
-                        <tr is="leaderboard-row"
-                            v-for="(run, index) in renderedRuns"
-                            v-bind:key="run.run_id"
-                            v-bind:run="run"
-                            v-bind:rank="getRenderedRank(index)"
-                        ></tr>
+                            <tr is="leaderboard-row"
+                                v-for="(run, index) in renderedRuns"
+                                v-bind:key="run.run_id"
+                                v-bind:run="run"
+                                v-bind:rank="getRenderedRank(index)"
+                                v-bind:current-run-id="runId"
+                            ></tr>
 
-                        <tr v-if="currentRunPosition === 1"><td colspan="5">...</td></tr>
-                        <tr is="leaderboard-row"
-                            v-if="currentRunPosition === 1"
-                            v-bind:run="currentRun"
-                            v-bind:rank="currentRunRank"
-                        ></tr>
+                            <tr v-if="currentRunPosition === 1"><td colspan="5">...</td></tr>
+                            <tr is="leaderboard-row"
+                                v-if="currentRunPosition === 1"
+                                v-bind:run="currentRun"
+                                v-bind:rank="currentRunRank"
+                                v-bind:current-run-id="runId"
+                            ></tr>
 
-                    </tbody>
-                </table>
-
-                <p class="my-4" v-else>This prompt currently doesn't have any runs. <span v-if="available">Be the first to play it! <a v-bind:href="'/play/' + getPromptID()">Play</a></span></p>
-
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
             <div v-cloak class="card-footer text-center">
                 <button class="btn btn-outline-secondary"
                     v-on:click="buildNewLink(1)"

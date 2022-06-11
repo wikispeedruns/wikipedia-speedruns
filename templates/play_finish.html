@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+<!-- play.js stylesheet -->
+<link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/play.css')}}">
+<script type="module" src="{{url_for('static', filename='js/play_finish.js')}}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+<style>
+    [v-cloak] { display: none }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div id="app">
+<template v-cloak> <!--Top level v-cloak to hide stuff when loading vue-->
+    <div v-cloak class="text-left">
+        <div v-if="played">
+            <p><h4>You found it!</h4></p>
+            <p v-if="loggedIn">Your run was submitted to the leaderboard.</p>
+            <p v-else>You are not logged in, but your run has been saved locally. Log in to upload your runs to the leaderboard!</p>
+            <p><h4>Here's how you did:</h4></p>
+        </div>
+        <div class="card md">
+            <div class="card-body">
+                <p><h4><strong class="font-italic">"[[startArticle]]"</strong> to <strong class="font-italic">"[[endArticle]]"</strong></h4></p>
+                <p>Time: <strong>[[playTime.toFixed(3)]] </strong>Seconds</p>
+                <p>Number of links visited: <strong>[[path.length-1]]</strong></p>
+                <p>The path you took: <br>[[path]]</p>
+
+                <div class="row py-0" v-if="!lobbyId" >
+                    <div class="button-tooltip-container col-auto py-2">
+                        <button @click="copyResults" class="share-btn btn-1 btn-1c"><i class="bi bi-share"></i> Share Run Summary</button>
+                        <span id="custom-tooltip" ref="shareTooltip">Copied results to clipboard!</span>
+                    </div>
+                    <div class="button-tooltip-container col-auto py-2">
+                        <button @click="copyPath" class="share-btn btn-1 btn-1c"><i class="bi bi-share"></i> Share Path</button>
+                        <span id="custom-tooltip-path" ref="shareTooltip">Copied results to clipboard!</span>
+                    </div>
+                </div>
+
+                <div v-if="lobbyId" class="py-3"><button @click="goToLobbyLeaderboard" class="btn btn-outline-secondary">See the lobby leaderboard</button></div>
+                <div v-else><a @click="goToLeaderboard" class="btn btn-outline-secondary" role="button">See the leaderboard</a></div>
+
+                <div v-if="lobbyId"><button @click="goToLobby" class="btn btn-outline-secondary">Return to lobby</button></div>
+                <div v-else class="py-3"><button @click="home" class="btn btn-outline-secondary">Return to home page</button></div>
+            </div>
+        </div>
+    </div>
+</template>
+</div>
+{% endblock %}

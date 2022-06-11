@@ -3,7 +3,7 @@ import { serverData } from "./modules/serverData.js";
 import { getArticleSummary } from "./modules/wikipediaAPI/util.js";
 import { submitRun, saveRun, loadRun, removeSave } from "./modules/game/marathon/runs.js";
 
-import { CountdownTimer } from "./modules/game/marathon/countdown.js";
+import { CountdownTimer } from "./modules/game/countdown.js";
 import { MarathonHelp } from "./modules/game/marathon/help.js";
 import { FinishPage } from "./modules/game/marathon/finish.js";
 import { ArticleRenderer } from "./modules/game/articleRenderer.js";
@@ -60,13 +60,8 @@ let app = new Vue({
         reachedstop: false,  //This variable only gets flipped once, its to prevent the stop box from showing up everytime the page is loaded
         saved: false,
 
-        renderer: null,
-        previewContent: null,
-
-        eventTimestamp: null,
-        eventType: null,
-        eventX: 0,
-        eventY: 0
+        expandedTimebox: true, 
+        isMobile: false
     },
 
     computed: {
@@ -90,6 +85,8 @@ let app = new Vue({
 
 
     mounted: async function() {
+        this.isMobile = window.screen.width < 768;
+
         this.loggedIn = "username" in serverData;
         this.promptId = PROMPT_ID;
 
@@ -147,7 +144,7 @@ let app = new Vue({
                 this.path.push(page);
                 this.clicksRemaining -= 1;
             }
-            
+
             //this.path.push(page);
             this.currentArticle = page;
 
@@ -165,7 +162,7 @@ let app = new Vue({
                     this.visitedCheckpoints.push(page);
                 }
             }
-            
+
             if (hitcheckpoint) {
                 let el = this.checkpoints.shift()
                 console.log(el)
@@ -176,6 +173,7 @@ let app = new Vue({
                 if (!this.reachedstop && this.checkpointMarkReached) {
                     this.showStop = true
                     this.reachedstop = true
+                    this.expandedTimebox = true
                 }
 
             } else if (this.clicksRemaining === 0) {
@@ -234,34 +232,15 @@ let app = new Vue({
             }
 
             removeSave(PROMPT_ID);
-        
+
         },
 
         showPreview: function(e) {
-            this.eventTimestamp = e.timeStamp;
-            this.eventType = e.type;
-            this.eventX = e.clientX;
-            this.eventY = e.clientY;
-            const href = e.currentTarget.getAttribute("href");
-            const title = href.split('/wiki/').pop();
-            const promises = [ getArticleSummary(title) ];
-            if (e.type !== "click") {
-                promises.push(new Promise(resolve => setTimeout(resolve, 600)));
-            }
-            // const promise1 = getArticleSummary(title);
-            // const promise2 = new Promise(resolve => setTimeout(resolve, 500));
-            Promise.all(promises).then((values) => {
-                if (e.timeStamp === this.eventTimestamp) {
-                    this.previewContent = values[0];
-                }
-            });
+            this.$refs.pagePreview.showPreview(e);
         },
-
-        hidePreview: function() {
-            this.eventTimestamp = null;
-            this.previewContent = null;
+        hidePreview: function(e) {
+            this.$refs.pagePreview.hidePreview(e);
         }
-
     }
 });
 
@@ -276,39 +255,39 @@ function conf() {
     });
     myConfetti({
         particleCount: 100,
-        spread: 90, 
-        startVelocity: 40, 
-        ticks: 70, 
-        zIndex: 9999999, 
+        spread: 90,
+        startVelocity: 40,
+        ticks: 70,
+        zIndex: 9999999,
         angle: 315,
-        origin: { x: 0, y: 0 } , 
+        origin: { x: 0, y: 0 } ,
     });
     myConfetti({
         particleCount: 100,
-        spread: 90, 
-        startVelocity: 40, 
-        ticks: 70, 
-        zIndex: 9999999, 
+        spread: 90,
+        startVelocity: 40,
+        ticks: 70,
+        zIndex: 9999999,
         angle: 225,
-        origin: { x: 1, y: 0 } , 
+        origin: { x: 1, y: 0 } ,
     });
     myConfetti({
         particleCount: 100,
-        spread: 90, 
-        startVelocity: 40, 
-        ticks: 70, 
-        zIndex: 9999999, 
+        spread: 90,
+        startVelocity: 40,
+        ticks: 70,
+        zIndex: 9999999,
         angle: 45,
-        origin: { x: 0, y: 1 } , 
+        origin: { x: 0, y: 1 } ,
     });
     myConfetti({
         particleCount: 100,
-        spread: 90, 
-        startVelocity: 40, 
-        ticks: 70, 
-        zIndex: 9999999, 
+        spread: 90,
+        startVelocity: 40,
+        ticks: 70,
+        zIndex: 9999999,
         angle: 135,
-        origin: { x: 1, y: 1 } , 
+        origin: { x: 1, y: 1 } ,
     });
 
 }

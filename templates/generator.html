@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script type="module">
+import { PromptGenerator } from "/static/js/modules/generator.js"
+
+let app = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    components: {
+        'prompt-generator': PromptGenerator,
+    },
+
+    data: {
+        start: "Start Article",
+        end: "End Article",
+
+    }
+
+});
+</script>
+{% endblock %}
+
+
+{% block content %}
+
+<div id ="app">
+    <h3>Prompt Generator</h3>
+
+    <div class="card" v-cloak>
+        <div class="card-body">
+            <div class="row" >
+
+                <div class="col-sm-6 py-3 text-center">
+                    <h4>[[start]]</h4>
+                </div>
+
+                <div class="col-sm-6 py-3 text-center" >
+                    <h4>[[end]]</h4>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-sm-6">
+
+                    <!-- Vue 3 this will be v-model -->
+                    <prompt-generator
+                        v-bind:start.sync="start"
+                        v-bind:end.sync="end"
+                    ></prompt-generator>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+    <h5><a id="about">About</a></h5>
+    <p>
+        This prompt generator chooses a start and end article based on a <a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a> of Wikipedia articles.
+        For more information, see our <a href="https://github.com/wikispeedruns/wikipedia-speedruns">github</a>.
+    </p>
+
+    <p>
+        This is still a work in progress.
+    </p>
+</div>
+
+
+
+{% endblock %}
