@@ -459,3 +459,14 @@ def reset_password():
 
     return "Password Changed", 200
 
+
+
+@user_api.delete("/delete_account")
+@check_user
+def delete_account():
+    """
+        Given the password and user_id, delete the account
+    """
+
+    return "Not implemented", 500
+

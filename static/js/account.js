@@ -1,16 +1,23 @@
 import { serverData } from "./modules/serverData.js";
 import { fetchJson } from "./modules/fetch.js";
+import { profileStatsTable } from "./modules/profileStats.js";
 
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
+
+    components: {
+        'profile-stats-table': profileStatsTable,
+    },
     
     data: {
         username: "",
         loggedIn: false,
         emailConfirmed: false,
         feedbackMsg: '',
+        confirmText: "Delete my account permanently!",
+        tab:'',
     },
 
     created: async function() {
@@ -46,6 +53,17 @@ var app = new Vue({
             this.emailConfirmed = await response.text();
         },
 
+        async verifyEmail(event) {
+            try {
+                const response = await fetchJson("/api/users/confirm_email_request", 'POST');
+                if (response.status === 200) {
+                    alert("Email verification request has been sent. ");
+                } 
+            } catch (e) {
+                alert(e);
+            }
+        },
+
         async submitNewUsername(event) {
             const body = {
                 'old_password' : document.getElementById("username-password").value,
@@ -67,6 +85,32 @@ var app = new Vue({
 
         async load(url) {
             window.location.href=url;
+        },
+
+        async deleteAccount(event) {
+
+            if (document.getElementById("confirm-text").value != this.confirmText) {
+                this.feedbackMsg = "Confirmation text does not match";
+                return;
+            }
+
+            const body = {
+                'old_password' : document.getElementById("deleteU-password").value
+            };
+
+            try {
+                /*
+                const response = await fetchJson("/api/users/delete_account", 'DELETE', body);
+                if (response.status === 200) {
+                    alert("Account has been deleted");
+                    await fetch("/api/users/logout");
+                    window.location.href = "/";
+                } 
+                this.feedbackMsg = await response.text()*/
+                this.feedbackMsg = "Not implemented"
+            } catch (e) {
+                console.log(e);
+            }
         }
     }
 

@@ -39,7 +39,7 @@
                     <span class="navbar-toggler-icon  align-baseline"><i class="bi bi-list"></i></span>
                 </button>
 
-                <div class="collapse navbar-collapse" id="navbarContent">
+                <div class="collapse navbar-collapse my-auto" id="navbarContent">
 
                     <ul class="navbar-nav ms-auto mb-2 mb-md-0">
 
@@ -56,12 +56,12 @@
                             <a class="nav-link active" v-bind:href="'/manage'">Manage</a>
                         </li>
 
-                        <li class="nav-item me-2">
+                        <li class="nav-item">
                             <a class="nav-link active" v-bind:href="'/profile/' + username">[[username]]</a>
                         </li>
 
-                        <li class="nav-item">
-                            <button class="btn btn-light" v-on:click="accountPage">Settings</button>
+                        <li class="nav-item align-middle my-auto">
+                            <button class="btn align-middle my-auto" style="background-color:transparent" v-on:click="accountPage"><i class="bi bi-gear"></i></button>
                         </li>
                     </template>
 

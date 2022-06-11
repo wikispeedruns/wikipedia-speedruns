@@ -10,7 +10,7 @@ from db import get_db
 profile_api = Blueprint("profiles", __name__, url_prefix="/api/profiles")
 
 
-@profile_api.get("/<username>/")
+@profile_api.get("/<username>")
 def get_user_info(username):
     '''
     Get the basic info for a user
