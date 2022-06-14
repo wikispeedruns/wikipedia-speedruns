@@ -11,7 +11,7 @@
 
 
 <div id="app">
-  <h1 class="mb-4">[[username]]</h1>
+  <h1 class="mb-4" v-cloak>[[username]]</h1>
   <hr class="mt-4">
 
   <div class="row justify-content-md-center py-4">
@@ -50,7 +50,7 @@
 
       <profile-stats-table v-show="tab=='basic-stats'"></profile-stats-table>
 
-      <div v-if="tab=='username'" class="card">
+      <div v-if="tab=='username'" class="card" v-cloak>
         <div class="card-body">      
           <div id="username-change" class="py-3">
             <div class="form-group">
@@ -67,7 +67,7 @@
         </div>
       </div>
 
-      <div v-if="tab=='deleteAccount'" class="card">
+      <div v-if="tab=='deleteAccount'" class="card" v-cloak>
         <div class="card-body"> 
 
           <div id="deleteAccount" class="py-3">

@@ -11,11 +11,23 @@ var profileStatsTable = {
                     val: "--"
                 },
                 totalratedruns: {
-                    field: "Total Runs",
+                    field: "Total Attempted Runs",
+                    val: "--"
+                },
+                totalfinishedruns: {
+                    field: "Total Completed Runs",
+                    val: "--"
+                },
+                promptsplayed: {
+                    field: "Prompts Attempted",
+                    val: "--"
+                },
+                winratio: {
+                    field: "Completion Ratio",
                     val: "--"
                 },
                 profileage: {
-                    field: "Member Since",
+                    field: "User Since",
                     val: "--"
                 },
             }
@@ -30,21 +42,23 @@ var profileStatsTable = {
 	methods: {
 
         async get_data() {
+        
+            try {
             let response = await fetch("/api/profiles/" + this.username + "/stats");
             const runs = await response.json(); 
         
             response = await fetch("/api/profiles/" + this.username);
             const user = await response.json(); 
         
-            this.update_data(runs, user);
-        },
+            this.basic_stats.username.val = this.username;
+            this.basic_stats.totalratedruns.val = runs['total_runs'];
+            this.basic_stats.promptsplayed.val = runs['total_prompts'];
+            this.basic_stats.totalfinishedruns.val = runs['total_completed_runs'];
+            this.basic_stats.winratio.val = String(parseInt(runs['total_completed_runs'])*100.0 / parseInt(runs['total_runs'])) + "%"
+            let date = new Date(user['join_date']);
+            this.basic_stats.profileage.val = date.toLocaleDateString();
 
-        update_data(runs, user) {
-            try {
-                this.basic_stats.username.val = this.username;
-                this.basic_stats.totalratedruns.val = runs['total_prompts'];
-                let date = new Date(user['join_date']);
-                this.basic_stats.profileage.val = date.toLocaleDateString();
+
             } catch (error) {
                 console.error(error);
                 //window.location.href = "/error";

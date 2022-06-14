@@ -50,6 +50,7 @@ def get_total_stats(username):
     SELECT
         users.user_id,
         COUNT(run_id) AS total_runs,
+        COUNT(case finished when 1 then 1 else null end) AS total_completed_runs,
         COUNT(DISTINCT prompt_id) as total_prompts
     FROM users
     LEFT JOIN sprint_runs ON sprint_runs.user_id=users.user_id
