@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 {% block head %}
 
+<!-- Some nice x minutes ago tags -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script type="text/javascript" src="{{url_for('static', filename='achievements/metadata.js')}}"></script>
 <script type="module" src="{{url_for('static', filename='js/profile.js')}}"></script>
+
 
 {% endblock %}
 
@@ -10,6 +14,12 @@
 
 <div id="app">
     <profile-stats></profile-stats>
+
+    <achievement-table class="py-4"
+        v-bind:list="list"
+        v-bind:achievements="testData"
+        v-bind:basepath="'{{url_for('static', filename='achievements/icons/')}}'"
+    ></achievement-table>
 </div>
 
 {% endblock %}
