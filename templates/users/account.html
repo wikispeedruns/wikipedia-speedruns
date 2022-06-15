@@ -2,6 +2,9 @@
 
 {% block head %}
 
+<!-- Some nice x minutes ago tags -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script type="text/javascript" src="{{url_for('static', filename='achievements/metadata.js')}}"></script>
 <!-- Account JS Code -->
 <script type="module" src="{{url_for('static', filename='js/account.js')}}"></script>
 
@@ -23,6 +26,7 @@
         <div class="card-body">
           <div class="list-group">
               <button type="button" class="list-group-item list-group-item-action" v-on:click="tab='basic-stats'">Basic Stats</button>
+              <button type="button" class="list-group-item list-group-item-action" v-on:click="tab='achievements'">Achievements</button>
           </div>
         </div>
       </div>
@@ -87,6 +91,12 @@
 
         </div>
       </div>
+
+      <achievement-table v-if="tab=='achievements'"
+        v-bind:list="list"
+        v-bind:achievements="testData"
+        v-bind:basepath="'{{url_for('static', filename='achievements/icons/')}}'"
+    ></achievement-table>
     </div>
   </div>
     
