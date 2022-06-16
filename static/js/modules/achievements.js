@@ -20,11 +20,11 @@ var achievement = {
 
     created: function () {
         if (!this.achieved) {
-            this.imgpath += 'lock.png'
+            this.imgpath += 'locked200px.png'
         } else if (this.img) {
             this.imgpath += this.img
         } else {
-            this.imgpath += 'test.jpg'
+            this.imgpath += 'achieved200px.png'
         }
 
         if (this.achieved) {
