@@ -1,4 +1,5 @@
 from typing import Tuple, Dict, Any, Optional, Callable, List
+
 import json
 
 test_data = {
@@ -21,7 +22,6 @@ test_data = {
     "user_id": 5,
     "username": "dan"
 }
-
 
 
 """
@@ -120,9 +120,103 @@ def taking_over_the_internet(single_run_data: Dict[str, Any], single_run_article
 def you_lost(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
     return sum(i >= 2 for i in list(single_run_article_map.values())) > 0, None, None
 
+def fastest_gun_alive(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    num_links = len(single_run_data["path"]) - 1
+    time_in_seconds = single_run_data["play_time"]
+    seconds_per_click = time_in_seconds / num_links
+    return seconds_per_click < 10, None, None
 
+def carthago_delenda_est(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    return "Third Punic War" in single_run_article_map and "Cato the Elder" in single_run_article_map, None, None
 
+def back_to_square_one(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    starting_article: str = single_run_data["path"][0]["article"]
+    return single_run_article_map[starting_article] >= 2, None, None
 
+def merseyside_derby(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    return "Liverpool F.C." in single_run_article_map and "Everton F.C." in single_run_article_map, None, None
+
+def the_matrix_trilogy(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    return "The Matrix (franchise)" in single_run_article_map and "Matrix (mathematics)" in single_run_article_map and "Toyota Matrix" in single_run_article_map, None, None
+
+def are_you_still_watching(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    path = single_run_data["path"]
+    achieved = False
+    for i in range(len(path) - 1):
+        time_spent = path[i+1]["timeReached"] - path[i]["timeReached"] - path[i+1]["loadTime"]
+        if time_spent >= 3600:
+            achieved = True
+    return achieved, None, None
+
+def avengers_assemble(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    article_set = {"Thor (Marvel Comics)", "Captain America", "Hulk", "Iron Man", "Black Widow (Marvel Comics)", "Hawkeye (Clint Barton)"}
+    achieved = True
+    for article in article_set:
+        if article not in single_run_article_map:
+            achieved = False
+    return achieved, None, None
+
+def high_roller(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    path = single_run_data["path"]
+    achieved = False
+    for i in range(len(path) - 1):
+        if path[i]["article"] == "Las Vegas" and path[i+1]["article"] == "Gambling":
+            achieved = True
+    return achieved, None, None
+
+def marathon(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    return len(single_run_article_map) >= 50, None, None
+
+def back_so_soon(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    count = 0
+    for article_name in single_run_article_map:
+        if article_name.startswith("Sack of Rome"):
+            count += 1
+    return count >= 3, None, None
+
+def what_a_mouthful(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    max_len = 0
+    for article_name in single_run_article_map:
+        max_len = max(max_len, len(article_name))
+    return max_len > 25, None, None
+
+def lightning_round(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    return single_run_data["play_time"] < 15, None, None
+
+def around_the_world_in_80_seconds(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    article_set = {"North America", "South America", "Asia", "Europe", "Africa", "Australia (continent)", "Antarctica"}
+    path = single_run_data["path"]
+
+    current_map: Dict[str, int] = {}
+    shortest_time = float("inf")
+    load_time_sum = 0.0
+    i, j, n = 0, 0, len(path)
+
+    while i < n:
+        while j < n and len(current_map) < len(article_set):
+            article = path[j]["article"]
+            if article in article_set:
+                if article in current_map:
+                    current_map[article] += 1
+                else:
+                    current_map[article] = 1
+            load_time_sum += path[j]["loadTime"]
+            j += 1
+
+        if len(current_map) == len(article_set):
+            shortest_time = min(shortest_time, 
+            path[j-1]["timeReached"] - path[i]["timeReached"] - load_time_sum + path[i]["loadTime"])
+        else:
+            break
+
+        article = path[i]["article"]
+        current_map[article] -= 1
+        if current_map[article] == 0:
+            del current_map[article]
+    
+    return shortest_time <= 80, None, None
+
+        
 
 
 """
@@ -139,11 +233,13 @@ General Process:
 
 def visit_45_25_times(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
     new_progress = json.loads(current_progress)
-    new_progress += "45 (number)" in single_run_article_map
+    if "45 (number)" in single_run_article_map:
+        new_progress += single_run_article_map["45 (number)"]
     return new_progress >= 25, new_progress, new_progress
 
 
 """Real Achievements"""
+
 
 def friends(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
     new_progress = json.loads(current_progress)
@@ -153,7 +249,17 @@ def friends(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, i
             new_progress[name] = True
     return len(new_progress) == 6, new_progress, len(new_progress)
 
+def land_of_the_free_home_of_the_brave(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    new_progress = json.loads(current_progress)
+    if "United States" in single_run_article_map:
+        new_progress += single_run_article_map["United States"]
+    return new_progress >= 50, min(new_progress, 50), min(new_progress, 50)
 
+def super_size_me(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    new_progress = json.loads(current_progress)
+    if "McDonald's" in single_run_article_map:
+        new_progress += single_run_article_map["McDonald's"]
+    return new_progress >= 10, min(new_progress, 10), min(new_progress, 10)
 
 
 """
@@ -176,6 +282,7 @@ def append_achievement(all_achievements: List[Dict[str, Any]], name: str, functi
     }
     all_achievements.append(entry)
 
+
 def place_all_achievements_in_list() -> List[Dict[str, Any]]:
     
     all_achievements: List[Dict[str, Any]] = []
@@ -185,8 +292,9 @@ def place_all_achievements_in_list() -> List[Dict[str, Any]]:
     append_achievement(all_achievements, "visit_46", visit_46, False, 1, "")
     append_achievement(all_achievements, "visit_food", visit_food, False, 1, "")
     append_achievement(all_achievements, "visit_45_twice", visit_45_twice, False, 1, "")
-    append_achievement(all_achievements, "you_lost", you_lost, False, 1, "")
     append_achievement(all_achievements, "visit_45_25_times", visit_45_25_times, True, 25, "0")
+
+    append_achievement(all_achievements, "you_lost", you_lost, False, 1, "")
     append_achievement(all_achievements, "friends", friends, True, 6, "{}")
 
     return all_achievements
