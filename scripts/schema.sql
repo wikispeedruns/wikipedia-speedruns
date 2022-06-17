@@ -181,7 +181,7 @@ CREATE TABLE IF NOT EXISTS `list_of_achievements` (
 CREATE TABLE IF NOT EXISTS `achievements` (
     `achievement_id` INT NOT NULL,
     `user_id` INT NOT NULL,
-    `time_achieved` VARCHAR(35) NOT NULL,
+    `time_achieved` TIMESTAMP(3) NOT NULL,
     PRIMARY KEY (`achievement_id`, `user_id`),
     FOREIGN KEY (`achievement_id`) REFERENCES list_of_achievements(`achievement_id`),
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)

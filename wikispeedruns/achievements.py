@@ -1,6 +1,13 @@
 from typing import List, Tuple, Dict, Any, Optional, Callable
 
-from achievement_functions import place_all_achievements_in_list
+import os
+import sys
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
+
+
+from wikispeedruns.achievement_functions import place_all_achievements_in_list
 
 import pymysql
 from pymysql.cursors import DictCursor
@@ -8,20 +15,30 @@ from pymysql.cursors import DictCursor
 import json
 
 
+actual_data = {
+    "end_time": "2022-05-27T10:22:25.446000",
+    "path": [
+      {
+        "article": "45 (number)",
+        "loadTime": 0.169,
+        "timeReached": 0.169
+      },
+      {
+        "article": "46 (number)",
+        "loadTime": 0.135,
+        "timeReached": 1.887
+      }
+    ],
+    "play_time": 1.583,
+    "run_id": 11631,
+    "start_time": "2022-05-27T10:22:23.559000",
+    "user_id": 5,
+    "username": "dan"
+}
+
 test_data_1 = {
     "end_time": "2022-05-27T10:22:25.446000",
-    "path": [
-      {
-        "article": "45 (number)",
-        "loadTime": 0.169,
-        "timeReached": 0.169
-      },
-      {
-        "article": "46 (number)",
-        "loadTime": 0.135,
-        "timeReached": 1.887
-      }
-    ],
+    "path": '{"path": [{"article": "45 (number)","loadTime": 0.169,"timeReached": 0.169},{"article": "46 (number)","loadTime": 0.135,"timeReached": 1.887}],"version": "2.1"}',
     "play_time": 1.583,
     "run_id": 11631,
     "start_time": "2022-05-27T10:22:23.559000",
@@ -29,78 +46,35 @@ test_data_1 = {
     "username": "dan"
 }
 
-test_data_2 = {
-    "end_time": "2022-05-27T10:22:25.446000",
-    "path": [
-      {
-        "article": "Jennifer Aniston",
-        "loadTime": 0.169,
-        "timeReached": 0.169
-      },
-      {
-        "article": "Courteney Cox",
-        "loadTime": 0.135,
-        "timeReached": 1.887
-      }
-    ],
-    "play_time": 1.583,
-    "run_id": 11631,
-    "start_time": "2022-05-27T10:22:23.559000",
-    "user_id": 3,
-    "username": "dan"
-}
+def version_2_1(test_data: Any) -> Dict[str, Any]:
+    path = json.loads(test_data["path"])
+    actual_data = dict.copy(test_data)
+    actual_data["path"] = path["path"]
+    return actual_data
 
-test_data_3 = {
-    "end_time": "2022-05-27T10:22:25.446000",
-    "path": [
-      {
-        "article": "Lisa Kudrow",
-        "loadTime": 0.169,
-        "timeReached": 0.169
-      },
-      {
-        "article": "Matt LeBlanc",
-        "loadTime": 0.135,
-        "timeReached": 1.887
-      }
-    ],
-    "play_time": 1.583,
-    "run_id": 11631,
-    "start_time": "2022-05-27T10:22:23.559000",
-    "user_id": 3,
-    "username": "dan"
-}
+def version_2_0(test_data: Any) -> Dict[str, Any]:
+    return test_data
 
-test_data_4 = {
-    "end_time": "2022-05-27T10:22:25.446000",
-    "path": [
-      {
-        "article": "Matthew Perry",
-        "loadTime": 0.169,
-        "timeReached": 0.169
-      },
-      {
-        "article": "David Schwimmer",
-        "loadTime": 0.135,
-        "timeReached": 1.887
-      },
-      {
-        "article": "45 (number)",
-        "loadTime": 0.169,
-        "timeReached": 0.169
-      },
-      {
-        "article": "46 (number)",
-        "loadTime": 0.135,
-        "timeReached": 1.887
-      }
-    ],
-    "play_time": 1.583,
-    "run_id": 11631,
-    "start_time": "2022-05-27T10:22:23.559000",
-    "user_id": 3,
-    "username": "dan"
-}
+def version_1_0(test_data: Any) -> Dict[str, Any]:
+    path = json.loads(test_data["path"])
+    actual_data = dict.copy(test_data)
+    actual_data["path"] = path["path"]
+    return actual_data
+
+def get_version_map():
+    return {
+        "1.0": version_1_0,
+        "2.0": version_2_0,
+        "2.1": version_2_1
+    }
+
+def convert_to_standard(test_data: Dict[str, Any]) -> Dict[str, Any]:
+    version_map = get_version_map()
+    path = json.loads(test_data["path"])
+    version = path["version"]
+    return version_map[version](test_data)
+
+
 
 
 
@@ -124,11 +98,10 @@ class Achievement():
         self.endgoal = endgoal
         self.default_progress = default_progress
 
-    def check_status(self, single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str = "") -> ReturnType:
+    def check_status(self, single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
         if current_progress == "":
             current_progress = self.default_progress
-        return self.check_function(single_run_data, single_run_article_map, current_progress)
-
+        return self.check_function(single_run_data, single_run_article_map, json.loads(current_progress))
 
 
 """
@@ -173,8 +146,9 @@ returns all the new_achievements by the user after new run (using get_new_achiev
 and makes updates to achievements database accordingly (using add_achievements_to_database)
 """
 def get_and_update_new_achievements(cursor: DictCursor, single_run_data: Dict[str, Any], achievements: Dict[int, Achievement]) -> List[int]:
-    new_achievements = get_new_achievements(cursor, single_run_data, achievements)
-    add_achievements_to_database(cursor, single_run_data["user_id"], single_run_data["end_time"], new_achievements)
+    actual_data = convert_to_standard(single_run_data)
+    new_achievements = get_new_achievements(cursor, actual_data, achievements)
+    add_achievements_to_database(cursor, actual_data["user_id"], actual_data["end_time"], new_achievements)
     return new_achievements
 
 
@@ -212,6 +186,13 @@ def get_new_achievements(cursor: DictCursor, single_run_data: Dict[str, Any], ac
     # loop through all achievement_id's
     for id in sorted(achievements):
         
+        # ignore achievements that are present in database but not present here
+        while j < len(already_achieved) and already_achieved[j] < id:
+            j += 1
+        while k < len(list_of_achievements_progress) and list_of_achievements_progress[k]["achievement_id"] < id:
+            k += 1
+        
+
         # if this id is present in already_achieved, skip it
         if j < len(already_achieved) and already_achieved[j] == id:
             j += 1
@@ -319,6 +300,13 @@ def get_all_achievements_and_progress(cursor: DictCursor, user_id: int, achievem
 
     for id in sorted(achievements):
 
+        # ignore achievements that are present in database but not present here
+        while j < len(already_achieved) and already_achieved[j]["achievement_id"] < id:
+            j += 1
+        while k < len(unachieved_multi_run_progress) and unachieved_multi_run_progress[k]["achievement_id"] < id:
+            k += 1
+        
+
         name = achievements[id].name
         entry = { "out_of": achievements[id].endgoal, "time_achieved": None }
         reached = 0
@@ -341,31 +329,37 @@ def get_all_achievements_and_progress(cursor: DictCursor, user_id: int, achievem
     return all_achievements      
 
 
-
 def main():
-    achievements = {}
+
+    config = json.load(open("config/default.json"))
+    try:
+        config.update(json.load(open("config/prod.json")))
+    except FileNotFoundError:
+        pass
 
     conn = pymysql.connect(
-        user="root",
-        host="localhost",
-        password="Catsbwr2@",
-        database="wikipedia_speedruns"
+        user=config["MYSQL_USER"],
+        host=config["MYSQL_HOST"],
+        password=config["MYSQL_PASSWORD"],
+        database=config["DATABASE"]
     )
+
+    achievements = {}
 
     with conn.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
 
         add_all_achievements(cursor, achievements)
 
-        # new_achievements = get_and_update_new_achievements(cursor, test_data_4, achievements)
+        # new_achievements = get_and_update_new_achievements(cursor, test_data_1, achievements)
         # for id in new_achievements:
         #     cursor.execute("SELECT name FROM list_of_achievements WHERE achievement_id = (%s)", (id, ))
         #     print(cursor.fetchone()["name"])
 
 
-        user = 3
-        all_achievements = get_all_achievements_and_progress(cursor, user, achievements)
-        print("user_id: ", user)
-        print(all_achievements)
+        # user = 3
+        # all_achievements = get_all_achievements_and_progress(cursor, user, achievements)
+        # print("user_id: ", user)
+        # print(all_achievements)
 
 
         conn.commit()
