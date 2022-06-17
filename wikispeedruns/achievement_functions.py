@@ -1,5 +1,4 @@
 from typing import Tuple, Dict, Any, Optional, Callable, List
-
 import json
 
 test_data = {
@@ -28,6 +27,7 @@ test_data = {
 TO ADD AN ACHIEVEMENT:
 1. Write its function satisfying the constraints below
 2. Write an append_achievement() statement for place_all_achievements_in_list(), passing in data accordingly
+
 """
 
 
@@ -274,15 +274,18 @@ Each dictionary has some information corresponding to the values
 1. "function": Callable function
 2. "name": str
 3. "is_multi_run_achievement": bool
-4. "endgoal": int
-5. "default_progress": str
+4. "is_time_dependent": bool
+5. "endgoal": int
+6. "default_progress": str
 """
 
-def append_achievement(all_achievements: List[Dict[str, Any]], name: str, function: AchievementFunction, is_multi_run_achievement: bool, endgoal: int = 1, default_progress: str = "0") -> None:
+def append_achievement(all_achievements: List[Dict[str, Any]], name: str, function: AchievementFunction, 
+is_multi_run_achievement: bool, is_time_dependent: bool, endgoal: int = 1, default_progress: str = "0") -> None:
     entry = {
         "name" : name,
         "function" : function,
         "is_multi_run_achievement" : is_multi_run_achievement,
+        "is_time_dependent": is_time_dependent,
         "endgoal" : endgoal,
         "default_progress" : default_progress
     }
@@ -294,48 +297,48 @@ def place_all_achievements_in_list() -> List[Dict[str, Any]]:
     all_achievements: List[Dict[str, Any]] = []
 
     # test achievements
-    append_achievement(all_achievements, "visit_30", visit_30, False)
-    append_achievement(all_achievements, "visit_45", visit_45, False)
-    append_achievement(all_achievements, "visit_46", visit_46, False)
-    append_achievement(all_achievements, "visit_food", visit_food, False)
-    append_achievement(all_achievements, "visit_45_twice", visit_45_twice, False)
-    append_achievement(all_achievements, "visit_45_25_times", visit_45_25_times, True, 25, "0")
+    append_achievement(all_achievements, "visit_30", visit_30, False, False)
+    append_achievement(all_achievements, "visit_45", visit_45, False, False)
+    append_achievement(all_achievements, "visit_46", visit_46, False, False)
+    append_achievement(all_achievements, "visit_food", visit_food, False, False)
+    append_achievement(all_achievements, "visit_45_twice", visit_45_twice, False, False)
+    append_achievement(all_achievements, "visit_45_25_times", visit_45_25_times, True, False, 25, "0")
 
 
     # real achievements
-    append_achievement(all_achievements, "meta", meta, False)
-    append_achievement(all_achievements, "bathroom_break", bathroom_break, False)
-    append_achievement(all_achievements, "luck_of_the_irish", luck_of_the_irish, False)
-    append_achievement(all_achievements, "all_roads_lead_to_rome", all_roads_lead_to_rome, False)
-    append_achievement(all_achievements, "time_is_money", time_is_money, False)
-    append_achievement(all_achievements, "heart_of_darkness", heart_of_darkness, False)
-    append_achievement(all_achievements, "the_birds_and_the_bees", the_birds_and_the_bees, False)
-    append_achievement(all_achievements, "emissionsgate", emissionsgate, False)
-    append_achievement(all_achievements, "taking_over_the_internet", taking_over_the_internet, False)
-    append_achievement(all_achievements, "jet_fuel_cant_melt_steel_beams", jet_fuel_cant_melt_steel_beams, False)
-    append_achievement(all_achievements, "i_am_not_a_crook", i_am_not_a_crook, False)
-    append_achievement(all_achievements, "this_is_sparta", this_is_sparta, False)
-    append_achievement(all_achievements, "mufasa_would_be_proud", mufasa_would_be_proud, False)
-    append_achievement(all_achievements, "how_bizarre", how_bizarre, False)
-    append_achievement(all_achievements, "gateway_to_the_world", gateway_to_the_world, False)
+    append_achievement(all_achievements, "meta", meta, False, False)
+    append_achievement(all_achievements, "bathroom_break", bathroom_break, False, False)
+    append_achievement(all_achievements, "luck_of_the_irish", luck_of_the_irish, False, False)
+    append_achievement(all_achievements, "all_roads_lead_to_rome", all_roads_lead_to_rome, False, False)
+    append_achievement(all_achievements, "time_is_money", time_is_money, False, False)
+    append_achievement(all_achievements, "heart_of_darkness", heart_of_darkness, False, False)
+    append_achievement(all_achievements, "the_birds_and_the_bees", the_birds_and_the_bees, False, False)
+    append_achievement(all_achievements, "emissionsgate", emissionsgate, False, False)
+    append_achievement(all_achievements, "taking_over_the_internet", taking_over_the_internet, False, False)
+    append_achievement(all_achievements, "jet_fuel_cant_melt_steel_beams", jet_fuel_cant_melt_steel_beams, False, False)
+    append_achievement(all_achievements, "i_am_not_a_crook", i_am_not_a_crook, False, False)
+    append_achievement(all_achievements, "this_is_sparta", this_is_sparta, False, False)
+    append_achievement(all_achievements, "mufasa_would_be_proud", mufasa_would_be_proud, False, False)
+    append_achievement(all_achievements, "how_bizarre", how_bizarre, False, False)
+    append_achievement(all_achievements, "gateway_to_the_world", gateway_to_the_world, False, False)
 
-    append_achievement(all_achievements, "you_lost", you_lost, False)
-    append_achievement(all_achievements, "fastest_gun_alive", fastest_gun_alive, False)
-    append_achievement(all_achievements, "carthago_delenda_est", carthago_delenda_est, False)
-    append_achievement(all_achievements, "back_to_square_one", back_to_square_one, False)
-    append_achievement(all_achievements, "merseyside_derby", merseyside_derby, False)
-    append_achievement(all_achievements, "the_matrix_trilogy", the_matrix_trilogy, False)
-    append_achievement(all_achievements, "are_you_still_watching", are_you_still_watching, False)
-    append_achievement(all_achievements, "avengers_assemble", avengers_assemble, False)
-    append_achievement(all_achievements, "high_roller", high_roller, False)
-    append_achievement(all_achievements, "marathon", marathon, False)
-    append_achievement(all_achievements, "back_so_soon", back_so_soon, False)
-    append_achievement(all_achievements, "what_a_mouthful", what_a_mouthful, False)
-    append_achievement(all_achievements, "lightning_round", lightning_round, False)
-    append_achievement(all_achievements, "around_the_world_in_80_seconds", around_the_world_in_80_seconds, False)
+    append_achievement(all_achievements, "you_lost", you_lost, False, False)
+    append_achievement(all_achievements, "fastest_gun_alive", fastest_gun_alive, False, True)
+    append_achievement(all_achievements, "carthago_delenda_est", carthago_delenda_est, False, False)
+    append_achievement(all_achievements, "back_to_square_one", back_to_square_one, False, False)
+    append_achievement(all_achievements, "merseyside_derby", merseyside_derby, False, False)
+    append_achievement(all_achievements, "the_matrix_trilogy", the_matrix_trilogy, False, False)
+    append_achievement(all_achievements, "are_you_still_watching", are_you_still_watching, False, True)
+    append_achievement(all_achievements, "avengers_assemble", avengers_assemble, False, False)
+    append_achievement(all_achievements, "high_roller", high_roller, False, False)
+    append_achievement(all_achievements, "marathon", marathon, False, False)
+    append_achievement(all_achievements, "back_so_soon", back_so_soon, False, False)
+    append_achievement(all_achievements, "what_a_mouthful", what_a_mouthful, False, False)
+    append_achievement(all_achievements, "lightning_round", lightning_round, False, True)
+    append_achievement(all_achievements, "around_the_world_in_80_seconds", around_the_world_in_80_seconds, False, True)
 
-    append_achievement(all_achievements, "friends", friends, True, 6, "{}")
-    append_achievement(all_achievements, "land_of_the_free_home_of_the_brave", land_of_the_free_home_of_the_brave, True, 50, "0")
-    append_achievement(all_achievements, "super_size_me", super_size_me, True, 10, "0")
+    append_achievement(all_achievements, "friends", friends, True, False, 6, "{}")
+    append_achievement(all_achievements, "land_of_the_free_home_of_the_brave", land_of_the_free_home_of_the_brave, True, False, 50, "0")
+    append_achievement(all_achievements, "super_size_me", super_size_me, True, False, 10, "0")
 
     return all_achievements

@@ -1,3 +1,4 @@
+from ast import Return
 from typing import List, Tuple, Dict, Any, Optional, Callable
 
 import os
@@ -15,7 +16,10 @@ from pymysql.cursors import DictCursor
 import json
 
 
-actual_data = {
+"""
+This is what data looks like after processed to be handled for achievements
+"""
+format_for_data = {
     "end_time": "2022-05-27T10:22:25.446000",
     "path": [
       {
@@ -29,6 +33,7 @@ actual_data = {
         "timeReached": 1.887
       }
     ],
+    "version": "2.1",
     "play_time": 1.583,
     "run_id": 11631,
     "start_time": "2022-05-27T10:22:23.559000",
@@ -36,6 +41,11 @@ actual_data = {
     "username": "dan"
 }
 
+
+
+"""
+This is what data might look like in the database
+"""
 test_data_1 = {
     "end_time": "2022-05-27T10:22:25.446000",
     "path": '{"path": [{"article": "45 (number)","loadTime": 0.169,"timeReached": 0.169},{"article": "46 (number)","loadTime": 0.135,"timeReached": 1.887}],"version": "2.1"}',
@@ -46,10 +56,12 @@ test_data_1 = {
     "username": "dan"
 }
 
+
 def version_2_1(test_data: Any) -> Dict[str, Any]:
     path = json.loads(test_data["path"])
     actual_data = dict.copy(test_data)
     actual_data["path"] = path["path"]
+    actual_data["version"] = path["version"]
     return actual_data
 
 def version_2_0(test_data: Any) -> Dict[str, Any]:
@@ -59,7 +71,9 @@ def version_1_0(test_data: Any) -> Dict[str, Any]:
     path = json.loads(test_data["path"])
     actual_data = dict.copy(test_data)
     actual_data["path"] = path["path"]
+    actual_data["version"] = path["version"]
     return actual_data
+
 
 def get_version_map():
     return {
@@ -68,12 +82,12 @@ def get_version_map():
         "2.1": version_2_1
     }
 
+
 def convert_to_standard(test_data: Dict[str, Any]) -> Dict[str, Any]:
     version_map = get_version_map()
     path = json.loads(test_data["path"])
     version = path["version"]
     return version_map[version](test_data)
-
 
 
 
@@ -91,17 +105,30 @@ endgoal: stores the endgoal for this achievement in progress
 default_progress: The value representing progress when no actual progress has been made (a definition of the data) * only useful for multiple run achievements
 """
 class Achievement():
-    def __init__(self, name: str, function: AchievementFunction, is_multi_run_achievement: bool, endgoal: int = 1, default_progress: str = "") -> None:
+
+    EMPTY_RETURN_TYPE: ReturnType = (False, None, None)
+
+    def __init__(self, name: str, function: AchievementFunction, is_multi_run_achievement: bool, is_time_dependent: bool,
+    endgoal: int = 1, default_progress: str = "") -> None:
         self.name = name
         self.check_function = function
         self.is_multi_run_achievement = is_multi_run_achievement
+        self.is_time_dependent = is_time_dependent
         self.endgoal = endgoal
         self.default_progress = default_progress
+    
+    def no_time_data(single_run_data: Dict[str, Any]) -> bool:
+        return single_run_data["play_time"] == 0
 
-    def check_status(self, single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> ReturnType:
+    def check_status(self, single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> Tuple[bool, ReturnType]:
         if current_progress == "":
             current_progress = self.default_progress
-        return self.check_function(single_run_data, single_run_article_map, json.loads(current_progress))
+        progress = json.loads(current_progress)
+
+        if self.is_time_dependent and self.no_time_data(single_run_data):
+            return False, self.EMPTY_RETURN_TYPE
+        else:
+            return True, self.check_function(single_run_data, single_run_article_map, progress)
 
 
 """
@@ -113,7 +140,8 @@ def add_all_achievements(cursor: DictCursor, achievements: Dict[int, Achievement
     list_of_achievements = place_all_achievements_in_list()
     for achievement in list_of_achievements:
         add_achievement(cursor, achievements, 
-        achievement["name"], achievement["function"], achievement["is_multi_run_achievement"], achievement["endgoal"], achievement["default_progress"])
+            achievement["name"], achievement["function"], achievement["is_multi_run_achievement"], 
+            achievement["is_time_dependent"], achievement["endgoal"], achievement["default_progress"])
 
 
 """
@@ -123,7 +151,8 @@ endgoal: the progress that will be shown when the achievement is complete (as a 
 default_progress: the progress that will be shown when no progress has been made
 """
 def add_achievement(cursor: DictCursor, achievements: Dict[int, Achievement], 
-name: str, function: AchievementFunction, is_multi_run_achievement: bool, endgoal: int = 1, default_progress: str = "") -> None:
+name: str, function: AchievementFunction, is_multi_run_achievement: bool, 
+is_time_dependent: bool, endgoal: int = 1, default_progress: str = "") -> None:
 
     # Inserts achievement into database if not present, otherwise makes no change
     num_rows = cursor.execute("SELECT achievement_id FROM list_of_achievements WHERE name = (%s)", (name, ))
@@ -137,7 +166,7 @@ name: str, function: AchievementFunction, is_multi_run_achievement: bool, endgoa
         id = row["achievement_id"]
 
     # Inserts achievement into achievements dictionary
-    achievements[id] = Achievement(name, function, is_multi_run_achievement, endgoal, default_progress)
+    achievements[id] = Achievement(name, function, is_multi_run_achievement, is_time_dependent, endgoal, default_progress)
 
 
 
@@ -145,10 +174,10 @@ name: str, function: AchievementFunction, is_multi_run_achievement: bool, endgoa
 returns all the new_achievements by the user after new run (using get_new_achievements)
 and makes updates to achievements database accordingly (using add_achievements_to_database)
 """
-def get_and_update_new_achievements(cursor: DictCursor, single_run_data: Dict[str, Any], achievements: Dict[int, Achievement]) -> List[int]:
-    actual_data = convert_to_standard(single_run_data)
-    new_achievements = get_new_achievements(cursor, actual_data, achievements)
-    add_achievements_to_database(cursor, actual_data["user_id"], actual_data["end_time"], new_achievements)
+def get_and_update_new_achievements(cursor: DictCursor, raw_run_data: Dict[str, Any], achievements: Dict[int, Achievement]) -> List[int]:
+    single_run_data = convert_to_standard(raw_run_data)
+    new_achievements = get_new_achievements(cursor, single_run_data, achievements)
+    add_achievements_to_database(cursor, single_run_data["user_id"], single_run_data["end_time"], new_achievements)
     return new_achievements
 
 
@@ -205,13 +234,20 @@ def get_new_achievements(cursor: DictCursor, single_run_data: Dict[str, Any], ac
             current_progress = list_of_achievements_progress[k]["progress"]
 
         # gets the new progress after considering the data
-        achieved, new_progress, new_progress_as_number = achievements[id].check_status(single_run_data, single_run_article_map, current_progress)
-        new_progress_as_string = json.dumps(new_progress)
+        changed, progress_data = achievements[id].check_status(single_run_data, single_run_article_map, current_progress)
+        achieved, new_progress, new_progress_as_number = progress_data
+
+
+        # if no changes were made, don't make any modifications
+        if not changed:
+            continue
+
 
         # for multi-run achievements:
         # updates progress status if it is already present in database
         # adds a new entry to the end otherwise as long as it is not empty progress
         if achievements[id].is_multi_run_achievement:
+            new_progress_as_string = json.dumps(new_progress)
             if present_in_database:
                 list_of_achievements_progress[k]["progress"] = new_progress_as_string
                 list_of_achievements_progress[k]["progress_as_number"] = new_progress_as_number

@@ -127,6 +127,7 @@ def historical_achievements(db_name):
         if val.lower() == "yes":
             break
         elif val.lower() == "no":
+            print("no changes were made")
             return
         else:
             print("This is not a valid format for (yes/no); try again")
