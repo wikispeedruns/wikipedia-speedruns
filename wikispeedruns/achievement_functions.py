@@ -23,20 +23,6 @@ test_data = {
 }
 
 
-"""
-TO ADD AN ACHIEVEMENT:
-1. Write its function satisfying the constraints below
-2. Write an append_achievement() statement for place_all_achievements_in_list(), passing in data accordingly
-
-"""
-
-
-"""
-TO REMOVE AN ACHIEVEMENT:
-1. Remove the append_achievement() statement for the function
-2. Make sure to run script to actually delete this achievement from database
-"""
-
 
 """
 *** Achievement Functions ***
@@ -54,11 +40,6 @@ Returns 3 values:
 
 ReturnType = Tuple[bool, Any, Optional[int]]
 AchievementFunction = Callable[[Dict[str, Any], Dict[str, int], str], ReturnType]
-
-
-"""
-*** Single Run Achievements ***
-"""
 
 
 """Test Achievements"""
@@ -228,15 +209,6 @@ def around_the_world_in_80_seconds(single_run_data: Dict[str, Any], single_run_a
     return shortest_time <= 80, None, None
 
         
-
-
-"""
-*** Multiple Run Achievements ***
-
-General Process:
-1. Make the updates needed for progress
-2. Return achieved (Boolean, based on data in progress)  +  the progress itself  +  the progress as a number
-"""
 
 
 """Test Achievements"""

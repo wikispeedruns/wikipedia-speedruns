@@ -17,7 +17,7 @@ import json
 
 
 """
-This is what data looks like after processed to be handled for achievements
+This is what data looks like after processing
 """
 test_data_1 = {
     "end_time": "2022-05-27T10:22:25.446000",
@@ -127,17 +127,13 @@ def convert_to_standard(test_data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 
-
 ReturnType = Tuple[bool, Any, Optional[int]]
 AchievementFunction = Callable[[Dict[str, Any], Dict[str, int], str], ReturnType]
 
+
+
 """
 *** Achievement Class ***
-
-function: the check function that defines an achievement; different formats depending on type of achievement
-is_multi_run_achievement: whether the achievement is a multiple run achievement
-endgoal: stores the endgoal for this achievement in progress
-default_progress: The value representing progress when no actual progress has been made (a definition of the data) * only useful for multiple run achievements
 """
 class Achievement():
 
@@ -167,7 +163,9 @@ class Achievement():
             return True, self.check_function(single_run_data, single_run_article_map, progress)
 
 
-
+"""
+Returns achievements dictionary for achievement information
+"""
 def get_achievements_info(cursor: DictCursor) -> Dict[int, Achievement]:
     list_of_achievements = place_all_achievements_in_list()
     achievements: Dict[int, Achievement] = {}
@@ -184,9 +182,7 @@ def get_achievements_info(cursor: DictCursor) -> Dict[int, Achievement]:
 
 
 """
-Adds all the achievements present in the function
-
-achievements: a dictionary mapping {achievement_id : achievement_object (defined in class above)}
+Adds all the achievements present in the achievement_functions
 """
 def add_all_achievements(cursor: DictCursor) -> None:
     list_of_achievements = place_all_achievements_in_list()
