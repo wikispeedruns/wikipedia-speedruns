@@ -22,58 +22,51 @@ DEFAULT_DB_NAME='wikipedia_speedruns'
 
 
 def remove_all_achievements_and_progress(cursor):
-    cursor.execute("DELETE FROM achievements")
     cursor.execute("DELETE FROM achievements_progress")
 
 
 def get_all_runs(cursor):
     query = """
-    SELECT `start_time`, `end_time`, `play_time`, `path`, `user_id` FROM sprint_runs
+    SELECT `start_time`, `end_time`, `play_time`, `path`, `user_id`, `run_id` FROM sprint_runs
     """
     cursor.execute(query)
     return list(cursor.fetchall())
 
 
-def place_in_database(cursor, already_achieved, achievements_progress):
-    
-    list = []
-    for key in already_achieved:
-        list.append(
-            {
-                "user_id": key[0],
-                "achievement_id": key[1],
-                "time_achieved": already_achieved[key]
-            }
-        )
-
-    query = """
-    INSERT INTO achievements (achievement_id, user_id, time_achieved) 
-    VALUES (%(achievement_id)s, %(user_id)s, %(time_achieved)s)
-    """
-    cursor.executemany(query, list)
-    list.clear()
-
+def place_in_database(cursor, achievements_progress):
+    achieved = []
+    not_achieved = []
     for key in achievements_progress:
-        list.append(
-            {   
-                "user_id": key[0],
-                "achievement_id": key[1],
-                "progress": achievements_progress[key]["progress"],
-                "progress_as_number": achievements_progress[key]["progress_as_number"],
-                "achieved": achievements_progress[key]["achieved"]
-            }
-        )
+        entry = {
+            "user_id": key[0],
+            "achievement_id": key[1],
+            "progress": achievements_progress[key]["progress"],
+            "progress_as_number": achievements_progress[key]["progress_as_number"],
+            "achieved": achievements_progress[key]["achieved"],
+            "time_achieved": achievements_progress[key]["time_achieved"]
+        }
+        if achievements_progress[key]["achieved"]:
+            achieved.append(entry)
+        else:
+            not_achieved.append(entry)
 
     query = """
-    INSERT INTO achievements_progress (achievement_id, user_id, progress, progress_as_number, achieved)
-    VALUES (%(achievement_id)s, %(user_id)s, %(progress)s, %(progress_as_number)s, %(achieved)s)
+    INSERT INTO achievements_progress (user_id, achievement_id, progress, progress_as_number, achieved, time_achieved)
+    VALUES (%(user_id)s, %(achievement_id)s, %(progress)s, %(progress_as_number)s, %(achieved)s, %(time_achieved)s)
     """
-    cursor.executemany(query, list)
-    list.clear()
+    cursor.executemany(query, achieved)
+
+    query = """
+    INSERT INTO achievements_progress (user_id, achievement_id, progress, progress_as_number, achieved)
+    VALUES (%(user_id)s, %(achievement_id)s, %(progress)s, %(progress_as_number)s, %(achieved)s)
+    """
+    cursor.executemany(query, not_achieved)        
+    
+    cursor.execute("UPDATE sprint_runs SET counted_for_achievements = 1")
 
 
 
-def process_run(single_run_data, achievements, already_achieved, achievements_progress):
+def process_run(single_run_data, achievements, achievements_progress):
 
     user_id = single_run_data["user_id"]
     single_run_article_map = {}
@@ -86,37 +79,49 @@ def process_run(single_run_data, achievements, already_achieved, achievements_pr
             single_run_article_map[article] = 1
     
 
-    for id in achievements:
+    for achievement_id in achievements:
 
-        key = (user_id, id)
+        key = (user_id, achievement_id)
+        present_in_data = key in achievements_progress
 
-        if key in already_achieved:
+        if present_in_data and achievements_progress[key]["achieved"]:
             continue
 
         current_progress = ""
-        present_in_data = key in achievements_progress
-        if achievements[id].is_multi_run_achievement and present_in_data:
+        if present_in_data:
             current_progress = achievements_progress[key]["progress"]
-        
-        achieved, new_progress, new_progress_as_number = achievements[id].check_status(single_run_data, single_run_article_map, current_progress)
+
+        checked, progress_data = achievements[achievement_id].check_status(single_run_data, single_run_article_map, current_progress)
+        achieved, new_progress, new_progress_as_number = progress_data
+
+        if not checked:
+            continue
+        if not achievements[achievement_id].is_multi_run_achievement:
+            if achieved:
+                new_progress = new_progress_as_number = 1
+            else:
+                new_progress = new_progress_as_number = 0
+
         new_progress_as_string = json.dumps(new_progress)
 
-        if achievements[id].is_multi_run_achievement:
-            if present_in_data:
-                achievements_progress[key]["progress"] = new_progress_as_string
-                achievements_progress[key]["progress_as_number"] = new_progress_as_number
-                achievements_progress[key]["achieved"] = achieved
-            elif new_progress_as_string != achievements[id].default_progress:
-                achievements_progress[key] = {
-                    "achievement_id": id,
-                    "user_id": user_id,
-                    "progress": new_progress_as_string,
-                    "progress_as_number": new_progress_as_number,
-                    "achieved": achieved
-                }        
+
+        if present_in_data:
+            achievements_progress[key]["progress"] = new_progress_as_string
+            achievements_progress[key]["progress_as_number"] = new_progress_as_number
+            achievements_progress[key]["achieved"] = achieved
+
+        elif new_progress_as_string != achievements[achievement_id].default_progress:
+            achievements_progress[key] = {
+                "achievement_id": achievement_id,
+                "user_id": user_id,
+                "progress": new_progress_as_string,
+                "progress_as_number": new_progress_as_number,
+                "achieved": achieved,
+                "time_achieved": None
+            }        
 
         if achieved:
-            already_achieved[key] = single_run_data["end_time"]
+            achievements_progress[key]["time_achieved"] = single_run_data["end_time"]
 
 
 
@@ -149,18 +154,15 @@ def historical_achievements(db_name):
     with conn.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
 
         remove_all_achievements_and_progress(cursor)
-        
-        achievements = {}
-        achievements_utils.add_all_achievements(cursor, achievements) # places all the achievement information in achievements
+        achievements = achievements_utils.get_achievements_info(cursor)
 
         all_runs = get_all_runs(cursor)
-        already_achieved = {} # maps from tuple(user_id, achievement_id) to time_achieved
-        achievements_progress = {} # maps from tuple(user_id, achievement_id) to progress, progress_as_number, achieved
+        achievements_progress = {} # maps from tuple(user_id, achievement_id) to progress, progress_as_number, achieved, time_achieved
 
         for run_data in all_runs:
-            process_run(achievements_utils.convert_to_standard(run_data), achievements, already_achieved, achievements_progress)
+            process_run(achievements_utils.convert_to_standard(run_data), achievements, achievements_progress)
         
-        place_in_database(cursor, already_achieved, achievements_progress)
+        place_in_database(cursor, achievements_progress)
 
         conn.commit()
         conn.close()
