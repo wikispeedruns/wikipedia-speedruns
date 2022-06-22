@@ -119,6 +119,25 @@ def get_lobby_prompts(lobby_id: int, prompt_id: Optional[int]=None ) -> List[Lob
         cursor.execute(query, query_args)
         return cursor.fetchall()
 
+def delete_lobby_prompts(lobby_id: int, prompts: List[int]) -> bool:
+    tables = ['lobby_runs', 'lobby_prompts']
+
+    query_start = 'DELETE FROM'
+    query_body = 'WHERE lobby_id=%(lobby_id)s AND prompt_id IN %(prompts)s'
+    
+    query_args = {
+        "lobby_id": lobby_id,
+        "prompts": tuple(prompts)
+    }
+    
+    db = get_db()
+    with db.cursor() as cursor:
+        for table in tables:
+            query = f'{query_start} {table} {query_body}'
+            cursor.execute(query, query_args)
+        db.commit()
+
+        return True
 
 # Lobby user management
 
@@ -193,7 +212,7 @@ def get_lobby_run(lobby_id: int, run_id: int):
     db = get_db()
 
     with db.cursor(cursor=DictCursor) as cursor:
-        print(cursor.mogrify(query, query_args))
+        # print(cursor.mogrify(query, query_args))
         cursor.execute(query, query_args)
         results = cursor.fetchone()
 
@@ -203,23 +222,31 @@ def get_lobby_run(lobby_id: int, run_id: int):
 
 
 def get_user_lobbys(user_id: int):
-    
     query = """
-    select lobbys.lobby_id, `name`, `desc`, passcode, create_date, active_date, rules, user_lobbys.owner, count(prompt_id) as n_prompts from lobbys
+    SELECT
+        lobbys.lobby_id,
+        `name`,
+        `desc`,
+        passcode,
+        create_date,
+        active_date,
+        rules,
+        user_lobbys.owner,
+        count(prompt_id) as n_prompts
+    FROM lobbys
     LEFT JOIN user_lobbys ON user_lobbys.lobby_id=lobbys.lobby_id
     LEFT JOIN lobby_prompts ON lobby_prompts.lobby_id=lobbys.lobby_id
-    where user_id=%(user_id)s
-    GROUP BY lobby_id;
+    WHERE user_id=%(user_id)s
+    GROUP BY lobby_id, user_lobbys.owner;
     """
-    
+
     query_args = {
         "user_id": user_id,
     }
-    
+
     db = get_db()
 
     with db.cursor(cursor=DictCursor) as cursor:
-        print(cursor.mogrify(query, query_args))
         cursor.execute(query, query_args)
         results = cursor.fetchall()
         return results

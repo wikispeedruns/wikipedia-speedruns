@@ -99,11 +99,9 @@ def get_archive_prompts():
     try:
         limit = int(request.args.get('limit', 20))
         offset = int(request.args.get('offset', 0))
-        sort_desc = request.args.get('sort_desc', "True").lower() == "true"
         sprints, num_prompts = prompts.get_archive_prompts("sprint",
             offset=offset,
             limit=limit,
-            sort_desc=sort_desc,
             user_id=session.get("user_id")
         )
 
@@ -134,67 +132,6 @@ def get_prompt(id):
         return "Prompt not yet available", 401
 
     if prompt["rated"] and prompt["active"] and "user_id" not in session:
-        return "You must be logged in to play this rated prompt", 401
+        return "You must be logged in to play this daily prompt", 401
 
     return prompt
-
-
-
-@sprint_api.get('/<int:id>/leaderboard/', defaults={'run_id' : None})
-@sprint_api.get('/<int:id>/leaderboard/<int:run_id>')
-def get_prompt_leaderboard(id, run_id):
-    # First get the prompt details, and the string
-    user_id = session.get("user_id")
-    prompt = prompts.get_prompt(id, "sprint", user_id=user_id)
-
-    if not session.get("admin", False) and (prompt["active"] and prompt["rated"] and not prompt.get("played", False)):
-        return "Cannot view leaderboard of currently rated prompt until played", 401
-
-    resp = {
-        "prompt": prompt
-    }
-
-    query = '''
-    SELECT run_id, path, runs.user_id, username, play_time, start_time, end_time
-    FROM sprint_runs AS runs
-    JOIN (
-            SELECT users.user_id, username, MIN(run_id) AS first_run
-            FROM sprint_runs AS runs
-            JOIN users ON users.user_id=runs.user_id
-            WHERE prompt_id=%s
-            GROUP BY user_id
-    ) firsts
-    ON firsts.user_id=runs.user_id AND first_run=run_id
-    WHERE finished IS TRUE AND path IS NOT NULL
-    '''
-
-    args = [id]
-
-    specificRunQuery = '''
-    SELECT runs.run_id, path, runs.user_id, username, play_time, start_time, end_time
-    FROM sprint_runs AS runs
-    LEFT JOIN users
-    ON runs.user_id=users.user_id
-    WHERE runs.run_id=%s
-    '''
-
-    ordering = f'\nORDER BY play_time'
-
-    if run_id:
-        query = f'({query}) UNION ({specificRunQuery})'
-        args.append(run_id)
-
-    query += ordering
-
-    db = get_db()
-    with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query, tuple(args))
-        results = cursor.fetchall()
-
-        for run in results:
-            run['path'] = json.loads(run['path'])['path']
-
-        resp["leaderboard"] = results
-        resp["run_id"] = run_id
-
-        return jsonify(resp)

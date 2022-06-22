@@ -6,10 +6,6 @@
     font-size: 40px;
 }
 
-.thumbcaption {
-    margin: 5px 5px;
-}
-
 a {
     text-decoration: none !important;
 }
@@ -110,36 +106,9 @@ a:hover, a:hover * {
         display: none;
     }
 
-    .show-on-mobile {
-        display: contents;
-    }
-
-
-    .show-on-desktop {
-        display: none;
-    }
-
     .content span > img {
         max-width: 100%;
         height: auto;
-    }
-}
-
-@media (min-width: 768px) {
-    .show-on-mobile {
-        display: none;
-    }
-
-    .show-on-desktop {
-        display: contents;
-    }
-
-    .thumb {
-        font-size: 80%;
-        text-align: center;
-        border-style: solid;
-        border-width: 1px;
-        border-color: black;
     }
 }
 

@@ -1,6 +1,7 @@
 //JS module imports
 import { serverData } from "./modules/serverData.js";
 import { getRun, getLobbyRun } from "./modules/game/finish.js";
+import { getLocalRun } from "./modules/localStorage/localStorageSprint.js"
 
 import { basicCannon, fireworks, side } from "./modules/confetti.js";
 
@@ -59,8 +60,10 @@ let app = new Vue({
         let run = null;
         if (this.lobbyId != null) {
             run = await getLobbyRun(this.lobbyId, RUN_ID);
-        } else {
+        } else if (this.loggedIn) {
             run = await getRun(RUN_ID);
+        } else if (!this.loggedIn) {
+            run = getLocalRun(RUN_ID);
         }
 
         this.promptId = run['prompt_id'];
@@ -120,11 +123,11 @@ let app = new Vue({
 
         //redirect to the corresponding prompt page
         goToLobbyLeaderboard: function (event) {
-            window.location.replace(`/lobby/${this.lobbyId}/prompt/${this.promptId}?run_id=${this.runId}`);
+            window.location.replace(`/lobby/${this.lobbyId}/leaderboard/${this.promptId}?run_id=${this.runId}`);
         },
 
         goToLeaderboard: function (event) {
-            window.location.replace(`/prompt/${this.promptId}?run_id=${this.runId}`);
+            window.location.replace(`/leaderboard/${this.promptId}?run_id=${this.runId}`);
         },
     }
 })

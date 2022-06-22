@@ -3,7 +3,8 @@
 {% block head %}
 
 <!-- wiki desktop stylesheet -->
-<link rel="stylesheet" href="https://en.wikipedia.org/w/load.php?lang=en&modules=site.styles&only=styles" media="screen and (min-width: 768px)">
+<link rel="stylesheet" href="{{url_for('static', filename='stylesheets/wikipedia.css')}}" media="(min-width: 768px)">
+<link rel="stylesheet" href="{{url_for('static', filename='stylesheets/wikipedia-vec.css')}}" media="(min-width: 768px)">
 
 <!-- wiki mobile stylesheets -->
 <link rel="stylesheet" href="https://meta.wikimedia.org/api/rest_v1/data/css/mobile/base" media="screen and (max-width: 767px)">
@@ -82,7 +83,7 @@
                             <button @click="expandedTimebox = !expandedTimebox"
                                     class="btn btn-outline-secondary mx-2"
                                     style="padding: 8px 8px">
-r                                <i class="bi bi-chevron-up"></i>
+                                <i class="bi bi-chevron-up"></i>
                             </button>
                         </div>
                     </div>
