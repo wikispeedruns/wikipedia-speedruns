@@ -26,6 +26,10 @@
         <!-- Nav JS Code -->
         <script type="module" src="{{url_for('static', filename='js/nav.js')}}"></script>
 
+        <!-- Donation -->
+        <script type="text/javascript" defer src="https://donorbox.org/install-popup-button.js"></script>
+        <script>window.DonorBox = { widgetLinkClassName: 'custom-dbox-popup' }</script>
+
         <!-- Page specific styling/JS -->
         {% block head %}{% endblock %}
     </head>
@@ -66,14 +70,17 @@
                     </template>
 
                     <template v-else>
-                        <li class="nav-item me-2">
+                        <li class="nav-item">
                             <a class="btn btn-light" href="/register">Register</a>
                         </li>
 
-                        <li class="nav-item">
+                        <li class="nav-item ms-2">
                             <a class="btn btn-light" href="/login">Login</a>
                         </li>
                     </template>
+                        <li class="nav-item ms-2">
+                            <a class="custom-dbox-popup btn btn-warning" href="https://donorbox.org/buy-us-a-coffee-9">Support</a>
+                        </li>
                     </ul>
 
                 </div>
