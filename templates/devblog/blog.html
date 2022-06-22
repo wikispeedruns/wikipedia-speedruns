@@ -7,6 +7,13 @@
 
 {% block content %}
 
+<style>
+    .indented { 
+        margin-left: 30px;
+    }
+</style>
+
+
 <div id="app">
 
     <section class="blog-description py-2">
@@ -24,37 +31,87 @@
 
     <div class="w-75 mx-auto"><hr></div>
 
-    <div class="row py-4 justify-content-md-center blogpost" id="blogPost4">
-        <div class="col-lg-12 px-0">
+    <div class="row py-2 justify-content-md-center blogpost" id="blogPost4">
+        <div class="col-lg-10 px-0">
             <div class="card">
-                <div class="alert alert-info my-0 py-4 px-4" role="alert">
+                <div class="alert alert-success my-0 py-4 px-4 accordion" role="alert">
                     <div class="row">
                         <div class="col">
                             <h5 class="blogHeader">Version 0.1 Changelog</h5>
+                            <span class="blogAbstract">Check out the new features we've included in our first official update!</span>
                         </div>
                         <div class="col-sm-auto">
-                            X/XX/XXXX
+                            07/04/2022
                         </div>
                     </div>
                 </div>
-                <div class="card-body px-4 py-4">
+                <div class="card-body px-4 py-4" style="display:none">
                     <p class="blogBody">
-                        Hey everyone! We're excited to bring you the first changelog for WikiSpeedruns!
+                        Hey everyone! We're excited to bring you the first changelog for WikiSpeedruns! Thank you all for your support thus far and for just playing the game. The fact that you took the time to visit this corner of the website already means alot to us devs. 
+                        <br><br>
+                        As we continue to improve the game, we wanted to introduce a more formal version system for the game to document any major changes and fixes. So we’re happy to introduce Wikipedia Speedruns <b>Version 0.1</b>!
+                        <br><br>
+                        Since this is the first changelog, we wanted to provide a quick summary of the main features we have in place:</h4>
                         <br>
-                        Thank you all for your support thus far and for just playing the game. The fact that you took the time to visit this corner of the website already means alot to us devs. Go join the discord if you haven't yet! 
+                        <h4 class="py-3">Feature Summary</h4>
+                        <p>
+                        <b>Classic sprint mode + Prompt of the Day</b>
+                        <br>The classic Wikipedia speedrunning experience with classic rules. Everyday, we’ll upload a new Prompt of the Day for you to test your skills against. You can also access any past prompts in the archive. 
+                        </p>
+                        <p>
+                        <b>Lobbies</b>
+                        <br>You can create a private lobby with your own custom prompts to compete against your friends with private leaderboards. They don’t even need an account to join the lobby!
+                        </p>
+                        <p>
+                        <b>Marathon Mode</b>
+                        <br>As an alternative to the classic sprint mode, marathon mode tracks the number of clicks that you take rather than the amount of time. This is a great mode if you like to be extra thorough and methodical.
+                        </p>
+                        <p>
+                        <b>Leaderboards</b>
+                        <br>After finishing a game, you’ll be able to view your own history on that prompt and the global leaderboards. 
+                        </p>
+                        <p>
+                        <b>Streaks</b>
+                        <br>Streaks keep track of how many days in a row you complete the daily prompt. In order to add to the streak tally, play the prompt of the day while it is active!
+                        </p>
+                        <p>
+                        <b>Prompt Generator</b>
+                        <br>We have also added a prompt generator so that you can get some help when coming up with prompts (more details on the prompt generator to come in a future blog post).
+                        </p>
+                        <p>
+                        <b>Devblog</b>
+                        <br>Lastly, this blog page will be where we post official changelogs and many interesting aspects to our game.
+                        </p>
                         <br>
+                        <h4>Other Improvements since March 2022</h4>
+                        <ul>
+                            <li>Removed legacy rating system and rated prompt restrictions</li>
+                            <li>Added on-hover end article previews</li>
+                            <li>Added tutorial</li>
+                            <li>Added a run replay system</li>
+                            <li>Added quick access links to each user’s active lobbies on the home page</li>
+                            <li>Added celebratory confetti   B)</li>
+                            <li>Greatly improved desktop and mobile UIs</li>
+                            <li>Improved performance with article loading</li>
+                            <li>Reorganized home page layout</li>
+                            <li>Lobby invite and passcodes are now hidden by default (more streamer friendly)</li>
+                        </ul>
+                        <h4>Fixes since March 2022:</h4>
+                        <ul>
+                            <li>Fixed many rendering and spacing issues with certain Wikipedia elements</li>
+                            <li>Fixed many display issues on mobile</li>
+                            <li>Added a warning when attempting to add disambiguation page as a prompt, as they are sometimes unreachable</li>
+                            <li>Fixed a number of login issues</li>
+                            <li>Fixed redirect issues after successful login</li>
+                            <li>Tons of other small fixes here and there</li>
+                        </ul>
                         <br>
-                        We're hoping to use this place + discord as a place to tell you what we've been up to......
-                        <br>
-                        ......
-                        <br>
-                        ......
-                        <br>
-                        ......
-                        <br>
+                        As an open source project, we want many aspects of our development work as community driven as possible. 
+                        Please join our discord community! If you have any suggestions, feedback, or have issues to report, please shoot us an email or a message on discord.
+                        <br><br>
                         Happy wiki surfing!
                         <br>
-                        [[Dev name/alias]]
+                        <b>Wikipedia Speedruns Team</b>
                     </p>
                 </div>
             </div>
@@ -64,21 +121,21 @@
     
     <div class="w-75 mx-auto"><hr></div>
 
-    <div class="row py-4 justify-content-md-center blogpost" id="blogPost3">
-        <div class="col-lg-12 px-0">
+    <div class="row py-2 justify-content-md-center blogpost" id="blogPost3">
+        <div class="col-lg-10 px-0">
             <div class="card">
-                <div class="alert alert-info my-0 py-4 px-4" role="alert">
+                <div class="alert alert-info my-0 py-4 px-4 accordion" role="alert">
                     <div class="row">
                         <div class="col">
                             <h5 class="blogHeader">Developer Interview: Dan</h5>
                             <span class="blogAbstract">Today, we’ll be interviewing Dan, one of our founders and developers.</span>
                         </div>
                         <div class="col-sm-auto">
-                            X/XX/XXXX
+                            07/04/2022
                         </div>
                     </div>
                 </div>
-                <div class="card-body px-4 py-4">
+                <div class="card-body px-4 py-4"  style="display:none">
                     <p class="blogBody">[Interviewer]: Why did you decide to start the WikiSpeedruns project?
                         <br>
                         [Dan]: ‘On a whim we had done some wiki races on our own, and we had talked about making a website so it would be more convenient. We were bored one week without 
@@ -199,4 +256,26 @@
     -->
 
 </div>
+
+<script>
+    function addButton() {
+
+        var acc = document.getElementsByClassName("accordion");
+        var i;
+    
+        for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            /* Toggle between hiding and showing the active panel */
+            var panel = this.nextElementSibling;
+            if (panel.style.display == "block") {
+                panel.style.display = "none";
+              } else {
+                panel.style.display = "block";
+              }
+        });
+        }
+    }
+    console.log("button")
+    addButton();
+</script>
 {% endblock %}
