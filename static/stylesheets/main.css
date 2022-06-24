@@ -139,6 +139,16 @@ details[open] summary {
     margin-bottom: .5em;
 }
 
+.version {
+    vertical-align: sub;
+    padding-top : .5em;
+    
+}
+
+.version-link {
+    color: #808080;
+}
+
 
 [v-cloak] { display: none }
 
