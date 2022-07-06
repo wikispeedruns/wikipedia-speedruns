@@ -4,7 +4,6 @@
 
 <!-- Some nice x minutes ago tags -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
-<script type="text/javascript" src="{{url_for('static', filename='achievements/metadata.js')}}"></script>
 <!-- Account JS Code -->
 <script type="module" src="{{url_for('static', filename='js/account.js')}}"></script>
 
@@ -26,7 +25,7 @@
         <div class="card-body">
           <div class="list-group">
               <button type="button" class="list-group-item list-group-item-action" v-on:click="tab='basic-stats'">Basic Stats</button>
-              <button type="button" class="list-group-item list-group-item-action" v-on:click="tab='achievements'">Achievements</button>
+              <!--<button type="button" class="list-group-item list-group-item-action" v-on:click="tab='achievements'">Achievements</button>-->
           </div>
         </div>
       </div>
@@ -58,12 +57,12 @@
         <div class="card-body">      
           <div id="username-change" class="py-3">
             <div class="form-group">
-              <label for="username-password">Current password</label>
-              <input type="password" class="form-control" id="username-password">
-            </div>
-            <div class="form-group">
               <label for="new-username">New username</label>
               <input type="text" class="form-control" id="new-username">
+            </div>
+            <div class="form-group">
+              <label for="new-username-check">Re-enter new username</label>
+              <input type="text" class="form-control" id="new-username-check">
             </div>
             <small class="text-danger">[[feedbackMsg]]</small>
             <button class="btn btn-primary my-4" v-on:click="submitNewUsername">Submit</button>
@@ -76,8 +75,8 @@
 
           <div id="deleteAccount" class="py-3">
             <div class="form-group">
-              <label for="deleteU-password">Current password</label>
-              <input type="password" class="form-control" id="deleteU-password">
+              <label for="deleteU-username">Your username</label>
+              <input type="text" class="form-control" id="deleteU-username">
             </div>
             <div onmousedown="return false" onselectstart="return false" class="my-4 alert alert-danger">
               Please type the following in the box below: <br><b>[[confirmText]]</b>
@@ -91,12 +90,6 @@
 
         </div>
       </div>
-
-      <achievement-table v-if="tab=='achievements'"
-        v-bind:list="list"
-        v-bind:achievements="testData"
-        v-bind:basepath="'{{url_for('static', filename='achievements/icons/')}}'"
-    ></achievement-table>
     </div>
   </div>
     

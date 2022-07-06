@@ -296,33 +296,21 @@ def change_password():
 @check_user
 def change_username():
     '''
-    Given the old password and a new username, change the username
+    Given a new username, change the username
     '''
-    get_query = "SELECT * FROM `users` WHERE `user_id`=%s"
     update_query = "UPDATE `users` SET `username`=%s WHERE `user_id`=%s"
-    
-    #print(request.json)
 
-    if ("old_password" not in request.json or "new_username" not in request.json):
+    if ("new_username" not in request.json):
         #print("Incomplete request")
         return ("Incomplete request", 400)
 
     id = session["user_id"]
-    old_password = request.json["old_password"]
     new_username = request.json["new_username"]
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
         
         try:
-            # Query for user and check password
-            result = cursor.execute(get_query, (id, ))
-            user = cursor.fetchone()
-
-            if not passwords.check_password(user, old_password):
-                #print("Incorrect password")
-                return "Incorrect password", 401
-
             cursor.execute(update_query, (new_username, id))
             db.commit()
         

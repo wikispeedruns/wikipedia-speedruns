@@ -1,7 +1,6 @@
 import { serverData } from "./modules/serverData.js";
 import { fetchJson } from "./modules/fetch.js";
 import { profileStatsTable } from "./modules/profileStats.js";
-import { achievement_table } from "./modules/achievements.js";
 
 
 var app = new Vue({
@@ -10,7 +9,6 @@ var app = new Vue({
 
     components: {
         'profile-stats-table': profileStatsTable,
-        'achievement-table': achievement_table
     },
     
     data: {
@@ -21,32 +19,6 @@ var app = new Vue({
         confirmText: "Delete my account permanently!",
         tab:'',
 
-
-        list: achievement_list,
-
-        testData: {
-            "bathroom": {
-                "time_reached": "2009-06-15T13:45:30",
-                "achieved": 1
-            }, 
-            "usa": {
-                "time_reached": "2019-06-15T13:45:30",
-                "achieved": 0,
-                "reached": 7,
-                "out_of": 50
-            }, 
-            "sparta": {
-                "time_reached": "2009-06-15T13:45:30",
-                "achieved": 0
-            }, 
-            "fastest_gun_alive": {
-                "time_reached": "2019-06-15T13:45:30",
-                "achieved": 1
-            }, 
-            "meta": {
-                "time_reached": "2019-06-15T13:45:30",
-                "achieved": 1
-            }}
     },
 
     created: async function() {
@@ -94,8 +66,14 @@ var app = new Vue({
         },
 
         async submitNewUsername(event) {
+
+            if (document.getElementById("new-username").value != document.getElementById("new-username-check").value) {
+                this.feedbackMsg = "Usernames do not match"
+                return
+            }
+
+
             const body = {
-                'old_password' : document.getElementById("username-password").value,
                 'new_username' : document.getElementById("new-username").value
             };
             
@@ -124,7 +102,7 @@ var app = new Vue({
             }
 
             const body = {
-                'old_password' : document.getElementById("deleteU-password").value
+                'username' : document.getElementById("deleteU-username").value
             };
 
             try {
