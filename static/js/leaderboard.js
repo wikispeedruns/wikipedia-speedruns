@@ -47,14 +47,17 @@ var LeaderboardRow = {
 
             <td class="l-col">
                 <template v-if="run.username">
-                    <strong v-if="run.run_id == currentRunId">Your Last Run</strong>
+                    <strong v-if="run.run_id === currentRunId">Your Last Run</strong>
                     <span v-else>{{run.username}}</span>
                 </template>
-                <template class="l-col" v-else-if="run.name">
-                    <strong v-if="run.run_id == currentRunId">Your Last Run</strong>
+                <template v-else-if="run.name">
+                    <strong v-if="run.run_id === currentRunId">Your Last Run</strong>
                     <span v-else>{{run.name}}</span>
                 </template>
-                <template v-else><strong>Your Last Run</strong></template>
+                <template v-else>
+                    <strong v-if="run.run_id === currentRunId">Your Last Run</strong>
+                    <span v-else>Anonymous</span>
+                </template>
 
                 <small class="text-muted">({{momentString}})</small>
             </td>
@@ -341,8 +344,7 @@ var app = new Vue({
         } else if (this.preset === "shortest") {
             args = {
                 "sort_mode": "length",
-                "user_run_mode": "shortest",
-                "show_anonymous": true,
+                "user_run_mode": "shortest"
             };
         } else {
             if (this.preset !== "personal") {
