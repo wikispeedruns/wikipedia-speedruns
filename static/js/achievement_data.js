@@ -14,7 +14,7 @@ var am = new Vue({
 
     data: {
         list: achievement_list,
-        testData: {},
+        data: {},
         empty: true,
         loggedIn: false,
         lobbyId: null
@@ -27,7 +27,7 @@ var am = new Vue({
         },
 
         setData: function(data){
-            this.testData = data;
+            this.data = data;
         },
 
         convertData: function(oldData){
