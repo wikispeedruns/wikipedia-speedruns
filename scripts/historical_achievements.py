@@ -61,8 +61,6 @@ def place_in_database(cursor, achievements_progress):
     VALUES (%(user_id)s, %(achievement_id)s, %(progress)s, %(progress_as_number)s, %(achieved)s)
     """
     cursor.executemany(query, not_achieved)        
-    
-    cursor.execute("UPDATE sprint_runs SET counted_for_achievements = 1")
 
 
 
@@ -124,6 +122,13 @@ def process_run(single_run_data, achievements, achievements_progress):
             achievements_progress[key]["time_achieved"] = single_run_data["end_time"]
 
 
+def set_all_sprint_runs(cursor):
+    query = """
+    UPDATE sprint_runs
+    SET counted_for_am = 1;
+    """
+    cursor.execute(query)
+
 
 def historical_achievements(db_name):
     
@@ -163,6 +168,7 @@ def historical_achievements(db_name):
             process_run(achievements_utils.convert_to_standard(run_data), achievements, achievements_progress)
         
         place_in_database(cursor, achievements_progress)
+        set_all_sprint_runs(cursor)
 
         conn.commit()
         conn.close()

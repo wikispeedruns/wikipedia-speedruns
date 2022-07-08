@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `sprint_runs` (
     */
     `prompt_id` INT NOT NULL,
     `user_id` INT,
-    `counted_for_achievements` BOOLEAN DEFAULT 0,
+    `counted_for_am` BOOLEAN DEFAULT 0,
     PRIMARY KEY (`run_id`),
     FOREIGN KEY (`prompt_id`) REFERENCES `sprint_prompts`(`prompt_id`),
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)

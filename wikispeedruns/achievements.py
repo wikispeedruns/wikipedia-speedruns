@@ -90,6 +90,52 @@ test_data_3 = {
     "username": "dan"
 }
 
+test_data_4 = {
+    "end_time": "2022-05-27T10:22:25.446000",
+    "path": [
+      {
+        "article": "Lisa Kudrow",
+        "loadTime": 0.169,
+        "timeReached": 0.169
+      },
+      {
+        "article": "Matt LeBlanc",
+        "loadTime": 0.135,
+        "timeReached": 1.887
+      }
+    ],
+    "version": "2.1",
+    "play_time": 1.583,
+    "run_id": 11631,
+    "start_time": "2022-05-27T10:22:23.559000",
+    "user_id": 5,
+    "username": "dan"
+}
+
+test_data_5 = {
+    "end_time": "2022-05-27T10:22:25.446000",
+    "path": [
+      {
+        "article": "Matthew Perry",
+        "loadTime": 0.169,
+        "timeReached": 0.169
+      },
+      {
+        "article": "David Schwimmer",
+        "loadTime": 0.135,
+        "timeReached": 1.887
+      }
+    ],
+    "version": "2.1",
+    "play_time": 1.583,
+    "run_id": 11631,
+    "start_time": "2022-05-27T10:22:23.559000",
+    "user_id": 5,
+    "username": "dan"
+}
+
+
+
 """
 This is what data might look like in the database
 """
@@ -150,7 +196,7 @@ class Achievement():
     
     @staticmethod
     def no_time_data(single_run_data: Dict[str, Any]) -> bool:
-        return single_run_data["play_time"] == 0
+        return single_run_data["version"] == "1.0"
 
     def check_status(self, single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: str) -> Tuple[bool, ReturnType]:
         if current_progress == "":
@@ -197,14 +243,12 @@ def add_all_achievements(cursor: DictCursor) -> None:
 returns all the new_achievements by the user after new run (using get_new_achievements)
 and makes updates to database accordingly
 """
-def get_and_update_new_achievements(cursor: DictCursor, raw_run_data: Dict[str, Any]) -> Dict[str, Any]:
+def get_and_update_new_achievements(cursor: DictCursor, raw_run_data: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    
     single_run_data = convert_to_standard(raw_run_data)
+
     achievements = get_achievements_info(cursor)
-
     new_achievements = get_new_achievements(cursor, single_run_data, achievements)
-
-    run_id = single_run_data["run_id"]
-    cursor.execute("UPDATE sprint_runs SET counted_for_achievements = 1 WHERE run_id = (%s)", (run_id, ))
 
     return new_achievements
 
@@ -212,7 +256,7 @@ def get_and_update_new_achievements(cursor: DictCursor, raw_run_data: Dict[str, 
 """
 returns all the new_achievements by the user after new run
 """
-def get_new_achievements(cursor: DictCursor, single_run_data: Dict[str, Any], achievements: Dict[int, Achievement]) -> Dict[str, Any]:
+def get_new_achievements(cursor: DictCursor, single_run_data: Dict[str, Any], achievements: Dict[int, Achievement]) -> Dict[str, Dict[str, Any]]:
 
     # Create single_run_article_map as defined above
     single_run_article_map: Dict[str, int] = {}
@@ -276,9 +320,10 @@ def get_new_achievements(cursor: DictCursor, single_run_data: Dict[str, Any], ac
             )
 
         if achieved:
-            new_achievements[achievements[achievement_id].name] = {
+            name = achievements[achievement_id].name
+            new_achievements[name] = {
                 "achieved": achieved,
-                "time_achieved": end_time,
+                "time_reached": end_time,
                 "reached": new_progress_as_number,
                 "out of": achievements[achievement_id].endgoal
             }
@@ -299,6 +344,12 @@ def get_new_achievements(cursor: DictCursor, single_run_data: Dict[str, Any], ac
     """
     cursor.execute(query, (end_time, ))
 
+    query = """
+    UPDATE sprint_runs
+    SET counted_for_am = 1 WHERE run_id = (%s)
+    """
+    cursor.execute(query, (single_run_data["run_id"]))
+
     return new_achievements
 
 
@@ -311,7 +362,6 @@ def get_all_progress(cursor: DictCursor, user_id: int) -> List[Dict[str, Any]]:
     """
     cursor.execute(query, (user_id,))
     return list(cursor.fetchall())
-
 
 
 def get_all_achievements_and_progress(cursor: DictCursor, user_id: int) -> Dict[str, Dict[str, Any]]:
@@ -330,21 +380,21 @@ def get_all_achievements_and_progress(cursor: DictCursor, user_id: int) -> Dict[
         entry = { "out_of": achievements[achievement_id].endgoal }
 
         reached = 0
-        time_achieved = None
+        time_reached = None
         achieved = 0
 
         present = j < len(achievements_progress) and achievements_progress[j]["achievement_id"] == achievement_id
         if present:
             reached = achievements_progress[j]["progress_as_number"]
-            time_achieved = achievements_progress[j]["time_achieved"]
+            time_reached = achievements_progress[j]["time_achieved"]
             achieved = achievements_progress[j]["achieved"]
         else:
             reached = 0
-            time_achieved = None
+            time_reached = None
             achieved = 0
     
         entry["reached"] = reached
-        entry["time_achieved"] = time_achieved
+        entry["time_reached"] = time_reached
         entry["achieved"] = achieved
         all_achievements[name] = entry
 
@@ -369,16 +419,16 @@ def main():
     with conn.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
 
         # cursor.execute("DELETE FROM list_of_achievements")
-        add_all_achievements(cursor)
+        # add_all_achievements(cursor)
 
-        # get_and_update_new_achievements(cursor, test_data_1)
+        # get_and_update_new_achievements(cursor, test_data_5)
 
-        user = 5
-        all_achievements = get_all_achievements_and_progress(cursor, user)
-        for name in all_achievements:
-            reached = all_achievements[name]["reached"]
-            out_of = all_achievements[name]["out_of"]
-            print(f"{name} - reached {reached} out of {out_of}")
+        # user = 5
+        # all_achievements = get_all_achievements_and_progress(cursor, user)
+        # for name in all_achievements:
+        #     reached = all_achievements[name]["reached"]
+        #     out_of = all_achievements[name]["out_of"]
+        #     print(f"{name} - reached {reached} out of {out_of}")
 
 
         conn.commit()

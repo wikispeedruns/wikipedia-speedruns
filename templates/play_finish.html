@@ -4,13 +4,17 @@
 
 <!-- play.js stylesheet -->
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/play.css')}}">
-<script type="module" src="{{url_for('static', filename='js/play_finish.js')}}"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+
+<script defer type="module" src="{{url_for('static', filename='js/play_finish.js')}}"></script>
+<script defer id='achievement' type="module" src="{{url_for('static', filename='js/achievement_data.js')}}" data="run"></script>
 
 <style>
     [v-cloak] { display: none }
 </style>
+
 {% endblock %}
 
 {% block content %}
@@ -52,4 +56,28 @@
     </div>
 </template>
 </div>
+
+<div id="am">
+    <br>
+    <template v-if="loggedIn&&!lobbyId">
+        <template v-if="!empty">
+            <h4>New Achievements!</h4>
+            <achievement-table class="py-4"
+                v-bind:list="list"
+                v-bind:achievements="testData"
+                v-bind:basepath="'{{url_for('static', filename='achievements/icons/')}}'"
+            ></achievement-table>
+        </template>
+        <template v-else>
+            <h4>No New Achievements Unlocked</h4>
+        </template>
+    </template>
+    <template v-else-if="lobbyId">
+        <h4>Achievements Can Only Be Unlocked In Public Prompts</h4>
+    </template>
+    <template v-else>
+        <h4>Login To Check Possible New Achievements!</h4>
+    </template>
+</div>
+
 {% endblock %}

@@ -1,30 +1,42 @@
 {% extends 'base.html' %}
 {% block head %}
 
-<script src="https://vuejs.org/js/vue.js"></script>
-
+<!-- <script src="https://vuejs.org/js/vue.js"></script> -->
 <script type="module" src="{{url_for('static', filename='js/profile.js') }}"></script>
+
+<!-- Some nice x minutes ago tags -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<script id='achievement' type="module" src="{{url_for('static', filename='js/achievement_data.js')}}" data="all"></script>
+
 
 {% endblock %}
 
 
 {% block content %}
 
-<div id="app" class="col-sm-6">
+<div id="app" class="col-sm-6" v-cloak>
     <div class="card">
         <div class="card-body">
-        <table class="table table-striped table-hover col-sm-6">
-            <thead>
-                <td colspan=2><h4>[[user_name.val]]'s Profile</h4></td>
-            </thead>
-            <tr v-for="key in Object.keys($data)" v-bind:key="">
-                <td>[[$data[key].field]]: </td>
-                <td>[[$data[key].val]]</td>
-            </tr>
-        </table>
+            <table class="table table-striped table-hover col-sm-6">
+                <thead>
+                    <td colspan=2><h4>[[user_name.val]]'s Profile</h4></td>
+                </thead>
+                <tr v-for="key in Object.keys($data)" v-bind:key="">
+                    <td>[[$data[key].field]]: </td>
+                    <td>[[$data[key].val]]</td>
+                </tr>
+            </table>
+        </div>
     </div>
 </div>
-    
+
+<div id="am" v-cloak>
+    <achievement-table class="py-4"
+        v-bind:list="list"
+        v-bind:achievements="testData"
+        v-bind:basepath="'{{url_for('static', filename='achievements/icons/')}}'"
+    ></achievement-table>
 </div>
+
 
 {% endblock %}

@@ -1,6 +1,6 @@
+import pymysql
 import argparse
 import json
-import pymysql
 
 DEFAULT_DB_NAME='wikipedia_speedruns'
 
@@ -20,25 +20,22 @@ def expand(db_name):
     )
 
     with conn.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
-
-        query = "ALTER TABLE sprint_runs ADD COLUMN counted_for_achievements BOOLEAN DEFAULT 0"
-
-        try:
-            cursor.execute(query)
-        except:
-            print("'counted_for_achievements' already present in sprint_runs")
-            return
+        
+        query = """
+        ALTER TABLE sprint_runs
+        ADD COLUMN `counted_for_am` BOOLEAN DEFAULT 0
+        """
+        cursor.execute(query)
+        print("Column added")
         
         conn.commit()
         conn.close()
-
-    print("sprint runs expanded to include 'counted_for_achievements'")
 
 
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Adds all defined achievements in "achievement_functions" to database')
+    parser = argparse.ArgumentParser(description = "Add a `counted_for_am` column to sprint_runs")
     parser.add_argument('--db_name', type = str, default = DEFAULT_DB_NAME)
 
     args = parser.parse_args()
