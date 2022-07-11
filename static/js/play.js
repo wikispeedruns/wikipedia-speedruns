@@ -68,14 +68,14 @@ let app = new Vue({
         lobbyId: null,
         runId: -1,          //unique ID for the current run. This gets populated upon start of run
 
-        startTime: null,     // The start time of run (ms elapsed since January 1, 1970)
+        startTime: Date.now(),     // The start time of run (ms elapsed since January 1, 1970)
         endTime: null,       // The end time of run (ms elapsed since January 1, 1970)
-        countdownTime: null,  // Time spent in countdown screen (seconds)
+        countdownTime: 0,  // Time spent in countdown screen (seconds)
 
         elapsed: 0,             // Total time elapsed in ms (frontend)
         timerInterval: null,
         
-        offset: null,           // Offset time since last pause, initially = startTime
+        offset: Date.now(),           // Offset time since last pause, initially approx. startTime
         isRunning: false,       // Whether the timer is running
         milliseconds: 0,        // Current ms since last pause (frontend)
         savedMilliseconds: 0,   // Cumulative pause times (frontend)
@@ -118,7 +118,6 @@ let app = new Vue({
             console.log("Not logged in, uploading start of run to local storage")
         }
 
-        this.startTime = Date.now();
         this.offset = this.startTime;
 
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview, this.loadCallback);
