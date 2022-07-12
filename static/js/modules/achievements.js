@@ -66,27 +66,6 @@ var achievement_table = {
         //console.log(this.list)
     },
 
-	// template: (`
-    //     <div class="col-sm-10">
-    //         <div class="card">
-    //             <div class="card-body">
-    //             <table class="table table-hover">
-    //                 <tbody>
-    //                 <achievement v-for="(entry, name) in achievements" v-bind:key="name"
-    //                     v-bind:display_name="list[name]['display_name']"
-    //                     v-bind:description="list[name]['description']"
-    //                     v-bind:hidden="list[name]['hidden']"
-    //                     v-bind:img="list[name]['img']"
-    //                     v-bind:basepath="basepath"
-    //                     v-bind:achievementdata="achievements[name]"
-    //                 ></achievement>
-    //                 </tbody>
-    //             </table>
-    //             </div>
-    //         </div>
-    //     </div>
-    // `)
-
     template: (`
     <div class="col-sm-10">
         <div class="card">

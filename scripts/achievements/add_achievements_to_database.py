@@ -7,7 +7,8 @@ import os
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
-sys.path.append(parent)
+next_parent = os.path.dirname(parent)
+sys.path.append(next_parent)
 
 import wikispeedruns.achievements as achievements_utils
 
@@ -17,9 +18,9 @@ DEFAULT_DB_NAME='wikipedia_speedruns'
 
 def add_achievements(db_name):
 
-    config = json.load(open("../config/default.json"))
+    config = json.load(open("../../config/default.json"))
     try:
-        config.update(json.load(open("../config/prod.json")))
+        config.update(json.load(open("../../config/prod.json")))
     except FileNotFoundError:
         pass
 

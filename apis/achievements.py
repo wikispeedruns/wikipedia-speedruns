@@ -10,8 +10,8 @@ from wikispeedruns import achievements
 achievements_api = Blueprint('achievements', __name__, url_prefix='/api/achievements')
 
 
-@achievements_api.get('/get/<int:run_id>')
-def get_new(run_id):
+@achievements_api.get('/process/<int:run_id>')
+def process_for_achievements(run_id):
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:

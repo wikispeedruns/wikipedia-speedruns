@@ -2,49 +2,9 @@ from typing import Tuple, Dict, Any, Optional, Callable, List
 import json
 
 
-test_data = {
-    "end_time": "2022-05-27T10:22:25.446000",
-    "path": [
-      {
-        "article": "45 (number)",
-        "loadTime": 0.169,
-        "timeReached": 0.169
-      },
-      {
-        "article": "46 (number)",
-        "loadTime": 0.135,
-        "timeReached": 1.887
-      }
-    ],
-    "play_time": 1.583,
-    "run_id": 11631,
-    "start_time": "2022-05-27T10:22:23.559000",
-    "user_id": 5,
-    "username": "dan"
-}
-
-
 ReturnType = Tuple[bool, Any, Optional[int]]
 AchievementFunction = Callable[[Dict[str, Any], Dict[str, int], str], ReturnType]
 
-
-"""Test Achievements"""
-
-def visit_45(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: Any) -> ReturnType:
-    return "45 (number)" in single_run_article_map, None, None
-
-def visit_46(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: Any) -> ReturnType:
-    return "46 (number)" in single_run_article_map, None, None
-
-def visit_food(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: Any) -> ReturnType:
-    return "food" in single_run_article_map, None, None
-
-def visit_45_twice(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: Any) -> ReturnType:
-    return "45 (number)" in single_run_article_map and single_run_article_map["45 (number)"] >= 2, None, None
-
-
-
-"""Real Achievements"""
 
 def meta(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: Any) -> ReturnType:
     return "Wikipedia" in single_run_article_map, None, None
@@ -191,18 +151,6 @@ def around_the_world_in_80_seconds(single_run_data: Dict[str, Any], single_run_a
     
     return shortest_time <= 80, None, None
 
-        
-
-
-"""Test Achievements"""
-
-def visit_45_25_times(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: Any) -> ReturnType:
-    if "45 (number)" in single_run_article_map:
-        current_progress += single_run_article_map["45 (number)"]
-    return current_progress >= 25, current_progress, current_progress
-
-
-"""Real Achievements"""
 
 
 def friends(single_run_data: Dict[str, Any], single_run_article_map: Dict[str, int], current_progress: Any) -> ReturnType:
@@ -224,6 +172,7 @@ def super_size_me(single_run_data: Dict[str, Any], single_run_article_map: Dict[
 
 
 
+
 def append_achievement(all_achievements: List[Dict[str, Any]], name: str, function: AchievementFunction, 
 is_multi_run_achievement: bool, is_time_dependent: bool, endgoal: int = 1, default_progress: str = "0") -> None:
     entry = {
@@ -237,19 +186,11 @@ is_multi_run_achievement: bool, is_time_dependent: bool, endgoal: int = 1, defau
     all_achievements.append(entry)
 
 
+
 def place_all_achievements_in_list() -> List[Dict[str, Any]]:
     
     all_achievements: List[Dict[str, Any]] = []
 
-    # test achievements
-    # append_achievement(all_achievements, "visit_45", visit_45, False, False)
-    # append_achievement(all_achievements, "visit_46", visit_46, False, False)
-    # append_achievement(all_achievements, "visit_food", visit_food, False, False)
-    # append_achievement(all_achievements, "visit_45_twice", visit_45_twice, False, False)
-    # append_achievement(all_achievements, "visit_45_25_times", visit_45_25_times, True, False, 25, "0")
-
-
-    # real achievements
     append_achievement(all_achievements, "meta", meta, False, False)
     append_achievement(all_achievements, "bathroom", bathroom_break, False, False)
     append_achievement(all_achievements, "ireland", luck_of_the_irish, False, False)

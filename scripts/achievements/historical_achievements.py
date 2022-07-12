@@ -7,7 +7,8 @@ import os
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
-sys.path.append(parent)
+next_parent = os.path.dirname(parent)
+sys.path.append(next_parent)
 
 import wikispeedruns.achievements as achievements_utils
 
@@ -27,7 +28,7 @@ def remove_all_achievements_and_progress(cursor):
 
 def get_all_runs(cursor):
     query = """
-    SELECT `start_time`, `end_time`, `play_time`, `path`, `user_id`, `run_id` FROM sprint_runs
+    SELECT `start_time`, `end_time`, `play_time`, `finished`, `path`, `user_id`, `run_id` FROM sprint_runs
     """
     cursor.execute(query)
     return list(cursor.fetchall())
@@ -122,11 +123,9 @@ def process_run(single_run_data, achievements, achievements_progress):
             achievements_progress[key]["time_achieved"] = single_run_data["end_time"]
 
 
-def set_all_sprint_runs(cursor):
-    query = """
-    UPDATE sprint_runs
-    SET counted_for_am = 1;
-    """
+def set_all_sprint_runs(cursor, id_list):
+    cursor.execute("UPDATE sprint_runs SET counted_for_am = 0")
+    query = "UPDATE sprint_runs SET counted_for_am = 1 WHERE run_id IN {};".format(tuple(id_list))
     cursor.execute(query)
 
 
@@ -143,9 +142,9 @@ def historical_achievements(db_name):
             print("This is not a valid format for (yes/no); try again")
     
 
-    config = json.load(open("../config/default.json"))
+    config = json.load(open("../../config/default.json"))
     try:
-        config.update(json.load(open("../config/prod.json")))
+        config.update(json.load(open("../../config/prod.json")))
     except FileNotFoundError:
         pass
 
@@ -163,12 +162,22 @@ def historical_achievements(db_name):
 
         all_runs = get_all_runs(cursor)
         achievements_progress = {} # maps from tuple(user_id, achievement_id) to progress, progress_as_number, achieved, time_achieved
+        id_list = [] # stores all runs that got considered
+        failed = [] # stores all runs that failed
 
         for run_data in all_runs:
-            process_run(achievements_utils.convert_to_standard(run_data), achievements, achievements_progress)
+            run_id = run_data["run_id"]
+            try:
+                achievements_utils.check_data(run_data)
+                process_run(achievements_utils.convert_to_standard(run_data), achievements, achievements_progress)
+                id_list.append(run_id)
+            except:
+                failed.append(run_id)
         
         place_in_database(cursor, achievements_progress)
-        set_all_sprint_runs(cursor)
+        set_all_sprint_runs(cursor, id_list)
+
+        print("Failed to consider run_id {}".format(failed))
 
         conn.commit()
         conn.close()

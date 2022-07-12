@@ -16,143 +16,9 @@ from pymysql.cursors import DictCursor
 import json
 
 
-"""
-This is what data looks like after processing
-"""
-test_data_1 = {
-    "end_time": "2022-05-27T10:22:25.446000",
-    "path": [
-      {
-        "article": "45 (number)",
-        "loadTime": 0.169,
-        "timeReached": 0.169
-      },
-      {
-        "article": "46 (number)",
-        "loadTime": 0.135,
-        "timeReached": 1.887
-      }
-    ],
-    "version": "2.1",
-    "play_time": 1.583,
-    "run_id": 11631,
-    "start_time": "2022-05-27T10:22:23.559000",
-    "user_id": 5,
-    "username": "dan"
-}
-
-test_data_2 = {
-    "end_time": "2022-05-27T10:22:25.446000",
-    "path": [
-      {
-        "article": "Wikipedia",
-        "loadTime": 0.169,
-        "timeReached": 0.169
-      },
-      {
-        "article": "United States",
-        "loadTime": 0.135,
-        "timeReached": 1.887
-      },
-      {
-        "article": "McDonald's",
-        "loadTime": 0.111,
-        "timeReached": 3.193
-      }
-    ],
-    "version": "2.1",
-    "play_time": 1.583,
-    "run_id": 11631,
-    "start_time": "2022-05-27T10:22:23.559000",
-    "user_id": 5,
-    "username": "dan"
-}
-
-test_data_3 = {
-    "end_time": "2022-05-27T10:22:25.446000",
-    "path": [
-      {
-        "article": "Jennifer Aniston",
-        "loadTime": 0.169,
-        "timeReached": 0.169
-      },
-      {
-        "article": "Courteney Cox",
-        "loadTime": 0.135,
-        "timeReached": 1.887
-      }
-    ],
-    "version": "2.1",
-    "play_time": 1.583,
-    "run_id": 11631,
-    "start_time": "2022-05-27T10:22:23.559000",
-    "user_id": 5,
-    "username": "dan"
-}
-
-test_data_4 = {
-    "end_time": "2022-05-27T10:22:25.446000",
-    "path": [
-      {
-        "article": "Lisa Kudrow",
-        "loadTime": 0.169,
-        "timeReached": 0.169
-      },
-      {
-        "article": "Matt LeBlanc",
-        "loadTime": 0.135,
-        "timeReached": 1.887
-      }
-    ],
-    "version": "2.1",
-    "play_time": 1.583,
-    "run_id": 11631,
-    "start_time": "2022-05-27T10:22:23.559000",
-    "user_id": 5,
-    "username": "dan"
-}
-
-test_data_5 = {
-    "end_time": "2022-05-27T10:22:25.446000",
-    "path": [
-      {
-        "article": "Matthew Perry",
-        "loadTime": 0.169,
-        "timeReached": 0.169
-      },
-      {
-        "article": "David Schwimmer",
-        "loadTime": 0.135,
-        "timeReached": 1.887
-      }
-    ],
-    "version": "2.1",
-    "play_time": 1.583,
-    "run_id": 11631,
-    "start_time": "2022-05-27T10:22:23.559000",
-    "user_id": 5,
-    "username": "dan"
-}
-
-
-
-"""
-This is what data might look like in the database
-"""
-actual_data = {
-    "end_time": "2022-05-27T10:22:25.446000",
-    "path": '{"path": [{"article": "45 (number)","loadTime": 0.169,"timeReached": 0.169},{"article": "46 (number)","loadTime": 0.135,"timeReached": 1.887}],"version": "2.1"}',
-    "play_time": 1.583,
-    "run_id": 11631,
-    "start_time": "2022-05-27T10:22:23.559000",
-    "user_id": 3,
-    "username": "dan"
-}
-
-
-def version_2_1(test_data: Any) -> Dict[str, Any]:
-    path = json.loads(test_data["path"])
-    actual_data = dict.copy(test_data)
+def version_2_1(raw_data: Dict[str, Any]) -> Dict[str, Any]:
+    path = json.loads(raw_data["path"])
+    actual_data = dict.copy(raw_data)
     actual_data["path"] = path["path"]
     actual_data["version"] = path["version"]
     return actual_data
@@ -164,18 +30,21 @@ def get_version_map():
         "2.1": version_2_1
     }
 
-def convert_to_standard(test_data: Dict[str, Any]) -> Dict[str, Any]:
+def convert_to_standard(raw_data: Dict[str, Any]) -> Dict[str, Any]:
     version_map = get_version_map()
-    path = json.loads(test_data["path"])
+    path = json.loads(raw_data["path"])
     version = path["version"]
-    return version_map[version](test_data)
+    return version_map[version](raw_data)
 
-
+def check_data(raw_data: Dict[str, Any]) -> None:
+    valid = raw_data["finished"] and raw_data["user_id"]
+    if not valid:
+        raise Exception("The run_data provided is incomplete for achievements")
+    
 
 
 ReturnType = Tuple[bool, Any, Optional[int]]
 AchievementFunction = Callable[[Dict[str, Any], Dict[str, int], str], ReturnType]
-
 
 
 """
@@ -245,6 +114,7 @@ and makes updates to database accordingly
 """
 def get_and_update_new_achievements(cursor: DictCursor, raw_run_data: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     
+    check_data(raw_run_data)
     single_run_data = convert_to_standard(raw_run_data)
 
     achievements = get_achievements_info(cursor)
