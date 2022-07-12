@@ -32,15 +32,10 @@ testData = {
 }
 
 
-@pytest.fixture
-def add_achievements(cursor):
-    wikispeedruns.achievements.add_all_achievements(cursor)
-    yield
-    assert 0 != cursor.execute("DELETE FROM list_of_achievements")
-
-
-
 def test_achievement(cursor, client, user):
+
+    # add all achievements to the database
+    wikispeedruns.achievements.add_all_achievements(cursor)
 
     # Set up a prompt and a run, get the run_id
     query = "INSERT INTO sprint_prompts (prompt_id, start, end) VALUES (%s, %s, %s);"
@@ -76,3 +71,4 @@ def test_achievement(cursor, client, user):
     client.post("/api/users/logout")
     cursor.execute(f"DELETE FROM sprint_runs WHERE run_id={run_id}")
     cursor.execute("DELETE FROM sprint_prompts WHERE prompt_id={}".format(PROMPT_A["prompt_id"]))
+    cursor.execute("DELETE FROM list_of_achievements")
