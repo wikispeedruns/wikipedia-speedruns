@@ -1,15 +1,15 @@
 import pytest
 import wikispeedruns
 
-PROMPT = {
+PROMPT_A = {
         "start" : "Wikipedia",
         "end" : "YouTube",
         "prompt_id": 30
-        }
+}
 
 testData = {
     "end_time": "2022-05-27T10:22:25.446000",
-    "path": """
+    "path": {
         'path':[
         {
             'article': 'Wikipedia',
@@ -23,7 +23,7 @@ testData = {
         }
         ],
         'version': '2.1'
-        """,
+    },
     "play_time": 1.583,
     "finished": 1,
     "run_id": 11631,
@@ -43,7 +43,7 @@ def test_achievement(cursor, client, user):
 
     # Set up a prompt and a run, get the run_id
     query = "INSERT INTO sprint_prompts (prompt_id, start, end) VALUES (%s, %s, %s);"
-    cursor.execute(query, (PROMPT["prompt_id"], PROMPT["start"], PROMPT["end"]))
+    cursor.execute(query, (PROMPT_A["prompt_id"], PROMPT_A["start"], PROMPT_A["end"]))
 
     query = """
     INSERT INTO sprint_runs 
@@ -52,7 +52,7 @@ def test_achievement(cursor, client, user):
     (%s, %s, %s, %s, %s, %s, %s);
     """
     data = (testData["start_time"], testData["end_time"], testData["play_time"], 
-    testData["finished"], testData["path"], PROMPT["prompt_id"], user["user_id"] 
+    testData["finished"], testData["path"], PROMPT_A["prompt_id"], user["user_id"] 
     )
     cursor.execute(query, data)
     run_id = cursor.lastrowid
@@ -74,4 +74,4 @@ def test_achievement(cursor, client, user):
     query = "DELETE FROM achievements_progress"
     client.post("/api/users/logout")
     cursor.execute(f"DELETE FROM sprint_runs WHERE run_id={run_id}")
-    cursor.execute("DELETE FROM sprint_prompts WHERE prompt_id={}".format(PROMPT["prompt_id"]))
+    cursor.execute("DELETE FROM sprint_prompts WHERE prompt_id={}".format(PROMPT_A["prompt_id"]))
