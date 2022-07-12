@@ -3,24 +3,27 @@ import wikispeedruns
 
 PROMPT = {
         "start" : "Wikipedia",
-        "end" : "YouTube", 
-        "prompt_id": 1
-}
+        "end" : "YouTube",
+        "prompt_id": 30
+        }
 
 testData = {
     "end_time": "2022-05-27T10:22:25.446000",
-    "path": [
-      {
-        "article": "Wikipedia",
-        "loadTime": 0.169,
-        "timeReached": 0.169
-      },
-      {
-        "article": "Youtube",
-        "loadTime": 0.135,
-        "timeReached": 1.887
-      }
-    ],
+    "path": """
+        'path':[
+        {
+            'article': 'Wikipedia',
+            'loadTime': 0.169,
+            'timeReached': 0.169
+        },
+        {
+            'article': 'Youtube',
+            'loadTime': 0.135,
+            'timeReached': 1.887
+        }
+        ],
+        'version': '2.1'
+        """,
     "play_time": 1.583,
     "finished": 1,
     "run_id": 11631,
@@ -35,8 +38,10 @@ def add_achievements(cursor):
     assert 0 != cursor.execute("DELETE FROM list_of_achievements")
 
 
-@pytest.fixture
-def run_id(cursor, user):
+
+def test_achievement(cursor, client, user):
+
+    # Set up a prompt and a run, get the run_id
     query = "INSERT INTO sprint_prompts (prompt_id, start, end) VALUES (%s, %s, %s);"
     cursor.execute(query, (PROMPT["prompt_id"], PROMPT["start"], PROMPT["end"]))
 
@@ -50,16 +55,13 @@ def run_id(cursor, user):
     testData["finished"], testData["path"], PROMPT["prompt_id"], user["user_id"] 
     )
     cursor.execute(query, data)
+    run_id = cursor.lastrowid
 
-    yield cursor.lastrowid
-
-    cursor.execute("DELETE FROM sprint_runs")
-    cursor.execute("DELETE FROM sprint_prompts")
-
-
-def test_process_run(cursor, client, user, run_id):
+    # Make sure currently we are logged in
     resp = client.post("/api/users/login", json={"username": user["username"], "password": user["password"]})
 
+
+    # Go through some achievements procedure
     resp = client.get(f"/api/achievements/process/{run_id}")
     assert resp.status_code == 200
 
@@ -67,7 +69,9 @@ def test_process_run(cursor, client, user, run_id):
     assert resp.status_code == 200
     assert resp.json["meta"]["achieved"] # achievement to reach Wikipedia
 
-    query = "DELETE FROM achievements_progress"
-    assert 0 != cursor.execute(query)
 
+    # delete everything added here
+    query = "DELETE FROM achievements_progress"
     client.post("/api/users/logout")
+    cursor.execute(f"DELETE FROM sprint_runs WHERE run_id={run_id}")
+    cursor.execute("DELETE FROM sprint_prompts WHERE prompt_id={}".format(PROMPT["prompt_id"]))
