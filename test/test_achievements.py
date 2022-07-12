@@ -1,5 +1,6 @@
 import pytest
 import wikispeedruns
+import json
 
 PROMPT_A = {
         "start" : "Wikipedia",
@@ -45,17 +46,17 @@ def test_achievement(cursor, client, user):
     query = "INSERT INTO sprint_prompts (prompt_id, start, end) VALUES (%s, %s, %s);"
     cursor.execute(query, (PROMPT_A["prompt_id"], PROMPT_A["start"], PROMPT_A["end"]))
 
+    run_id = testData["run_id"]
     query = """
     INSERT INTO sprint_runs 
-    (start_time, end_time, play_time, finished, path, prompt_id, user_id)
+    (run_id, start_time, end_time, play_time, finished, path, prompt_id, user_id)
     VALUES
-    (%s, %s, %s, %s, %s, %s, %s);
+    (%s, %s, %s, %s, %s, %s, %s, %s);
     """
-    data = (testData["start_time"], testData["end_time"], testData["play_time"], 
-    testData["finished"], testData["path"], PROMPT_A["prompt_id"], user["user_id"] 
+    data = (run_id, testData["start_time"], testData["end_time"], testData["play_time"], 
+    testData["finished"], json.dumps(testData["path"]), PROMPT_A["prompt_id"], user["user_id"] 
     )
     cursor.execute(query, data)
-    run_id = cursor.lastrowid
 
     # Make sure currently we are logged in
     resp = client.post("/api/users/login", json={"username": user["username"], "password": user["password"]})
