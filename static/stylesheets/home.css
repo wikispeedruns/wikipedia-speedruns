@@ -9,7 +9,7 @@
 	height: 40px;
 	border-radius: 50%;
 	font-size: 25px;
-	margin-right: 10px;
+	margin: 0 5px;
 	transition: all 0.2s ease-in-out;
 	display: flex;
 	justify-content: center;
@@ -21,20 +21,28 @@
 	align-items: center;
 }
 
-.social-menu a {
-	text-decoration: none;
+.social-menu :is(a, a:hover, a:hover *) {
+	text-decoration: none !important;
 }
 
 .bi-twitter {
-	background:#1DA1F2
+	background:#1DA1F2;
 }
 
 .bi-discord {
-	background:#7289DA
+	background:#7289DA;
 }
 
 .bi-github {
-	background:#333
+	background:#333;
+}
+
+.bi-box2-heart-fill {
+	background:#F2BD42;
+}
+
+.bi-envelope-fill {
+	background:#D95040;
 }
 
 .social-menu i:hover {
@@ -46,4 +54,29 @@
 	color:red;
 	vertical-align: super;
 	font-size: small;
+}
+
+nav[data-toggle="toc"] {
+  top: 72px;
+}
+
+/* small screens */
+@media (max-width: 768px) {
+  /* override stickyness so that the navigation does not follow scrolling */
+  nav[data-toggle="toc"] {
+    margin-bottom: 42px;
+    position: static;
+  }
+
+  /* PICK ONE */
+  /* don't expand nested items, which pushes down the rest of the page when navigating */
+  nav[data-toggle="toc"] .nav .active .nav {
+    display: none;
+  }
+  /* alternatively, if you *do* want the second-level navigation to be shown (as seen on this page on mobile), use this */
+  /*
+  nav[data-toggle='toc'] .nav .nav {
+    display: block;
+  }
+  */
 }

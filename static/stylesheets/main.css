@@ -1,3 +1,12 @@
+html {
+    scroll-padding-top: 96px;
+}
+
+body {
+    position: relative;
+    overflow-y: auto;
+}
+
 .text-size-1 {
     font-size: 20px;
 }
@@ -139,16 +148,22 @@ details[open] summary {
     margin-bottom: .5em;
 }
 
-.version {
-    vertical-align: sub;
-    padding-top : .5em;
-    
-}
-
-.version-link {
+.version-link, .version-link:hover {
     color: #808080;
+    font-size: 0.75rem;
 }
 
+.no-color, .no-color:hover {
+    color: unset;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.navbar-toggler:focus {
+    box-shadow: unset;
+}
 
 [v-cloak] { display: none }
 
