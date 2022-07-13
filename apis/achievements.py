@@ -10,7 +10,7 @@ from wikispeedruns import achievements
 achievements_api = Blueprint('achievements', __name__, url_prefix='/api/achievements')
 
 
-@achievements_api.get('/process/<int:run_id>')
+@achievements_api.patch('/process/<int:run_id>')
 def process_for_achievements(run_id):
 
     db = get_db()

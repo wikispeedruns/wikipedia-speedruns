@@ -87,7 +87,7 @@ var am = new Vue({
             else{ // This is getting achievements for the current run
                 let localData = JSON.parse(window.localStorage.getItem("lastAchievements"));
                 if(localData === null || localData["run_id"] != RUN_ID){
-                    const response = await fetch('/api/achievements/process/' + RUN_ID);
+                    const response = await fetch('/api/achievements/process/' + RUN_ID, {method: 'PATCH'});
                     let tmpData = await response.json();
                     data = this.convertData(tmpData);
 

@@ -58,7 +58,7 @@ def test_achievement(cursor, client, user):
 
 
     # Go through some achievements procedure
-    resp = client.get(f"/api/achievements/process/{run_id}")
+    resp = client.patch(f"/api/achievements/process/{run_id}")
     assert resp.status_code == 200
 
     resp = client.get("/api/achievements/user")
