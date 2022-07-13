@@ -19,6 +19,10 @@
     display: none;
     margin-left: 10px;
 }
+
+.active-dropdown {
+    display: block !important;
+}
 </style>
 
 
@@ -161,11 +165,18 @@ var app = new Vue({
 
 
         async getLobbyUsers() {
-            const resp = await fetchJson(`/api/lobbys/players/${LOBBY_ID}`, "GET");
-            this.users = await resp.json();
 
-            const resp2 = await fetchJson(`/api/lobbys/anon_players/${LOBBY_ID}`, "GET");
-            this.anon_users = await resp2.json();
+            Promise.all([
+                fetchJson(`/api/lobbys/players/${LOBBY_ID}`, "GET"), 
+                fetchJson(`/api/lobbys/anon_players/${LOBBY_ID}`, "GET")
+            ])
+            .then(responses =>
+                Promise.all(responses.map(res => res.json()))
+            ).then(resp => {
+                this.users = resp[0];
+                this.anon_users = resp[1];
+            }).catch(err => console.log(err));
+
         },
 
         async makeHost(user_id, username) {
@@ -184,6 +195,10 @@ var app = new Vue({
                 console.log(e)
                 alert(e);
             }
+        },
+
+        toggleDropdown(id) {
+            document.getElementById(id).classList.toggle("active-dropdown")
         }
     }
 
@@ -226,21 +241,34 @@ var app = new Vue({
                     <table class="table table-hover">
                         <thead>
                             <th scope="col">Display name</th>
-                            <th scope="col">Host</th>
-                            <th scope="col">Full user</th>
+                            <th scope="col">User type</th>
                             <th scope="col"></th>
                         </thead>
                         <tbody>
                             <tr v-for="user in users" v-cloak>
                                 <td>[[user.username]]</td>
-                                <td><i v-if="user.owner" class="bi bi-check"></i></td>
-                                <td><i class="bi bi-check"></i></td>
-                                <td><button v-if="!user.owner" class="btn btn-link btn-sm" @click="makeHost(user.user_id, user.username)"><small>Make host</small></button></td>
+                                <td>Registered User</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary dropdown-toggle" 
+                                                type="button" 
+                                                data-toggle="dropdown" 
+                                                aria-haspopup="true" 
+                                                aria-expanded="true"
+                                                @click="toggleDropdown(String(user.user_id)+'dropdown')">
+                                            <small>Options</small>
+                                        </button>
+                                        <div class="dropdown-menu" 
+                                            v-bind:id="String(user.user_id)+'dropdown'">
+                                            <button v-if="!user.owner" class="btn btn-sm" @click="makeHost(user.user_id, user.username)">Transfer Ownership</button>
+                                            <button class="btn btn-sm disabled" v-else>Currently host</button>
+                                        </div>
+                                    </div>
+                                </td>
                             </tr>
                             <tr v-for="user in anon_users" v-cloak>
                                 <td>[[user.name]]</td>
-                                <td></td>
-                                <td></td>
+                                <td>Anonymous User</td>
                                 <td></td>
                             </tr>
                         </tbody>
