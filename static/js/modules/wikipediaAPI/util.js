@@ -48,8 +48,11 @@ async function articleCheck(title) {
     const cats = body['query']['pages'][id]['categories']
 
     for (const cat of cats) {
-        if (cat['title'].toLowerCase().includes('disambiguation')) {
-            return {warning: `ERROR: \'${title}\' is a disambiguation page, may be impossible to reach. Try checking the full title of the intended article on Wikipedia.`}
+        if (cat['title'] === "Category:All article disambiguation pages" || 
+            cat['title'] === "Category:All disambiguation pages" || 
+            cat['title'] === "Category:Disambiguation pages" || 
+            cat['title'] === "Category:Disambiguation pages with short descriptions" ) {
+            return {warning: `ERROR: \'${title}\' is a disambiguation page and may be impossible to reach. Try checking the full title of the intended article on Wikipedia.`}
         }
     }
 
