@@ -453,8 +453,25 @@ def reset_password():
 @check_user
 def delete_account():
     """
-        Given the password and user_id, delete the account
+        Delete the account of the user in session
     """
+    
+    query = """
+    delete from historical_ratings where user_id = 45;
+    delete from ratings where user_id = 45;
+    delete from lobby_runs where user_id = 45;
+    delete from sprint_runs where user_id = 45;
+    delete from marathonruns where user_id = 45;
+    """
+    
+    id = session["user_id"]
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        # Query for user and check password
+        result = cursor.execute(delete_query, (id, ))
+        db.commit()
+    
 
     return "Not implemented", 500
 

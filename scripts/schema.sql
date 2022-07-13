@@ -82,7 +82,8 @@ CREATE TABLE IF NOT EXISTS `marathonruns` (
     `user_id` INT,
     `finished` BOOLEAN DEFAULT 1,
     `total_time` FLOAT(10) NOT NULL,
-    PRIMARY KEY (`run_id`)
+    PRIMARY KEY (`run_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
 );
 
 -- Tables for private lobbys
