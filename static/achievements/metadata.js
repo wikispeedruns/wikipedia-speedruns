@@ -33,7 +33,7 @@ var achievement_list = {
         description: "Visit \"Volkswagen emissions scandal\""
     },
     "love_nwantiti": {
-        display_name: "Taking over the internet",
+        display_name: "Taking over the Internet",
         description: "Visit \"Love Nwantiti\""
     },
     "conspiracy_theory": {
@@ -49,7 +49,7 @@ var achievement_list = {
         description: "Visit \"Sparta\""
     },
     "simba": {
-        display_name: "Mufasa would be proud",
+        display_name: "Mufasa Would be Proud",
         description: "Visit \"Simba\""
     },
     "how_bizarre": {
@@ -57,7 +57,7 @@ var achievement_list = {
         description: "Visit \"One-hit wonder\""
     },
     "gateway_to_the_world": {
-        display_name: "Gateway to the world",
+        display_name: "Gateway to the World",
         description: "Visit \"List of sovereign states\""
     },
     "you_lost": {
@@ -95,7 +95,7 @@ var achievement_list = {
     },
     "are_you_still_watching": {
         display_name: "Are You Still Watching?",
-        description: "Remain on a single page for 1 hour during run"
+        description: "Remain on a single page for 1 hour during a run"
     },
     "avengers": {
         display_name: "Avengers, Assemble!",
@@ -110,7 +110,7 @@ var achievement_list = {
         description: "Visit 50 unique pages in a single game"
     },
     "back_so_soon": {
-        display_name: "Back so soon?",
+        display_name: "Back so Soon?",
         description: "Visit 3 different \"Sack of Rome\" pages in the same run"
     },
     "mcdonalds": {
@@ -118,12 +118,12 @@ var achievement_list = {
         description: "Visit the page for \"McDonald's\" 10 times"
     },
     "mouthful": {
-        display_name: "What a mouthful!",
+        display_name: "What a Mouthful!",
         description: "Visit a page that has a word with more than 25 characters in its title",
         hidden: "true"
     },
     "lightning_round": {
-        display_name: "Lightning round",
+        display_name: "Lightning Round",
         description: "Finish a game under 15 seconds"
     },
     "around_the_world": {
