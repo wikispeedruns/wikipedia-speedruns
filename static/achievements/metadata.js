@@ -62,7 +62,7 @@ var achievement_list = {
     },
     "you_lost": {
         display_name: "You Lost?",
-        description: "land on the same page 2 times in the same game"
+        description: "Land on the same page 2 times in the same game"
     },
     "fastest_gun_alive": {
         display_name: "Fastest Gun Alive",
@@ -107,7 +107,7 @@ var achievement_list = {
     },
     "marathon": {
         display_name: "Marathon",
-        description: "Visit 50 unique pages in single game"
+        description: "Visit 50 unique pages in a single game"
     },
     "back_so_soon": {
         display_name: "Back so soon?",
@@ -124,7 +124,7 @@ var achievement_list = {
     },
     "lightning_round": {
         display_name: "Lightning round",
-        description: "finish a game under 15 seconds"
+        description: "Finish a game under 15 seconds"
     },
     "around_the_world": {
         display_name: "Around the World in 80 Seconds",

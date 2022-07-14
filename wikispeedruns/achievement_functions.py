@@ -146,7 +146,7 @@ def around_the_world_in_80_seconds(single_run_data: Dict[str, Any], single_run_a
 
         article = path[i]["article"]
         i += 1
-        
+
         if article in article_set:
             current_map[article] -= 1
             if current_map[article] == 0:

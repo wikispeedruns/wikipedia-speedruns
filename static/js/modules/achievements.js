@@ -28,7 +28,7 @@ var achievement = {
         }
 
         if (this.achieved) {
-            this.progress = "Achieved " + moment(this.achievementdata['time_reached']).fromNow()
+            this.progress = "Achieved " + moment.utc(this.achievementdata['time_reached']).fromNow()
         } else if (this.multirun) {
             this.progress = String((this.achievementdata['reached'] / this.achievementdata['out_of'] * 100.0).toFixed(1))+"%"
         }
