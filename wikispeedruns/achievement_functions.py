@@ -145,10 +145,13 @@ def around_the_world_in_80_seconds(single_run_data: Dict[str, Any], single_run_a
             break
 
         article = path[i]["article"]
-        current_map[article] -= 1
-        if current_map[article] == 0:
-            del current_map[article]
-    
+        i += 1
+        
+        if article in article_set:
+            current_map[article] -= 1
+            if current_map[article] == 0:
+                del current_map[article]
+
     return shortest_time <= 80, None, None
 
 
