@@ -172,3 +172,52 @@ def get_user_lobbies():
     lobbies = lobbys.get_user_lobbys(user_id)
     
     return jsonify(lobbies), 200
+
+
+@lobby_api.get("/players/<int:lobby_id>")
+@check_user
+def get_lobby_users(lobby_id):
+    
+    user_id = session.get("user_id")
+    
+    user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
+    if user_info is None or not user_info["owner"]:
+        return "Only the host can check the list of lobby users", 401
+    
+    return jsonify(lobbys.get_lobby_users(lobby_id)), 200
+
+
+@lobby_api.get("/anon_players/<int:lobby_id>")
+@check_user
+def get_lobby_anon_users(lobby_id):
+    
+    user_id = session.get("user_id")
+    
+    user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
+    if user_info is None or not user_info["owner"]:
+        return "Only the host can check the list of lobby users", 401
+    
+    return jsonify(lobbys.get_lobby_anon_users(lobby_id)), 200
+
+
+
+@lobby_api.patch("/change_host/<int:lobby_id>")
+@check_user
+@check_request_json({"target_user_id": int})
+def change_lobby_host(lobby_id):
+    
+    user_id = session.get("user_id")
+    target_user_id = request.json["target_user_id"]
+    
+    user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
+    if user_info is None or not user_info["owner"]:
+        return "Only the host can change host to another user", 401
+    
+    if user_id == target_user_id:
+        return "User is already lobby host!", 400
+    if not lobbys.check_other_membership(lobby_id, target_user_id):
+        return "Target user is not a member of this lobby", 400
+    
+    lobbys.change_lobby_host(lobby_id, target_user_id)
+    
+    return "Lobby host changed successfully", 200
