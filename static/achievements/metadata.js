@@ -128,7 +128,7 @@ var achievement_list = {
     },
     "around_the_world": {
         display_name: "Around the World in 80 Seconds",
-        description: "Visit the page for each continent within 80 seconds"
+        description: "Visit the page for each continent within 80 seconds. (\"North America\", \"South America\", \"Asia\", \"Europe\", \"Africa\", \"Australia (continent)\", \"Antarctica\")"
     }
 };
 
