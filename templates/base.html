@@ -30,14 +30,20 @@
         {% block head %}{% endblock %}
     </head>
 
-    <body data-bs-spy="scroll" data-bs-target="#toc" data-bs-offset="120">
+    <body data-bs-spy="scroll" data-bs-target="#toc" data-bs-offset="144">
         <nav id="nav" class="navbar navbar-expand-md sticky-top bg-body">
             <div class="container-xxl py-2">
 
-                <span class="navbar-brand">
-                    <a href="/">Wikipedia Speedruns</a>
+                <div class="navbar-brand d-flex align-items-end">
+                    <a href="/" class="d-flex align-items-center text-center">
+                        <img src="/static/assets/wslogo.svg" alt="" height="45">
+                        <div class="d-flex flex-column">
+                            <img src="/static/assets/wikipedia.svg" alt="" height="25">
+                            <strong class="localized-slogan">Speedruns</strong>
+                        </div>
+                    </a>
                     <a href="/devblog" class="version-link">V. 0.1</a>
-                </span>
+                </div>
                 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                     <span class="navbar-toggler-icon"></span>

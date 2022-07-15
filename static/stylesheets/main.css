@@ -1,5 +1,5 @@
 html {
-    scroll-padding-top: 96px;
+    scroll-padding-top: 120px;
 }
 
 body {
@@ -167,3 +167,9 @@ details[open] summary {
 
 [v-cloak] { display: none }
 
+.localized-slogan {
+    font-family: Linux Libertine,Georgia,Times,serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    font-feature-settings: "ss05";
+}
