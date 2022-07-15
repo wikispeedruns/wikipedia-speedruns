@@ -14,7 +14,7 @@ var achievement = {
             display_text: '',
             imgpath: this.basepath,
             achieved: this.achievementdata['achieved'],
-            multirun: this.achievementdata['out_of'] ? true : false,
+            multirun: this.achievementdata['out_of'] != 1,
             progress: ''
         }
     },

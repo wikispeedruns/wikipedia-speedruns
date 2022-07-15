@@ -121,12 +121,20 @@ def around_the_world_in_80_seconds(single_run_data: Dict[str, Any], single_run_a
     article_set = {"North America", "South America", "Asia", "Europe", "Africa", "Australia (continent)", "Antarctica"}
     path = single_run_data["path"]
 
+    # only contains the required articles
     current_map: Dict[str, int] = {}
     shortest_time = float("inf")
     load_time_sum = 0.0
     i, j, n = 0, 0, len(path)
 
+    # Sliding Window Algorithm
+    # for each left index (i), finds the leftmost right index (j) that contains all required articles and considers it
+    # If we move the left index forward (e.g. shrink the window), the right index can either stay the same or move forward
+    # it can never shrink to the left 
+
     while i < n:
+
+        # moves the right pointer forward until all articles are contained or there are no articles left
         while j < n and len(current_map) < len(article_set):
             article = path[j]["article"]
             if article in article_set:
@@ -137,13 +145,15 @@ def around_the_world_in_80_seconds(single_run_data: Dict[str, Any], single_run_a
             load_time_sum += path[j]["loadTime"]
             j += 1
 
+        # all articles are contained in this window
         if len(current_map) == len(article_set):
+            # subtracts out the loadTime, adds the first one since it doesn't actually count
             shortest_time = min(shortest_time, 
             path[j-1]["timeReached"] - path[i]["timeReached"] - load_time_sum + path[i]["loadTime"])
-            # add load_time of the first article since it doesn't count in the time wasted for load_time
         else:
             break
 
+        # move the left pointer forward for next iteration
         article = path[i]["article"]
         i += 1
 
