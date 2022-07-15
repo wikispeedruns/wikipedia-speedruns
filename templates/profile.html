@@ -35,6 +35,9 @@
         v-bind:list="list"
         v-bind:achievements="data"
         v-bind:basepath="'{{url_for('static', filename='achievements/icons/')}}'"
+        v-bind:profile="isProfile"
+        v-bind:total="total"
+        v-bind:achieved="achieved"
     ></achievement-table>
 </div>
 

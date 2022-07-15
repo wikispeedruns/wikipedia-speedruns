@@ -46,6 +46,13 @@ var am = new Vue({
     data: {
         list: achievement_list,
         data: {},
+        isProfile: null,
+
+        // These are specific for the profile page
+        total: null,
+        achieved: null,
+
+        // These are specific for a finished run
         empty: true,
         loggedIn: false,
         lobbyId: null
@@ -63,11 +70,18 @@ var am = new Vue({
 
         convertData: function(oldData){
             let data = [];
+            let total = 0, achieved = 0;
             for(const [name, object] of Object.entries(oldData)){
                 let newObject = object;
                 newObject["name"] = name;
                 data.push(newObject);
+
+                if(newObject["achieved"]) achieved ++;
+                total ++;
             }
+
+            this.total = total;
+            this.achieved = achieved;
             return data;
         },
 
@@ -79,12 +93,14 @@ var am = new Vue({
 
             let data = null;
             if(dataType == 'all'){ // This is getting all achievements for data
+                this.isProfile = true;
                 const response = await fetch('/api/achievements/user');
                 let tmpData = await response.json();
                 data = this.convertData(tmpData);
                 data.sort(default_cmp);
             }
             else{ // This is getting achievements for the current run
+                this.isProfile = false;
                 let localData = JSON.parse(window.localStorage.getItem("lastAchievements"));
                 if(localData === null || localData["run_id"] != RUN_ID){
                     const response = await fetch('/api/achievements/process/' + RUN_ID, {method: 'PATCH'});

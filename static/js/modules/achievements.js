@@ -11,14 +11,20 @@ var achievement = {
 
     data: function () {
         return {
+            display_text: '',
             imgpath: this.basepath,
             achieved: this.achievementdata['achieved'],
-            multirun: this.achievementdata['out_of'] ? true : false,
+            multirun: this.achievementdata['out_of'] != 1,
             progress: ''
         }
     },
 
     created: function () {
+        this.display_text = this.$props.display_name;
+        if (this.hidden){
+            this.display_text += ' - (Hidden)';
+        }
+
         if (!this.achieved) {
             this.imgpath += 'locked200px.png'
         } else if (this.img) {
@@ -28,7 +34,7 @@ var achievement = {
         }
 
         if (this.achieved) {
-            this.progress = "Achieved " + moment(this.achievementdata['time_reached']).fromNow()
+            this.progress = "Achieved " + moment.utc(this.achievementdata['time_reached']).fromNow()
         } else if (this.multirun) {
             this.progress = String((this.achievementdata['reached'] / this.achievementdata['out_of'] * 100.0).toFixed(1))+"%"
         }
@@ -41,7 +47,7 @@ var achievement = {
                 <b class="text-muted">Hidden achievement...</b>
             </td>
             <td v-else>
-                <b>{{display_name}}</b><br>{{description}}
+                <b>{{display_text}}</b><br>{{description}}
             </td>
             <td v-if="achieved || (multirun && !hidden)"><small class="text-muted">{{progress}}</small></td>
             <td v-else></td>
@@ -54,7 +60,10 @@ var achievement_table = {
     props: [
         "list",
         "achievements", //array of achieved names,
-        "basepath"
+        "basepath",
+        "profile",
+        "total",
+        "achieved"
     ],
 
     components: {
@@ -66,11 +75,16 @@ var achievement_table = {
         //console.log(this.list)
     },
 
+    //Achievements - {{achieved}}/{{total}}
+
     template: (`
     <div class="col-sm-10">
         <div class="card">
             <div class="card-body">
             <table class="table table-hover">
+                <thead v-if="profile">
+                    <td colspan=4><h3>Achievements - {{achieved}}/{{total}} Unlocked</h3></td>
+                </thead>
                 <tbody>
                 <achievement v-for="item in achievements" v-bind:key="item.name"
                     v-bind:display_name="list[item.name]['display_name']"
