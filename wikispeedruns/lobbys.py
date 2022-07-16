@@ -1,6 +1,7 @@
 from cProfile import run
 from datetime import datetime
 import json
+from os import remove
 from typing import List, Literal, Tuple, TypedDict, Optional
 from unittest import result
 
@@ -29,6 +30,13 @@ def check_membership(lobby_id: int, session: dict) -> bool:
 
     # lobby_id gets converted to string in session when creating cookie apparently
     if "lobbys" in session and session["lobbys"].get(str(lobby_id)) is not None:
+        return True
+
+    return False
+
+
+def check_other_membership(lobby_id: int, target_user_id: int) -> bool:
+    if get_lobby_user_info(lobby_id, target_user_id) is not None:
         return True
 
     return False
@@ -249,4 +257,65 @@ def get_user_lobbys(user_id: int):
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, query_args)
         results = cursor.fetchall()
+        return results
+
+
+def change_lobby_host(lobby_id: int, target_user_id: int):
+    remove_host_query = """
+    UPDATE user_lobbys
+    SET owner=0
+    WHERE owner=1 AND lobby_id=%(lobby_id)s
+    """
+
+    set_host_query = """
+    UPDATE user_lobbys
+    SET owner=1
+    WHERE user_id=%(target_user_id)s AND lobby_id=%(lobby_id)s
+    """
+    
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute(remove_host_query, {
+            "lobby_id": lobby_id,
+        })
+
+        cursor.execute(set_host_query, {
+            "target_user_id": target_user_id, 
+            "lobby_id": lobby_id
+        })
+        db.commit()
+
+        return True    
+
+
+
+def get_lobby_users(lobby_id: int):
+    query = """
+    SELECT DISTINCT users.username, users.user_id, owner FROM user_lobbys
+    LEFT JOIN users ON user_lobbys.user_id = users.user_id
+    WHERE lobby_id=%s
+    """
+    
+    db = get_db()
+
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (lobby_id,))
+        results = cursor.fetchall()
+        
+        return results
+    
+    
+    
+def get_lobby_anon_users(lobby_id: int):
+    query = """
+    SELECT DISTINCT name FROM lobby_runs
+    WHERE lobby_id=%s AND user_id IS NULL
+    """
+    
+    db = get_db()
+
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (lobby_id,))
+        results = cursor.fetchall()
+        
         return results

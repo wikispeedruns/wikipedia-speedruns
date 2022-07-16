@@ -19,6 +19,10 @@
     display: none;
     margin-left: 10px;
 }
+
+.active-dropdown {
+    display: block !important;
+}
 </style>
 
 
@@ -56,6 +60,9 @@ var app = new Vue({
 
         editPrompts: false,
         selectedPrompts: new Set(),
+
+        users: null,
+        anon_users: null,
     },
 
 
@@ -94,6 +101,10 @@ var app = new Vue({
         async getLobbyInfo() {
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}`);
             this.lobbyInfo = await resp.json();
+
+            if (this.lobbyInfo.user.owner) {
+                await this.getLobbyUsers();
+            }
         },
 
         async getPrompts() {
@@ -150,6 +161,44 @@ var app = new Vue({
             this.editPrompts = false;
             this.clearSelectedPrompts();
             this.getPrompts();
+        },
+
+
+        async getLobbyUsers() {
+
+            Promise.all([
+                fetchJson(`/api/lobbys/players/${LOBBY_ID}`, "GET"), 
+                fetchJson(`/api/lobbys/anon_players/${LOBBY_ID}`, "GET")
+            ])
+            .then(responses =>
+                Promise.all(responses.map(res => res.json()))
+            ).then(resp => {
+                this.users = resp[0];
+                this.anon_users = resp[1];
+            }).catch(err => console.log(err));
+
+        },
+
+        async makeHost(user_id, username) {
+            if (!confirm(`Are you sure you want to make ${username} the lobby host?`)) {
+                return; 
+            }
+
+            try {
+                const resp = await fetchJson(`/api/lobbys/change_host/${LOBBY_ID}`, "PATCH", {
+                    "target_user_id": user_id,
+                });
+                
+                alert(`${username} is now host!`);
+                window.location.reload();
+            } catch (e) {
+                console.log(e)
+                alert(e);
+            }
+        },
+
+        toggleDropdown(id) {
+            document.getElementById(id).classList.toggle("active-dropdown")
         }
     }
 
@@ -177,10 +226,58 @@ var app = new Vue({
         <span id="custom-tooltip" ref="shareTooltip">Copied invite to clipboard!</span>
     </div>
 
+    
 
     <template v-if="lobbyInfo.user.owner">
+
         <hr>
-        <h4>Manage: Add a prompt</h4>
+
+        <h3>Lobby settings</h4>
+
+        <details>
+            <summary>List of players</summary>
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <th scope="col">Display name</th>
+                            <th scope="col">User type</th>
+                            <th scope="col"></th>
+                        </thead>
+                        <tbody>
+                            <tr v-for="user in users" v-cloak>
+                                <td>[[user.username]]</td>
+                                <td>Registered User</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary dropdown-toggle" 
+                                                type="button" 
+                                                data-toggle="dropdown" 
+                                                aria-haspopup="true" 
+                                                aria-expanded="true"
+                                                @click="toggleDropdown(String(user.user_id)+'dropdown')">
+                                            <small>Options</small>
+                                        </button>
+                                        <div class="dropdown-menu" 
+                                            v-bind:id="String(user.user_id)+'dropdown'">
+                                            <button v-if="!user.owner" class="btn btn-sm" @click="makeHost(user.user_id, user.username)">Transfer Ownership</button>
+                                            <button class="btn btn-sm disabled" v-else>Currently host</button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr v-for="user in anon_users" v-cloak>
+                                <td>[[user.name]]</td>
+                                <td>Anonymous User</td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </details>
+
+        <h4 class="py-4">Manage: Add a prompt</h4>
 
         <form id="newPrompt" v-on:submit.prevent="addPrompt">
             <div class="my-2 row">

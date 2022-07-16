@@ -20,7 +20,11 @@
 
 <div id="app">
 
-    <h3 class="mb-4">Welcome<span v-if="username"> back</span> to Wikipedia Speedruns<span  v-cloak v-if="username">, [[username]]</span>! <a href="/about#beta"><span class="beta">BETA*</span></a></h3>
+    <h3 class="mb-4">Welcome<span v-if="username"> back</span> to Wikipedia Speedruns<span  v-cloak v-if="username">, [[username]]</span>!</h3>
+
+    <div class="alert alert-info" v-cloak role="alert" v-if="loggedIn">
+        We've just added <b>achievements</b> to the game! Visit your profile page <a v-bind:href="'/profile/' + username">here</a> to check your current progress. 
+    </div>
 
     <div class="alert alert-warning" v-cloak role="alert" v-html="streakText" v-if="loggedIn && streakText"></div>
 
@@ -207,8 +211,9 @@
             <a href="https://bricehalder.com/">Brice Halder</a>,
             <a href="https://xablexa.com/">Axel Bax</a>,
             <a href="https://www.omfgdogs.com/#">Manan Aggarwal</a>,
-            and <a href="https://en.wikipedia.org/wiki/Melody">Melody</a>
-            <a href="https://en.wikipedia.org/wiki/Xu_(surname_%E5%BE%90)"> Hsu</a>.
+            <a href="https://en.wikipedia.org/wiki/Melody">Melody</a>
+            <a href="https://en.wikipedia.org/wiki/Xu_(surname_%E5%BE%90)"> Hsu</a>,
+            and <a href="https://en.wikipedia.org/wiki/Otaku">Daniel Liu</a>
         </p>
         <p>
             <a href="/about#acknowledgements">Special Thanks and Acknowledgements</a>

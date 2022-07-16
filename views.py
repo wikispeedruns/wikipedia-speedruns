@@ -198,6 +198,12 @@ def get_stats_page():
 def get_labeler_page():
     return render_with_data('admin/categoryLabeler.html')
 
+
+@views.route('/devblog', methods=['GET'])
+def get_devblog_page():
+    return render_with_data('devblog/blog.html')
+
+
 # Error pages
 @views.route('/error', methods=['GET'])
 def get_gen_error_page():
