@@ -106,15 +106,15 @@ var app = new Vue({
             };
 
             try {
-                /*
+                
                 const response = await fetchJson("/api/users/delete_account", 'DELETE', body);
                 if (response.status === 200) {
                     alert("Account has been deleted");
-                    await fetch("/api/users/logout");
+                    await fetch("/api/users/logout", {method : "POST"});
                     window.location.href = "/";
-                } 
-                this.feedbackMsg = await response.text()*/
-                this.feedbackMsg = "Not implemented"
+                } else {
+                    this.feedbackMsg = await response.text()
+                }
             } catch (e) {
                 console.log(e);
             }

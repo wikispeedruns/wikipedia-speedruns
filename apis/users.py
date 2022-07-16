@@ -456,22 +456,79 @@ def delete_account():
         Delete the account of the user in session
     """
     
-    query = """
-    delete from historical_ratings where user_id = 45;
-    delete from ratings where user_id = 45;
-    delete from lobby_runs where user_id = 45;
-    delete from sprint_runs where user_id = 45;
-    delete from marathonruns where user_id = 45;
+    user_query1 = """
+    delete from historical_ratings where user_id = %(user_id)s
+    """
+    user_query2 = """
+    delete from ratings where user_id = %(user_id)s
+    """
+    user_query3 = """
+    delete from sprint_runs where user_id = %(user_id)s
+    """
+    user_query4 = """
+    delete from marathonruns where user_id = %(user_id)s
+    """
+    user_query5 = """
+    delete from lobby_runs where user_id = %(user_id)s
+    """
+    user_query6 = """
+    delete from user_lobbys where user_id = %(user_id)s
+    """
+    user_query7 = """
+    delete from users where user_id = %(user_id)s
+    """
+    
+    delete_lobbies_query1 = """
+    DELETE lobby_runs FROM lobby_runs
+    WHERE lobby_runs.lobby_id = %(lobbies)s
+    """
+    
+    delete_lobbies_query2 = """
+    DELETE user_lobbys FROM user_lobbys
+    WHERE user_lobbys.lobby_id = %(lobbies)s
+    """
+    
+    delete_lobbies_query3 = """
+    DELETE lobby_prompts FROM lobby_prompts
+    WHERE lobby_prompts.lobby_id = %(lobbies)s
+    """
+    
+    delete_lobbies_query4 = """
+    DELETE lobbys FROM lobbys
+    WHERE lobbys.lobby_id = %(lobbies)s
+    """
+    
+    get_hosted_lobbies_query = """
+    select lobby_id from user_lobbys 
+    WHERE user_id=%(user_id)s AND owner = 1
     """
     
     id = session["user_id"]
+    args = {"user_id": id}
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        # Query for user and check password
-        result = cursor.execute(delete_query, (id, ))
+        
+        count = cursor.execute(get_hosted_lobbies_query, args)
+        
+        lobbies = cursor.fetchall()
+        
+        if (count > 0):
+            args["lobbies"] = ','.join([str(x['lobby_id']) for x in lobbies])
+            cursor.execute(delete_lobbies_query1, args)
+            cursor.execute(delete_lobbies_query2, args)
+            cursor.execute(delete_lobbies_query3, args)
+            cursor.execute(delete_lobbies_query4, args)
+        
+        cursor.execute(user_query1, args)
+        cursor.execute(user_query2, args)
+        cursor.execute(user_query3, args)
+        cursor.execute(user_query4, args)
+        cursor.execute(user_query5, args)
+        cursor.execute(user_query6, args)
+        cursor.execute(user_query7, args)
+        
         db.commit()
-    
 
-    return "Not implemented", 500
+    return "User account deleted", 200
 
