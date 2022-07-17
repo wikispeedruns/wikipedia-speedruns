@@ -320,6 +320,7 @@ def change_username():
         except pymysql.Error as e:
             return ("Unknown error", 500)
 
+    session["username"] = new_username
     return "Username Changed", 200
 
 
@@ -486,6 +487,23 @@ def delete_account():
     WHERE user_id=%(user_id)s AND owner = 1
     """
     
+    delete_lobbies_query1 = """
+    DELETE lobby_runs FROM lobby_runs
+    WHERE lobby_runs.lobby_id=%s
+    """
+    delete_lobbies_query2 = """
+    DELETE user_lobbys FROM user_lobbys
+    WHERE user_lobbys.lobby_id=%s
+    """
+    delete_lobbies_query3 = """
+    DELETE lobby_prompts FROM lobby_prompts
+    WHERE lobby_prompts.lobby_id=%s
+    """
+    delete_lobbies_query4 = """
+    DELETE lobbys FROM lobbys
+    WHERE lobbys.lobby_id=%s
+    """
+    
     id = session["user_id"]
     args = {"user_id": id}
 
@@ -495,32 +513,13 @@ def delete_account():
         count = cursor.execute(get_hosted_lobbies_query, args)
         
         lobbies = cursor.fetchall()
+        lobby_ids = [str(x['lobby_id']) for x in lobbies]
         
         if (count > 0):
-            format_string = '('+','.join(['%s'] * count)+')'
-            
-            delete_lobbies_query1 = """
-            DELETE lobby_runs FROM lobby_runs
-            WHERE lobby_runs.lobby_id IN""" + " " + format_string
-            
-            delete_lobbies_query2 = """
-            DELETE user_lobbys FROM user_lobbys
-            WHERE user_lobbys.lobby_id IN""" + " " + format_string
-            
-            delete_lobbies_query3 = """
-            DELETE lobby_prompts FROM lobby_prompts
-            WHERE lobby_prompts.lobby_id IN""" + " " + format_string
-            
-            delete_lobbies_query4 = """
-            DELETE lobbys FROM lobbys
-            WHERE lobbys.lobby_id IN""" + " " + format_string
-    
-            lobby_ids = tuple([str(x['lobby_id']) for x in lobbies])
-            
-            cursor.execute(delete_lobbies_query1, lobby_ids)
-            cursor.execute(delete_lobbies_query2, lobby_ids)
-            cursor.execute(delete_lobbies_query3, lobby_ids)
-            cursor.execute(delete_lobbies_query4, lobby_ids)
+            cursor.executemany(delete_lobbies_query1, lobby_ids)
+            cursor.executemany(delete_lobbies_query2, lobby_ids)
+            cursor.executemany(delete_lobbies_query3, lobby_ids)
+            cursor.executemany(delete_lobbies_query4, lobby_ids)
         
         cursor.execute(user_query1, args)
         cursor.execute(user_query2, args)
