@@ -475,27 +475,10 @@ def delete_account():
     delete from user_lobbys where user_id = %(user_id)s
     """
     user_query7 = """
+    delete from achievements_progress where user_id = %(user_id)s
+    """
+    user_query8 = """
     delete from users where user_id = %(user_id)s
-    """
-    
-    delete_lobbies_query1 = """
-    DELETE lobby_runs FROM lobby_runs
-    WHERE lobby_runs.lobby_id = %(lobbies)s
-    """
-    
-    delete_lobbies_query2 = """
-    DELETE user_lobbys FROM user_lobbys
-    WHERE user_lobbys.lobby_id = %(lobbies)s
-    """
-    
-    delete_lobbies_query3 = """
-    DELETE lobby_prompts FROM lobby_prompts
-    WHERE lobby_prompts.lobby_id = %(lobbies)s
-    """
-    
-    delete_lobbies_query4 = """
-    DELETE lobbys FROM lobbys
-    WHERE lobbys.lobby_id = %(lobbies)s
     """
     
     get_hosted_lobbies_query = """
@@ -514,11 +497,30 @@ def delete_account():
         lobbies = cursor.fetchall()
         
         if (count > 0):
-            args["lobbies"] = ','.join([str(x['lobby_id']) for x in lobbies])
-            cursor.execute(delete_lobbies_query1, args)
-            cursor.execute(delete_lobbies_query2, args)
-            cursor.execute(delete_lobbies_query3, args)
-            cursor.execute(delete_lobbies_query4, args)
+            format_string = '('+','.join(['%s'] * count)+')'
+            
+            delete_lobbies_query1 = """
+            DELETE lobby_runs FROM lobby_runs
+            WHERE lobby_runs.lobby_id IN""" + " " + format_string
+            
+            delete_lobbies_query2 = """
+            DELETE user_lobbys FROM user_lobbys
+            WHERE user_lobbys.lobby_id IN""" + " " + format_string
+            
+            delete_lobbies_query3 = """
+            DELETE lobby_prompts FROM lobby_prompts
+            WHERE lobby_prompts.lobby_id IN""" + " " + format_string
+            
+            delete_lobbies_query4 = """
+            DELETE lobbys FROM lobbys
+            WHERE lobbys.lobby_id IN""" + " " + format_string
+    
+            lobby_ids = tuple([str(x['lobby_id']) for x in lobbies])
+            
+            cursor.execute(delete_lobbies_query1, lobby_ids)
+            cursor.execute(delete_lobbies_query2, lobby_ids)
+            cursor.execute(delete_lobbies_query3, lobby_ids)
+            cursor.execute(delete_lobbies_query4, lobby_ids)
         
         cursor.execute(user_query1, args)
         cursor.execute(user_query2, args)
@@ -527,6 +529,7 @@ def delete_account():
         cursor.execute(user_query5, args)
         cursor.execute(user_query6, args)
         cursor.execute(user_query7, args)
+        cursor.execute(user_query8, args)
         
         db.commit()
 
