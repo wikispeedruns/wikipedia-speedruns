@@ -61,7 +61,8 @@ def get_total_stats(username):
         cursor.execute(query, (username, ))
 
         result = cursor.fetchone()
-        if (result["user_id"] is None): abort(404)
+        if (result["user_id"] is None): 
+            return "Username not found", 404
         result.pop("user_id")
 
 

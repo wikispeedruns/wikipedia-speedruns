@@ -332,10 +332,19 @@ def confirm_email_request():
         Request another email token be sent in as a logged in user, i.e. from profile page
     '''
     id = session["user_id"]
+    
+    check_query = "SELECT `email_confirmed` FROM `users` WHERE `user_id`=%s"
+    
     query = "SELECT `email`, `username` FROM `users` WHERE `user_id`=%s"
 
     db = get_db()
     with db.cursor() as cursor:
+        res = cursor.execute(check_query, (id, ))
+        if (res != 0):
+            email_confirmed = cursor.fetchone()
+            if email_confirmed[0] == 1:
+                return "Email already confirmed", 400
+        
         cursor.execute(query, (id, ))
         (email, username) = cursor.fetchone()
         # TODO throw error?
@@ -370,7 +379,7 @@ def check_email_confirmation():
 
     # user must be logged in to access
     if session["username"] != username:
-        return "false"
+        return "Username does not match session", 400
 
     query = "SELECT `email_confirmed` FROM `users` WHERE `username`=%s"
 
@@ -380,9 +389,9 @@ def check_email_confirmation():
         if (res != 0):
             email_confirmed = cursor.fetchone()
             if email_confirmed[0] == 1:
-                return "true"
+                return "true", 200
 
-    return "false"
+    return "false", 200
 
 
 @user_api.post("/reset_password_request")

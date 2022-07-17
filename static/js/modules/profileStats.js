@@ -2,9 +2,10 @@ import { serverData } from "./serverData.js";
 
 var profileStatsTable = {
 
+    props: ['username'],
+
 	data: function () {
         return {
-            username:"",
             basicStats: {
                 username: {
                     field: "Username",
@@ -35,7 +36,6 @@ var profileStatsTable = {
 	},
 
     created: async function () {
-        this.username = serverData["username"];
         await this.get_data();
     },
 
@@ -44,20 +44,27 @@ var profileStatsTable = {
         async get_data() {
         
             try {
-            let response = await fetch("/api/profiles/" + this.username + "/stats");
-            const runs = await response.json(); 
-        
-            response = await fetch("/api/profiles/" + this.username);
-            const user = await response.json(); 
-        
-            this.basicStats.username.val = this.username;
-            this.basicStats.totalratedruns.val = runs['total_runs'];
-            this.basicStats.promptsplayed.val = runs['total_prompts'];
-            this.basicStats.totalfinishedruns.val = runs['total_completed_runs'];
-            this.basicStats.winratio.val = String(parseInt(runs['total_completed_runs'])*100.0 / parseInt(runs['total_runs'])) + "%"
-            let date = new Date(user['join_date']);
-            this.basicStats.profileage.val = date.toLocaleDateString();
-
+                let response = await fetch("/api/profiles/" + this.username + "/stats");
+                if (response.status != 200) {
+                    alert(await response.text());
+                    window.location.href = "/";
+                }
+                const runs = await response.json(); 
+            
+                response = await fetch("/api/profiles/" + this.username);
+                if (response.status != 200) {
+                    alert(await response.text());
+                    window.location.href = "/";
+                }
+                const user = await response.json(); 
+            
+                this.basicStats.username.val = this.username;
+                this.basicStats.totalratedruns.val = runs['total_runs'];
+                this.basicStats.promptsplayed.val = runs['total_prompts'];
+                this.basicStats.totalfinishedruns.val = runs['total_completed_runs'];
+                this.basicStats.winratio.val = String((parseInt(runs['total_completed_runs'])*100.0 / parseInt(runs['total_runs'])).toFixed(2)) + "%"
+                let date = new Date(user['join_date']);
+                this.basicStats.profileage.val = date.toLocaleDateString();
 
             } catch (error) {
                 console.error(error);
@@ -72,7 +79,7 @@ var profileStatsTable = {
                 <div class="card-body">
                     <table class="table table-striped table-hover">
                         <thead class="thead-light">
-                            <td colspan=2><h4>Basic Profile Stats</h4></td>
+                            <td colspan=2><h4>{{basicStats.username.val}}'s Basic Profile Stats</h4></td>
                         </thead>
                         <tbody>
                             <tr v-for="key in Object.keys(basicStats)" v-bind:key="">

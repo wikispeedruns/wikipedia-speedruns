@@ -42,8 +42,8 @@
               <button type="button" class="list-group-item list-group-item-action" v-on:click="tab='deleteAccount'">Delete account</button>
           </div>
           <div class="list-group my-4">
-            <button v-if="emailConfirmed='true'" type="button" class="list-group-item list-group-item-action" disabled>Email verified <i class="bi bi-check"></i></button>
-            <button v-else type="button" class="list-group-item list-group-item-action" v-on:click="verifyEmail">Verify email</button>
+            <button v-if="emailConfirmed==='true'" type="button" class="list-group-item list-group-item-action" disabled>Email verified <i class="bi bi-check"></i></button>
+            <button v-if="emailConfirmed==='false'" type="button" class="list-group-item list-group-item-action" v-on:click="verifyEmail">Verify email</button>
           </div>
         </div>
       </div>
@@ -51,7 +51,7 @@
 
     <div class="col">
 
-      <profile-stats-table v-show="tab=='basic-stats'"></profile-stats-table>
+      <profile-stats-table v-show="tab=='basic-stats'" v-bind:username="username"></profile-stats-table>
 
       <div v-if="tab=='username'" class="card" v-cloak>
         <div class="card-body">      

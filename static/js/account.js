@@ -80,9 +80,7 @@ var app = new Vue({
             try {
                 const response = await fetchJson("/api/users/change_username", 'POST', body);
                 if (response.status === 200) {
-                    alert("Username changed, please re-login with your new credentials");
-                    await fetch("/api/users/logout");
-                    window.location.href = "/login";
+                    window.location.reload();
                 } 
                 this.feedbackMsg = await response.text()
             } catch (e) {
