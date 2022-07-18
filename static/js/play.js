@@ -68,11 +68,17 @@ let app = new Vue({
         lobbyId: null,
         runId: -1,          //unique ID for the current run. This gets populated upon start of run
 
-        startTime: null,     // The start time of run (ms elapsed since January 1, 1970)
+        startTime: Date.now(),     // The start time of run (ms elapsed since January 1, 1970)
         endTime: null,       // The end time of run (ms elapsed since January 1, 1970)
-        elapsed: 0,
+        countdownTime: 0,  // Time spent in countdown screen (seconds)
+
+        elapsed: 0,             // Total time elapsed in ms (frontend)
         timerInterval: null,
-        totalLoadTime: 0,    // Cumulative load time in seconds
+        
+        offset: Date.now(),           // Offset time since last pause, initially approx. startTime
+        isRunning: false,       // Whether the timer is running
+        milliseconds: 0,        // Current ms since last pause (frontend)
+        savedMilliseconds: 0,   // Cumulative pause times (frontend)
 
         finished: false,     // Flag for whether a game has finished, used for rendering
         started: false,      // Flag for whether a game has started (countdown finished), used for rendering
@@ -112,9 +118,9 @@ let app = new Vue({
             console.log("Not logged in, uploading start of run to local storage")
         }
 
-        this.startTime = Date.now();
+        this.offset = this.startTime;
 
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview);
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview, this.loadCallback);
         await this.renderer.loadPage(this.startArticle);
 
 
@@ -145,14 +151,16 @@ let app = new Vue({
 
             submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
         },
+        
+        loadCallback: function() {
+            this.stopTimer();
+        },
 
         pageCallback: function(page, loadTime) {
-
             this.hidePreview();
+            this.startTimer();
 
             let loadTimeSeconds = loadTime / 1000;
-            this.totalLoadTime += loadTimeSeconds;
-
             this.currentArticle = page;
 
             if (this.path.length == 0 || this.path[this.path.length - 1]["article"] != page) {
@@ -164,6 +172,10 @@ let app = new Vue({
                     "loadTime": loadTimeSeconds
                 });
 
+                // Set first page timeReached if first page loaded after start() is called
+                if (this.path.length == 1 && this.started) {
+                    this.path[0]['timeReached'] = this.countdownTime;
+                }
 
                 // If the page's title matches that of the end article, finish the game, and submit the run
                 // Otherwise update partial run information
@@ -177,16 +189,22 @@ let app = new Vue({
         },
 
         async start() {
+            this.countdownTime = (Date.now() - this.startTime) / 1000;
+            
+            // Set first page timeReached if start() called after first page is loaded
+            if (this.path.length == 1) {
+                this.path[0]['timeReached'] = this.countdownTime;
+            }
 
-            let countdownTime = (Date.now() - this.startTime) / 1000;
-            this.totalLoadTime = countdownTime;
-            this.path[0]['timeReached'] = countdownTime;
+            this.resetTimer();
+            this.startTimer();
 
-            // set the timer update interval
             this.timerInterval = setInterval(() => {
-                const seconds = (Date.now() - this.startTime) / 1000;
-                this.elapsed = seconds - this.totalLoadTime;
-            }, 50);
+                if (!this.isRunning) return;
+
+                this.milliseconds = Date.now() - this.offset;
+                this.elapsed = (this.milliseconds + this.savedMilliseconds) / 1000;
+            }, 10);
 
 
             this.started = true;
@@ -223,6 +241,24 @@ let app = new Vue({
             this.$refs.pagePreview.hidePreview(e);
         },
 
+        startTimer() {
+            if (this.isRunning) return;
+
+            this.isRunning = true;
+            this.offset = Date.now();
+        },
+
+        stopTimer() {
+            this.savedMilliseconds += this.milliseconds;
+            this.milliseconds = 0;
+            this.isRunning = false;
+        },
+
+        resetTimer() {
+            this.milliseconds = 0;
+            this.savedMilliseconds = 0;
+            this.offset = Date.now();
+        }
     }
 })
 

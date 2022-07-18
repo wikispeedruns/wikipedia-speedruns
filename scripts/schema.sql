@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS `sprint_runs` (
     */
     `prompt_id` INT NOT NULL,
     `user_id` INT,
+    `counted_for_am` BOOLEAN DEFAULT 0,
     PRIMARY KEY (`run_id`),
     FOREIGN KEY (`prompt_id`) REFERENCES `sprint_prompts`(`prompt_id`),
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
@@ -82,7 +83,8 @@ CREATE TABLE IF NOT EXISTS `marathonruns` (
     `user_id` INT,
     `finished` BOOLEAN DEFAULT 1,
     `total_time` FLOAT(10) NOT NULL,
-    PRIMARY KEY (`run_id`)
+    PRIMARY KEY (`run_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
 );
 
 -- Tables for private lobbys
@@ -171,3 +173,21 @@ CREATE TABLE IF NOT EXISTS `historical_ratings` (
     FOREIGN KEY (`prompt_id`) REFERENCES `sprint_prompts`(`prompt_id`),
     INDEX (`prompt_id`, `rating`)
 );
+
+CREATE TABLE IF NOT EXISTS `list_of_achievements` (
+    `achievement_id` INT NOT NULL AUTO_INCREMENT,
+    `name` varchar(60) NOT NULL,
+    PRIMARY KEY (`achievement_id`)
+);
+
+CREATE TABLE IF NOT EXISTS `achievements_progress` (
+    `achievement_id` INT NOT NULL,
+    `user_id` INT NOT NULL,
+    `progress` JSON NOT NULL,
+    `progress_as_number` INT NOT NULL,
+    `achieved` BOOLEAN DEFAULT 0,
+    `time_achieved` TIMESTAMP(3) NULL,
+    PRIMARY KEY (`achievement_id`, `user_id`),
+    FOREIGN KEY (`achievement_id`) REFERENCES `list_of_achievements`(`achievement_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
+)

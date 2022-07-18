@@ -101,6 +101,19 @@ def _update_run(run_id: int, start_time: datetime, end_time: datetime,
     total_load_time = sum([entry.get('loadTime') for entry in path[1:]]) + path[0].get('timeReached')
     play_time = duration - total_load_time
 
+    # Fall-through case for https://github.com/wikispeedruns/wikipedia-speedruns/issues/395
+    # We can remove the band-aid fix if we stop seeing negative times
+    if (play_time < -5 and finished and not lobby_run):
+        path[0]['timeReached'] = 0
+        new_total_load_time = sum([entry.get('loadTime') for entry in path[1:]]) + path[0].get('timeReached') 
+        assert(duration >= new_total_load_time)
+
+        # Try and submit finished run with fixed time
+        _update_run(run_id, start_time, end_time, path, finished, lobby_run)
+
+        # Still raise exception for original time 
+        raise ValueError(f"Invalid play_time '{play_time}'")
+
     query_args = {
         "run_id": run_id,
         "start_time": start_time,

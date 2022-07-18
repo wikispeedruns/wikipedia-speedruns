@@ -1,3 +1,4 @@
+import re
 from flask import request, Response, jsonify, session
 from typing import Dict
 
@@ -37,6 +38,11 @@ class OptionalArg():
 
 
 def check_json(schema, reqjson):
+    for k in reqjson:
+        if k not in schema:
+            raise RequestJsonError(f"Extraneous argument {k}")
+
+
     for k in schema:
         expected_type = schema[k]
 

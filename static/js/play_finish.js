@@ -123,11 +123,11 @@ let app = new Vue({
 
         //redirect to the corresponding prompt page
         goToLobbyLeaderboard: function (event) {
-            window.location.replace(`/lobby/${this.lobbyId}/prompt/${this.promptId}?run_id=${this.runId}`);
+            window.location.replace(`/lobby/${this.lobbyId}/leaderboard/${this.promptId}?run_id=${this.runId}`);
         },
 
         goToLeaderboard: function (event) {
-            window.location.replace(`/prompt/${this.promptId}?run_id=${this.runId}`);
+            window.location.replace(`/leaderboard/${this.promptId}?run_id=${this.runId}`);
         },
     }
 })

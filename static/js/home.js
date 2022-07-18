@@ -21,14 +21,6 @@ async function getBackupPrompts()
     return resp["prompts"].filter(p => !p["active"]);
 }
 
-async function getTopUsers()
-{
-    const response = await fetch("/api/ratings");
-    const ratings = await response.json();
-
-    return ratings;
-}
-
 async function getMarathonPrompts()
 {
     const response = await fetch("/api/marathon/all");
@@ -54,7 +46,7 @@ var app = new Vue({
         marathonPrompts: [],
         timeLeft: "",
         username: serverData["username"],
-        loggedIn: false,
+        loggedIn: null,
 
         streakText: '',
 
@@ -69,7 +61,7 @@ var app = new Vue({
         },
 
         copyInvite: function (lobby) {
-            const link = `Join my Wikispeedruns lobby\nhttps://wikispeedruns.com/lobby/${lobby.lobby_id}\nPasscode: ${lobby.passcode}`
+            const link = `Join my Wikispeedruns lobby\n${window.location.origin}/lobby/${lobby.lobby_id}\nPasscode: ${lobby.passcode}`
             navigator.clipboard.writeText(link);
             document.getElementById("custom-tooltip-"+lobby.lobby_id).innerHTML = "Invite copied!";
             setTimeout(function() {
@@ -93,14 +85,13 @@ var app = new Vue({
         }
 
         //this.topUsers = await getTopUsers();
-        this.marathonPrompts = await getMarathonPrompts(); 
+        this.marathonPrompts = await getMarathonPrompts();
 
         const prompts = await getPrompts();
         this.dailyPrompts = prompts.filter(p => p.rated);
         this.activePrompts = prompts.filter(p => !p.rated);
 
         this.lobbies = await getUserLobby(this.loggedIn);
-        //console.log(this.lobbies);
 
         if (this.activePrompts.length === 0) {
             this.activePrompts = await getBackupPrompts();
@@ -128,14 +119,14 @@ var app = new Vue({
             }, 1000);
 
         }
-        
+
         if (!this.loggedIn) {
 
             const localSprints = getLocalSprints();
 
             //console.log("Locally stored sprints: ")
             //console.log(localSprints)
-            
+
             for (let prompt of this.dailyPrompts){
                 for (let run_id of Object.keys(localSprints)) {
                     if (parseInt(localSprints[run_id].prompt_id) === prompt.prompt_id) {

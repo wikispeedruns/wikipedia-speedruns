@@ -10,7 +10,7 @@ from db import get_db
 profile_api = Blueprint("profiles", __name__, url_prefix="/api/profiles")
 
 
-@profile_api.get("/<username>/")
+@profile_api.get("/<username>")
 def get_user_info(username):
     '''
     Get the basic info for a user
@@ -50,6 +50,7 @@ def get_total_stats(username):
     SELECT
         users.user_id,
         COUNT(run_id) AS total_runs,
+        COUNT(case finished when 1 then 1 else null end) AS total_completed_runs,
         COUNT(DISTINCT prompt_id) as total_prompts
     FROM users
     LEFT JOIN sprint_runs ON sprint_runs.user_id=users.user_id
@@ -60,7 +61,8 @@ def get_total_stats(username):
         cursor.execute(query, (username, ))
 
         result = cursor.fetchone()
-        if (result["user_id"] is None): abort(404)
+        if (result["user_id"] is None): 
+            return "Username not found", 404
         result.pop("user_id")
 
 

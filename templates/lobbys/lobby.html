@@ -11,9 +11,17 @@
 
 }
 
+.prompt-header h3 { 
+  display: inline;
+}
+
 #custom-tooltip {
     display: none;
     margin-left: 10px;
+}
+
+.active-dropdown {
+    display: block !important;
 }
 </style>
 
@@ -21,13 +29,17 @@
 <script type="module">
 import { fetchJson } from "/static/js/modules/fetch.js";
 import { serverData } from "/static/js/modules/serverData.js";
-import { getArticleTitle } from "/static/js/modules/wikipediaAPI/util.js";
+import { getArticleTitle, articleCheck } from "/static/js/modules/wikipediaAPI/util.js";
+import { PromptGenerator } from "/static/js/modules/generator.js"
 
 const LOBBY_ID = serverData["lobby_id"];
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
+    components: {
+        'prompt-generator': PromptGenerator
+    },
     data: {
         startPrompt:"",
         endPrompt:"",
@@ -44,8 +56,15 @@ var app = new Vue({
                 "name": null,
                 "owner": null
             }
-        }
+        },
+
+        editPrompts: false,
+        selectedPrompts: new Set(),
+
+        users: null,
+        anon_users: null,
     },
+
 
     created: async function() {
         this.getPrompts();
@@ -67,15 +86,37 @@ var app = new Vue({
             }, 1500);
         },
 
+        selectPrompt(prompt_id) {
+            if (this.selectedPrompts.has(prompt_id)) {
+                this.selectedPrompts.delete(prompt_id);
+            } else {
+                this.selectedPrompts.add(prompt_id);
+            }
+        },
+
+        clearSelectedPrompts() {
+            this.selectedPrompts.clear();
+        },
+
         async getLobbyInfo() {
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}`);
             this.lobbyInfo = await resp.json();
+
+            if (this.lobbyInfo.user.owner) {
+                await this.getLobbyUsers();
+            }
         },
 
         async getPrompts() {
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}/prompts`);
             this.prompts = await resp.json();
 
+        },
+
+        async generatePrompt(e) {
+            const prompt = await getGeneratedPrompt(this.difficulty);
+            this.startPrompt = prompt["start"];
+            this.endPrompt = prompt["end"];
         },
 
 
@@ -94,12 +135,70 @@ var app = new Vue({
                 return;
             }
 
+            const checkRes = await articleCheck(this.endPrompt);
+            if ('warning' in checkRes) {
+                this.addPromptMessage = checkRes["warning"];
+                return;
+            }
+
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}/prompts`, "POST", {
                 "start": start,
                 "end": end
             });
 
             this.getPrompts();
+        },
+
+        async deletePrompts() {
+            if (!confirm("Are you sure you want to delete the selected prompts and their runs?")) {
+               return; 
+            }
+
+            const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}/prompts`, "DELETE", {
+                "prompts": Array.from(this.selectedPrompts),
+            }); 
+
+            this.editPrompts = false;
+            this.clearSelectedPrompts();
+            this.getPrompts();
+        },
+
+
+        async getLobbyUsers() {
+
+            Promise.all([
+                fetchJson(`/api/lobbys/players/${LOBBY_ID}`, "GET"), 
+                fetchJson(`/api/lobbys/anon_players/${LOBBY_ID}`, "GET")
+            ])
+            .then(responses =>
+                Promise.all(responses.map(res => res.json()))
+            ).then(resp => {
+                this.users = resp[0];
+                this.anon_users = resp[1];
+            }).catch(err => console.log(err));
+
+        },
+
+        async makeHost(user_id, username) {
+            if (!confirm(`Are you sure you want to make ${username} the lobby host?`)) {
+                return; 
+            }
+
+            try {
+                const resp = await fetchJson(`/api/lobbys/change_host/${LOBBY_ID}`, "PATCH", {
+                    "target_user_id": user_id,
+                });
+                
+                alert(`${username} is now host!`);
+                window.location.reload();
+            } catch (e) {
+                console.log(e)
+                alert(e);
+            }
+        },
+
+        toggleDropdown(id) {
+            document.getElementById(id).classList.toggle("active-dropdown")
         }
     }
 
@@ -127,28 +226,101 @@ var app = new Vue({
         <span id="custom-tooltip" ref="shareTooltip">Copied invite to clipboard!</span>
     </div>
 
+    
 
     <template v-if="lobbyInfo.user.owner">
-        <hr>
-        <h4>Manage: Add a prompt</h4>
-        <form id="newPrompt" v-on:submit.prevent="addPrompt">
-            <label for="start">Start Article:</label>
-            <input type="text" id="start" name="start" v-model="startPrompt">
-            <label for="end">End Article:</label>
-            <input type="text" id="end" name="end" v-model="endPrompt">
 
-            <input type="submit" value="Submit">
+        <hr>
+
+        <h3>Lobby settings</h4>
+
+        <details>
+            <summary>List of players</summary>
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <th scope="col">Display name</th>
+                            <th scope="col">User type</th>
+                            <th scope="col"></th>
+                        </thead>
+                        <tbody>
+                            <tr v-for="user in users" v-cloak>
+                                <td>[[user.username]]</td>
+                                <td>Registered User</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary dropdown-toggle" 
+                                                type="button" 
+                                                data-toggle="dropdown" 
+                                                aria-haspopup="true" 
+                                                aria-expanded="true"
+                                                @click="toggleDropdown(String(user.user_id)+'dropdown')">
+                                            <small>Options</small>
+                                        </button>
+                                        <div class="dropdown-menu" 
+                                            v-bind:id="String(user.user_id)+'dropdown'">
+                                            <button v-if="!user.owner" class="btn btn-sm" @click="makeHost(user.user_id, user.username)">Transfer Ownership</button>
+                                            <button class="btn btn-sm disabled" v-else>Currently host</button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr v-for="user in anon_users" v-cloak>
+                                <td>[[user.name]]</td>
+                                <td>Anonymous User</td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </details>
+
+        <h4 class="py-4">Manage: Add a prompt</h4>
+
+        <form id="newPrompt" v-on:submit.prevent="addPrompt">
+            <div class="my-2 row">
+                <div class="col-md-4 col-sm-6">
+                    <input  class="form-control" type="text" id="start" name="start" placeholder="Start Article" v-model="startPrompt">
+                </div>
+            </div>
+
+            <div class="mb-2 row">
+                <div class="col-md-4 col-sm-6">
+                    <input class="form-control" type="text" id="end" name="end" placeholder="End Article" v-model="endPrompt">
+                </div>
+            </div>
+
+            <details class="mb-4">
+                <summary>Prompt Generation</summary>
+
+                <prompt-generator
+                    v-bind:start.sync="startPrompt"
+                    v-bind:end.sync="endPrompt"
+                ></prompt-generator>
+
+
+            </details>
+
+            <input class="btn btn-primary" type="submit" value="Submit">
         </form>
 
-        <p>[[addPromptMessage]]</p>
+        <p class="text-danger">[[addPromptMessage]]</p>
+
 
         <hr>
 
     </template>
 
 
-    <h3> Prompts </h3>
-
+    <div class="prompt-header">
+        <h3> Prompts </h3>
+        <template v-if="lobbyInfo.user.owner">
+            <a v-on:click="editPrompts = !editPrompts">(Edit)</a>
+        </template>
+    </div>
+    
     <div class="card">
         <div class="card-body">
             <table class="table table-hover">
@@ -167,10 +339,14 @@ var app = new Vue({
                         <td>[[prompt.start]]</td>
                         <td>[[prompt.end]]</td>
 
-                        <td><a v-bind:href="'/lobby/' + lobbyInfo.lobby_id + '/prompt/' + prompt.prompt_id">Results</a></td>
+                        <td><a v-bind:href="'/lobby/' + lobbyInfo.lobby_id + '/leaderboard/' + prompt.prompt_id">Results</a></td>
+                        <td v-if="editPrompts">
+                            <input type="checkbox" @click="selectPrompt(prompt.prompt_id)">
+                        </td>
                     </tr>
                 </tbody>
             </table>
+            <input v-if="editPrompts" href="javascript:;" @click="deletePrompts" class="btn btn-danger" value="Delete Selected">
         </div>
     </div>
 
