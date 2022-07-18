@@ -56,6 +56,18 @@
         <p>First time? Play the <a href="/play/tutorial">tutorial</a>!</p>
 
         <p>Try our new prompt generator <a href="/generator">here</a>!</p>
+
+        <template v-cloak>
+            <p v-if="loggedIn === true && lobbies.length > 0">
+                See your active lobbies <a href="#user-lobbies">here</a> or <a href="/lobby/create">create a new private lobby</a>.
+            </p>
+            <p v-if="loggedIn === true && lobbies.length == 0">
+                Playing with friends? Create a new private lobby <a href="/lobby/create">here</a>!
+            </p>
+            <p v-if="loggedIn === false">
+                <a href="/login">Log in</a>/<a href="/register">Register</a> to create a new private lobby and play with your friends!
+            </p>
+        </template>
     </div>
 
     <hr class="my-4">
