@@ -248,6 +248,7 @@ def login():
     return "Logged in", 200
 
 
+
 @user_api.post("/logout")
 def logout():
     _logout_session()
@@ -291,6 +292,39 @@ def change_password():
 
 
 
+@user_api.post("/change_username")
+@check_user
+def change_username():
+    '''
+    Given a new username, change the username
+    '''
+    update_query = "UPDATE `users` SET `username`=%s WHERE `user_id`=%s"
+
+    if ("new_username" not in request.json):
+        #print("Incomplete request")
+        return ("Incomplete request", 400)
+
+    id = session["user_id"]
+    new_username = request.json["new_username"]
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        
+        try:
+            cursor.execute(update_query, (new_username, id))
+            db.commit()
+        
+        except pymysql.IntegrityError:
+            print("dup username")
+            return (f'Username `{new_username}` already exists', 409)
+        except pymysql.Error as e:
+            return ("Unknown error", 500)
+
+    session["username"] = new_username
+    return "Username Changed", 200
+
+
+
 @user_api.post("/confirm_email_request")
 @check_user
 def confirm_email_request():
@@ -298,10 +332,19 @@ def confirm_email_request():
         Request another email token be sent in as a logged in user, i.e. from profile page
     '''
     id = session["user_id"]
+    
+    check_query = "SELECT `email_confirmed` FROM `users` WHERE `user_id`=%s"
+    
     query = "SELECT `email`, `username` FROM `users` WHERE `user_id`=%s"
 
     db = get_db()
     with db.cursor() as cursor:
+        res = cursor.execute(check_query, (id, ))
+        if (res != 0):
+            email_confirmed = cursor.fetchone()
+            if email_confirmed[0] == 1:
+                return "Email already confirmed", 400
+        
         cursor.execute(query, (id, ))
         (email, username) = cursor.fetchone()
         # TODO throw error?
@@ -328,6 +371,27 @@ def confirm_email():
         # TODO throw error if not right?
 
     return "Email Confirmed"
+
+
+@user_api.post("/check_email_confirmation")
+def check_email_confirmation():
+    username = request.json
+
+    # user must be logged in to access
+    if session["username"] != username:
+        return "Username does not match session", 400
+
+    query = "SELECT `email_confirmed` FROM `users` WHERE `username`=%s"
+
+    db = get_db()
+    with db.cursor() as cursor:
+        res = cursor.execute(query, (username, ))
+        if (res != 0):
+            email_confirmed = cursor.fetchone()
+            if email_confirmed[0] == 1:
+                return "true", 200
+
+    return "false", 200
 
 
 @user_api.post("/reset_password_request")
@@ -392,4 +456,90 @@ def reset_password():
         db.commit()
 
     return "Password Changed", 200
+
+
+
+@user_api.delete("/delete_account")
+@check_user
+def delete_account():
+    """
+        Delete the account of the user in session
+    """
+    
+    user_query1 = """
+    delete from historical_ratings where user_id = %(user_id)s
+    """
+    user_query2 = """
+    delete from ratings where user_id = %(user_id)s
+    """
+    user_query3 = """
+    delete from sprint_runs where user_id = %(user_id)s
+    """
+    user_query4 = """
+    delete from marathonruns where user_id = %(user_id)s
+    """
+    user_query5 = """
+    delete from lobby_runs where user_id = %(user_id)s
+    """
+    user_query6 = """
+    delete from user_lobbys where user_id = %(user_id)s
+    """
+    user_query7 = """
+    delete from achievements_progress where user_id = %(user_id)s
+    """
+    user_query8 = """
+    delete from users where user_id = %(user_id)s
+    """
+    
+    get_hosted_lobbies_query = """
+    select lobby_id from user_lobbys 
+    WHERE user_id=%(user_id)s AND owner = 1
+    """
+    
+    delete_lobbies_query1 = """
+    DELETE lobby_runs FROM lobby_runs
+    WHERE lobby_runs.lobby_id=%s
+    """
+    delete_lobbies_query2 = """
+    DELETE user_lobbys FROM user_lobbys
+    WHERE user_lobbys.lobby_id=%s
+    """
+    delete_lobbies_query3 = """
+    DELETE lobby_prompts FROM lobby_prompts
+    WHERE lobby_prompts.lobby_id=%s
+    """
+    delete_lobbies_query4 = """
+    DELETE lobbys FROM lobbys
+    WHERE lobbys.lobby_id=%s
+    """
+    
+    id = session["user_id"]
+    args = {"user_id": id}
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        
+        count = cursor.execute(get_hosted_lobbies_query, args)
+        
+        lobbies = cursor.fetchall()
+        lobby_ids = [str(x['lobby_id']) for x in lobbies]
+        
+        if (count > 0):
+            cursor.executemany(delete_lobbies_query1, lobby_ids)
+            cursor.executemany(delete_lobbies_query2, lobby_ids)
+            cursor.executemany(delete_lobbies_query3, lobby_ids)
+            cursor.executemany(delete_lobbies_query4, lobby_ids)
+        
+        cursor.execute(user_query1, args)
+        cursor.execute(user_query2, args)
+        cursor.execute(user_query3, args)
+        cursor.execute(user_query4, args)
+        cursor.execute(user_query5, args)
+        cursor.execute(user_query6, args)
+        cursor.execute(user_query7, args)
+        cursor.execute(user_query8, args)
+        
+        db.commit()
+
+    return "User account deleted", 200
 

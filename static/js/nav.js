@@ -19,11 +19,9 @@ var app = new Vue({
     },
 
     methods: {
-        async handleLogout(event)
+        async accountPage(event)
         {
-            event.preventDefault();
-            await fetch("/api/users/logout", {method : "POST"});
-            window.location.href = "/";
+            window.location.href = "/account"
         }
     }
 

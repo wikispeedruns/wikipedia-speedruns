@@ -49,7 +49,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse" id="navbarContent">
+                <div class="collapse navbar-collapse my-auto" id="navbarContent">
 
                     <div class="navbar-nav ms-auto">
 
@@ -61,16 +61,18 @@
                                 <a class="nav-link" v-bind:href="'/manage'">Manage</a>
                             </template>
 
-                            <a class="nav-link" v-bind:href="'/profile/' + username">[[username]]</a>
-                            <button class="btn btn-light" v-on:click="handleLogout">Logout</button>
+                            <li class="nav-item">
+                                <a class="nav-link active" v-bind:href="'/profile/' + username">[[username]]</a>
+                            </li>
 
+                            <li class="nav-item align-middle my-auto">
+                                <button class="btn align-middle my-auto" style="background-color:transparent" v-on:click="accountPage"><i class="bi bi-gear"></i></button>
+                            </li>
                         </template>
 
                         <template v-else>
-
                             <a class="btn btn-light" href="/register">Register</a>
                             <a class="btn btn-light" href="/login">Login</a>
-
                         </template>
                     </div>
                 </div>
