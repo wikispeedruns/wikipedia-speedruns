@@ -42,6 +42,7 @@ def test_achievement(cursor, client, user):
     cursor.execute(query, (PROMPT_A["prompt_id"], PROMPT_A["start"], PROMPT_A["end"]))
 
     run_id = testData["run_id"]
+    username = testData["username"]
     query = """
     INSERT INTO sprint_runs 
     (run_id, start_time, end_time, play_time, finished, path, prompt_id, user_id)
@@ -61,7 +62,7 @@ def test_achievement(cursor, client, user):
     resp = client.patch(f"/api/achievements/process/{run_id}")
     assert resp.status_code == 200
 
-    resp = client.get("/api/achievements/user")
+    resp = client.get(f"/api/achievements/user/{username}")
     assert resp.status_code == 200
     assert resp.json["meta"]["achieved"] # achievement to reach Wikipedia
 
