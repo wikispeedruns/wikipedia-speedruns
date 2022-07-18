@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+<!-- Some nice x minutes ago tags -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+<!-- Account JS Code -->
+<script type="module" src="{{url_for('static', filename='js/account.js')}}"></script>
+
+{% endblock %}
+
+{% block content %}
+
+
+<div id="app">
+  <h1 class="mb-4" v-cloak>[[username]]</h1>
+  <hr class="mt-4">
+
+  <div class="row justify-content-md-center py-4">
+    <div class="col-sm-3">
+      <div class="card">
+        <div class="alert alert-info my-0" role="alert">
+          <h5 class="my-0">User Profile</h5>
+        </div>
+        <div class="card-body">
+          <div class="list-group">
+              <button type="button" class="list-group-item list-group-item-action" v-on:click="tab='basic-stats'">Basic Stats</button>
+              <!--<button type="button" class="list-group-item list-group-item-action" v-on:click="tab='achievements'">Achievements</button>-->
+          </div>
+        </div>
+      </div>
+      
+      <div class="card my-5">
+        <div class="alert alert-info my-0" role="alert">
+          <h5 class="my-0">Settings</h5>
+        </div>
+        <div class="card-body">
+          <div class="list-group">
+              <button type="button" class="list-group-item list-group-item-action" v-on:click="handleLogout">Log Out</button>
+              <button type="button" class="list-group-item list-group-item-action" v-on:click="load(`{{url_for('views.get_reset_request_page')}}`)">Change your password</button>
+              <button type="button" class="list-group-item list-group-item-action" v-on:click="tab='username'">Change your username</a>
+              <button type="button" class="list-group-item list-group-item-action" v-on:click="tab='deleteAccount'">Delete account</button>
+          </div>
+          <div class="list-group my-4">
+            <button v-if="emailConfirmed==='true'" type="button" class="list-group-item list-group-item-action" disabled>Email verified <i class="bi bi-check"></i></button>
+            <button v-if="emailConfirmed==='false'" type="button" class="list-group-item list-group-item-action" v-on:click="verifyEmail">Verify email</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+
+      <profile-stats-table v-show="tab=='basic-stats'" v-bind:username="username"></profile-stats-table>
+
+      <div v-if="tab=='username'" class="card" v-cloak>
+        <div class="card-body">      
+          <div id="username-change" class="py-3">
+            <div class="form-group">
+              <label for="new-username">New username</label>
+              <input type="text" class="form-control" id="new-username">
+            </div>
+            <div class="form-group">
+              <label for="new-username-check">Re-enter new username</label>
+              <input type="text" class="form-control" id="new-username-check">
+            </div>
+            <small class="text-danger">[[feedbackMsg]]</small>
+            <button class="btn btn-primary my-4" v-on:click="submitNewUsername">Submit</button>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="tab=='deleteAccount'" class="card" v-cloak>
+        <div class="card-body"> 
+
+          <div id="deleteAccount" class="py-3">
+            <div class="form-group">
+              <label for="deleteU-username">Confirm your username</label>
+              <input type="text" class="form-control" id="deleteU-username">
+            </div>
+            <div onmousedown="return false" onselectstart="return false" class="my-4 alert alert-danger">
+              Please type the following in the box below: <br><b>[[confirmText]]</b>
+            </div>
+            <div class="form-group">
+              <input type="text" class="form-control" id="confirm-text">
+            </div>
+            <div class="my-4 alert alert-warning">
+              <p><b>Note:</b> Deleting your account will permanently delete all of your past runs, stats, achievements. It will also permanently delete all lobbies that you are currently hosting. Change hosts for your hosted lobbies if you would like to keep them. </p>
+              
+              <p>This change CANNOT be reverted. </p>
+            </div>
+            <small class="text-danger">[[feedbackMsg]]</small>
+            <button class="btn btn-primary my-4" v-on:click="deleteAccount">Delete my account</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+    
+</div>
+
+{% endblock %}

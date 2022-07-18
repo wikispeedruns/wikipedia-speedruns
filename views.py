@@ -120,6 +120,9 @@ def get_replay_page():
     run_id = request.args.get('run_id', '')
     return render_with_data('replay.html', run_id=run_id)
 
+@views.route('/account', methods=['GET'])
+def get_user_account_page():
+    return render_with_data('users/account.html')
 
 # Finish pages
 @views.route('/finish', methods=['GET'])
