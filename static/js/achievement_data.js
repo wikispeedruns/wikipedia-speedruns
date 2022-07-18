@@ -6,6 +6,7 @@ import { serverData } from "./modules/serverData.js";
 const dataType = document.getElementById('achievement').getAttribute('data');
 const RUN_ID = serverData["run_id"];
 const LOBBY_ID = serverData["lobby_id"] || null;
+const profile_name = serverData["profile_name"];
 
 
 // Sort data (array of values) for display
@@ -94,7 +95,7 @@ var am = new Vue({
             let data = null;
             if(dataType == 'all'){ // This is getting all achievements for data
                 this.isProfile = true;
-                const response = await fetch('/api/achievements/user');
+                const response = await fetch('/api/achievements/user/' + profile_name);
                 let tmpData = await response.json();
                 data = this.convertData(tmpData);
                 data.sort(default_cmp);

@@ -27,17 +27,19 @@ def process_for_achievements(run_id):
 
         db.commit()
 
-    return new_achievements
+    return new_achievements, 200
 
 
 
-@achievements_api.get('/user')
-@check_user
-def get_all_achievements():
-    user_id = session["user_id"]
+@achievements_api.get('/user/<username>')
+def get_all_achievements(username):
     with get_db().cursor(cursor=DictCursor) as cursor:
+        rows = cursor.execute(f"SELECT user_id FROM users WHERE username = '{username}'")
+        if rows == 0:
+            return "User not found", 404
+        user_id = cursor.fetchone()["user_id"]
         all_achievements = achievements.get_all_achievements_and_progress(cursor, user_id)
-    return all_achievements
+    return all_achievements, 200
 
 
 
