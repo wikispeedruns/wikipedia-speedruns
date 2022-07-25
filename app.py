@@ -5,6 +5,7 @@ import json
 import db
 import mail
 import tokens
+import tasks
 from util.flaskjson import CustomJSONEncoder
 
 import sentry_sdk
