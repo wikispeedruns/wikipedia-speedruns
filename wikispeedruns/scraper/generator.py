@@ -5,11 +5,9 @@ from typing import List, Any
 from db import get_db
 
 from .util import ARTICLE_TABLE
-from .util import getLinks, convertToArticleName, convertPathToNames, convertToID
-
+from .util import getLinks, convertToArticleName
 
 def randStart(thresholdStart: int) -> Any:
-#def randStart(thresholdStart):
     """Generator for starting article
 
     Args:
@@ -30,7 +28,6 @@ def randStart(thresholdStart: int) -> Any:
                 yield start
 
 def checkEnd(end: int, thresholdEnd: int) -> bool:
-#def checkEnd(end, thresholdEnd):
     """Higher level checker function to determine whether or not a given end article is valid as the goal page of a randomly generated prompt
 
     Args:
@@ -68,7 +65,6 @@ def checkEnd(end: int, thresholdEnd: int) -> bool:
     return True
 
 def checkStart(start: int, thresholdStart: int) -> bool:
-#def checkStart(start, thresholdStart):
     """Similar to checkEnd, with a higher tolerance for sports pages"""
 
     title = convertToArticleName(start)
@@ -102,8 +98,6 @@ def countWords(string: str) -> int:
     return counter
 
 def randomFilter(bln: bool, chance: float) -> bool:
-#def randomFilter(bln, chance):
-
     """Pass a boolean through a RNG gate. Overall, {chance}% of True booleans will remain True
 
     Args:
@@ -119,7 +113,6 @@ def randomFilter(bln: bool, chance: float) -> bool:
     return False
 
 def checkSports(title: str) -> bool:
-#def checkSports(title):
     """Check to see if the article is a sports season/team page. If true, bias against these articles.
     To be considered a sports season/team/game page, the article's first 4 characters must form a year > 1900,
     and the article name must also contain one of the identified sports keywords.
@@ -148,7 +141,6 @@ def checkSports(title: str) -> bool:
     return False
 
 def numLinksOnArticle(id : int) -> int:
-#def numLinksOnArticle(id):
     """get the number of outgoing links of a given article
 
     Args:
@@ -167,7 +159,6 @@ def numLinksOnArticle(id : int) -> int:
     return 0
 
 def traceFromStart(startID: int, dist: int) -> List[int]:
-#def traceFromStart(startID, dist):
     """helper function to trace a path from a given article number
 
     Args:
@@ -201,7 +192,6 @@ def traceFromStart(startID: int, dist: int) -> List[int]:
     return path + [currentTitle]
 
 def generatePrompts(thresholdStart : int = 100, thresholdEnd : int = 100, n : int = 20, dist: int = 15) -> List[List[int]]:
-#def generatePrompts(thresholdStart = 100, thresholdEnd = 100, n = 20, dist = 15):
     """Generates N random paths. THe function uses a random article generator to get a start article, traces a random path 'dist' steps away,
     checks that the end article also fits the criteria, and appends the resulting path as a list to the output list.
 
