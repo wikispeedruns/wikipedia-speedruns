@@ -45,18 +45,18 @@ def create_app(test_config=None):
     tokens.init_app(app)
     tasks.make_celery(app)
 
-    from apis.sprints import sprint_api
-    from apis.runs import run_api
-    from apis.users import user_api
-    from apis.profiles import profile_api
-    from apis.scraper import scraper_api
-    from apis.ratings import ratings_api
-    from apis.stats import stats_api
-    from apis.marathon import marathon_api
-    from apis.lobbys import lobby_api
+    from apis.sprints_api import sprint_api
+    from apis.runs_api import run_api
+    from apis.users_api import user_api
+    from apis.profiles_api import profile_api
+    from apis.scraper_api import scraper_api
+    from apis.ratings_api import ratings_api
+    from apis.stats_api import stats_api
+    from apis.marathon_api import marathon_api
+    from apis.lobbys_api import lobby_api
     from apis.leaderboard_api import leaderboard_api
-    from apis.generator import generator_api, load_page_rank
-    from apis.achievements import achievements_api
+    from apis.generator_api import generator_api, load_page_rank
+    from apis.achievements_api import achievements_api
     from views import views
 
     app.register_blueprint(sprint_api)
