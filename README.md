@@ -48,7 +48,7 @@ python create_db.py
 ```
 
 There is also an interactive script (with instructions in the scripts) which
-can be used to set up a local admin account. Through the admin account, 
+can be used to set up a local admin account. Through the admin account,
 prompts can be managed through `/manage`.
 ```
 cd scripts
@@ -98,3 +98,8 @@ pytest
 
 Note that these tests are also run in Docker upon making a PR using Github workflows.
 In the future we may setup docker to run tests as well.
+
+
+## (Optional) Scraper Setup
+
+TODO, ask @dqian3 about this.
