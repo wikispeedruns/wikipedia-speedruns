@@ -4,8 +4,8 @@ from typing import List, Any
 
 from db import get_db
 
-from .graph import ARTICLE_TABLE
-from .graph import getLinks, convertToArticleName, convertPathToNames, convertToID
+from .util import ARTICLE_TABLE
+from .util import getLinks, convertToArticleName, convertPathToNames, convertToID
 
 
 def randStart(thresholdStart: int) -> Any:

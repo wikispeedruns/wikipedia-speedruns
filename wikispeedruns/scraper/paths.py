@@ -7,10 +7,9 @@ import time
 
 from typing import List, Dict, Any, Tuple
 
-from .graph import getLinks, convertToArticleName, convertPathToNames, convertToID
+from .util import getLinks, convertToArticleName, convertPathToNames, convertToID
 
 def bidirectionalSearcher(start: int, end:int) -> List[List[int]]:
-#def bidirectionalSearcher(start, end):
     """High level logic for bidirectional search. Continuously calls forward and reverse search until an intersection is found,
     then traces the paths back to generate a concatenated final path.
 
@@ -61,7 +60,6 @@ def bidirectionalSearcher(start: int, end:int) -> List[List[int]]:
 
 
 def forwardBFS(start: int, end: int, forwardVisited: Dict[int, Tuple[int, int]], reverseVisited: Dict[int, Tuple[int, int]], queue: List[int]) -> int:
-#def forwardBFS(start, end, forwardVisited, reverseVisited, queue):
 
     """Forward search component of the bidirectional search. Looks for any article that the reverse search component has previously visited,
     which makes it an intersection. The full path can then be traced from the intersection
@@ -83,7 +81,7 @@ def forwardBFS(start: int, end: int, forwardVisited: Dict[int, Tuple[int, int]],
     c = 0
     batchSize = 200    #Can be increased to reduce number of SQL queries
 
-    pages = {}
+    pages = []
     startingDepth = 0
 
     #CHeck if the queue is empty before a path is found
@@ -105,15 +103,12 @@ def forwardBFS(start: int, end: int, forwardVisited: Dict[int, Tuple[int, int]],
             break
 
         #Mark a page to retrieve its links in this batch by batch query in SQL
-        pages[pageTitle] = True
+        pages.append(pageTitle)
         c += 1
 
 
     #Try getting the links of the pages marked to be processed
-    try:
-        links = getLinks(pages, forward = True)
-    except:
-        return None
+    links = getLinks(pages, forward = True)
 
     #iterate through each batch article
     for title in links:
@@ -146,7 +141,6 @@ def forwardBFS(start: int, end: int, forwardVisited: Dict[int, Tuple[int, int]],
     return None
 
 def reverseBFS(start: int, end: int, forwardVisited: Dict[int, Tuple[int, int]], reverseVisited: Dict[int, Tuple[int, int]], queue: List[int]) -> int:
-#def reverseBFS(start, end, forwardVisited, reverseVisited, queue):
     """Reverse search component of the bidirectional search. Looks for any article that the forward search component has previously visited,
     which makes it an intersection. The full path can then be traced from the intersection
 
@@ -167,7 +161,7 @@ def reverseBFS(start: int, end: int, forwardVisited: Dict[int, Tuple[int, int]],
     c = 0
     batchSize = 200   #Can be increased to reduce number of SQL queries
 
-    pages = {}
+    pages = []
     startingDepth = 0
 
     #CHeck if the queue is empty before a path is found
@@ -189,7 +183,7 @@ def reverseBFS(start: int, end: int, forwardVisited: Dict[int, Tuple[int, int]],
             break
 
         #Mark a page to retrieve its links in this batch by batch query in SQL
-        pages[pageTitle] = True
+        pages.append(pageTitle)
         c += 1
 
     #Try getting the links of the pages marked to be processed

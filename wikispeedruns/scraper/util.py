@@ -10,7 +10,6 @@ SCRAPER_DB = "scraper_graph"
 ARTICLE_TABLE = SCRAPER_DB + ".articleid"
 EDGE_TABLE = SCRAPER_DB + ".edgeidarticleid"
 
-
 def getLinks(pages: List[int], forward: bool = True) -> Dict[int, List[int]]:
     """Gets the outgoing/incoming links of a list of articles as a batch query
 
@@ -24,14 +23,17 @@ def getLinks(pages: List[int], forward: bool = True) -> Dict[int, List[int]]:
 
     output = {p : [] for p in pages}
 
+
     with get_db().cursor(cursor=DictCursor) as cur:
+        tuple_template = ','.join(['%s'] * len(pages))
+
         # If used in forward search, search will be based on outgoing edges. Incoming edges for reverse search
         if forward:
-            query = "SELECT src AS cur, dst AS next FROM " + EDGE_TABLE + " WHERE src=%s"
+            query = f"SELECT src AS cur, dest AS next FROM {EDGE_TABLE} WHERE src IN ({tuple_template})"
         else:
-            query = "SELECT dst AS cur, src AS next FROM " + EDGE_TABLE + " WHERE dst=%s"
+            query = f"SELECT dest AS cur, src AS next FROM {EDGE_TABLE} WHERE dest IN ({tuple_template})"
 
-        cur.execute(query, f"({','.join(pages)})")
+        cur.execute(query, tuple(pages))
         results = cur.fetchall()
 
         # Build the output dict, storing a list of dest links as the value:
@@ -45,7 +47,6 @@ def getLinks(pages: List[int], forward: bool = True) -> Dict[int, List[int]]:
 
 
 def convertToID(name: str) -> int:
-#def convertToID(name):
     """Converts a single article title to its corresponding article id
     """
     with get_db().cursor(cursor=DictCursor) as cur:
@@ -60,7 +61,6 @@ def convertToID(name: str) -> int:
 
 
 def convertToArticleName(id: int) -> str:
-#def convertToArticleName(id):
     """Converts a single article ID to its corresponding article title
     """
     with get_db().cursor(cursor=DictCursor) as cur:
@@ -77,7 +77,6 @@ def convertToArticleName(id: int) -> str:
 
 
 def convertPathToNames(idpath: List[int])-> List[str]:
-#def convertPathToNames(idpath):
     """Converts a path in the form of article IDs to article Titles"""
     output = []
     for item in idpath:
@@ -85,3 +84,92 @@ def convertPathToNames(idpath: List[int])-> List[str]:
 
     return output
 
+def numLinksOnArticle(title, forward = True):
+
+    links = getLinks({title:True}, forward=forward)
+
+    if title in links:
+        links = links[title]
+
+        return len(links)
+
+    return 0
+
+
+def countDigitsInTitle(title) :
+    count = 0
+    for character in title:
+        if character.isdigit():
+            count += 1
+    return count
+
+
+def randomFilter(bln, chance):
+    if bln:
+        if random.random() > chance:
+            return True
+    return False
+
+
+def countWords(string):
+    counter = 1
+    for i in string:
+        if i == ' ' or i == '-':
+            counter += 1
+    return counter
+
+
+
+def getRandomArticle():
+    with get_db().cursor() as cur:
+        query = "SELECT max(articleID) FROM " + ARTICLE_TABLE + ";"
+        cur.execute(query)
+        (maxID, ) = cur.fetchone()
+
+        while(True):
+            yield random.randint(1, maxID)
+
+
+def traceFromStart(startTitle, dist):
+
+    path = []
+
+    currentTitle = startTitle
+    while dist > 0:
+
+        path.append(currentTitle)
+
+        links = getLinks({currentTitle:True}, forward=True)
+
+        if currentTitle in links:
+            links = links[currentTitle]
+        else:
+            break
+
+        randIndex = random.randint(0, len(links) - 1)
+
+        currentTitle = links[randIndex]
+
+        dist -= 1
+
+    return path + [currentTitle]
+
+
+def convertNamePathToID(path):
+    output = []
+    for item in path:
+        output.append(convertToID(item))
+    return output
+
+
+
+def articleLinkNumCheck(id, min_incoming, min_outgoing):
+    num_incoming = numLinksOnArticle(id, forward = False)
+    if num_incoming < min_incoming:
+        return False, None, None
+
+    num_outgoing = numLinksOnArticle(id)
+    if num_outgoing < min_outgoing:
+        return False, None, None
+
+    return True, num_incoming, num_outgoing

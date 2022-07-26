@@ -1,17 +1,17 @@
-import wikispeedruns.scraper.scraper_graph_utils as utils
+import wikispeedruns.scraper.util as util
 import wikispeedruns.scraper.paths as scraper
 import math
 import random
 
 def getDifficultyScore(id, min_incoming, min_outgoing):
 
-    linkCheckBool, num_incoming, num_outgoing = utils.articleLinkNumCheck(id, min_incoming, min_outgoing)
+    linkCheckBool, num_incoming, num_outgoing = util.articleLinkNumCheck(id, min_incoming, min_outgoing)
     if not linkCheckBool:
         return -1, 0, 0, 0, 0
 
-    title = utils.convertToArticleName(id)
-    num_digits = utils.countDigitsInTitle(title)
-    num_words = utils.countWords(title)
+    title = util.convertToArticleName(id)
+    num_digits = util.countDigitsInTitle(title)
+    num_words = util.countWords(title)
 
     incoming_score = 100 / (1 + math.exp(-0.04 * (num_incoming - min_incoming)))
     outgoing_score = 100 / (1 + math.exp(-0.04 * (num_outgoing - min_outgoing)))
@@ -43,20 +43,20 @@ def genBatch(prevBatch, min_incoming=100, min_outgoing=100, N=10, d=2):
 
     outputList = []
 
-    generator = utils.getRandomArticle()
+    generator = util.getRandomArticle()
 
     while (len(outputList) < N):
 
         mid = -1
         try:
             rand = generator.__next__()
-            if not utils.articleLinkNumCheck(rand, int(min_incoming/3), int(min_outgoing/3)):
+            if not util.articleLinkNumCheck(rand, int(min_incoming/3), int(min_outgoing/3)):
                 continue
 
             #start = random.choices(prevBucket, k=2)
             start = random.choice(prevBatch)
             if not type(start) is int:
-                start = utils.convertToID(start['a'])
+                start = util.convertToID(start['a'])
 
             p1 = scraper.findPaths(rand, start)['ArticlesIDs']
             #p1 = scraper.findPaths(rand, start[0], id=True)['ArticlesIDs']
@@ -70,12 +70,12 @@ def genBatch(prevBatch, min_incoming=100, min_outgoing=100, N=10, d=2):
         s = -1
         id = -1
         while (s == -1):
-            id = utils.traceFromStart(mid, d)[-1]
+            id = util.traceFromStart(mid, d)[-1]
             s, s1, s2, s3, s4 = getDifficultyScore(id, min_incoming, min_outgoing)
-            print("Checked: " + utils.convertToArticleName(id) + " " + str(s))
+            print("Checked: " + util.convertToArticleName(id) + " " + str(s))
 
 
-        item = {"a": utils.convertToArticleName(id),
+        item = {"a": util.convertToArticleName(id),
                 "s": round(s, 1)}#,
                 #"digits": s1,
                 #"words":s2,
@@ -105,7 +105,7 @@ def genPrompts(initBatch, batches=5, nPerBatch=10, buckets=5):
 
     batchesArr = []
 
-    batchesArr.append(genBatch(utils.convertNamePathToID(initBatch), min_incoming = mi, min_outgoing = mo, N=nPerBatch))
+    batchesArr.append(genBatch(util.convertNamePathToID(initBatch), min_incoming = mi, min_outgoing = mo, N=nPerBatch))
 
     for i in range(batches-1):
         batchesArr.append(genBatch(batchesArr[i], min_incoming = mi-(i+1)*1/(2*batches), min_outgoing = mo-(i+1)*1/(2*batches), N=nPerBatch))

@@ -3,12 +3,7 @@ from flask import session, request, abort, Blueprint, jsonify, current_app
 from util.async_result import register_async_endpoint
 
 from wikispeedruns.scraper.paths import findPaths
-from wikispeedruns.scraper.scraper_graph_utils import convertToArticleName
-from wikispeedruns.prompt_generator import generatePrompts
-
-import json
-
-from util.decorators import check_request_json
+from wikispeedruns.scraper.util import convertToID
 
 from tasks import celery
 
@@ -25,31 +20,13 @@ def shortest_path_parse(task, request):
 
 @celery.task(time_limit=SCRAPER_TIMEOUT)
 def shortest_path(start: str, end: str):
-    return findPaths(start, end)
+    start_id = convertToID(start)
+    end_id = convertToID(end)
+
+    return findPaths(start_id, end_id)
 
 register_async_endpoint(scraper_api, "/path", shortest_path, shortest_path_parse)
 
-
-# Prompt Generation
-
-def generate_prompt_parse(task, request):
-    return task.delay()
-
-@celery.task(time_limit=SCRAPER_TIMEOUT)
-def generate_prompt():
-    d = 25
-    thresholdStart = 200
-    paths = generatePrompts(thresholdStart=thresholdStart, thresholdEnd=thresholdStart, n=1, dist=d)
-
-    outputArr = []
-
-    for path in paths:
-        outputArr.append([str(convertToArticleName(path[0])), str(convertToArticleName(path[-1]))])
-
-    return {'Prompts': outputArr}
-
-
-register_async_endpoint(scraper_api, "/gen_prompts", generate_prompt, generate_prompt_parse)
 
 # Test
 
