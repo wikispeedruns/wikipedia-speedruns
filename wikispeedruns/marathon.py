@@ -1,5 +1,5 @@
-import wikispeedruns.scraper_graph_utils as utils
-import wikispeedruns.scraper.scraper as scraper
+import wikispeedruns.scraper.scraper_graph_utils as utils
+import wikispeedruns.scraper.paths as scraper
 import math
 import random
 

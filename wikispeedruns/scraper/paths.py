@@ -11,7 +11,8 @@ from .graph import getLinks, convertToArticleName, convertPathToNames, convertTo
 
 def bidirectionalSearcher(start: int, end:int) -> List[List[int]]:
 #def bidirectionalSearcher(start, end):
-    """High level logic for bidirectional search. Continuously calls forward and reverse search until an intersection is found, then traces the paths back to generate a concatenated final path.
+    """High level logic for bidirectional search. Continuously calls forward and reverse search until an intersection is found,
+    then traces the paths back to generate a concatenated final path.
 
     Args:
         start (int): starting article ID
@@ -78,8 +79,6 @@ def forwardBFS(start: int, end: int, forwardVisited: Dict[int, Tuple[int, int]],
     Returns:
         int: article ID of intersection if found.
     """
-
-    global articleCount
 
     c = 0
     batchSize = 200    #Can be increased to reduce number of SQL queries
@@ -164,8 +163,6 @@ def reverseBFS(start: int, end: int, forwardVisited: Dict[int, Tuple[int, int]],
     Returns:
         int: article ID of intersection if found.
     """
-
-    global reverseArticleCount
 
     c = 0
     batchSize = 200   #Can be increased to reduce number of SQL queries

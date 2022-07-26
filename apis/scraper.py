@@ -2,8 +2,8 @@ from tabnanny import check
 from flask import session, request, abort, Blueprint, jsonify, current_app
 from util.async_result import register_async_endpoint
 
-from wikispeedruns.scraper.scraper import findPaths
-from wikispeedruns.scraper_graph_utils import convertToArticleName
+from wikispeedruns.scraper.paths import findPaths
+from wikispeedruns.scraper.scraper_graph_utils import convertToArticleName
 from wikispeedruns.prompt_generator import generatePrompts
 
 import json
