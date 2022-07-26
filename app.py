@@ -52,7 +52,7 @@ def create_app(test_config=None):
     from apis.stats_api import stats_api
     from apis.marathon_api import marathon_api
     from apis.lobbys_api import lobby_api
-    from apis.leaderboard_api_api import leaderboard_api
+    from apis.leaderboard_api import leaderboard_api
     from apis.generator_api import generator_api, load_page_rank
     from apis.achievements_api import achievements_api
     from views import views
