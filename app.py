@@ -5,6 +5,7 @@ import json
 import db
 import mail
 import tokens
+import tasks
 from util.flaskjson import CustomJSONEncoder
 
 import sentry_sdk
@@ -42,6 +43,7 @@ def create_app(test_config=None):
     db.init_app(app)
     mail.init_app(app)
     tokens.init_app(app)
+    tasks.make_celery(app)
 
     from apis.sprints_api import sprint_api
     from apis.runs_api import run_api
