@@ -88,10 +88,31 @@ def create_lobby_run(prompt_id: int, lobby_id: int, user_id: Optional[int] = Non
 def create_sprint_run(prompt_id: int, user_id=Optional[int]) -> int:
     return _create_run(prompt_id=prompt_id, user_id=user_id, name=None)
 
+def create_quick_run(prompt_start: str, prompt_end: str, user_id: Optional[int] = None) -> int:
+    query_args = {
+        "prompt_start": prompt_start,
+        "prompt_end": prompt_end,
+        "user_id": user_id
+    }
+
+    query = "INSERT INTO `quick_runs` (`prompt_start`, `prompt_end`, `user_id`) \
+        VALUES (%(prompt_start)s, %(prompt_end)s, %(user_id)s);"
+    
+    sel_query = "SELECT LAST_INSERT_ID()"
+
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute(query, query_args)
+        cursor.execute(sel_query)
+        id = cursor.fetchone()[0]
+        db.commit()
+
+    return id
+
 
 # Updating runs
 def _update_run(run_id: int, start_time: datetime, end_time: datetime,
-                      path: List[PathEntry], finished: bool, lobby_run: bool):
+                      path: List[PathEntry], finished: bool, run_type: str):
     pathStr = json.dumps({
         'version': get_db_version(),
         'path': path
@@ -103,13 +124,13 @@ def _update_run(run_id: int, start_time: datetime, end_time: datetime,
 
     # Fall-through case for https://github.com/wikispeedruns/wikipedia-speedruns/issues/395
     # We can remove the band-aid fix if we stop seeing negative times
-    if (play_time < -5 and finished and not lobby_run):
+    if (play_time < -5 and finished and not run_type != 'lobby'):
         path[0]['timeReached'] = 0
         new_total_load_time = sum([entry.get('loadTime') for entry in path[1:]]) + path[0].get('timeReached') 
         assert(duration >= new_total_load_time)
 
         # Try and submit finished run with fixed time
-        _update_run(run_id, start_time, end_time, path, finished, lobby_run)
+        _update_run(run_id, start_time, end_time, path, finished, run_type)
 
         # Still raise exception for original time 
         raise ValueError(f"Invalid play_time '{play_time}'")
@@ -126,7 +147,7 @@ def _update_run(run_id: int, start_time: datetime, end_time: datetime,
     db = get_db()
     with db.cursor() as cursor:
         query = f'''
-        UPDATE `{'lobby' if lobby_run else 'sprint'}_runs`
+        UPDATE `{run_type}_runs`
         SET `start_time`=%(start_time)s, `end_time`=%(end_time)s, `play_time`=%(play_time)s, `finished`=%(finished)s, `path`=%(path)s
         WHERE `run_id`=%(run_id)s
         '''
@@ -138,10 +159,14 @@ def _update_run(run_id: int, start_time: datetime, end_time: datetime,
 
 def update_lobby_run(run_id: int, start_time: datetime, end_time: datetime,
                       path: List[PathEntry], finished: bool):
-    return _update_run(run_id, start_time, end_time, path, finished, lobby_run=True)
+    return _update_run(run_id, start_time, end_time, path, finished, run_type='lobby')
 
 def update_sprint_run(run_id: int, start_time: datetime, end_time: datetime,
                       path: List[PathEntry], finished: bool):
-    return _update_run(run_id, start_time, end_time, path, finished, lobby_run=False)
+    return _update_run(run_id, start_time, end_time, path, finished, run_type='sprint')
+
+def update_quick_run(run_id: int, start_time: datetime, end_time: datetime,
+                      path: List[PathEntry], finished: bool):
+    return _update_run(run_id, start_time, end_time, path, finished, run_type='quick')
 
 

@@ -190,4 +190,32 @@ CREATE TABLE IF NOT EXISTS `achievements_progress` (
     PRIMARY KEY (`achievement_id`, `user_id`),
     FOREIGN KEY (`achievement_id`) REFERENCES `list_of_achievements`(`achievement_id`),
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
-)
+);
+
+CREATE TABLE IF NOT EXISTS 'quick_runs' (
+    `run_id` INT NOT NULL AUTO_INCREMENT,
+    `start_time` TIMESTAMP(3) NULL,
+    `end_time` TIMESTAMP(3) NULL,
+    `play_time` FLOAT NULL,
+    `finished` BOOLEAN DEFAULT 0,
+    `path` JSON NULL,
+    /*
+    {
+        "version": number
+        "path": [
+            ...
+            {
+                "article": string,
+                "timeReached": number,
+                "loadTime": number,
+            },
+            ...
+        ]
+    }
+    */
+    `prompt_start` VARCHAR NOT NULL,
+    `prompt_end` VARCHAR NOT NULL,
+    `user_id` INT,
+    PRIMARY KEY (`run_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
+);

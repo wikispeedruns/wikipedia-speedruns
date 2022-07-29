@@ -19,10 +19,19 @@ import { startLocalRun, submitLocalRun } from "./modules/localStorage/localStora
 // retrieve the unique prompt_id of the prompt to load
 const PROMPT_ID = serverData["prompt_id"] || null;
 
+// Or get the prompt for a quick run
+const PROMPT_START = serverData["prompt_start"] || null;
+const PROMPT_END = serverData["prompt_end"] || null;
+
 // Get lobby if a lobby_prompt
 const LOBBY_ID = serverData["lobby_id"] || null;
 
 async function getPrompt(promptId, lobbyId=null) {
+
+    if(promptId == null){
+        return {start: PROMPT_START, end: PROMPT_END};
+    }
+
     const url = (lobbyId === null) ? `/api/sprints/${promptId}` : `/api/lobbys/${lobbyId}/prompts/${promptId}`;
     const response = await fetch(url);
 
@@ -64,6 +73,9 @@ let app = new Vue({
         promptRated: false,
         promptPlayed: false,
         promptActive: false,
+
+        promptStart: null,     // or get the actual prompt for quick run
+        promptEnd: null,
 
         lobbyId: null,
         runId: -1,          //unique ID for the current run. This gets populated upon start of run
@@ -112,9 +124,9 @@ let app = new Vue({
 
         this.currentArticle = this.startArticle;
 
-        this.runId = await startRun(PROMPT_ID, LOBBY_ID);
+        this.runId = await startRun(PROMPT_ID, LOBBY_ID, PROMPT_START, PROMPT_END);
         if (!this.loggedIn && this.lobbyId == null) {
-            startLocalRun(PROMPT_ID, this.runId);
+            startLocalRun(PROMPT_ID, PROMPT_START, PROMPT_END, this.runId);
             console.log("Not logged in, uploading start of run to local storage")
         }
 
@@ -219,13 +231,16 @@ let app = new Vue({
 
             this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
             if (!this.loggedIn && this.lobbyId == null) {
-                submitLocalRun(PROMPT_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
-                console.log("Not logged in, submitting run to local storage")
+                submitLocalRun(PROMPT_ID, PROMPT_START, PROMPT_END, this.runId, this.startTime, this.endTime, this.finished, this.path);
+                console.log("Not logged in, submitting run to local storage");
                 //console.log(this.runId)
             }
 
             //fireworks();
-            if (this.lobbyId == null) {
+            if (this.promptId == null){
+                window.location.replace(`/quick_run/finish?run_id=${this.runId}&played=true`)
+            }
+            else if (this.lobbyId == null) {
                 window.location.replace(`/finish?run_id=${this.runId}&played=true`);
             } else {
                 window.location.replace(`/lobby/${this.lobbyId}/finish?run_id=${this.runId}&played=true`);

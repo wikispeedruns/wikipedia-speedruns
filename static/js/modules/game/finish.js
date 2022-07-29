@@ -20,4 +20,14 @@ async function getLobbyRun(lobbyId, runId) {
     }
 }
 
-export { getRun, getLobbyRun};
+async function getQuickRun(runId) {
+    try {
+        const response = await fetchJson(`/api/quick_run/runs/${runId}`, 'GET');
+        const body = await response.json();
+        return body;
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+export { getRun, getLobbyRun, getQuickRun};

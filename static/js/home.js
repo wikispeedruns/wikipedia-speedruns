@@ -2,6 +2,7 @@ import { MarathonPrompts } from "./modules/game/marathon/marathonPrompts.js";
 import { serverData } from "./modules/serverData.js";
 import { uploadLocalSprints, getLocalSprints } from "./modules/localStorage/localStorageSprint.js";
 import { uploadLocalMarathons, getLocalMarathons } from "./modules/localStorage/localStorageMarathon.js";
+import { uploadLocalQuickRuns } from "./modules/localStorage/localStorageQuickRun.js";
 import { generateStreakText } from "./modules/streaks.js";
 import { getUserLobby } from "./modules/lobby/utils.js";
 
@@ -82,6 +83,7 @@ var app = new Vue({
         if (this.loggedIn) {
             await uploadLocalSprints();
             await uploadLocalMarathons();
+            await uploadLocalQuickRuns();
         }
 
         //this.topUsers = await getTopUsers();

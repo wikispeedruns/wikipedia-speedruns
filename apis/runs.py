@@ -30,9 +30,13 @@ def create_lobby_run(prompt_id, lobby_id):
     )
     return jsonify({"run_id": run_id})
 
+@run_api.post("/quick_runs/<string:prompt_start>/<string:prompt_end>/runs")
+def create_quick_run(prompt_start, prompt_end):
+    run_id = runs.create_quick_run(prompt_start, prompt_end, session.get("user_id"))
 
 @run_api.patch('/sprints/<int:prompt_id>/runs/<int:run_id>', defaults={'lobby_id' : None})
 @run_api.patch("/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/runs/<int:run_id>")
+@run_api.patch("/quick_runs/runs/<int:run_id>", defaults={'lobby_id' : None, 'prompt_id': None})
 @check_request_json({'start_time': int, 'end_time': int, 'finished': bool, 'path': list})
 def update_run(prompt_id, lobby_id, run_id):
     '''
@@ -40,7 +44,15 @@ def update_run(prompt_id, lobby_id, run_id):
 
     Returns the run ID of the run updated.
     '''
-    if lobby_id is None:
+    if prompt_id is None:
+        ret_run_id = runs.update_quick_run(
+            run_id     = run_id,
+            start_time = datetime.fromtimestamp(request.json['start_time']/1000),
+            end_time   = datetime.fromtimestamp(request.json['end_time']/1000),
+            finished   = request.json['finished'],
+            path       = request.json['path']
+        )
+    elif lobby_id is None:
         ret_run_id = runs.update_sprint_run(
             run_id     = run_id,
             start_time = datetime.fromtimestamp(request.json['start_time']/1000),
@@ -83,6 +95,24 @@ def update_anonymous_sprint_run():
         return f'Updated run {run_id} to user {user_id}', 200
 
 
+
+@run_api.patch('/runs/update_anonymous')
+@check_user
+@check_request_json({"run_id": int})
+def update_anonymous_quick_run():
+    query = 'UPDATE `quick_runs` SET `user_id`=%s WHERE `run_id`=%s AND `user_id` IS NULL'
+
+    user_id = session['user_id']
+    run_id = request.json['run_id']
+
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute(query, (user_id, run_id))
+        db.commit()
+
+        return f'Updated quick run {run_id} to user {user_id}', 200
+
+
 @run_api.get('/runs')
 def get_all_runs():
     # TODO this should probably be paginated, and return just ids
@@ -116,6 +146,30 @@ def get_run(id):
         prompt = prompts.get_prompt(result['prompt_id'], "sprint", user_id=session.get("user_id"))
         if not session.get("admin", False) and (not prompt.get("played", False)):
             return "Cannot view run until prompt has been completed", 401
+
+        if result["finished"] is False:
+            return f'Run {id} has not been completed', 401
+
+        result['path'] = json.loads(result['path'])['path']
+        return jsonify(result)
+
+    return f'Error fetching run {id}', 500
+
+
+@run_api.get('/quick_run/runs/<id>')
+def get_quick_run(id):
+
+    query = '''
+    SELECT run_id, start_time, end_time, play_time, finished, path, prompt_start, prompt_end, user_id
+    FROM quick_runs
+    WHERE run_id=%s
+    '''
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (id))
+        result = cursor.fetchone()
+        db.commit()
 
         if result["finished"] is False:
             return f'Run {id} has not been completed', 401

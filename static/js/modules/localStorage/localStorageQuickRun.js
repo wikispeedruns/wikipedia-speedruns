@@ -1,31 +1,22 @@
 import {startRun, submitRun, updateAnonymousRun} from "../game/runs.js"
 import { getLocalStorageRuns, addRunToLocalStorage, setLocalStorageRuns } from "./localStorage.js"
-import {startLocalQuickRun, submitLocalQuickRun } from "./localStorageQuickRun.js"
 
-function startLocalRun(promptId, promptStart, promptEnd, runId) {
-    if(promptId == null){
-        startLocalQuickRun(promptStart, promptEnd, runId);
-        return;
-    }
-
+function startLocalQuickRun(promptStart, promptEnd, runId) {
     const data = {
         run_id: runId,
-        prompt_id: promptId,
+        prompt_start: promptStart,
+        prompt_end: promptEnd
     };
 
-    const key = "WS-S-sprint-runs";
+    const key = "WS-S-quick-runs";
 
     addRunToLocalStorage(key, data);
 }
 
-function submitLocalRun(promptId, promptStart, promptEnd, runId, startTime, endTime, finished, path) {
-    if(promptId == null){
-        submitLocalQuickRun(promptStart, promptEnd, runId, startTime, endTime, finished, path);
-        return;
-    }
-
+function submitLocalQuickRun(promptStart, promptEnd, runId, startTime, endTime, finished, path) {
     let data = {
-        prompt_id: promptId,
+        prompt_start: promptStart,
+        prompt_end: promptEnd,
         start_time: startTime,
         end_time: endTime,
         finished: finished,
@@ -38,7 +29,7 @@ function submitLocalRun(promptId, promptStart, promptEnd, runId, startTime, endT
     });
     data['play_time'] = (endTime - startTime) / 1000 - totalloadtime;
 
-    const key = "WS-S-sprint-runs";
+    const key = "WS-S-quick-runs";
 
     let ls = getLocalStorageRuns(key);
     ls[runId] = data;
@@ -47,8 +38,8 @@ function submitLocalRun(promptId, promptStart, promptEnd, runId, startTime, endT
     //console.log(getLocalStorageRuns(key));
 }
 
-async function uploadLocalSprints() {
-    const key = "WS-S-sprint-runs";
+async function uploadLocalQuickRuns() {
+    const key = "WS-S-quick-runs";
     let data = getLocalStorageRuns(key);
 
     const runs = Object.keys(data)
@@ -60,7 +51,7 @@ async function uploadLocalSprints() {
 
     for (let runId of runs) {
         try {
-            await updateAnonymousRun(runId);
+            await updateAnonymousRun(runId, type = "quick");
             runIds.push(runId);
             //console.log(`RUNID: ${runId}`)
         } catch (e) {
@@ -71,14 +62,14 @@ async function uploadLocalSprints() {
     localStorage.removeItem(key);
 }
 
-function getLocalSprints() {
-    const key = "WS-S-sprint-runs";
+function getLocalQuickRuns() {
+    const key = "WS-S-quick-runs";
     return getLocalStorageRuns(key);
 }
 
-function getLocalRun(run_id) {
-    return getLocalSprints()[run_id];
+function getLocalQuickRun(run_id) {
+    return getLocalQuickRuns()[run_id];
 }
 
-export { startLocalRun, submitLocalRun, uploadLocalSprints, getLocalSprints, getLocalRun };
+export { startLocalQuickRun, submitLocalQuickRun, uploadLocalQuickRuns, getLocalQuickRuns, getLocalQuickRun };
 

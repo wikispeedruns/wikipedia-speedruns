@@ -1,6 +1,7 @@
 from cProfile import run
 from click import prompt
 from flask import Blueprint, render_template, request, redirect, session
+from toml import TomlDecodeError
 
 from util.decorators import check_admin, check_user
 
@@ -105,6 +106,10 @@ def get_sprint_play_page(id):
 def get_lobby_play_page(lobby_id, prompt_id):
     return render_with_data('play.html', lobby_id=lobby_id, prompt_id=prompt_id)
 
+# TODO
+@views.route('/play/<string:start>/<string:end>', methods=['GET'])
+def get_quick_play_page(start, end):
+    return render_with_data('play.html', prompt_start=start, prompt_end=end)
 
 # leaderboard(s)
 @views.route('/leaderboard/<prompt_id>', methods=['GET'])
@@ -130,7 +135,7 @@ def get_sprint_finish_page():
     try:
         run_id = int(request.args.get('run_id', -1))
         played = request.args.get('played', False)
-        return render_with_data('play_finish.html', run_id=run_id, played=played)
+        return render_with_data('play_finish.html', type='sprint', run_id=run_id, played=played)
     except ValueError:
         return "Page Not Found", 404
 
@@ -139,7 +144,16 @@ def get_lobby_finish_page(lobby_id):
     try:
         run_id = int(request.args.get('run_id', -1))
         played = request.args.get('played', False)
-        return render_with_data('play_finish.html', run_id=run_id, lobby_id=lobby_id, played=played)
+        return render_with_data('play_finish.html', type='lobby', run_id=run_id, lobby_id=lobby_id, played=played)
+    except ValueError:
+        return "Page Not Found", 404
+
+@views.route('/quick_run/finish', methods=['GET'])
+def get_quick_finish_page():
+    try:
+        run_id = int(request.args.get('run_id', -1))
+        played = request.args.get('played', False)
+        return render_with_data('play_finish.html', type='quick', run_id=run_id, played=played)
     except ValueError:
         return "Page Not Found", 404
 

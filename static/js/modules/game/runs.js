@@ -1,14 +1,14 @@
 import { fetchJson } from "../fetch.js";
 
-async function startRun(promptId, lobbyId, startTime) {
-    const reqBody = {
-        "start_time": startTime,
-    };
+async function startRun(promptId, lobbyId, promptStart, promptEnd) {
 
-    let endpoint = lobbyId == null
-        ? `/api/sprints/${promptId}/runs`
-        : `/api/lobbys/${lobbyId}/prompts/${promptId}/runs`;
+    let endpoint = null;
+    if(promptId == null) endpoint = `/api/quick_runs/${promptStart}/${promptEnd}/runs`;
+    else if(lobbyId == null) endpoint = `/api/sprints/${promptId}/runs`;
+    else endpoint = `/api/lobbys/${lobbyId}/prompts/${promptId}/runs`;
 
+    console.log(endpoint);
+    
     const response = await fetchJson(endpoint, "POST", {
         "prompt_id": promptId,
     });
@@ -23,21 +23,25 @@ async function submitRun(promptId, lobbyId,  runId, startTime, endTime, finished
         "path": path,
     }
 
-    let endpoint = lobbyId == null
-        ? `/api/sprints/${promptId}/runs/${runId}`
-        : `/api/lobbys/${lobbyId}/prompts/${promptId}/runs/${runId}`;
-
+    let endpoint = null;
+    if(promptId == null) endpoint = `/api/quick_runs/runs/${runId}`;
+    else if(lobbyId == null) endpoint = `/api/sprints/${promptId}/runs/${runId}`
+    else endpoint = `/api/lobbys/${lobbyId}/prompts/${promptId}/runs/${runId}`;
+    
     const response = await fetchJson(endpoint, "PATCH", reqBody);
     return (await response.json())["run_id"];
 }
 
-async function updateAnonymousRun(runId) {
+async function updateAnonymousRun(runId, type = "sprint") {
     const reqBody = {
         "run_id": parseInt(runId)
     };
 
     try {
-        const response = await fetchJson(`/api/runs/update_anonymous`, 'PATCH', reqBody);
+        const endpoint = (type == "sprint") ?
+        `/api/runs/update_anonymous` : `/api/quick_runs/update_anonymous`;
+
+        const response = await fetchJson(endpoint, 'PATCH', reqBody);
     } catch (e) {
         console.log(e);
     }
