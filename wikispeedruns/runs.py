@@ -106,8 +106,7 @@ def create_quick_run(prompt_start: str, prompt_end: str, user_id: Optional[int] 
         cursor.execute(sel_query)
         id = cursor.fetchone()[0]
         db.commit()
-
-    return id
+        return id
 
 
 # Updating runs
@@ -168,5 +167,3 @@ def update_sprint_run(run_id: int, start_time: datetime, end_time: datetime,
 def update_quick_run(run_id: int, start_time: datetime, end_time: datetime,
                       path: List[PathEntry], finished: bool):
     return _update_run(run_id, start_time, end_time, path, finished, run_type='quick')
-
-

@@ -192,7 +192,7 @@ CREATE TABLE IF NOT EXISTS `achievements_progress` (
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
 );
 
-CREATE TABLE IF NOT EXISTS 'quick_runs' (
+CREATE TABLE IF NOT EXISTS `quick_runs` (
     `run_id` INT NOT NULL AUTO_INCREMENT,
     `start_time` TIMESTAMP(3) NULL,
     `end_time` TIMESTAMP(3) NULL,
@@ -213,8 +213,8 @@ CREATE TABLE IF NOT EXISTS 'quick_runs' (
         ]
     }
     */
-    `prompt_start` VARCHAR NOT NULL,
-    `prompt_end` VARCHAR NOT NULL,
+    `prompt_start` VARCHAR(255) NOT NULL,
+    `prompt_end` VARCHAR(255) NOT NULL,
     `user_id` INT,
     PRIMARY KEY (`run_id`),
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)

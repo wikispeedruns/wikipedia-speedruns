@@ -3,11 +3,13 @@ import { fetchJson } from "../fetch.js";
 async function startRun(promptId, lobbyId, promptStart, promptEnd) {
 
     let endpoint = null;
-    if(promptId == null) endpoint = `/api/quick_runs/${promptStart}/${promptEnd}/runs`;
+    if(promptId == null) {
+        promptStart = encodeURIComponent(promptStart);
+        promptEnd = encodeURIComponent(promptEnd);
+        endpoint = `/api/quick_runs/${promptStart}/${promptEnd}/runs`;
+    }
     else if(lobbyId == null) endpoint = `/api/sprints/${promptId}/runs`;
     else endpoint = `/api/lobbys/${lobbyId}/prompts/${promptId}/runs`;
-
-    console.log(endpoint);
     
     const response = await fetchJson(endpoint, "POST", {
         "prompt_id": promptId,

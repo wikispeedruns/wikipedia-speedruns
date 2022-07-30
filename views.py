@@ -2,6 +2,7 @@ from cProfile import run
 from click import prompt
 from flask import Blueprint, render_template, request, redirect, session
 from toml import TomlDecodeError
+from urllib.parse import unquote
 
 from util.decorators import check_admin, check_user
 
@@ -60,6 +61,9 @@ def get_random_prompt():
         rand_prompt = random.choice(results)[0]
         return redirect("/play/" + str(rand_prompt), code=302)
 
+@views.route('/quick_run', methods=['GET'])
+def get_quick_run_page():
+    return render_with_data('quick_play.html')
 
 @views.route('/register', methods=['GET'])
 def get_register_page():
@@ -106,10 +110,9 @@ def get_sprint_play_page(id):
 def get_lobby_play_page(lobby_id, prompt_id):
     return render_with_data('play.html', lobby_id=lobby_id, prompt_id=prompt_id)
 
-# TODO
 @views.route('/play/<string:start>/<string:end>', methods=['GET'])
 def get_quick_play_page(start, end):
-    return render_with_data('play.html', prompt_start=start, prompt_end=end)
+    return render_with_data('play.html', prompt_start=unquote(start), prompt_end=unquote(end))
 
 # leaderboard(s)
 @views.route('/leaderboard/<prompt_id>', methods=['GET'])

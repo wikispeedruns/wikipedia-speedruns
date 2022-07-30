@@ -2,6 +2,8 @@ from click import prompt
 from flask import jsonify, request, Blueprint, session
 from util.decorators import check_user, check_request_json
 
+from urllib.parse import unquote
+
 from db import get_db
 from pymysql.cursors import DictCursor
 
@@ -32,7 +34,8 @@ def create_lobby_run(prompt_id, lobby_id):
 
 @run_api.post("/quick_runs/<string:prompt_start>/<string:prompt_end>/runs")
 def create_quick_run(prompt_start, prompt_end):
-    run_id = runs.create_quick_run(prompt_start, prompt_end, session.get("user_id"))
+    run_id = runs.create_quick_run(unquote(prompt_start), unquote(prompt_end), session.get("user_id"))
+    return jsonify({"run_id": run_id})
 
 @run_api.patch('/sprints/<int:prompt_id>/runs/<int:run_id>', defaults={'lobby_id' : None})
 @run_api.patch("/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/runs/<int:run_id>")
@@ -96,7 +99,7 @@ def update_anonymous_sprint_run():
 
 
 
-@run_api.patch('/runs/update_anonymous')
+@run_api.patch('/quick_runs/update_anonymous')
 @check_user
 @check_request_json({"run_id": int})
 def update_anonymous_quick_run():
