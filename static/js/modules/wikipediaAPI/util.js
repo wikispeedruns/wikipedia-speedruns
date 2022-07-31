@@ -71,4 +71,17 @@ async function getArticleSummary(page) {
     return body
 }
 
-export { getArticle, getArticleTitle, getArticleSummary, articleCheck };
+async function getAutoCompleteArticles(search, numEntries = 5){
+    // https://en.wikipedia.org/w/api.php?action=opensearch&format=json&formatversion=2&search=a&namespace=0&limit=10
+    const resp = await fetch(
+        `https://en.wikipedia.org/w/api.php?action=opensearch&origin=*&format=json&formatversion=2&search=${search}&namespace=0&limit=${numEntries}`,
+        {
+            mode: "cors"
+        }
+    )
+    let body = await resp.json();
+    body = body[1]; // get the list of araticles
+    return body;
+}
+
+export { getArticle, getArticleTitle, getArticleSummary, articleCheck, getAutoCompleteArticles };

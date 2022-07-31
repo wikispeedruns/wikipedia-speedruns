@@ -138,6 +138,10 @@ let app = new Vue({
             window.location.replace(`/lobby/${this.lobbyId}`);
         },
 
+        quickPlay: function (event) {
+            window.location.replace("/quick_run");
+        },
+
 
         generateResults: function(event) {
             return `Wiki Speedruns ${this.promptId}\n${this.startArticle}\n${this.path.length - 1} 🖱️\n${(this.playTime)} ⏱️`

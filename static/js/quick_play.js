@@ -1,6 +1,6 @@
 
 import { PromptGenerator } from "./modules/generator.js"
-import { getArticleTitle, articleCheck } from "/static/js/modules/wikipediaAPI/util.js";
+import { getArticleTitle, articleCheck, getAutoCompleteArticles } from "/static/js/modules/wikipediaAPI/util.js";
 
 let app = new Vue({
     delimiters: ['[[', ']]'],
@@ -17,26 +17,20 @@ let app = new Vue({
         startPrompt: "",  // The actual wikipedia article names that will be played
         endPrompt: "", 
 
-        articleCheckMessage: ""
+        articleCheckMessage: "",
+
+        autocomplete: null
     },
 
     methods: {
 
-        playRandom() {
-            // const difficulty = this.getDifficulty(default_difficulty);
-            // const [start, end] = await getGeneratedPrompt(difficulty, 2);
-            // this.start = start;
-            // this.end = end;
-
-            this.start = "Big Bang";
-            this.end = "Australia (continent)";
-
-            this.play();
-        },
-
         async checkArticles() {
             this.articleCheckMessage = "";
-
+            
+            if(this.start == "" || this.end == ""){
+                this.articleCheckMessage = "Prompt is currently empty";
+                return;
+            }
             this.startPrompt = await getArticleTitle(this.start);
             if (this.startPrompt === null) {
                 this.articleCheckMessage = `"${this.start}" is not a Wikipedia article`;
@@ -64,7 +58,7 @@ let app = new Vue({
             const start_param = encodeURIComponent(this.start);
             const end_param = encodeURIComponent(this.end);
             window.location.replace(`/play/${start_param}/${end_param}`);
-        },
+        }
 	}
 
 });
