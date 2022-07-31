@@ -2,6 +2,7 @@
 Create some example users/prompts/runs etc. for local dev
 '''
 import datetime
+import secrets
 import pymysql
 import json
 
@@ -194,6 +195,133 @@ def populate_marathon_runs(cursor):
     cursor.executemany(runs_query, runs)
 
 
+def populate_lobbies(cursor):
+    # Create a lobby for each user
+    users_query = "SELECT user_id, join_date FROM users"
+
+    lobby_query = """
+        INSERT INTO `lobbys` (`name`, `desc`, passcode, create_date, active_date, rules)
+        VALUES (%(name)s, %(desc)s, %(passcode)s, %(date)s, %(date)s, %(rules)s);
+    """
+    
+    user_lobbys_query = """
+        INSERT INTO `user_lobbys` (user_id, lobby_id, `owner`)
+        VALUES (%s, %s, 1);
+    """
+
+    cursor.execute(users_query)
+    users = cursor.fetchall()
+
+    for i, user in enumerate(users):
+        user_id = user["user_id"]
+        date = user["join_date"]
+        passcode = "".join([str(secrets.randbelow(10)) for _ in range(6)])  # XXX: this is from thing
+
+        cursor.execute(lobby_query, {
+            "name": f"lobby{i+1}",
+            "desc": f"test lobby {i+1}",
+            "passcode": passcode,
+            "date" : date,
+            "rules": json.dumps({})
+        })
+
+        lobby_id = cursor.lastrowid
+        cursor.execute(user_lobbys_query, (user_id, lobby_id))
+
+
+def populate_lobby_prompts(cursor):
+    # Add lobby prompts of the form '[n] (number)' -> '[n + 1] (number)'
+    # to each existing lobby
+    lobby_query = """
+        SELECT l.lobby_id, IFNULL(MAX(prompt_id), 0) AS max_prompt_id
+        FROM
+            lobbys AS l
+                LEFT JOIN 
+            lobby_prompts AS p ON l.lobby_id = p.lobby_id
+        GROUP BY l.lobby_id
+    """
+    cursor.execute(lobby_query)
+    lobbies = cursor.fetchall()
+
+    prompts = []    
+    for lobby in lobbies:
+        lobby_id = lobby["lobby_id"]
+        prompt_id = lobby["max_prompt_id"]
+
+        for i in range(10):
+            prompt_start = f"{20 + i} (number)"
+            prompt_end = f"{20 + i + 1} (number)"
+
+            prompts.append({
+                "lobby_id": lobby_id,
+                "prompt_id": prompt_id + i + 1,
+                "start": prompt_start,
+                "end": prompt_end
+            })
+
+    prompt_query = """
+        INSERT INTO `lobby_prompts` (`lobby_id`, `prompt_id`, `start`, `end`)
+        VALUES (%(lobby_id)s, %(prompt_id)s, %(start)s, %(end)s);
+    """
+    cursor.executemany(prompt_query, prompts)
+
+
+def populate_lobby_runs(cursor):
+    # Create a run for each user on all currently archived prompts
+    users_query = "SELECT user_id FROM users"
+    lobby_prompts_query = """
+        SELECT lobby_id, prompt_id, start, end FROM lobby_prompts
+    """
+    runs_query = """
+        INSERT INTO lobby_runs (lobby_id, prompt_id, user_id, name, start_time, end_time, play_time, finished, path)
+        VALUES (%(lobby_id)s, %(prompt_id)s, %(user_id)s, %(name)s, %(start_time)s, %(end_time)s, %(play_time)s, %(finished)s, %(path)s)
+    """
+
+    cursor.execute(users_query)
+    users = cursor.fetchall()
+
+    cursor.execute(lobby_prompts_query)
+    lobby_prompts = cursor.fetchall()
+
+    runs = []
+    for lobby_prompt in lobby_prompts:
+
+        run_time = 50
+
+        for i, u in enumerate(users):
+            start_time = datetime.datetime.now() - datetime.timedelta(len(users) - i)
+            end_time = datetime.datetime.now() - datetime.timedelta(len(users) - i)
+            path = json.dumps({
+                "version": "2.1",
+                "path": [
+                    {
+                        "article": lobby_prompt["start"],
+                        "loadTime": 0,
+                        "timeReached": 0
+                    },
+                    {
+                        "article": lobby_prompt["end"],
+                        "loadTime": 0,
+                        "timeReached": 0
+                    }
+                ]
+            })
+
+            runs.append({
+                "lobby_id": lobby_prompt["lobby_id"],
+                "prompt_id": lobby_prompt["prompt_id"],
+                "user_id": u["user_id"],
+                "name": None,
+                "start_time": start_time,
+                "end_time": end_time,
+                "play_time": (end_time - start_time).total_seconds(),
+                "finished": True,
+                "path": path,
+            })
+            run_time += 20
+
+    cursor.executemany(runs_query, runs)
+
 
 def populate_database(db_name, recreate=False):
     # Load database settings from
@@ -217,6 +345,9 @@ def populate_database(db_name, recreate=False):
         populate_runs(cursor)
         populate_marathon_prompts(cursor)
         populate_marathon_runs(cursor)
+        populate_lobbies(cursor)
+        populate_lobby_prompts(cursor)
+        populate_lobby_runs(cursor)
 
         conn.commit()
         conn.close()
