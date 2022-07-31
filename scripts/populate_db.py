@@ -288,9 +288,9 @@ def populate_lobby_runs(cursor):
 
         run_time = 50
 
-        for u in users:
-            start_time = datetime.datetime.now() + datetime.timedelta(hours=4)
-            end_time = datetime.datetime.now() + datetime.timedelta(hours=4, seconds=run_time)
+        for i, u in enumerate(users):
+            start_time = datetime.datetime.now() - datetime.timedelta(len(users) - i)
+            end_time = datetime.datetime.now() - datetime.timedelta(len(users) - i)
             path = json.dumps({
                 "version": "2.1",
                 "path": [

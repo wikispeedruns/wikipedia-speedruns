@@ -56,31 +56,83 @@
                 <div class="stats__change mid">[[totals.pct_user_finished_marathons]]% <span style="font-weight:normal;color: white;">registered users</span></div>
             </div>
         </div>
+
+        <div class="box">
+            <div class="stats">
+                <div class="stats__amount">[[totals.created_lobbies]]</div>
+                <div class="stats__caption">created lobbies</div>
+                <div class="stats__change positive">+[[weekly.lobbies_change]] <span style="font-weight:normal;color: white;">since last week</span></div>
+            </div>
+        </div>
     </div>
-   
-    <div class="col-xs-6">
-        <canvas id="daily-users" width="400" height="450"></canvas>
-    </div>
-    
-    <div class="col-xs-6">
-        <canvas id="daily-new-users" width="400" height="450"></canvas>
-    </div>
+
+    <ul class="nav nav-pills" id="stats-tabs" @click.prevent>
+        <li class="nav-item">
+            <a class="nav-link" @click="set_active('player_growth')" :class="{active: is_active('player_growth')}">Player Growth</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" @click="set_active('sprints')" :class="{active: is_active('sprints')}">Sprints</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" @click="set_active('lobbies')" :class="{active: is_active('lobbies')}">Lobbies</a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade" :class="{'active show': is_active('player_growth')}">
+            <div class="col-xs-6">
+                <canvas id="daily-users" width="400" height="450"></canvas>
+            </div>
+            
+            <div class="col-xs-6">
+                <canvas id="daily-new-users" width="400" height="450"></canvas>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" :class="{'active show': is_active('sprints')}">
+            <div class="col-xs-6">
+                <canvas id="daily-runs" width="400" height="450"></canvas>
+            </div>
         
-    <div class="col-xs-6">
-        <canvas id="daily-runs" width="400" height="450"></canvas>
-    </div>
+            <div class="col-xs-6">
+                <canvas id="daily-new-runs" width="400" height="450"></canvas>
+            </div>
+        
+            <div class="col-xs-6">
+                <canvas id="daily-active-users" width="400" height="450"></canvas>
+            </div>
+        
+            <div class="col-xs-6">
+                <canvas id="daily-average-user-plays" width="400" height="450"></canvas>
+            </div>
+        
+        </div>
 
-    <div class="col-xs-6">
-        <canvas id="daily-new-runs" width="400" height="450"></canvas>
-    </div>
+        <div class="tab-pane fade" :class="{'active show': is_active('lobbies')}">
+            <div class="col-xs-6">
+                <canvas id="daily-lobbies" width="400" height="450"></canvas>
+            </div>
+        
+            <div class="col-xs-6">
+                <canvas id="daily-new-lobbies" width="400" height="450"></canvas>
+            </div>
 
-    <div class="col-xs-6">
-        <canvas id="daily-active-users" width="400" height="450"></canvas>
-    </div>
+            <div class="col-xs-6">
+                <canvas id="daily-lobby-runs" width="400" height="450"></canvas>
+            </div>
 
-    <div class="col-xs-6">
-        <canvas id="daily-average-user-plays" width="400" height="450"></canvas>
-    </div>
+            <div class="col-xs-6">
+                <canvas id="daily-new-lobby-runs" width="400" height="450"></canvas>
+            </div>
 
+            <div class="col-xs-6">
+                <canvas id="daily-active-lobby-users" width="400" height="450"></canvas>
+            </div>
+
+            <div class="col-xs-6">
+                <canvas id="daily-average-lobby-user-plays" width="400" height="450"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

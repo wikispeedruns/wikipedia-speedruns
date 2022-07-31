@@ -26,6 +26,10 @@ def get_total_stats():
     queries['total_finished_marathons'] = "SELECT COUNT(*) AS marathons_finished FROM marathonruns where finished=TRUE"
     queries['total_user_marathons'] = "SELECT COUNT(*) AS user_marathons FROM marathonruns WHERE user_id IS NOT NULL"
     queries['total_finished_user_marathons'] = "SELECT COUNT(*) AS user_finished_marathons FROM marathonruns WHERE user_id IS NOT NULL AND finished=TRUE"
+    
+    queries['total_created_lobbies'] = "SELECT COUNT(*) AS lobbies_created FROM lobbys"
+    queries['total_lobby_runs'] = "SELECT COUNT(*) AS lobby_runs FROM lobby_runs"
+    queries['total_finished_lobby_runs'] = "SELECT COUNT(*) AS lobby_finished_runs FROM lobby_runs WHERE user_id IS NOT NULL"
     results = {}
 
     db = get_db()
@@ -89,6 +93,57 @@ def get_daily_stats():
         SUM(daily_plays) OVER (ORDER BY day) AS total 
     FROM data
     '''
+    
+    queries['daily_lobby_runs'] = '''
+    WITH data AS (
+        SELECT 
+            DATE(start_time) AS day,
+            COUNT(*) AS daily_plays 
+        FROM lobby_runs
+        WHERE start_time IS NOT NULL
+        GROUP BY day 
+    )
+
+    SELECT
+        day,
+        daily_plays,
+        SUM(daily_plays) OVER (ORDER BY day) AS total 
+    FROM data
+    '''
+        
+    queries['daily_finished_lobby_runs'] = '''
+    WITH data AS (
+        SELECT 
+            DATE(start_time) AS day,
+            COUNT(*) AS daily_plays 
+        FROM lobby_runs
+        WHERE start_time IS NOT NULL AND end_time IS NOT NULL
+        GROUP BY day 
+    )
+
+    SELECT
+        day,
+        daily_plays,
+        SUM(daily_plays) OVER (ORDER BY day) AS total 
+    FROM data
+    '''
+    
+    queries['daily_created_lobbies'] = '''
+    WITH data AS (
+        SELECT
+            DATE(create_date) AS day,
+            COUNT(*) as daily_created_lobbies
+        FROM lobbys
+        WHERE create_date IS NOT NULL
+        GROUP BY day
+    )
+    
+    SELECT
+        day,
+        daily_created_lobbies,
+        SUM(daily_created_lobbies) OVER (ORDER BY day) AS total
+    FROM data
+    '''
 
     queries['avg_user_plays'] = '''
     WITH data AS (
@@ -102,7 +157,7 @@ def get_daily_stats():
 
     SELECT
         day,
-        AVG(plays) AS "plays_per_user"
+        AVG(plays) AS "sprint_runs_per_user"
     FROM data
     GROUP BY day
     '''
@@ -119,7 +174,41 @@ def get_daily_stats():
 
     SELECT
         day,
-        AVG(plays) AS "plays_per_user"
+        AVG(plays) AS "finished_sprint_runs_per_user"
+    FROM data
+    GROUP BY day
+    '''
+    
+    queries['avg_user_lobby_plays'] = '''
+    WITH data AS (
+        SELECT user_id,
+        DATE(start_time) AS day,
+        COUNT(*) AS plays
+        FROM lobby_runs
+        WHERE user_id IS NOT NULL AND start_time IS NOT NULL
+        GROUP BY user_id, day
+    )
+
+    SELECT
+        day,
+        AVG(plays) AS "lobby_runs_per_user"
+    FROM data
+    GROUP BY day
+    '''
+
+    queries['avg_user_finished_lobby_plays'] = '''
+    WITH data AS (
+        SELECT user_id,
+        DATE(start_time) AS day,
+        COUNT(*) AS plays
+        FROM lobby_runs
+        WHERE user_id IS NOT NULL AND start_time IS NOT NULL AND end_time IS NOT NULL
+        GROUP BY user_id, day
+    )
+
+    SELECT
+        day,
+        AVG(plays) AS "finished_lobby_runs_per_user"
     FROM data
     GROUP BY day
     '''
@@ -141,6 +230,25 @@ def get_daily_stats():
     FROM data
     GROUP BY day
     '''
+    
+    queries['active_lobby_users'] = '''
+    WITH data AS (
+        SELECT
+            COUNT(*) AS plays,
+            DATE(end_time) AS day,
+            user_id
+        FROM lobby_runs
+        WHERE user_id IS NOT NULL AND end_time IS NOT NULL
+        GROUP BY user_id, day
+    )
+
+    SELECT 
+        day,
+        COUNT(*) AS active_users
+    FROM data
+    GROUP BY day
+    '''
+
     results = {} 
 
     db = get_db()

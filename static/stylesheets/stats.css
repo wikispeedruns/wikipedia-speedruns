@@ -3,6 +3,18 @@
     float: right;
 }
 
+.nav-pills {
+    justify-content: center;
+}
+.nav-pills .nav-item .nav-link {
+    color: #347aeb;
+    text-decoration: none !important;
+}
+.nav-pills .nav-item .active, .nav-pills .nav-item a:hover {
+    color: #fff;
+    background-color: #347aeb;
+}
+
 canvas {
    float: left; 
    margin-left: 2em;
