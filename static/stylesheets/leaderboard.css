@@ -1,0 +1,15 @@
+.progress {
+	margin-top: .2rem;
+}
+
+.progress-label {
+	float: left;
+	margin-right: 1em;
+}
+
+/* Mobile */
+@media (max-width: 768px) {                  
+	.hide-if-mobile {
+	   display: none;
+	}
+ }

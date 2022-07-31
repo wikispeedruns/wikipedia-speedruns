@@ -10,6 +10,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
 
 <script defer type="module" src="{{url_for('static', filename='js/leaderboard.js') }}"></script>
+
+<link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/leaderboard.css')}}">
 {% endblock %}
 
 {% block content %}
@@ -29,15 +31,47 @@
         </div>
 
         <div class="card">
-            <div class="card-header pt-3">
+            <div class="row">
+                <div class="col-8" style="padding-right:0">
+                    <div class="card-header pt-3" style="height: 8rem;">
 
-                <h4>Prompt [[prompt.prompt_id || ""]]</h4>
+                        <h4>Prompt [[prompt.prompt_id || ""]]</h4>
 
-                <h6 v-if="available">
-                    <strong>[[prompt.start]]</strong> to <strong v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>
-                </h6>
+                        <h6 v-if="available">
+                            <strong>[[prompt.start]]</strong> to <strong v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>
+                        </h6>
 
-                <p>[[numRuns]] total runs</p>
+
+                        <p>[[numRuns]] total runs</p>
+                    </div>
+                </div>  
+
+                <div class="col" style="padding-left:0">
+                    <div class="card-header pt-3" style="height: 8rem;">   
+                        <div class="row mb-1">
+                            <div class="col">
+                            <p class="text-muted small progress-label hide-if-mobile">Success Rate:</p>
+                            <div class="progress w-50">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 25%" :aria-valuenow="numRuns" aria-valuemin="0" aria-valuemax="100">
+                                    [[stats]]%
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-1">
+                            <div class="col">
+                            <p class="text-muted small progress-label hide-if-mobile">Avg. # Clicks:</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-1">
+                            <div class="col">
+                            <p class="text-muted small progress-label hide-if-mobile">Avg. Completion Time:</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="card-body">

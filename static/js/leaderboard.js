@@ -279,6 +279,8 @@ var app = new Vue({
         offset: 0,
 
         preset: "",
+        
+        stats: {},
     },
 
     computed: {
