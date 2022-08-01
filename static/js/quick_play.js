@@ -1,7 +1,7 @@
 
 import { autocompleteInput } from "./modules/autocomplete.js";
 import { PromptGenerator } from "./modules/generator.js"
-import { getArticleTitle, articleCheck, getAutoCompleteArticles } from "/static/js/modules/wikipediaAPI/util.js";
+import { getArticleTitle, articleCheck } from "/static/js/modules/wikipediaAPI/util.js";
 
 let app = new Vue({
     delimiters: ['[[', ']]'],
@@ -54,12 +54,11 @@ let app = new Vue({
 
         async play() {
 
-            console.log(this.start);
-            console.log(this.end);
-
             await this.checkArticles();
             if(this.articleCheckMessage != "") return;
 
+            console.log(`${this.startPrompt} -> ${this.endPrompt}`);
+            
             const start_param = encodeURIComponent(this.startPrompt);
             const end_param = encodeURIComponent(this.endPrompt);
             window.location.replace(`/play/${start_param}/${end_param}`);
