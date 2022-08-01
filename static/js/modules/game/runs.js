@@ -34,7 +34,7 @@ async function submitRun(promptId, lobbyId,  runId, startTime, endTime, finished
     return (await response.json())["run_id"];
 }
 
-async function updateAnonymousRun(runId, type = "sprint") {
+async function updateAnonymousRun(runId, type="sprint") {
     const reqBody = {
         "run_id": parseInt(runId)
     };
