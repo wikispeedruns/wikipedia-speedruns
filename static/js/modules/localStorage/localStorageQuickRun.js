@@ -44,8 +44,6 @@ async function uploadLocalQuickRuns() {
     const key = location;
     let data = getLocalQuickRuns();
 
-    console.log(data);
-
     const runs = Object.keys(data)
     if (runs.length == 0) return;
 

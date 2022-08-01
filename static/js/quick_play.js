@@ -45,7 +45,7 @@ let app = new Vue({
                 return;
             }
 
-            const checkRes = await articleCheck(this.end);
+            const checkRes = await articleCheck(this.endPrompt);
             if ('warning' in checkRes) {
                 this.articleCheckMessage = checkRes["warning"];
                 return;
