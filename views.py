@@ -61,8 +61,12 @@ def get_random_prompt():
         rand_prompt = random.choice(results)[0]
         return redirect("/play/" + str(rand_prompt), code=302)
 
-@views.route('/quick_run', methods=['GET'])
-def get_quick_run_page():
+@views.route('/custom_play', methods=['GET'])
+def get_custom_play_page():
+    return render_with_data('custom_play.html')
+
+@views.route('/quick_play', methods=['GET'])
+def get_quick_play_page():
     return render_with_data('quick_play.html')
 
 @views.route('/register', methods=['GET'])
@@ -111,7 +115,7 @@ def get_lobby_play_page(lobby_id, prompt_id):
     return render_with_data('play.html', lobby_id=lobby_id, prompt_id=prompt_id)
 
 @views.route('/play/<string:start>/<string:end>', methods=['GET'])
-def get_quick_play_page(start, end):
+def get_quick_run_page(start, end):
     return render_with_data('play.html', prompt_start=unquote(start), prompt_end=unquote(end))
 
 # leaderboard(s)

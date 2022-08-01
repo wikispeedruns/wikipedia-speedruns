@@ -76,11 +76,6 @@ var autocompleteInput = {
 
         setHighlightIndex(index){
             this.highlightIndex = index;
-        },
-
-        logText(input) {
-            console.log(`input: ${input}`);
-            console.log(`text_variable: ${this.text}`);
         }
     },
 
@@ -106,7 +101,7 @@ var autocompleteInput = {
                     @mousedown.prevent
                     @mouseover="setHighlightIndex(index)"
                     @click="selectArticle(article)"
-                    :style="{ 'background-color': index===highlightIndex ? 'lightgray' : 'transparent' }"
+                    :style="{ 'cursor': 'pointer', 'background-color': index===highlightIndex ? 'lightgray' : 'transparent' }"
                 >
                     <h6 style="margin-left: 0.8em">{{ article }}</h6>
                 </li>

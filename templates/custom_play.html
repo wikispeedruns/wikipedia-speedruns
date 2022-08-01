@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block head %}
+
+<script type="module" src="{{url_for('static', filename='js/custom_play.js') }}"></script>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div id="app">
+
+    <h2> Choose Your Starting and Ending Article! </h2>
+    <hr>
+
+    <div class="col-md-4 col-sm-6">
+        <ac-input :text="start" @update:text="newValue => start = newValue" placeholder="Start Article"></ac-input>
+        <ac-input :text="end" @update:text="newValue => end = newValue" placeholder="End Article"></ac-input>
+    </div>
+
+    <details class="mb-4">
+        <summary> Generate Random Articles </summary>
+
+        <prompt-generator
+            v-bind:start.sync="start"
+            v-bind:end.sync="end"
+        ></prompt-generator>
+
+    </details>
+
+    <p class="text-danger">[[articleCheckMessage]]</p>
+
+    <button class="btn btn-primary" style="font-size:20px" v-on:click.prevent="play"> Play! </button>
+</div>
+
+
+{% endblock %}
