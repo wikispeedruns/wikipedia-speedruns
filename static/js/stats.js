@@ -15,6 +15,8 @@ function update_totals(totals) {
     app.totals.marathon_runs = totals['marathons_total'];
     app.totals.finished_runs = totals['sprints_finished'];
     app.totals.finished_marathons = totals['marathons_finished'];
+    app.totals.lobby_runs = totals['lobby_runs_total'];
+    app.totals.finished_lobby_runs = totals['lobby_runs_finished'];
     app.totals.created_lobbies = totals['lobbies_created'];
    
     let user_runs = totals['user_runs'];
@@ -72,8 +74,11 @@ function calculate_weekly_change() {
     let last_week_finished_runs = app.daily.finished_sprint_runs[app.daily.finished_sprint_runs.length - 7]['total'];
     app.weekly.finished_runs_change = app.totals.finished_runs - last_week_finished_runs;
 
-    let last_week_lobbies = app.daily.created_lobbies[app.daily.created_lobbies.length - 7]['total'];
-    app.weekly.lobbies_change = app.totals.created_lobbies - last_week_lobbies;
+    let last_week_lobby_runs = app.daily.lobby_runs[app.daily.lobby_runs.length - 7]['total'];
+    app.weekly.lobby_runs_change = app.totals.lobby_runs - last_week_lobby_runs;
+
+    let last_week_finished_lobby_runs = app.daily.finished_lobby_runs[app.daily.finished_lobby_runs.length - 7]['total'];
+    app.weekly.finished_lobby_runs_change = app.totals.finished_lobby_runs - last_week_finished_lobby_runs;
 }
 
 async function draw_player_graphs() {
@@ -397,6 +402,7 @@ var app = new Vue({
             marathons_runs: 0,
             finished_runs: 0,
             finished_marathons: 0,
+            finished_lobby_runs: 0,
             pct_goog_users: 0.0,
             pct_user_runs: 0.0,
             pct_user_finished_runs: 0.0,
@@ -407,7 +413,7 @@ var app = new Vue({
             user_change: 0.0,
             runs_change: 0.0,
             finished_runs_change: 0.0,
-            lobbies_change: 0.0,
+            finished_lobby_runs_change: 0.0,
         },
         daily: {
             users: [],
@@ -423,7 +429,7 @@ var app = new Vue({
             finished_lobby_runs_per_user: [],
             active_lobby_users: []
         },
-        active_tab: 'player_growth'
+        active_tab: 'users'
     },
     methods: {
         is_active(tab_name) {

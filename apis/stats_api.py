@@ -28,8 +28,8 @@ def get_total_stats():
     queries['total_finished_user_marathons'] = "SELECT COUNT(*) AS user_finished_marathons FROM marathonruns WHERE user_id IS NOT NULL AND finished=TRUE"
     
     queries['total_created_lobbies'] = "SELECT COUNT(*) AS lobbies_created FROM lobbys"
-    queries['total_lobby_runs'] = "SELECT COUNT(*) AS lobby_runs FROM lobby_runs"
-    queries['total_finished_lobby_runs'] = "SELECT COUNT(*) AS lobby_finished_runs FROM lobby_runs WHERE user_id IS NOT NULL"
+    queries['total_lobby_runs'] = "SELECT COUNT(*) AS lobby_runs_total FROM lobby_runs"
+    queries['total_finished_lobby_runs'] = "SELECT COUNT(*) AS lobby_runs_finished FROM lobby_runs WHERE user_id IS NOT NULL"
     results = {}
 
     db = get_db()
