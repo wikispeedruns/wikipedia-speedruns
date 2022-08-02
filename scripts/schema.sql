@@ -2,7 +2,7 @@
     This file should have parity with the actual database.
     For any changes to the database, those changes should be reflected here.
 
-    Schema Version: 2.1
+    Schema Version: 2.2
     This version number should be incremented with any change to the schema.
     Keep this up-to-date with db.py
 */
