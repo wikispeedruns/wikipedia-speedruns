@@ -41,6 +41,11 @@ var customPlay = {
                 this.articleCheckMessage = `"${this.end}" is not a Wikipedia article`;
                 return;
             }
+            
+            if(this.startPrompt == this.endPrompt) {
+                this.articleCheckMessage = `The start and end articles are the same`;
+                return;
+            }
 
             const checkRes = await articleCheck(this.endPrompt);
             if ('warning' in checkRes) {
@@ -56,8 +61,8 @@ var customPlay = {
 
             console.log(`${this.startPrompt} -> ${this.endPrompt}`);
             
-            const start_param = encodeURIComponent(this.startPrompt).replace('%2F', '%252F');
-            const end_param = encodeURIComponent(this.endPrompt).replace('%2F', '%252F');
+            const start_param = encodeURIComponent(this.startPrompt).replaceAll('%2F', '%252F');
+            const end_param = encodeURIComponent(this.endPrompt).replaceAll('%2F', '%252F');
             window.location.replace(`/play/${start_param}/${end_param}`);
         }
 	},
@@ -69,19 +74,20 @@ var customPlay = {
                 <ac-input :text.sync="end" placeholder="End Article"></ac-input>
             </div>
 
+            <p class="text-danger">{{articleCheckMessage}}</p>
+
             <details class="mb-4">
                 <summary> Generate Random Articles </summary>
 
                 <prompt-generator
                     v-bind:start.sync="start"
                     v-bind:end.sync="end"
+                    v-bind:showLink="false"
                 ></prompt-generator>
 
             </details>
 
-            <p class="text-danger">{{articleCheckMessage}}</p>
-
-            <button class="btn btn-primary" v-on:click.prevent="play"> Play </button>
+            <button class="btn btn-primary" style="font-weight:600;" v-on:click.prevent="play"> Play </button>
         </div>
     `)
 };

@@ -3,6 +3,11 @@
 	font-size: 1.3em;
 }
 
+.underline-text {
+	text-decoration: underline;
+	text-underline-offset: 4px;
+}
+
 .split-half {
 	background: linear-gradient(to right, aliceblue 50%,  #f0ede5 50%);
 }

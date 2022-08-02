@@ -15,7 +15,11 @@ var PromptGenerator = {
     props: {
         // Two way binding/v-model
         start: String,
-        end: String
+        end: String,
+        showLink: {
+            type: Boolean,
+            default: true
+        }
     },
 
 	data: function () {
@@ -69,7 +73,7 @@ var PromptGenerator = {
                     <button class="btn btn-primary border-dark" v-on:click.prevent="generateEnd"> End </button>
                 </div>
             </div>
-            <p>
+            <p v-if="showLink">
                 <small><a href="/generator#about"> How does this work? </a></small>
             </p>
         </div>

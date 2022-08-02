@@ -12,14 +12,17 @@ let app = new Vue({
         // loop until there is a valid start and end
         while(true){
             [start, end] = await getGeneratedPrompt(difficulty, 2);
+            
+            if(start === end) continue;
+
             const checkRes = await articleCheck(end);
             if (!('warning' in checkRes)) break;
         }
 
         console.log(`${start} -> ${end}`);
             
-        const start_param = encodeURIComponent(start).replace('%2F', '%252F');
-        const end_param = encodeURIComponent(end).replace('%2F', '%252F');
+        const start_param = encodeURIComponent(start).replaceAll('%2F', '%252F');
+        const end_param = encodeURIComponent(end).replaceAll('%2F', '%252F');
 
         window.location.replace(`/play/${start_param}/${end_param}`);
     }

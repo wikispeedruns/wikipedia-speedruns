@@ -80,10 +80,9 @@ var autocompleteInput = {
     },
 
     template: (`
-        <div ref="list">
+        <div ref="list" style="width:auto">
             <input
-                class="form-control" 
-                style="width:300px"
+                class="form-control"
                 type="text"
                 autocomplete=off
                 :placeholder="placeholder"

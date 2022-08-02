@@ -82,17 +82,18 @@
         <div class="card">
             <div class="alert alert-info my-0" role="alert">
                 <h5 class="my-0">Quick Play</h5>
-                <template>Play a random prompt, or set your own!</template>
+                <template>Play a quick game right now!</template>
             </div>
             <div class="card-body split-half">
                 <div class="row">
-                    <div class="col-sm-6 align-middle">
-                        <p class="header-text"> Customize Start and End </p>
-                        <custom-play/>
+                    <div class="col-6">
+                        <p class="header-text underline-text"> Play a Random Prompt </p>
+                        <button class="btn btn-primary header-text"
+                        v-on:click.prevent="playRandom"> Play Now </button>
                     </div>
-                    <div class="col-sm-6 align-middle">
-                        <p class="header-text"> Play a Random Prompt </p>
-                        <button class="btn btn-primary" v-on:click.prevent="playRandom"> Play </button>
+                    <div class="col-6">
+                        <p class="header-text underline-text">Customize Start and End</p>
+                        <custom-play/>
                     </div>
                 </div>
             </div>
