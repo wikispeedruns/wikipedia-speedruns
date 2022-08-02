@@ -13,7 +13,10 @@ let app = new Vue({
         while(true){
             [start, end] = await getGeneratedPrompt(difficulty, 2);
             
-            if(start === end) continue;
+            if(start == null || end == null || start === end) continue;
+            
+            console.log(start);
+            console.log(end);
 
             const checkRes = await articleCheck(end);
             if (!('warning' in checkRes)) break;
