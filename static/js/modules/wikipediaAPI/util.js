@@ -60,8 +60,9 @@ async function articleCheck(title) {
 }
 
 async function getArticleSummary(page) {
+    const encodedPage = page.replaceAll('/', '%2F');
     const resp = await fetch(
-        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(page)}`,
+        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodedPage}`,
         {
             mode: "cors"
         }
