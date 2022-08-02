@@ -27,7 +27,8 @@ def get_version_map():
     return {
         "1.0": version_2_1,
         "2.0": version_2_1,
-        "2.1": version_2_1
+        "2.1": version_2_1,
+        "2.2": version_2_1
     }
 
 def convert_to_standard(raw_data: Dict[str, Any]) -> Dict[str, Any]:
