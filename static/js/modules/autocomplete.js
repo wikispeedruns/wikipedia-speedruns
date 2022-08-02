@@ -83,6 +83,7 @@ var autocompleteInput = {
         <div ref="list">
             <input
                 class="form-control" 
+                style="width:300px"
                 type="text"
                 autocomplete=off
                 :placeholder="placeholder"

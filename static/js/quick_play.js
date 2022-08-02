@@ -18,8 +18,8 @@ let app = new Vue({
 
         console.log(`${start} -> ${end}`);
             
-        const start_param = encodeURIComponent(start);
-        const end_param = encodeURIComponent(end);
+        const start_param = encodeURIComponent(start).replace('%2F', '%252F');
+        const end_param = encodeURIComponent(end).replace('%2F', '%252F');
 
         window.location.replace(`/play/${start_param}/${end_param}`);
     }

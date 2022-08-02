@@ -4,8 +4,8 @@ async function startRun(promptId, lobbyId, promptStart, promptEnd) {
 
     let endpoint = null;
     if(promptId == null) {
-        promptStart = encodeURIComponent(promptStart);
-        promptEnd = encodeURIComponent(promptEnd);
+        promptStart = encodeURIComponent(promptStart).replace('%2F', '%252F');
+        promptEnd = encodeURIComponent(promptEnd).replace('%2F', '%252F');
         endpoint = `/api/quick_runs/${promptStart}/${promptEnd}/runs`;
     }
     else if(lobbyId == null) endpoint = `/api/sprints/${promptId}/runs`;

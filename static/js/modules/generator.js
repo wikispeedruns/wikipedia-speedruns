@@ -55,18 +55,18 @@ var PromptGenerator = {
 
 	template: (`
         <div>
-
-            Less Obscure <input type="range" min="2" max="5" v-model="logdifficulty" class="slider" step="0.1">
-            More Obscure  (Choosing from {{approx_difficulty}} articles)</p>
+            <div>
+                Less Obscure <input type="range" min="2" max="5" v-model="logdifficulty" class="slider" step="0.1">More Obscure 
+            </div> 
+            <div>(Choosing from {{approx_difficulty}} articles)</div>
 
             <!-- expression for 1-100 scale {{Math.floor(33 * (logdifficulty - 2)) + 1}}-->
 
             <div class="my-2">
-                Generate a new:
                 <div class="btn-group">
-                    <button class="btn btn-primary" v-on:click.prevent="generatePrompt"> Prompt (Start and End) </button>
-                    <button class="btn btn-primary" v-on:click.prevent="generateStart"> Start </button>
-                    <button class="btn btn-primary" v-on:click.prevent="generateEnd"> End </button>
+                    <button class="btn btn-primary border-dark" v-on:click.prevent="generatePrompt"> Prompt </button>
+                    <button class="btn btn-primary border-dark" v-on:click.prevent="generateStart"> Start </button>
+                    <button class="btn btn-primary border-dark" v-on:click.prevent="generateEnd"> End </button>
                 </div>
             </div>
             <p>

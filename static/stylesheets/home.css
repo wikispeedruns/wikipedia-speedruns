@@ -1,3 +1,12 @@
+.header-text {
+	font-weight: 600;
+	font-size: 1.3em;
+}
+
+.split-half {
+	background: linear-gradient(to right, aliceblue 50%,  #f0ede5 50%);
+}
+
 .social-menu {
 	display: flex;
 	list-style-type: none;

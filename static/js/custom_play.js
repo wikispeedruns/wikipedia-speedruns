@@ -3,26 +3,23 @@ import { autocompleteInput } from "./modules/autocomplete.js";
 import { PromptGenerator } from "./modules/generator.js"
 import { getArticleTitle, articleCheck } from "/static/js/modules/wikipediaAPI/util.js";
 
-let app = new Vue({
-    delimiters: ['[[', ']]'],
-    el: '#app',
+var customPlay = {
     components: {
         'prompt-generator': PromptGenerator,
         'ac-input': autocompleteInput
     },
 
-    data: {
+    data: function () {
+        return {
+            start: "", // The input article names
+            end: "",
 
-        start: "", // The input article names
-        end: "",
+            startPrompt: "",  // The actual wikipedia article names that will be played
+            endPrompt: "", 
 
-        startPrompt: "",  // The actual wikipedia article names that will be played
-        endPrompt: "", 
-
-        articleCheckMessage: "",
-
-        autocomplete: null
-    },
+            articleCheckMessage: ""
+        }
+	},
 
     methods: {
 
@@ -59,10 +56,34 @@ let app = new Vue({
 
             console.log(`${this.startPrompt} -> ${this.endPrompt}`);
             
-            const start_param = encodeURIComponent(this.startPrompt);
-            const end_param = encodeURIComponent(this.endPrompt);
+            const start_param = encodeURIComponent(this.startPrompt).replace('%2F', '%252F');
+            const end_param = encodeURIComponent(this.endPrompt).replace('%2F', '%252F');
             window.location.replace(`/play/${start_param}/${end_param}`);
         }
-	}
+	},
 
-});
+    template: (`
+        <div>
+            <div class="col-md-4 col-sm-6">
+                <ac-input :text.sync="start" placeholder="Start Article"></ac-input>
+                <ac-input :text.sync="end" placeholder="End Article"></ac-input>
+            </div>
+
+            <details class="mb-4">
+                <summary> Generate Random Articles </summary>
+
+                <prompt-generator
+                    v-bind:start.sync="start"
+                    v-bind:end.sync="end"
+                ></prompt-generator>
+
+            </details>
+
+            <p class="text-danger">{{articleCheckMessage}}</p>
+
+            <button class="btn btn-primary" v-on:click.prevent="play"> Play </button>
+        </div>
+    `)
+};
+
+export { customPlay }

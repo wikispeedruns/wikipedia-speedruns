@@ -67,12 +67,6 @@
             <p v-if="loggedIn === false">
                 <a href="/login">Log in</a>/<a href="/register">Register</a> to create a new private lobby and play with your friends!
             </p>
-            <p>
-                Play a Quick Game <a href="/quick_play">here</a>!
-            </p>
-            <p>
-                Play your own prompt <a href="/custom_play">here</a>!
-            </p>
         </template>
     </div>
 
@@ -84,6 +78,28 @@
     </div>
     <!-- main content area -->
     <div class="col-sm-9">
+
+        <div class="card">
+            <div class="alert alert-info my-0" role="alert">
+                <h5 class="my-0">Quick Play</h5>
+                <template>Play a random prompt, or set your own!</template>
+            </div>
+            <div class="card-body split-half">
+                <div class="row">
+                    <div class="col-sm-6 align-middle">
+                        <p class="header-text"> Customize Start and End </p>
+                        <custom-play/>
+                    </div>
+                    <div class="col-sm-6 align-middle">
+                        <p class="header-text"> Play a Random Prompt </p>
+                        <button class="btn btn-primary" v-on:click.prevent="playRandom"> Play </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
         <div class="card">
             <div class="alert alert-info my-0" role="alert">
                 <h5 class="my-0">Prompt of the Day</h5>

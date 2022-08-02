@@ -61,7 +61,7 @@ async function articleCheck(title) {
 
 async function getArticleSummary(page) {
     const resp = await fetch(
-        `https://en.wikipedia.org/api/rest_v1/page/summary/${page}`,
+        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(page)}`,
         {
             mode: "cors"
         }
