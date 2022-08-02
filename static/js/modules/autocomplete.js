@@ -89,7 +89,7 @@ var autocompleteInput = {
                 :value="text" 
                 @input="updateText($event.target.value)" 
                 @focusout="close"
-                @keydown.enter="selectArticle(acList[highlightIndex])"
+                @keydown.enter.prevent="selectArticle(acList[highlightIndex])"
                 @keydown.down.prevent="down"
                 @keydown.up.prevent="up"
             />

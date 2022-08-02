@@ -31,6 +31,7 @@ import { fetchJson } from "/static/js/modules/fetch.js";
 import { serverData } from "/static/js/modules/serverData.js";
 import { getArticleTitle, articleCheck } from "/static/js/modules/wikipediaAPI/util.js";
 import { PromptGenerator } from "/static/js/modules/generator.js"
+import { autocompleteInput } from "/static/js/modules/autocomplete.js"
 
 const LOBBY_ID = serverData["lobby_id"];
 
@@ -38,7 +39,8 @@ var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     components: {
-        'prompt-generator': PromptGenerator
+        'prompt-generator': PromptGenerator,
+        'ac-input': autocompleteInput
     },
     data: {
         startPrompt:"",
@@ -135,7 +137,7 @@ var app = new Vue({
                 return;
             }
 
-            const checkRes = await articleCheck(this.endPrompt);
+            const checkRes = await articleCheck(end);
             if ('warning' in checkRes) {
                 this.addPromptMessage = checkRes["warning"];
                 return;
@@ -282,13 +284,15 @@ var app = new Vue({
         <form id="newPrompt" v-on:submit.prevent="addPrompt">
             <div class="my-2 row">
                 <div class="col-md-4 col-sm-6">
-                    <input  class="form-control" type="text" id="start" name="start" placeholder="Start Article" v-model="startPrompt">
+                    <!-- <input  class="form-control" type="text" id="start" name="start" placeholder="Start Article" v-model="startPrompt"> -->
+                    <ac-input :text.sync="startPrompt" placeholder="Start Article"></ac-input>
                 </div>
             </div>
 
             <div class="mb-2 row">
                 <div class="col-md-4 col-sm-6">
-                    <input class="form-control" type="text" id="end" name="end" placeholder="End Article" v-model="endPrompt">
+                    <!-- <input class="form-control" type="text" id="end" name="end" placeholder="End Article" v-model="endPrompt"> -->
+                    <ac-input :text.sync="endPrompt" placeholder="End Article"></ac-input>
                 </div>
             </div>
 
