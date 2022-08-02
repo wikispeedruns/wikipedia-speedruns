@@ -1,5 +1,6 @@
 import { serverData } from "./modules/serverData.js"
 import { fetchJson } from "./modules/fetch.js"
+import { round } from "./modules/wikipediaAPI/util.js";
 
 
 import { pathArrowFilter } from "./modules/game/filters.js";
@@ -280,7 +281,11 @@ var app = new Vue({
 
         preset: "",
         
+        // Leaderboard Stats
         stats: {},
+        finishPct: 0,
+        avgClicks: 0,
+        avgTime: 0,
     },
 
     computed: {
@@ -401,8 +406,19 @@ var app = new Vue({
             }
         }
 
+        // Prompt Stats
+        let statsEndpoint = this.lobbyId === null
+        ? `/api/sprints/${this.promptId}/stats`
+        : `/api/lobbys/${this.lobbyId}/prompts/${this.promptId}/stats`;
 
+        var response = await fetchJson(statsEndpoint, "POST", {
+            ...args
+        });
+        let statJson = await response.json();
 
+        // TODO: Properly set data after navigation 
+        this.stats.finish_pct = statJson['finish_pct'];
+        this.finishPct = round(statJson['finish_pct'], 2);
 
         this.genGraph();
     }

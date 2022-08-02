@@ -51,9 +51,12 @@
                         <div class="row">
                             <div class="col">
                             <p class="text-muted small progress-label hide-if-mobile">Success Rate:</p>
+
+                            <!-- TODO: Add hover -->
+                            <!-- TODO: Properly fetch data after navigation  -->
                             <div class="progress">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: 25%" :aria-valuenow="numRuns" aria-valuemin="0" aria-valuemax="100">
-                                    [[stats]]%
+                                <div class="progress-bar bg-success" role="progressbar" :style="{ width: finishPct + '%' }" :aria-valuenow="finishPct" aria-valuemin="0" aria-valuemax="100">
+                                    [[finishPct]]%
                                 </div>
                             </div>
                             </div>
@@ -62,14 +65,14 @@
                         <div class="row"> 
                             <div class="col">
                             <p class="text-muted small progress-label hide-if-mobile">Avg. # Clicks: </p>
-                            <p class="stat text-dark">[[stats]]</p>
+                            <p class="stat text-dark">[[avgClicks]]</p>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col">
                             <p class="text-muted small progress-label hide-if-mobile">Avg. Completion Time:</p>
-                            <p class="stat text-dark">[[stats]]</p>
+                            <p class="stat text-dark">[[avgTime]]</p>
                             </div>
                         </div>
                     </div>
