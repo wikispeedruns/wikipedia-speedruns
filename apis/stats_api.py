@@ -81,7 +81,23 @@ def get_daily_stats():
         SUM(daily_plays) OVER (ORDER BY day) AS total 
     FROM data
     '''
-        
+    
+    queries['daily_started_sprints'] = '''
+    WITH data AS (
+        SELECT 
+            DATE(start_time) AS day,
+            COUNT(*) AS daily_plays 
+        FROM sprint_runs
+        GROUP BY day 
+    )
+
+    SELECT
+        day,
+        daily_plays,
+        SUM(daily_plays) OVER (ORDER BY day) AS total 
+    FROM data
+    '''
+
     queries['daily_finished_sprints'] = '''
     WITH data AS (
         SELECT 
@@ -106,6 +122,22 @@ def get_daily_stats():
             COUNT(*) AS daily_plays 
         FROM lobby_runs
         WHERE start_time IS NOT NULL
+        GROUP BY day 
+    )
+
+    SELECT
+        day,
+        daily_plays,
+        SUM(daily_plays) OVER (ORDER BY day) AS total 
+    FROM data
+    '''
+
+    queries['daily_started_lobby_runs'] = '''
+    WITH data AS (
+        SELECT 
+            DATE(start_time) AS day,
+            COUNT(*) AS daily_plays 
+        FROM lobby_runs
         GROUP BY day 
     )
 
@@ -140,6 +172,22 @@ def get_daily_stats():
             COUNT(*) AS daily_plays 
         FROM quick_runs
         WHERE start_time IS NOT NULL
+        GROUP BY day 
+    )
+
+    SELECT
+        day,
+        daily_plays,
+        SUM(daily_plays) OVER (ORDER BY day) AS total 
+    FROM data
+    '''
+
+    queries['daily_quick_runs'] = '''
+    WITH data AS (
+        SELECT 
+            DATE(start_time) AS day,
+            COUNT(*) AS daily_plays 
+        FROM quick_runs
         GROUP BY day 
     )
 
