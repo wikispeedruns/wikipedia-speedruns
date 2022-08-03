@@ -33,19 +33,24 @@ var autocompleteInput = {
         },
 
         async updateText(text) {
-            // this.close();
+            this.close();
             await this.$emit('update:text', text);
+        },
 
-            // clearTimeout(timer);
-            // timer = setTimeout(this.setAutocomplete, 1000);
+        clearList() {
+            this.acList = [];
+        },
 
-            await this.setAutocomplete();
+        async input(text) {
+            this.clearList();
+            await this.updateText(text);
+            clearTimeout(this.timer);
+            this.timer = setTimeout(this.setAutocomplete, 750);
         },
 
         async selectArticle(article) {
             if(!this.showAutocomplete) return;
             await this.updateText(article);
-            this.close();
             this.$refs.list.focus();
         },
 
@@ -93,7 +98,7 @@ var autocompleteInput = {
                 autocomplete=off
                 :placeholder="placeholder"
                 :value="text" 
-                @input="updateText($event.target.value)" 
+                @input="input($event.target.value)" 
                 @focusout="close"
                 @keydown.enter.prevent="selectArticle(acList[highlightIndex])"
                 @keydown.down.prevent="down"
