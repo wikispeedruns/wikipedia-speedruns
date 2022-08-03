@@ -238,6 +238,7 @@ def get_leaderboard_runs(
 
     db = get_db()
     with db.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
+        print(cursor.mogrify(query, query_args))
         cursor.execute(query, query_args)
 
         results = cursor.fetchall()
@@ -265,9 +266,10 @@ Leaderboard Stats
 def get_leaderboard_stats(
     prompt_id: int,
     lobby_id: Optional[int] = None,
+    run_id: Optional[int] = None,
     **kwargs
 ): 
-    lb_query = get_leaderboard_runs(prompt_id, lobby_id, limit=None, offset=0, query_only=True, **kwargs)
+    lb_query = get_leaderboard_runs(prompt_id, lobby_id, run_id, limit=None, offset=0, query_only=True, **kwargs)
     response = {}
 
     # Success Rate
@@ -277,7 +279,9 @@ def get_leaderboard_stats(
     )
 
     SELECT
-        COUNT(IF(finished, 1, NULL)) / COUNT(*) * 100 AS finish_pct
+        COUNT(IF(finished, 1, NULL)) / COUNT(*) * 100 AS finish_pct,
+        AVG(IF(finished, path_length, NULL)) AS avg_path_len,
+        AVG(IF(finished, play_time, NULL)) AS avg_play_time
     FROM data
     '''
     

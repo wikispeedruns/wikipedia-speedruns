@@ -411,6 +411,10 @@ var app = new Vue({
         ? `/api/sprints/${this.promptId}/stats`
         : `/api/lobbys/${this.lobbyId}/prompts/${this.promptId}/stats`;
 
+        if (this.runId !== -1) {
+            statsEndpoint += `/${this.runId}`;
+        }
+
         var response = await fetchJson(statsEndpoint, "POST", {
             ...args
         });
@@ -419,6 +423,8 @@ var app = new Vue({
         // TODO: Properly set data after navigation 
         this.stats.finish_pct = statJson['finish_pct'];
         this.finishPct = round(statJson['finish_pct'], 2);
+        this.avgClicks = round(statJson['avg_path_len'], 2);
+        this.avgTime = round(statJson['avg_play_time'], 2);
 
         this.genGraph();
     }

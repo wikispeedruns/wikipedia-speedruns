@@ -1,5 +1,5 @@
 .progress {
-	width:50%;
+	width: 50%;
 	margin-top: .2rem;
 }
 
@@ -10,15 +10,16 @@
 
 .stat {
 	font-size:large;
-	font-weight: bold;
+	font-weight: 500;
 	margin-top: -.25rem;
 }
 
+p.mobile { display: none }
+
 /* Mobile */
 @media (max-width: 768px) {                  
-	.hide-if-mobile {
-	   display: none;
-	}
+    p.mobile { display: block }
+    p.desktop { display: none }
 
 	.progress {
 		width: 100%;

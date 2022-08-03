@@ -64,22 +64,26 @@ def get_lobby_leaderboard(lobby_id, prompt_id, run_id):
     return jsonify(resp), 200
 
 
-@leaderboard_api.post('/sprints/<int:prompt_id>/stats')
+@leaderboard_api.post('/sprints/<int:prompt_id>/stats', defaults={'run_id' : None})
+@leaderboard_api.post('/sprints/<int:prompt_id>/stats/<int:run_id>')
 @check_request_json(LEADERBOARD_JSON)
-def get_sprint_leaderboard_stats(prompt_id):
+def get_sprint_leaderboard_stats(prompt_id, run_id):
     resp = leaderboards.get_leaderboard_stats(
         prompt_id=prompt_id,
+        run_id=run_id,
         **request.json
     )
 
     return jsonify(resp), 200
 
-@leaderboard_api.post('/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/stats')
+@leaderboard_api.post('/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/stats', defaults={'run_id' : None})
+@leaderboard_api.post('/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/stats/<int:run_id>')
 @check_request_json(LEADERBOARD_JSON)
-def get_lobby_leaderboard_stats(lobby_id, prompt_id):
+def get_lobby_leaderboard_stats(lobby_id, prompt_id, run_id):
     resp = leaderboards.get_leaderboard_stats(
         lobby_id=lobby_id,
         prompt_id=prompt_id,
+        run_id=run_id,
         **request.json
     )
 
