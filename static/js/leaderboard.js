@@ -396,7 +396,7 @@ var app = new Vue({
         if (currRunIndex !== -1) {
             this.currentRun = this.runs[currRunIndex];
 
-            // check if current run does not fall within range, remove and set positon if so
+            // check if current run does not fall within range, remove and set position if so
             if (this.currentRun['rank'] - 1 < this.offset) {
                 this.currentRunPosition = -1 ;
                 this.runs.splice(currRunIndex, 1);
