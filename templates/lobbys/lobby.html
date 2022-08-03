@@ -62,7 +62,7 @@ var app = new Vue({
         },
 
         editPrompts: false,
-        selectedPrompts: [],
+        selectedPrompts: new Set(),
 
         users: null,
         anon_users: null,
@@ -101,14 +101,23 @@ var app = new Vue({
         },
 
         selectAllPrompts() {
-            this.clearSelectedPrompts();
             for (const prompt of this.prompts) {
-                this.selectedPrompts.push(prompt.prompt_id);
+                if(!this.selectedPrompts.has(prompt.prompt_id)){
+                    this.selectPrompt(prompt.prompt_id);
+                }
+            }
+        },
+
+        deselectAllPrompts() {
+            for (const prompt of this.prompts) {
+                if(this.selectedPrompts.has(prompt.prompt_id)){
+                    this.selectPrompt(prompt.prompt_id);
+                }
             }
         },
 
         clearSelectedPrompts() {
-            this.selectedPrompts = [];
+            this.selectedPrompts.clear();
         },
 
         async getLobbyInfo() {
@@ -187,13 +196,9 @@ var app = new Vue({
             if (!confirm("Are you sure you want to delete the selected prompts and their runs?")) {
                return; 
             }
-            if(this.selectedPrompts.length == 0){
-                console.log("No prompts selected");
-                return;
-            }
 
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}/prompts`, "DELETE", {
-                "prompts": this.selectedPrompts,
+                "prompts": Array.from(this.selectedPrompts),
             }); 
 
             this.editPrompts = false;
@@ -270,7 +275,7 @@ var app = new Vue({
 
         <hr>
 
-        <h3>Lobby settings</h3>
+        <h3>Lobby settings</h4>
 
         <details>
             <summary>List of players</summary>
@@ -315,9 +320,7 @@ var app = new Vue({
             </div>
         </details>
 
-        <hr>
-
-        <h3>Add a Prompt:</h3>
+        <h4 class="py-4">Manage: Add a prompt</h4>
 
         <form id="newPrompt" v-on:submit.prevent="addPrompt">
             <div class="my-2 row">
@@ -345,9 +348,10 @@ var app = new Vue({
 
             </details>
 
-            <p v-if="messageType != null" :class="`text-${messageType}`">[[addPromptMessage]]</p>
             <input class="btn btn-primary" type="submit" value="Submit">
         </form>
+
+        <p v-if="messageType != null" :class="`text-${messageType}`">[[addPromptMessage]]</p>
 
         <hr>
 
@@ -381,20 +385,19 @@ var app = new Vue({
 
                         <td><a v-bind:href="'/lobby/' + lobbyInfo.lobby_id + '/leaderboard/' + prompt.prompt_id">Results</a></td>
                         <td v-if="editPrompts">
-                            <input type="checkbox" :value="prompt.prompt_id" v-model="selectedPrompts">
+                            <input type="checkbox" @click="selectPrompt(prompt.prompt_id)">
                         </td>
                     </tr>
                 </tbody>
             </table>
             <div v-if="editPrompts">
-                <input href="javascript:;" @click="selectAllPrompts" class="btn btn-primary" value="Select All">
-                <input href="javascript:;" @click="clearSelectedPrompts" class="btn btn-primary" value="Deselect All">
                 <input href="javascript:;" @click="deletePrompts" class="btn btn-danger" value="Delete Selected">
+                <input href="javascript:;" @click="selectAllPrompts" class="btn btn-primary" value="Select All">
+                <input href="javascript:;" @click="deselectAllPrompts" class="btn btn-primary" value="Deselect All">
             </div>
         </div>
     </div>
 
-    <br> <br>
 
 </div>
 {% endblock %}
