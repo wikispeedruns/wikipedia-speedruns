@@ -34,6 +34,7 @@ import { PromptGenerator } from "/static/js/modules/generator.js"
 import { autocompleteInput } from "/static/js/modules/autocomplete.js"
 
 const LOBBY_ID = serverData["lobby_id"];
+const successMessage = "Added prompt to lobby!";
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
@@ -65,6 +66,9 @@ var app = new Vue({
 
         users: null,
         anon_users: null,
+
+        messageType: null,
+        messageTimer: null
     },
 
 
@@ -96,6 +100,22 @@ var app = new Vue({
             }
         },
 
+        selectAllPrompts() {
+            for (const prompt of this.prompts) {
+                if(!this.selectedPrompts.has(prompt.prompt_id)){
+                    this.selectPrompt(prompt.prompt_id);
+                }
+            }
+        },
+
+        deselectAllPrompts() {
+            for (const prompt of this.prompts) {
+                if(this.selectedPrompts.has(prompt.prompt_id)){
+                    this.selectPrompt(prompt.prompt_id);
+                }
+            }
+        },
+
         clearSelectedPrompts() {
             this.selectedPrompts.clear();
         },
@@ -121,8 +141,16 @@ var app = new Vue({
             this.endPrompt = prompt["end"];
         },
 
+        clearMessage() {
+            this.messageType = null;
+        },
 
-        async addPrompt() {
+        setMessage(messageType) {
+            this.messageType = messageType;
+            setTimeout(this.clearMessage, 5000);
+        },
+
+        async considerPrompt() {
             this.addPromptMessage = "";
 
             const start = await getArticleTitle(this.startPrompt);
@@ -147,6 +175,19 @@ var app = new Vue({
                 "start": start,
                 "end": end
             });
+            if(resp.status !== 200){
+                this.addPromptMessage = "Error adding prompt to database"
+                return;            
+            }
+
+            this.addPromptMessage = successMessage;
+        },
+
+        async addPrompt() {
+            await this.considerPrompt();
+
+            const messageType = this.addPromptMessage == successMessage ? 'success' : 'danger';
+            this.setMessage(messageType);
 
             this.getPrompts();
         },
@@ -310,8 +351,7 @@ var app = new Vue({
             <input class="btn btn-primary" type="submit" value="Submit">
         </form>
 
-        <p class="text-danger">[[addPromptMessage]]</p>
-
+        <p v-if="messageType != null" :class="`text-${messageType}`">[[addPromptMessage]]</p>
 
         <hr>
 
@@ -350,7 +390,11 @@ var app = new Vue({
                     </tr>
                 </tbody>
             </table>
-            <input v-if="editPrompts" href="javascript:;" @click="deletePrompts" class="btn btn-danger" value="Delete Selected">
+            <div v-if="editPrompts">
+                <input href="javascript:;" @click="deletePrompts" class="btn btn-danger" value="Delete Selected">
+                <input href="javascript:;" @click="selectAllPrompts" class="btn btn-primary" value="Select All">
+                <input href="javascript:;" @click="deselectAllPrompts" class="btn btn-primary" value="Deselect All">
+            </div>
         </div>
     </div>
 
