@@ -138,8 +138,7 @@ var app = new Vue({
 
         setMessage(messageType) {
             this.messageType = messageType;
-            clearTimeout(this.messageTimer);
-            this.messageTimer = setTimeout(this.clearMessage, 5000);
+            setTimeout(this.clearMessage, 5000);
         },
 
         async considerPrompt() {
