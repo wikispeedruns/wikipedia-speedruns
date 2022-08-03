@@ -272,7 +272,6 @@ def get_leaderboard_stats(
     lb_query = get_leaderboard_runs(prompt_id, lobby_id, run_id, limit=None, offset=0, query_only=True, **kwargs)
     response = {}
 
-    # Success Rate
     query = f'''
     WITH data AS (
         {lb_query['query']}
@@ -293,10 +292,6 @@ def get_leaderboard_stats(
         results = cursor.fetchall()
 
         return results[0]
-
-    # Avg. # of Clicks
-
-    # Avg. Completion Time
 
 '''
 if __name__ == "__main__":
