@@ -21,19 +21,25 @@ var autocompleteInput = {
         return {
             acList: [],
             showAutocomplete: false,
-            highlightIndex: -1
+            highlightIndex: -1,
+            timer: null
         }
 	},
 
     methods: {
         async setAutocomplete() {
             this.acList = await getAutoCompleteArticles(this.text);
+            this.open();
         },
 
         async updateText(text) {
+            // this.close();
             await this.$emit('update:text', text);
+
+            // clearTimeout(timer);
+            // timer = setTimeout(this.setAutocomplete, 1000);
+
             await this.setAutocomplete();
-            this.open();
         },
 
         async selectArticle(article) {
@@ -94,18 +100,20 @@ var autocompleteInput = {
                 @keydown.up.prevent="up"
             />
 
-            <ul class="suggestion-list" v-show="showAutocomplete"
-            style="display: block; border: 1px solid #ddd; list-style: none; padding: 0;"
-            >
-                <li v-for="(article, index) in acList"
-                    @mousedown.prevent
-                    @mouseover="setHighlightIndex(index)"
-                    @click="selectArticle(article)"
-                    :style="{ 'cursor': 'pointer', 'background-color': index===highlightIndex ? 'lightgray' : 'transparent' }"
+            <div style="position:relative">
+                <ul class="suggestion-list" v-show="showAutocomplete"
+                style="display:block; border: 1px solid #ddd; list-style:none; padding:0; position:absolute; left:0; top:100%; width:100%; background-color:white"
                 >
-                    <h6 style="margin-left: 0.8em">{{ article }}</h6>
-                </li>
-            </ul>
+                    <li v-for="(article, index) in acList"
+                        @mousedown.prevent
+                        @mouseover="setHighlightIndex(index)"
+                        @click="selectArticle(article)"
+                        :style="{ 'cursor': 'pointer', 'background-color': index===highlightIndex ? 'lightgray' : 'transparent' }"
+                    >
+                        <h6 style="margin-left: 0.8em">{{ article }}</h6>
+                    </li>
+                </ul>
+            </div>
 
             <div style="margin-bottom: 0.5em"></div>
         </div>  
