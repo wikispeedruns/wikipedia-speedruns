@@ -238,7 +238,6 @@ def get_leaderboard_runs(
 
     db = get_db()
     with db.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
-        print(cursor.mogrify(query, query_args))
         cursor.execute(query, query_args)
 
         results = cursor.fetchall()
@@ -270,7 +269,6 @@ def get_leaderboard_stats(
     **kwargs
 ): 
     lb_query = get_leaderboard_runs(prompt_id, lobby_id, run_id, limit=None, offset=0, query_only=True, **kwargs)
-    response = {}
 
     query = f'''
     WITH data AS (
@@ -286,12 +284,8 @@ def get_leaderboard_stats(
     
     db = get_db()
     with db.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
-        print(cursor.mogrify(query, lb_query['args']))
         cursor.execute(query, lb_query['args'])
-
-        results = cursor.fetchall()
-
-        return results[0]
+        return cursor.fetchall()[0]
 
 '''
 if __name__ == "__main__":
