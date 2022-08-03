@@ -106,21 +106,21 @@ var autocompleteInput = {
             />
 
             <div style="position:relative">
-                <ul class="suggestion-list" v-show="showAutocomplete"
-                style="display:block; border: 1px solid #ddd; list-style:none; padding:0; position:absolute; left:0; top:100%; width:100%; background-color:white"
+                <ul v-show="showAutocomplete"
+                style="display:block; background-color:white; border: 1px solid #ddd; list-style:none; padding:0; position:absolute; left:0; top:100%; width:100%; z-index:1000;"
                 >
                     <li v-for="(article, index) in acList"
                         @mousedown.prevent
                         @mouseover="setHighlightIndex(index)"
                         @click="selectArticle(article)"
-                        :style="{ 'cursor': 'pointer', 'background-color': index===highlightIndex ? 'lightgray' : 'transparent' }"
+                        :style="{ 'cursor':'pointer', 'background-color': index===highlightIndex ? 'lightgray':'transparent', 'padding':'0' }"
                     >
-                        <h6 style="margin-left: 0.8em">{{ article }}</h6>
+                        <h6 style="margin-left: 12px">{{ article }}</h6>
                     </li>
                 </ul>
             </div>
 
-            <div style="margin-bottom: 0.5em"></div>
+            <div style="margin-bottom: 7px"></div>
         </div>  
     `)
 };
