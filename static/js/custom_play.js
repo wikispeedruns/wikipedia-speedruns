@@ -1,7 +1,7 @@
 
 import { autocompleteInput } from "./modules/autocomplete.js";
 import { PromptGenerator } from "./modules/generator.js"
-import { getArticleTitle, articleCheck } from "/static/js/modules/wikipediaAPI/util.js";
+import { checkArticles } from "/static/js/modules/wikipediaAPI/util.js";
 
 var customPlay = {
     components: {
@@ -14,80 +14,76 @@ var customPlay = {
             start: "", // The input article names
             end: "",
 
-            startPrompt: "",  // The actual wikipedia article names that will be played
-            endPrompt: "", 
-
             articleCheckMessage: ""
         }
 	},
 
     methods: {
 
-        async checkArticles() {
-            this.articleCheckMessage = "";
-            
-            if(this.start == "" || this.end == ""){
-                this.articleCheckMessage = "Prompt is currently empty";
-                return;
-            }
-            this.startPrompt = await getArticleTitle(this.start);
-            if (this.startPrompt === null) {
-                this.articleCheckMessage = `"${this.start}" is not a Wikipedia article`;
-                return;
-            }
-
-            this.endPrompt = await getArticleTitle(this.end);
-            if (this.endPrompt === null) {
-                this.articleCheckMessage = `"${this.end}" is not a Wikipedia article`;
-                return;
-            }
-            
-            if(this.startPrompt == this.endPrompt) {
-                this.articleCheckMessage = `The start and end articles are the same`;
-                return;
-            }
-
-            const checkRes = await articleCheck(this.endPrompt);
-            if ('warning' in checkRes) {
-                this.articleCheckMessage = checkRes["warning"];
-                return;
-            }
+        async generateRndPrompt(prompt) {
+            [this[prompt]] = await this.$refs.pg.generatePrompt();
         },
 
-        async play() {
-
-            await this.checkArticles();
-            if(this.articleCheckMessage != "") return;
-
-            console.log(`${this.startPrompt} -> ${this.endPrompt}`);
-            
-            const start_param = encodeURIComponent(this.startPrompt).replaceAll('%2F', '%252F');
-            const end_param = encodeURIComponent(this.endPrompt).replaceAll('%2F', '%252F');
+        play(start, end) {
+            const start_param = encodeURIComponent(start).replaceAll('%2F', '%252F');
+            const end_param = encodeURIComponent(end).replaceAll('%2F', '%252F');
             window.location.replace(`/play/${start_param}/${end_param}`);
-        }
+        },
+
+        async playCustom() {
+            this.articleCheckMessage = "";
+            const resp = await checkArticles(this.start, this.end);
+            if(resp.err) {
+                this.articleCheckMessage = resp.err;
+                return;
+            }
+
+            this.play(resp.body.start, resp.body.end);
+        },
+
+        async playRandom() {
+            let resp;
+            do {
+                const [start, end] = await this.$refs.pg.generatePrompt(2);
+                console.log("start: " + start + " end: " + end);
+                resp = await checkArticles(start, end);
+            } while (resp.err);
+            
+            this.play(resp.body.start, resp.body.end);
+        },
 	},
 
     template: (`
         <div>
-            <div class="col-md-4 col-sm-6">
-                <ac-input :text.sync="start" placeholder="Start Article"></ac-input>
-                <ac-input :text.sync="end" placeholder="End Article"></ac-input>
+            <div class="row">
+                <div class="col-sm mb-2 mb-sm-0">
+                    <div class="input-group flex-nowrap">
+                        <ac-input :text.sync="start" placeholder="Start Article"></ac-input>
+                        <button type="button" class="btn border quick-play" @click="generateRndPrompt('start')">
+                            <i class="bi bi-shuffle"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-sm">
+                    <div class="input-group flex-nowrap">
+                        <ac-input :text.sync="end" placeholder="End Article"></ac-input>
+                        <button type="button" class="btn border quick-play" @click="generateRndPrompt('end')">
+                            <i class="bi bi-shuffle"></i>
+                        </button>
+                    </div>
+                </div>
+                <p v-if="articleCheckMessage" class="text-danger mb-0">{{articleCheckMessage}}</p>
             </div>
 
-            <p class="text-danger">{{articleCheckMessage}}</p>
+            <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
+                <button type="button" class="btn quick-play" v-on:click="playCustom">Play Now</button>
+                <button type="button" class="btn quick-play" v-on:click="playRandom">I'm Feeling Lucky</button>
+            </div>
 
-            <details class="mb-4">
-                <summary> Generate Random Articles </summary>
-
-                <prompt-generator
-                    v-bind:start.sync="start"
-                    v-bind:end.sync="end"
-                    v-bind:showLink="false"
-                ></prompt-generator>
-
+            <details>
+                <summary>Random Article Generator Settings</summary>
+                <prompt-generator ref="pg"></prompt-generator>
             </details>
-
-            <button class="btn btn-primary" style="font-weight:600;" v-on:click.prevent="play"> Play </button>
         </div>
     `)
 };

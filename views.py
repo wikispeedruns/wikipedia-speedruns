@@ -61,10 +61,6 @@ def get_random_prompt():
         rand_prompt = random.choice(results)[0]
         return redirect("/play/" + str(rand_prompt), code=302)
 
-@views.route('/quick_play', methods=['GET'])
-def get_quick_play_page():
-    return render_with_data('quick_play.html')
-
 @views.route('/register', methods=['GET'])
 def get_register_page():
     return render_with_data('users/register.html')

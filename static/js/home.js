@@ -76,10 +76,6 @@ var app = new Vue({
             let date = new Date(string);
             return date.toLocaleDateString();
         },
-
-        playRandom: async function() {
-            window.location.replace('/quick_play');
-        }
     },
 
     created: async function() {

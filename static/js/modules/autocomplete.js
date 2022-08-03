@@ -96,14 +96,14 @@ var autocompleteInput = {
     },
 
     template: (`
-        <div ref="list" style="width:auto">
+        <div ref="list" style="flex-grow: 1;">
             <input
                 class="form-control"
                 type="text"
                 autocomplete=off
                 :placeholder="placeholder"
-                :value="text" 
-                @input="input($event.target.value)" 
+                :value="text"
+                @input="input($event.target.value)"
                 @focusout="focusout"
                 @keydown.enter.prevent="selectArticle(acList[highlightIndex])"
                 @keydown.down.prevent="down"
@@ -124,8 +124,6 @@ var autocompleteInput = {
                     </li>
                 </ul>
             </div>
-
-            <div style="margin-bottom: 7px"></div>
         </div>  
     `)
 };
