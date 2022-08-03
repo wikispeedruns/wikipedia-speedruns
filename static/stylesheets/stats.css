@@ -48,6 +48,7 @@ canvas {
     content: '';
     display: block;
     border-top: solid 3px #fff;
+    border-radius: 5px;
     transform: scaleX(0);
     transition: transform 0.2s ease-in-out;
 }
