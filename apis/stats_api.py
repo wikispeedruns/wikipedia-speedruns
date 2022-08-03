@@ -18,6 +18,7 @@ def get_total_stats():
     queries['total_google_users'] = 'SELECT COUNT(*) AS goog_total FROM users WHERE hash=""'
 
     queries['total_runs'] = "SELECT COUNT(*) AS sprints_total FROM sprint_runs"
+
     queries['total_finished_runs'] = "SELECT COUNT(*) AS sprints_finished FROM sprint_runs WHERE finished"
     queries['total_user_runs'] = "SELECT COUNT(*) AS user_runs FROM sprint_runs WHERE user_id IS NOT NULL"
     queries['total_finished_user_runs'] = "SELECT COUNT(*) AS user_finished_runs FROM sprint_runs WHERE user_id IS NOT NULL AND finished"
@@ -33,8 +34,8 @@ def get_total_stats():
     queries['total_finished_user_marathons'] = "SELECT COUNT(*) AS user_finished_marathons FROM marathonruns WHERE user_id IS NOT NULL AND finished=TRUE"
     
     queries['total_created_lobbies'] = "SELECT COUNT(*) AS lobbies_created FROM lobbys"
-    queries['total_lobby_runs'] = "SELECT COUNT(*) AS lobby_runs FROM lobby_runs"
-    queries['total_finished_lobby_runs'] = "SELECT COUNT(*) AS lobby_finished_runs FROM lobby_runs WHERE user_id IS NOT NULL"
+    queries['total_lobby_runs'] = "SELECT COUNT(*) AS lobby_runs_total FROM lobby_runs"
+    queries['total_finished_lobby_runs'] = "SELECT COUNT(*) AS lobby_runs_finished FROM lobby_runs WHERE user_id IS NOT NULL AND finished=TRUE"
     results = {}
 
     db = get_db()
@@ -190,7 +191,8 @@ def get_daily_stats():
         DATE(start_time) AS day,
         COUNT(*) AS plays
         FROM sprint_runs
-        WHERE user_id IS NOT NULL AND start_time IS NOT NULL
+        WHERE user_id IS NOT NULL 
+            AND start_time IS NOT NULL
         GROUP BY user_id, day
     )
 
@@ -224,7 +226,8 @@ def get_daily_stats():
         DATE(start_time) AS day,
         COUNT(*) AS plays
         FROM lobby_runs
-        WHERE user_id IS NOT NULL AND start_time IS NOT NULL
+        WHERE user_id IS NOT NULL 
+            AND start_time IS NOT NULL
         GROUP BY user_id, day
     )
 

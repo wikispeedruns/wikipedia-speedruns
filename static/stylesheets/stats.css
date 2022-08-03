@@ -3,18 +3,6 @@
     float: right;
 }
 
-.nav-pills {
-    justify-content: center;
-}
-.nav-pills .nav-item .nav-link {
-    color: #347aeb;
-    text-decoration: none !important;
-}
-.nav-pills .nav-item .active, .nav-pills .nav-item a:hover {
-    color: #fff;
-    background-color: #347aeb;
-}
-
 canvas {
    float: left; 
    margin-left: 2em;
@@ -49,8 +37,43 @@ canvas {
 .box {
 	background: #347aeb;
 	border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
     margin: 40px;
     padding: 10px;
+    transition: opacity 0.2s linear, box-shadow 0.2s linear;
+    opacity: 0.8;
+}
+
+.box::before {
+    content: '';
+    display: block;
+    border-top: solid 3px #fff;
+    border-radius: 5px;
+    transform: scaleX(0);
+    transition: transform 0.2s ease-in-out;
+}
+
+.box.active {
+	background: #347aeb;
+	border-radius: 5px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+    margin: 40px;
+    padding: 10px;
+    opacity: 1;
+}
+
+.box.active::before {
+    border-top: solid 3px #fff;
+    transform: scaleX(0.9);
+}
+
+.box:hover, .box:hover * {
+    text-decoration: none !important;
+}
+
+.box:hover {
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+    opacity: 1;
 }
 
 .box__header {
@@ -71,6 +94,11 @@ canvas {
 	color: #fff;
 	position: relative;
     padding: 1em;
+}
+
+.stats__header {
+    font-weight: bold;
+    font-size: 18px;
 }
 
 .stats__amount {
