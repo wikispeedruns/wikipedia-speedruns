@@ -139,7 +139,7 @@ let app = new Vue({
         },
 
         quickPlay: function (event) {
-            window.location.replace("/quick_run");
+            window.location.replace("/#quick-play");
         },
 
 
