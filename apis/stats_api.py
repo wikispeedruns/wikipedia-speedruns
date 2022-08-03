@@ -18,9 +18,15 @@ def get_total_stats():
     queries['total_google_users'] = 'SELECT COUNT(*) AS goog_total FROM users WHERE hash=""'
 
     queries['total_runs'] = "SELECT COUNT(*) AS sprints_total FROM sprint_runs"
-    queries['total_finished_runs'] = "SELECT COUNT(*) AS sprints_finished FROM sprint_runs WHERE end_time IS NOT NULL AND finished=TRUE"
+
+    queries['total_finished_runs'] = "SELECT COUNT(*) AS sprints_finished FROM sprint_runs WHERE finished"
     queries['total_user_runs'] = "SELECT COUNT(*) AS user_runs FROM sprint_runs WHERE user_id IS NOT NULL"
-    queries['total_finished_user_runs'] = "SELECT COUNT(*) AS user_finished_runs FROM sprint_runs WHERE user_id IS NOT NULL AND end_time IS NOT NULL AND finished=TRUE"
+    queries['total_finished_user_runs'] = "SELECT COUNT(*) AS user_finished_runs FROM sprint_runs WHERE user_id IS NOT NULL AND finished"
+
+    queries['total_quick_runs'] = "SELECT COUNT(*) AS quick_runs_total FROM quick_runs"
+    queries['total_finished_quick_runs'] = "SELECT COUNT(*) AS quick_runs_finished FROM quick_runs WHERE finished"
+    queries['total_user_quick_runs'] = "SELECT COUNT(*) AS user_quick_runs FROM quick_runs WHERE user_id IS NOT NULL"
+    queries['total_finished_user_quick_runs'] = "SELECT COUNT(*) AS user_finished_quick_runs FROM quick_runs WHERE user_id IS NOT NULL AND finished"
 
     queries['total_marathons'] = "SELECT COUNT(*) AS marathons_total FROM marathonruns"
     queries['total_finished_marathons'] = "SELECT COUNT(*) AS marathons_finished FROM marathonruns where finished=TRUE"
@@ -49,7 +55,7 @@ def get_daily_stats():
         SELECT 
             DATE(join_date) AS day,
             COUNT(*) AS daily_users 
-        FROM users
+        FROM users  
         GROUP BY day 
     )
 
@@ -76,16 +82,14 @@ def get_daily_stats():
         SUM(daily_plays) OVER (ORDER BY day) AS total 
     FROM data
     '''
-        
+
     queries['daily_finished_sprints'] = '''
     WITH data AS (
         SELECT 
             DATE(start_time) AS day,
             COUNT(*) AS daily_plays 
         FROM sprint_runs
-        WHERE start_time IS NOT NULL 
-            AND end_time IS NOT NULL
-            AND finished = TRUE
+        WHERE finished
         GROUP BY day 
     )
 
@@ -119,9 +123,7 @@ def get_daily_stats():
             DATE(start_time) AS day,
             COUNT(*) AS daily_plays 
         FROM lobby_runs
-        WHERE start_time IS NOT NULL 
-            AND end_time IS NOT NULL
-            AND finished = TRUE
+        WHERE finished
         GROUP BY day 
     )
 
@@ -132,6 +134,40 @@ def get_daily_stats():
     FROM data
     '''
     
+    queries['daily_quick_runs'] = '''
+    WITH data AS (
+        SELECT 
+            DATE(start_time) AS day,
+            COUNT(*) AS daily_plays 
+        FROM quick_runs
+        WHERE start_time IS NOT NULL
+        GROUP BY day 
+    )
+
+    SELECT
+        day,
+        daily_plays,
+        SUM(daily_plays) OVER (ORDER BY day) AS total 
+    FROM data
+    '''
+
+    queries['daily_finished_quick_runs'] = '''
+    WITH data AS (
+        SELECT 
+            DATE(start_time) AS day,
+            COUNT(*) AS daily_plays 
+        FROM quick_runs
+        WHERE finished
+        GROUP BY day 
+    )
+
+    SELECT
+        day,
+        daily_plays,
+        SUM(daily_plays) OVER (ORDER BY day) AS total 
+    FROM data
+    '''
+
     queries['daily_created_lobbies'] = '''
     WITH data AS (
         SELECT
@@ -173,10 +209,7 @@ def get_daily_stats():
         DATE(start_time) AS day,
         COUNT(*) AS plays
         FROM sprint_runs
-        WHERE user_id IS NOT NULL 
-            AND start_time IS NOT NULL 
-            AND end_time IS NOT NULL
-            AND finished = TRUE
+        WHERE user_id IS NOT NULL AND finished
         GROUP BY user_id, day
     )
 
@@ -211,16 +244,47 @@ def get_daily_stats():
         DATE(start_time) AS day,
         COUNT(*) AS plays
         FROM lobby_runs
-        WHERE user_id IS NOT NULL 
-            AND start_time IS NOT NULL 
-            AND end_time IS NOT NULL
-            AND finished = TRUE
+        WHERE user_id IS NOT NULL AND finished
         GROUP BY user_id, day
     )
 
     SELECT
         day,
         AVG(plays) AS "finished_lobby_runs_per_user"
+    FROM data
+    GROUP BY day
+    '''
+
+    queries['avg_user_quick_plays'] = '''
+    WITH data AS (
+        SELECT user_id,
+        DATE(start_time) AS day,
+        COUNT(*) AS plays
+        FROM quick_runs
+        WHERE user_id IS NOT NULL AND start_time IS NOT NULL
+        GROUP BY user_id, day
+    )
+
+    SELECT
+        day,
+        AVG(plays) AS "quick_runs_per_user"
+    FROM data
+    GROUP BY day
+    '''
+
+    queries['avg_user_finished_quick_plays'] = '''
+    WITH data AS (
+        SELECT user_id,
+        DATE(start_time) AS day,
+        COUNT(*) AS plays
+        FROM quick_runs
+        WHERE user_id IS NOT NULL AND finished
+        GROUP BY user_id, day
+    )
+
+    SELECT
+        day,
+        AVG(plays) AS "finished_quick_runs_per_user"
     FROM data
     GROUP BY day
     '''
@@ -232,7 +296,7 @@ def get_daily_stats():
             DATE(end_time) AS day,
             user_id
         FROM sprint_runs
-        WHERE user_id IS NOT NULL AND end_time IS NOT NULL
+        WHERE user_id IS NOT NULL AND finished
         GROUP BY user_id, day
     )
 
@@ -250,7 +314,7 @@ def get_daily_stats():
             DATE(end_time) AS day,
             user_id
         FROM lobby_runs
-        WHERE user_id IS NOT NULL AND end_time IS NOT NULL
+        WHERE user_id IS NOT NULL AND finished
         GROUP BY user_id, day
     )
 
@@ -260,6 +324,25 @@ def get_daily_stats():
     FROM data
     GROUP BY day
     '''
+
+    queries['active_quick_run_users'] = '''
+    WITH data AS (
+        SELECT
+            COUNT(*) AS plays,
+            DATE(end_time) AS day,
+            user_id
+        FROM quick_runs
+        WHERE user_id IS NOT NULL AND finished
+        GROUP BY user_id, day
+    )
+
+    SELECT 
+        day,
+        COUNT(*) AS active_quick_run_users
+    FROM data
+    GROUP BY day
+    '''
+
 
     results = {} 
 
