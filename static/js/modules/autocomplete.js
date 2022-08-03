@@ -45,7 +45,7 @@ var autocompleteInput = {
             this.clearList();
             await this.updateText(text);
             clearTimeout(this.timer);
-            this.timer = setTimeout(this.setAutocomplete, 750);
+            this.timer = setTimeout(this.setAutocomplete, 650);
         },
 
         async selectArticle(article) {
@@ -76,6 +76,11 @@ var autocompleteInput = {
             }
         },
 
+        focusout() {
+            this.close();
+            clearTimeout(this.timer);
+        },
+
         open() {
             this.showAutocomplete = true;
             this.highlightIndex = 0;
@@ -99,7 +104,7 @@ var autocompleteInput = {
                 :placeholder="placeholder"
                 :value="text" 
                 @input="input($event.target.value)" 
-                @focusout="close"
+                @focusout="focusout"
                 @keydown.enter.prevent="selectArticle(acList[highlightIndex])"
                 @keydown.down.prevent="down"
                 @keydown.up.prevent="up"
