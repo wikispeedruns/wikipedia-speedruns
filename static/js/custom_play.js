@@ -27,7 +27,7 @@ var customPlay = {
         play(start, end) {
             const start_param = encodeURIComponent(start).replaceAll('%2F', '%252F');
             const end_param = encodeURIComponent(end).replaceAll('%2F', '%252F');
-            window.location.replace(`/play/${start_param}/${end_param}`);
+            window.location.replace(`/play/quick_play?prompt_start=${start_param}&prompt_end=${end_param}`);
         },
 
         async playCustom() {

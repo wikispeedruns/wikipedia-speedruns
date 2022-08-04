@@ -32,10 +32,17 @@ def create_lobby_run(prompt_id, lobby_id):
     )
     return jsonify({"run_id": run_id})
 
-@run_api.post("/quick_runs/<string:prompt_start>/<string:prompt_end>/runs")
-def create_quick_run(prompt_start, prompt_end):
-    run_id = runs.create_quick_run(unquote(prompt_start), unquote(prompt_end), session.get("user_id"))
-    return jsonify({"run_id": run_id})
+@run_api.post("/quick_runs/runs")
+def create_quick_run():
+    try:
+        prompt_start = request.args.get('prompt_start')
+        prompt_end = request.args.get('prompt_end')
+        if prompt_start is None or prompt_end is None:
+            return "Invalid request", 400
+        run_id = runs.create_quick_run(unquote(prompt_start), unquote(prompt_end), session.get("user_id"))
+        return jsonify({"run_id": run_id})
+    except ValueError:
+        return "Page Not Found", 404
 
 @run_api.patch('/sprints/<int:prompt_id>/runs/<int:run_id>', defaults={'lobby_id' : None})
 @run_api.patch("/lobbys/<int:lobby_id>/prompts/<int:prompt_id>/runs/<int:run_id>")

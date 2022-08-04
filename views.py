@@ -106,9 +106,16 @@ def get_sprint_play_page(id):
 def get_lobby_play_page(lobby_id, prompt_id):
     return render_with_data('play.html', lobby_id=lobby_id, prompt_id=prompt_id)
 
-@views.route('/play/<string:start>/<string:end>', methods=['GET'])
-def get_quick_run_page(start, end):
-    return render_with_data('play.html', prompt_start=unquote(start), prompt_end=unquote(end))
+@views.route('/play/quick_play', methods=['GET'])
+def get_quick_run_page():
+    try:
+        prompt_start = request.args.get('prompt_start', None)
+        prompt_end = request.args.get('prompt_end', None)
+        if prompt_start is None or prompt_end is None:
+            return "Invalid request", 400
+        return render_with_data('play.html', prompt_start=unquote(prompt_start), prompt_end=unquote(prompt_end))
+    except ValueError:
+        return "Page Not Found", 404
 
 # leaderboard(s)
 @views.route('/leaderboard/<prompt_id>', methods=['GET'])
