@@ -6,7 +6,7 @@ async function startRun(promptId, lobbyId, promptStart, promptEnd) {
     if(promptId == null) {
         promptStart = encodeURIComponent(promptStart).replaceAll('%2F', '%252F');
         promptEnd = encodeURIComponent(promptEnd).replaceAll('%2F', '%252F');
-        endpoint = `/api/quick_runs/${promptStart}/${promptEnd}/runs`;
+        endpoint = `/api/quick_runs/runs?prompt_start=${promptStart}&prompt_end=${promptEnd}`;
     }
     else if(lobbyId == null) endpoint = `/api/sprints/${promptId}/runs`;
     else endpoint = `/api/lobbys/${lobbyId}/prompts/${promptId}/runs`;
