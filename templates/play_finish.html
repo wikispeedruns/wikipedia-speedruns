@@ -8,8 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
 
-<script defer type="module" src="{{url_for('static', filename='js/play_finish.js')}}"></script>
-<script defer id='achievement' type="module" src="{{url_for('static', filename='js/achievement_data.js')}}" data="run"></script>
+<script type="module" src="{{url_for('static', filename='js/play_finish.js')}}"></script>
 
 <style>
     [v-cloak] { display: none }
@@ -57,37 +56,17 @@
                 <div v-if="isQuickRun"><button @click="quickPlay" class="btn btn-outline-secondary">Play another round</button></div>
             </div>
         </div>
+
+        <div id="achievements">
+            <achievements v-if="isMounted"
+                v-bind:logged-in="loggedIn"
+                v-bind:is-sprint="isSprint"
+                v-bind:run-id="runId"
+                v-bind:basepath="'{{url_for('static', filename='achievements/icons/')}}'"
+            ></achievements>
+        </div>
     </div>
 </template>
-</div>
-
-<div id="am">
-    <br>
-    <template v-if="isSprint">
-        <template v-if="loggedIn">
-            <template v-if="!empty">
-                <h4>New Achievements!</h4>
-                <achievement-table class="py-4"
-                    v-bind:list="list"
-                    v-bind:achievements="data"
-                    v-bind:basepath="'{{url_for('static', filename='achievements/icons/')}}'"
-                ></achievement-table>
-            </template>
-            <template v-else>
-                <h4>No new achievements unlocked</h4>
-            </template>
-        </template>
-        <template v-else>
-            <h4>Login to check possible New Achievements!</h4>
-        </template>
-    </template>
-    <template v-else>
-        <h4>Unlock Achievements in public prompts...</h4>
-    </template>
-    
-    <br>
-    <br>
-    <br>
 </div>
 
 {% endblock %}

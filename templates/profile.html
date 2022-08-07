@@ -6,8 +6,6 @@
 
 <!-- Some nice x minutes ago tags -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
-<script id='achievement' type="module" src="{{url_for('static', filename='js/achievement_data.js')}}" data="all"></script>
-
 
 {% endblock %}
 
@@ -19,17 +17,10 @@
     <profile-stats-table class="col-sm-10" 
         v-bind:username="profileName"
     ></profile-stats-table>
-</div>
-
-<div id="am" v-cloak>
-    <achievement-table class="py-4"
-        v-bind:list="list"
-        v-bind:achievements="data"
+    <achievements 
+        v-bind:username="profileName"
         v-bind:basepath="'{{url_for('static', filename='achievements/icons/')}}'"
-        v-bind:profile="isProfile"
-        v-bind:total="total"
-        v-bind:achieved="achieved"
-    ></achievement-table>
+    ></achievements>
 </div>
 
 
