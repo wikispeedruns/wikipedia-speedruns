@@ -111,9 +111,10 @@ def get_quick_run_page():
     try:
         prompt_start = request.args.get('prompt_start', None)
         prompt_end = request.args.get('prompt_end', None)
+        scroll = request.args.get('scroll', None)
         if prompt_start is None or prompt_end is None:
             return "Invalid request", 400
-        return render_with_data('play.html', prompt_start=unquote(prompt_start), prompt_end=unquote(prompt_end))
+        return render_with_data('play.html', prompt_start=unquote(prompt_start), prompt_end=unquote(prompt_end), scroll=scroll)
     except ValueError:
         return "Page Not Found", 404
 

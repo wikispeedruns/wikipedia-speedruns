@@ -26,6 +26,9 @@ const PROMPT_END = serverData["prompt_end"] || null;
 // Get lobby if a lobby_prompt
 const LOBBY_ID = serverData["lobby_id"] || null;
 
+// Get if auto scroll is on
+const IS_SCROLL_ON = serverData["scroll"] || null;
+
 async function getPrompt(promptId, lobbyId=null) {
 
     if(promptId == null){
@@ -98,7 +101,9 @@ let app = new Vue({
         loggedIn: false,
 
         expandedTimebox: true,
-        isMobile: false
+        isMobile: false,
+
+        isScroll: null
     },
 
     mounted: async function() {
@@ -111,6 +116,7 @@ let app = new Vue({
 
         this.promptId = PROMPT_ID;
         this.lobbyId = LOBBY_ID;
+        this.isScroll = IS_SCROLL_ON;
 
         const prompt = await getPrompt(PROMPT_ID, LOBBY_ID);
 
@@ -132,7 +138,7 @@ let app = new Vue({
 
         this.offset = this.startTime;
 
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview, this.loadCallback);
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.isScroll ? null : this.showPreview, this.isScroll ? null : this.hidePreview || null, this.loadCallback);
         await this.renderer.loadPage(this.startArticle);
 
 
@@ -169,7 +175,11 @@ let app = new Vue({
         },
 
         pageCallback: function(page, loadTime) {
+            window.scrollTo(0, 0);
             this.hidePreview();
+            if (this.isScroll) {
+                document.getElementById("wikipedia-frame").scrollTo(0, 0);
+            }
             this.startTimer();
 
             let loadTimeSeconds = loadTime / 1000;
@@ -218,6 +228,11 @@ let app = new Vue({
                 this.elapsed = (this.milliseconds + this.savedMilliseconds) / 1000;
             }, 10);
 
+            if (this.isScroll) {
+                setInterval(function() {
+                    document.getElementById("wikipedia-frame").scrollBy(0, 1);
+                }, 30);
+            }
 
             this.started = true;
         },

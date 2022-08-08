@@ -28,7 +28,12 @@ export class ArticleRenderer {
             // Create title
             let titleEl = document.createElement("div");
             titleEl.innerHTML = "<h1><i>" + body["title"] + "</i></h1>";
-            this.frame.insertBefore(titleEl, this.frame.firstChild);
+            this.frame.prepend(titleEl);
+
+            // Create end
+            let endArticleEl = document.createElement("div");
+            endArticleEl.innerHTML = `<hr class="mt-5"><h3 class="text-center">END</h3><hr>`
+            this.frame.append(endArticleEl);
 
             if (isMobile) {
                 disableLazyLoading(this.frame);
@@ -43,13 +48,11 @@ export class ArticleRenderer {
                 el.onclick = (e) => this.handleWikipediaLink(e);
                 el.removeAttribute("title");
 
-                if (window.screen.width >= 768 && el.hasAttribute("href") && el.getAttribute("href").startsWith("/wiki/")) {
+                if (!isMobile && el.hasAttribute("href") && el.getAttribute("href").startsWith("/wiki/")) {
                     el.onmouseenter = this.mouseEnter;
                     el.onmouseleave = this.mouseLeave;
                 }
             });
-
-            window.scrollTo(0, 0);
 
             this.pageCallback(body["title"], Date.now() - startTime);
 

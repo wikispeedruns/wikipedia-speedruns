@@ -14,7 +14,9 @@ var customPlay = {
             start: "", // The input article names
             end: "",
 
-            articleCheckMessage: ""
+            articleCheckMessage: "",
+
+            scroll: null
         }
 	},
 
@@ -27,7 +29,7 @@ var customPlay = {
         play(start, end) {
             const start_param = encodeURIComponent(start).replaceAll('%2F', '%252F');
             const end_param = encodeURIComponent(end).replaceAll('%2F', '%252F');
-            window.location.replace(`/play/quick_play?prompt_start=${start_param}&prompt_end=${end_param}`);
+            window.location.replace(`/play/quick_play?prompt_start=${start_param}&prompt_end=${end_param}${this.scroll ? '&scroll=1' : ''}`);
         },
 
         async playCustom() {
@@ -73,6 +75,13 @@ var customPlay = {
                     </div>
                 </div>
                 <p v-if="articleCheckMessage" class="text-danger mb-0">{{articleCheckMessage}}</p>
+            </div>
+
+            <div class="form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="checkbox" v-model="scroll">
+                    Enable auto-scrolling
+                </label>
             </div>
 
             <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
