@@ -94,7 +94,7 @@ async function checkArticles(start, end) {
 }
 
 async function getArticleSummary(page) {
-    const encodedPage = page.replaceAll('/', '%2F');
+    const encodedPage = encodeURIComponent(page);
     const resp = await fetch(
         `https://en.wikipedia.org/api/rest_v1/page/summary/${encodedPage}`,
         {

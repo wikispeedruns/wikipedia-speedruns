@@ -1,8 +1,4 @@
-from cProfile import run
-from click import prompt
 from flask import Blueprint, render_template, request, redirect, session
-from toml import TomlDecodeError
-from urllib.parse import unquote
 
 from util.decorators import check_admin, check_user
 
@@ -114,7 +110,7 @@ def get_quick_run_page():
         scroll = request.args.get('scroll', None)
         if prompt_start is None or prompt_end is None:
             return "Invalid request", 400
-        return render_with_data('play.html', prompt_start=unquote(prompt_start), prompt_end=unquote(prompt_end), scroll=scroll)
+        return render_with_data('play.html', prompt_start=prompt_start, prompt_end=prompt_end, scroll=scroll)
     except ValueError:
         return "Page Not Found", 404
 

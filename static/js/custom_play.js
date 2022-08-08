@@ -27,9 +27,7 @@ var customPlay = {
         },
 
         play(start, end) {
-            const start_param = encodeURIComponent(start).replaceAll('%2F', '%252F');
-            const end_param = encodeURIComponent(end).replaceAll('%2F', '%252F');
-            window.location.replace(`/play/quick_play?prompt_start=${start_param}&prompt_end=${end_param}${this.scroll ? '&scroll=1' : ''}`);
+            window.location.replace(`/play/quick_play?prompt_start=${start}&prompt_end=${end}${this.scroll ? '&scroll=1' : ''}`);
         },
 
         async playCustom() {

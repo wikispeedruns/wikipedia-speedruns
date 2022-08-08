@@ -1,8 +1,5 @@
-from click import prompt
 from flask import jsonify, request, Blueprint, session
 from util.decorators import check_user, check_request_json
-
-from urllib.parse import unquote
 
 from db import get_db
 from pymysql.cursors import DictCursor
@@ -39,7 +36,7 @@ def create_quick_run():
         prompt_end = request.args.get('prompt_end')
         if prompt_start is None or prompt_end is None:
             return "Invalid request", 400
-        run_id = runs.create_quick_run(unquote(prompt_start), unquote(prompt_end), session.get("user_id"))
+        run_id = runs.create_quick_run(prompt_start, prompt_end, session.get("user_id"))
         return jsonify({"run_id": run_id})
     except ValueError:
         return "Page Not Found", 404
