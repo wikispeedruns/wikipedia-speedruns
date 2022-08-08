@@ -2,7 +2,7 @@ import { getAutoCompleteArticles } from "./wikipediaAPI/util.js";
 
 const count = 5;
 
-var autocompleteInput = {
+var AutocompleteInput = {
 
     props: {
         text: {
@@ -128,4 +128,4 @@ var autocompleteInput = {
     `)
 };
 
-export { autocompleteInput }
+export { AutocompleteInput }

@@ -1,12 +1,12 @@
 
-import { autocompleteInput } from "./modules/autocomplete.js";
+import { AutocompleteInput } from "./modules/autocomplete.js";
 import { PromptGenerator } from "./modules/generator.js"
 import { checkArticles } from "/static/js/modules/wikipediaAPI/util.js";
 
 var customPlay = {
     components: {
         'prompt-generator': PromptGenerator,
-        'ac-input': autocompleteInput
+        'ac-input': AutocompleteInput
     },
 
     data: function () {

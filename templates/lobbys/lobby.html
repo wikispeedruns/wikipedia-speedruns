@@ -31,7 +31,7 @@ import { fetchJson } from "/static/js/modules/fetch.js";
 import { serverData } from "/static/js/modules/serverData.js";
 import { checkArticles } from "/static/js/modules/wikipediaAPI/util.js";
 import { PromptGenerator } from "/static/js/modules/generator.js"
-import { autocompleteInput } from "/static/js/modules/autocomplete.js"
+import { AutocompleteInput } from "/static/js/modules/autocomplete.js"
 
 const LOBBY_ID = serverData["lobby_id"];
 
@@ -40,7 +40,7 @@ var app = new Vue({
     el: '#app',
     components: {
         'prompt-generator': PromptGenerator,
-        'ac-input': autocompleteInput
+        'ac-input': AutocompleteInput
     },
     data: {
         startPrompt:"",
