@@ -230,7 +230,11 @@ let app = new Vue({
 
             if (this.isScroll) {
                 setInterval(function() {
-                    document.getElementById("wikipedia-frame").scrollBy(0, 1);
+                    const elem = document.getElementById("wikipedia-frame");
+                    elem.scrollBy(0, 1);
+                    if (Math.abs(elem.scrollHeight - elem.clientHeight - elem.scrollTop) < 1) {
+                        elem.scrollTo(0, 0);
+                    }
                 }, 20);
             }
 
