@@ -231,7 +231,7 @@ let app = new Vue({
             if (this.isScroll) {
                 setInterval(function() {
                     document.getElementById("wikipedia-frame").scrollBy(0, 1);
-                }, 30);
+                }, 20);
             }
 
             this.started = true;
