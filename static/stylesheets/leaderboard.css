@@ -86,3 +86,6 @@
     border-radius: 5px;
     color: #fff;
 }
+.clickable {
+    cursor: pointer;
+}

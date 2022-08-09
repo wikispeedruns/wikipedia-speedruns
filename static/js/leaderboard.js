@@ -60,7 +60,7 @@ var LeaderboardRow = {
     },
 
     template: (`
-        <tr :class="run.finished ? '' : 'text-danger'" @click="goToRun(run.run_id)">
+        <tr :class="[run.finished ? '' : 'text-danger', 'clickable']" @click="goToRun(run.run_id)">
             <td >
                 {{run.rank}}
                 <button
