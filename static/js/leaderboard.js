@@ -103,7 +103,8 @@ var LeaderboardRow = {
 
             <td class="col">
                 <div 
-                    v-if="run.run_id === currentRunId && 
+                    v-if="run.finished && 
+                    run.run_id === currentRunId && 
                     (run.username === this.$parent.username || (this.$parent.preset === 'personal' && !this.$parent.loggedIn))" 
                     class="button-tooltip-container col-auto py-2"
                 >
