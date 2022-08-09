@@ -109,7 +109,7 @@
                                 v-on:go-to-page="goToPage"
                             ></tr>
 
-                            <tr v-if="currentRunPosition === -1"><td colspan="5">...</td></tr>
+                            <tr v-if="currentRunPosition === -1"><td colspan="6">...</td></tr>
 
                             <tr is="leaderboard-row"
                                 v-for="run in runs"
@@ -118,7 +118,7 @@
                                 v-bind:current-run-id="runId"
                             ></tr>
 
-                            <tr v-if="currentRunPosition === 1"><td colspan="5">...</td></tr>
+                            <tr v-if="currentRunPosition === 1"><td colspan="6">...</td></tr>
                             <tr is="leaderboard-row"
                                 v-if="currentRunPosition === 1"
                                 v-bind:run="currentRun"

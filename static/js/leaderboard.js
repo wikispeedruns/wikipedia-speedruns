@@ -7,6 +7,7 @@ const URL_LOBBY_ID = serverData["lobby_id"] || null;
 
 // Hack, if USER_ID = -1 the server shouldn't return anything.
 const USER_ID = serverData["user_id"] === undefined ? -1 : serverData["user_id"];
+const USERNAME = USER_ID < 0 ? '' : serverData["username"];
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -101,7 +102,11 @@ var LeaderboardRow = {
             </td>
 
             <td class="col">
-                <div v-if="run.run_id === currentRunId" class="button-tooltip-container col-auto py-2">
+                <div 
+                    v-if="run.run_id === currentRunId && 
+                    (run.username === this.$parent.username || (this.$parent.preset === 'personal' && !this.$parent.loggedIn))" 
+                    class="button-tooltip-container col-auto py-2"
+                >
                     <button @click="copyResults(run)" id="share-btn" class="share-btn btn-1 btn-1c"><i class="bi bi-share"></i> Share</button>
                     <span id="custom-tooltip">Copied results to clipboard!</span>
                 </div>
@@ -294,6 +299,7 @@ var app = new Vue({
     el: '#app',
     data: {
         loggedIn: USER_ID !== -1,
+        username: USERNAME,
         prompt: {},
         available: false,
 
