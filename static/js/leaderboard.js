@@ -10,7 +10,7 @@ const USER_ID = serverData["user_id"] === undefined ? -1 : serverData["user_id"]
 
 const DEFAULT_PAGE_SIZE = 20;
 
-Vue.filter('pathArrow', pathArrowFilter)
+Vue.filter('pathArrow', pathArrowFilter);
 
 var LeaderboardRow = {
     props: [
@@ -40,14 +40,26 @@ var LeaderboardRow = {
         },
 
         generateResults: function(run) {
-            return `Wiki Speedruns ${run.prompt_id}\n${run.path[0].article}\n${run.path.length - 1} 🖱️\n${(run.play_time)} ⏱️`
+            return `Wiki Speedruns ${run.prompt_id}\n${this.$parent.prompt.start}\n${run.path.length - 1} 🖱️\n${(run.play_time)} ⏱️`
         },
+
+        goToRun: function(newRunId) {
+            if (newRunId === this.$props.currentRunId) return;
+            
+            let url = new URL(window.location.href);
+            url.searchParams.set('run_id', newRunId);
+            window.location.replace(url);
+        }
     },
 
+    mounted: async function() {
+        if (this.$props.run.run_id === this.$props.currentRunId) {
+            this.$el.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
+        }
+    },
 
     template: (`
-        <tr v-bind:class="run.finished ? '' : 'text-danger'">
-
+        <tr :class="run.finished ? '' : 'text-danger'" @click="goToRun(run.run_id)">
             <td >
                 {{run.rank}}
                 <button
@@ -330,8 +342,7 @@ var app = new Vue({
         },
 
 
-        goToPage: function(newPage)
-        {
+        goToPage: function(newPage) {
             let url = new URL(window.location.href);
             url.searchParams.set('offset', newPage * this.limit);
             url.searchParams.set('limit', this.limit);
@@ -420,9 +431,6 @@ var app = new Vue({
             }
         }
 
-
-
-
         this.genGraph();
-    }
+    },
 })
