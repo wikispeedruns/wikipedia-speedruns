@@ -21,31 +21,38 @@ var AutocompleteInput = {
         return {
             acList: [],
             showAutocomplete: false,
+            lastInputTime: null,
             highlightIndex: -1,
-            timer: null
+            timer: null,
+            timeout: 600
         }
 	},
 
     methods: {
         async setAutocomplete() {
             this.acList = await getAutoCompleteArticles(this.text);
-            this.open();
+            // only show if there was no recent inputs during the getting stage
+            if(Date.now() - this.lastInputTime > this.timeout) this.open();
+            else this.clearList();
         },
 
-        async updateText(text) {
+        updateText(text) {
             this.close();
-            await this.$emit('update:text', text);
+            this.$emit('update:text', text);
         },
 
         clearList() {
             this.acList = [];
         },
 
-        async input(text) {
+        input(text) {
+            this.lastInputTime = Date.now();
+
             this.clearList();
-            await this.updateText(text);
+            this.updateText(text);
+
             clearTimeout(this.timer);
-            this.timer = setTimeout(this.setAutocomplete, 650);
+            this.timer = setTimeout(this.setAutocomplete, this.timeout);
         },
 
         async selectArticle(article) {
@@ -78,6 +85,7 @@ var AutocompleteInput = {
 
         focusout() {
             this.close();
+            this.lastInputTime = Date.now();
             clearTimeout(this.timer);
         },
 
