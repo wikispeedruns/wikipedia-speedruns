@@ -1,7 +1,5 @@
 import { serverData } from "./modules/serverData.js"
 import { fetchJson } from "./modules/fetch.js"
-
-
 import { pathArrowFilter } from "./modules/game/filters.js";
 
 const URL_PROMPT_ID = serverData["prompt_id"];
@@ -28,6 +26,24 @@ var LeaderboardRow = {
         }
     },
 
+    methods: {
+        copyResults: function(run) {
+            console.log(run);
+            let results = this.generateResults(run);
+            document.getElementById("custom-tooltip").style.display = "inline";
+            document.getElementById("share-btn").style.display = "none";
+            navigator.clipboard.writeText(results);
+            setTimeout(function() {
+                document.getElementById("custom-tooltip").style.display = "none";
+                document.getElementById("share-btn").style.display = "inline-block";
+            }, 2000);
+        },
+
+        generateResults: function(run) {
+            return `Wiki Speedruns ${run.prompt_id}\n${run.path[0].article}\n${run.path.length - 1} 🖱️\n${(run.play_time)} ⏱️`
+        },
+    },
+
 
     template: (`
         <tr v-bind:class="run.finished ? '' : 'text-danger'">
@@ -47,11 +63,11 @@ var LeaderboardRow = {
 
             <td class="l-col">
                 <template v-if="run.username">
-                    <strong v-if="run.run_id === currentRunId">Your Last Run</strong>
+                    <strong v-if="run.run_id === currentRunId">{{run.username}}</strong>
                     <span v-else>{{run.username}}</span>
                 </template>
                 <template v-else-if="run.name">
-                    <strong v-if="run.run_id === currentRunId">Your Last Run</strong>
+                    <strong v-if="run.run_id === currentRunId">{{run.name}}</strong>
                     <span v-else>{{run.name}}</span>
                 </template>
                 <template v-else>
@@ -65,14 +81,19 @@ var LeaderboardRow = {
             <td class="l-col">{{(run.play_time).toFixed(3)}} s</td>
             <td>{{run.path.length}}</td>
 
-            <td style="min-width:400px">
+            <td class="col-lg">
                 {{run.path | pathArrow}}
                 <a v-if="!lobbyId" v-bind:href="'/replay?run_id=' + run.run_id" target="_blank" title="Replay" >
                     <i class="bi bi-play"></i>
                 </a>
             </td>
 
-
+            <td class="col">
+                <div v-if="run.run_id === currentRunId" class="button-tooltip-container col-auto py-2">
+                    <button @click="copyResults(run)" id="share-btn" class="share-btn btn-1 btn-1c"><i class="bi bi-share"></i> Share</button>
+                    <span id="custom-tooltip">Copied results to clipboard!</span>
+                </div>
+            </td>
         </tr>
     `)
 }
