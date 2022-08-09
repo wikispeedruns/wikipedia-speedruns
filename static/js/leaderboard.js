@@ -1,7 +1,5 @@
 import { serverData } from "./modules/serverData.js"
 import { fetchJson } from "./modules/fetch.js"
-import { round } from "./modules/wikipediaAPI/util.js";
-
 
 import { pathArrowFilter } from "./modules/game/filters.js";
 
@@ -282,10 +280,11 @@ var app = new Vue({
         preset: "",
         
         // Leaderboard Stats
-        stats: {},
-        finishPct: 0,
-        avgClicks: 0,
-        avgTime: 0,
+        stats: {
+            finishPct: 0,
+            avgClicks: 0,
+            avgTime: 0,
+        },
     },
 
     computed: {
@@ -421,10 +420,9 @@ var app = new Vue({
         let statJson = await response.json();
 
         // TODO: Properly set data after navigation 
-        this.stats.finish_pct = statJson['finish_pct'];
-        this.finishPct = round(statJson['finish_pct'], 2);
-        this.avgClicks = round(statJson['avg_path_len'], 2);
-        this.avgTime = round(statJson['avg_play_time'], 2);
+        this.stats.finishPct = parseFloat(statJson['finish_pct']).toFixed(2);
+        this.stats.avgClicks = parseFloat(statJson['avg_path_len']).toFixed(2);
+        this.stats.avgTime = parseFloat(statJson['avg_play_time']).toFixed(2);
 
         this.genGraph();
     }

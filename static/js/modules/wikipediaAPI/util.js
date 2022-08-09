@@ -71,8 +71,4 @@ async function getArticleSummary(page) {
     return body
 }
 
-function round(value, decimals) {
-    return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
-}   
-
-export { getArticle, getArticleTitle, getArticleSummary, articleCheck, round };
+export { getArticle, getArticleTitle, getArticleSummary, articleCheck };
