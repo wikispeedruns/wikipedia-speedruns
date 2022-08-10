@@ -346,7 +346,7 @@ var app = new Vue({
     <div class="prompt-header">
         <h3> Prompts </h3>
         <template v-if="lobbyInfo.user.owner">
-            <a v-on:click="editPrompts = !editPrompts">(Edit)</a>
+            <a style="cursor:pointer" v-on:click="editPrompts = !editPrompts">(Edit)</a>
         </template>
     </div>
 
