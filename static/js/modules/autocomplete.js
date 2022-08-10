@@ -29,10 +29,10 @@ var AutocompleteInput = {
 	},
 
     methods: {
-        async setAutocomplete() {
+        async setAutocomplete(timeCalled) {
             this.acList = await getAutoCompleteArticles(this.text);
             // only show if there was no recent inputs during the getting stage
-            if(Date.now() - this.lastInputTime > this.timeout) this.open();
+            if(this.lastInputTime === timeCalled) this.open();
             else this.clearList();
         },
 
@@ -52,7 +52,7 @@ var AutocompleteInput = {
             this.updateText(text);
 
             clearTimeout(this.timer);
-            this.timer = setTimeout(this.setAutocomplete, this.timeout);
+            this.timer = setTimeout(this.setAutocomplete.bind(null, this.lastInputTime), this.timeout);
         },
 
         async selectArticle(article) {
