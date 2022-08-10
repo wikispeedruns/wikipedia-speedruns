@@ -22,7 +22,7 @@ var userDisplay = {
     },
 
     template: (`
-        <span style="cursor:pointer" @click="goToProfile">{{username}}</span>
+        <a style="cursor:pointer" @click="goToProfile">{{username}}</a>
     `)
 };
 
