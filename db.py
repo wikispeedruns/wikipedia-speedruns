@@ -6,7 +6,7 @@ def init_app(app):
 
 # Keep up to date with scripts/schema.sql
 def get_db_version():
-    return '2.1'
+    return '2.2'
 
 def get_db():
     if 'db' not in g:

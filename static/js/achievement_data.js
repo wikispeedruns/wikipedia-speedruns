@@ -7,7 +7,7 @@ const dataType = document.getElementById('achievement').getAttribute('data');
 const RUN_ID = serverData["run_id"];
 const LOBBY_ID = serverData["lobby_id"] || null;
 const profile_name = serverData["profile_name"];
-
+const TYPE = serverData["type"];
 
 // Sort data (array of values) for display
 // Hidden, unachieved at the bottom
@@ -45,6 +45,7 @@ var am = new Vue({
     components: {'achievement-table': achievement_table },
 
     data: {
+
         list: achievement_list,
         data: {},
         isProfile: null,
@@ -54,20 +55,13 @@ var am = new Vue({
         achieved: null,
 
         // These are specific for a finished run
+        isSprint: false,
         empty: true,
         loggedIn: false,
         lobbyId: null
     },
 
     methods:{
-
-        toggleEmpty: function(){
-            this.empty = !this.empty;
-        },
-
-        setData: function(data){
-            this.data = data;
-        },
 
         convertData: function(oldData){
             let data = [];
@@ -88,11 +82,8 @@ var am = new Vue({
 
         getData: async function(){
 
-            if(!this.loggedIn){
-                return;
-            }
-
             let data = null;
+
             if(dataType == 'all'){ // This is getting all achievements for data
                 this.isProfile = true;
                 const response = await fetch('/api/achievements/user/' + profile_name);
@@ -101,6 +92,9 @@ var am = new Vue({
                 data.sort(default_cmp);
             }
             else{ // This is getting achievements for the current run
+
+                if(!this.loggedIn || !this.isSprint) return;
+
                 this.isProfile = false;
                 let localData = JSON.parse(window.localStorage.getItem("lastAchievements"));
                 if(localData === null || localData["run_id"] != RUN_ID){
@@ -120,15 +114,16 @@ var am = new Vue({
             }
 
             if(Object.keys(data).length > 0){
-                this.toggleEmpty();
+                this.empty = false;
             }
-            this.setData(data);
+            this.data = data;
         }
     },
 
     mounted: async function () {
         this.loggedIn = "username" in serverData;
         this.lobbyId = LOBBY_ID;
+        this.isSprint = TYPE === 'sprint';
 
         // Make sure that the run gets updated right when play_finish page is updated
         if (this.loggedIn) {

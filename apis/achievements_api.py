@@ -22,6 +22,8 @@ def process_for_achievements(run_id):
         run_data = cursor.fetchone()
         if run_data["counted_for_am"]:
             return f"run_id {run_id} already counted for achievements", 400
+        elif not achievements.check_data(run_data):
+            return f"run data is not compatible for achievements", 400
 
         new_achievements = achievements.get_and_update_new_achievements(cursor, run_data)
 
