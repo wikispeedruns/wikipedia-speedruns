@@ -87,32 +87,6 @@ var achievement_table = {
         //console.log(this.list)
     },
 
-    //Achievements - {{achieved}}/{{total}}
-
-    // <div class="col-sm-10">
-    //     <div class="card">
-    //         <div class="card-body">
-    //         <table class="table table-hover">
-    //             <thead>
-    //                 <td v-if="profile" colspan=4><h3>Achievements - {{achieved}}/{{total}} Unlocked</h3></td>
-    //                 <td v-else>
-    //                     <h3></h3>
-    //                 </td>
-    //             </thead>
-    //             <tbody>
-    //             <achievement v-for="item in achievements" v-bind:key="item.name"
-    //                 v-bind:display_name="list[item.name]['display_name']"
-    //                 v-bind:description="list[item.name]['description']"
-    //                 v-bind:hidden="list[item.name]['hidden']"
-    //                 v-bind:img="list[item.name]['img']"
-    //                 v-bind:basepath="basepath"
-    //                 v-bind:achievementdata="item"
-    //             ></achievement>
-    //             </tbody>
-    //         </table>
-    //         </div>
-    //     </div>
-    // </div>
     template: (`
     <tbody>
         <achievement v-for="item in achievements" v-bind:key="item.name"
@@ -202,14 +176,19 @@ var achievements = {
 
     computed: {
         isEmpty() {
-            return Object.keys(this.data).length == 0;
+            return this.count == 0;
+        },
+        count() {
+            return Object.keys(this.data).length;
         },
         title() {
             if(this.isProfile) return `Achievements - ${this.achieved}/${this.total} Unlocked`;
             else {
                 if(!this.isSprint) return `Unlock achievements in public prompts...`;
                 if(!this.loggedIn) return `Login to check possible New Achievements!`;
-                else return this.isEmpty ? `No new achievements unlocked` : `${this.achieved} New Achievements!`;
+                else return this.isEmpty ? `No new achievements unlocked` : 
+                            this.count == 1 ? `${this.achieved} New Achievement!` :
+                                              `${this.achieved} New Achievements!`;
             }
         }
     },
@@ -284,16 +263,8 @@ var achievements = {
         await this.getData();
     },
 
-    // <achievement-table class="py-4"
-    //     v-bind:list="list"
-    //     v-bind:achievements="data"
-    //     v-bind:basepath="basepath"
-    //     v-bind:profile="isProfile"
-    //     v-bind:total="total"
-    //     v-bind:achieved="achieved"
-    // ></achievement-table>
     template: (`
-    <div class="col-sm-10">
+    <div class="col-sm-10" style="padding-top:15px;">
         <div class="card">
             <div class="card-body">
             <table class="table table-hover">
