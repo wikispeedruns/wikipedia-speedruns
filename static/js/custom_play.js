@@ -27,7 +27,7 @@ var customPlay = {
         },
 
         play(start, end) {
-            window.location.replace(`/play/quick_play?prompt_start=${start}&prompt_end=${end}${this.scroll ? '&scroll=1' : ''}`);
+            window.location.assign(`/play/quick_play?prompt_start=${start}&prompt_end=${end}${this.scroll ? '&scroll=1' : ''}`);
         },
 
         async playCustom() {
