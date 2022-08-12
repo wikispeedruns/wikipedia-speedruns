@@ -423,7 +423,6 @@ var app = new Vue({
         })).json();
 
 
-
         /* Fill data structures */
         this.available = !('available' in resp['prompt']) || resp["prompt"]["available"];
         this.prompt = resp["prompt"];
@@ -450,11 +449,8 @@ var app = new Vue({
         ? `/api/sprints/${this.promptId}/stats`
         : `/api/lobbys/${this.lobbyId}/prompts/${this.promptId}/stats`;
 
-        if (this.runId !== -1) {
-            statsEndpoint += `/${this.runId}`;
-        }
-
         var response = await fetchJson(statsEndpoint, "POST", {
+            "show_unfinished": true,
             ...args
         });
         let statJson = await response.json();
