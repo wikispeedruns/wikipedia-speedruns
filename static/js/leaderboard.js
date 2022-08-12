@@ -1,6 +1,5 @@
 import { serverData } from "./modules/serverData.js"
 import { fetchJson } from "./modules/fetch.js"
-
 import { pathArrowFilter } from "./modules/game/filters.js";
 
 const URL_PROMPT_ID = serverData["prompt_id"];
@@ -8,10 +7,11 @@ const URL_LOBBY_ID = serverData["lobby_id"] || null;
 
 // Hack, if USER_ID = -1 the server shouldn't return anything.
 const USER_ID = serverData["user_id"] === undefined ? -1 : serverData["user_id"];
+const USERNAME = USER_ID < 0 ? '' : serverData["username"];
 
 const DEFAULT_PAGE_SIZE = 20;
 
-Vue.filter('pathArrow', pathArrowFilter)
+Vue.filter('pathArrow', pathArrowFilter);
 
 var LeaderboardRow = {
     props: [
@@ -27,10 +27,40 @@ var LeaderboardRow = {
         }
     },
 
+    methods: {
+        copyResults: function(run) {
+            console.log(run);
+            let results = this.generateResults(run);
+            document.getElementById("custom-tooltip").style.display = "inline";
+            document.getElementById("share-btn").style.display = "none";
+            navigator.clipboard.writeText(results);
+            setTimeout(function() {
+                document.getElementById("custom-tooltip").style.display = "none";
+                document.getElementById("share-btn").style.display = "inline-block";
+            }, 2000);
+        },
+
+        generateResults: function(run) {
+            return `Wiki Speedruns ${run.prompt_id}\n${this.$parent.prompt.start}\n${run.path.length - 1} 🖱️\n${(run.play_time)} ⏱️`
+        },
+
+        goToRun: function(newRunId) {
+            if (newRunId === this.$props.currentRunId) return;
+            
+            let url = new URL(window.location.href);
+            url.searchParams.set('run_id', newRunId);
+            window.location.replace(url);
+        }
+    },
+
+    mounted: async function() {
+        if (this.$props.run.run_id === this.$props.currentRunId) {
+            this.$el.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
+        }
+    },
 
     template: (`
-        <tr v-bind:class="run.finished ? '' : 'text-danger'">
-
+        <tr :class="[run.finished ? '' : 'text-danger', 'clickable']" @click="goToRun(run.run_id)">
             <td >
                 {{run.rank}}
                 <button
@@ -46,11 +76,11 @@ var LeaderboardRow = {
 
             <td class="l-col">
                 <template v-if="run.username">
-                    <strong v-if="run.run_id === currentRunId">Your Last Run</strong>
+                    <strong v-if="run.run_id === currentRunId">{{run.username}}</strong>
                     <span v-else>{{run.username}}</span>
                 </template>
                 <template v-else-if="run.name">
-                    <strong v-if="run.run_id === currentRunId">Your Last Run</strong>
+                    <strong v-if="run.run_id === currentRunId">{{run.name}}</strong>
                     <span v-else>{{run.name}}</span>
                 </template>
                 <template v-else>
@@ -64,14 +94,24 @@ var LeaderboardRow = {
             <td class="l-col">{{(run.play_time).toFixed(3)}} s</td>
             <td>{{run.path.length}}</td>
 
-            <td style="min-width:400px">
+            <td class="col-lg">
                 {{run.path | pathArrow}}
                 <a v-if="!lobbyId" v-bind:href="'/replay?run_id=' + run.run_id" target="_blank" title="Replay" >
                     <i class="bi bi-play"></i>
                 </a>
             </td>
 
-
+            <td class="col">
+                <div 
+                    v-if="run.finished && 
+                    run.run_id === currentRunId && 
+                    (run.username === this.$parent.username || (this.$parent.preset === 'personal' && !this.$parent.loggedIn))" 
+                    class="button-tooltip-container col-auto py-2"
+                >
+                    <button @click="copyResults(run)" id="share-btn" class="share-btn btn-1 btn-1c"><i class="bi bi-share"></i> Share</button>
+                    <span id="custom-tooltip">Copied results to clipboard!</span>
+                </div>
+            </td>
         </tr>
     `)
 }
@@ -260,6 +300,7 @@ var app = new Vue({
     el: '#app',
     data: {
         loggedIn: USER_ID !== -1,
+        username: USERNAME,
         prompt: {},
         available: false,
 
@@ -315,8 +356,7 @@ var app = new Vue({
         },
 
 
-        goToPage: function(newPage)
-        {
+        goToPage: function(newPage) {
             let url = new URL(window.location.href);
             url.searchParams.set('offset', newPage * this.limit);
             url.searchParams.set('limit', this.limit);
@@ -425,5 +465,5 @@ var app = new Vue({
         this.stats.avgTime = parseFloat(statJson['avg_play_time']).toFixed(2);
 
         this.genGraph();
-    }
+    },
 })

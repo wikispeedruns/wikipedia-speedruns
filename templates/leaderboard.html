@@ -6,9 +6,10 @@
 <script src="{{url_for('static', filename='js/springy-master/springy.js') }}"></script>
 <script src="{{url_for('static', filename='js/springy-master/springyui.js') }}"></script>
 
+<link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/leaderboard.css')}}">
+
 <!-- Some nice x minutes ago tags -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
-
 <script defer type="module" src="{{url_for('static', filename='js/leaderboard.js') }}"></script>
 
 <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/leaderboard.css')}}">
@@ -149,7 +150,7 @@
                                 v-on:go-to-page="goToPage"
                             ></tr>
 
-                            <tr v-if="currentRunPosition === -1"><td colspan="5">...</td></tr>
+                            <tr v-if="currentRunPosition === -1"><td colspan="6">...</td></tr>
 
                             <tr is="leaderboard-row"
                                 v-for="run in runs"
@@ -158,7 +159,7 @@
                                 v-bind:current-run-id="runId"
                             ></tr>
 
-                            <tr v-if="currentRunPosition === 1"><td colspan="5">...</td></tr>
+                            <tr v-if="currentRunPosition === 1"><td colspan="6">...</td></tr>
                             <tr is="leaderboard-row"
                                 v-if="currentRunPosition === 1"
                                 v-bind:run="currentRun"
