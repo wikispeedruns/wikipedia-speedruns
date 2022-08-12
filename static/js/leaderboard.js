@@ -319,6 +319,13 @@ var app = new Vue({
         offset: 0,
 
         preset: "",
+        
+        // Leaderboard Stats
+        stats: {
+            finishPct: 0,
+            avgClicks: 0,
+            avgTime: 0,
+        },
     },
 
     computed: {
@@ -428,7 +435,7 @@ var app = new Vue({
         if (currRunIndex !== -1) {
             this.currentRun = this.runs[currRunIndex];
 
-            // check if current run does not fall within range, remove and set positon if so
+            // check if current run does not fall within range, remove and set position if so
             if (this.currentRun['rank'] - 1 < this.offset) {
                 this.currentRunPosition = -1 ;
                 this.runs.splice(currRunIndex, 1);
@@ -437,6 +444,25 @@ var app = new Vue({
                 this.runs.splice(currRunIndex, 1);
             }
         }
+
+        // Prompt Stats
+        let statsEndpoint = this.lobbyId === null
+        ? `/api/sprints/${this.promptId}/stats`
+        : `/api/lobbys/${this.lobbyId}/prompts/${this.promptId}/stats`;
+
+        if (this.runId !== -1) {
+            statsEndpoint += `/${this.runId}`;
+        }
+
+        var response = await fetchJson(statsEndpoint, "POST", {
+            ...args
+        });
+        let statJson = await response.json();
+
+        // TODO: Properly set data after navigation 
+        this.stats.finishPct = parseFloat(statJson['finish_pct']).toFixed(2);
+        this.stats.avgClicks = parseFloat(statJson['avg_path_len']).toFixed(2);
+        this.stats.avgTime = parseFloat(statJson['avg_play_time']).toFixed(2);
 
         this.genGraph();
     },

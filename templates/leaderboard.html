@@ -11,6 +11,8 @@
 <!-- Some nice x minutes ago tags -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
 <script defer type="module" src="{{url_for('static', filename='js/leaderboard.js') }}"></script>
+
+<link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/leaderboard.css')}}">
 {% endblock %}
 
 {% block content %}
@@ -30,15 +32,54 @@
         </div>
 
         <div class="card">
-            <div class="card-header pt-3">
+            <div class="row">
+                <div class="col-8" style="padding-right:0">
+                    <div class="card-header pt-3" style="height: 8rem;">
 
-                <h4>Prompt [[prompt.prompt_id || ""]]</h4>
+                        <h4>Prompt [[prompt.prompt_id || ""]]</h4>
 
-                <h6 v-if="available">
-                    <strong>[[prompt.start]]</strong> to <strong v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>
-                </h6>
+                        <h6 v-if="available">
+                            <strong>[[prompt.start]]</strong> to <strong v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>
+                        </h6>
 
-                <p>[[numRuns]] total runs</p>
+
+                        <p>[[numRuns]] total runs</p>
+                    </div>
+                </div>  
+
+                <div class="col" style="padding-left:0">
+                    <div class="card-header pt-3" style="height: 8rem;">   
+                        <div class="row">
+                            <div class="col">
+                            <p class="text-muted small progress-label desktop">Completion Rate:</p>
+
+                            <!-- TODO: Add hover -->
+                            <!-- TODO: Properly fetch data after navigation  -->
+                            <div class="progress">
+                                <div class="progress-bar bg-success" role="progressbar" :style="{ width: stats.finishPct + '%' }" :aria-valuenow="stats.finishPct" aria-valuemin="0" aria-valuemax="100">
+                                    [[stats.finishPct]]%
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div class="row"> 
+                            <div class="col">
+                            <p class="text-muted small progress-label desktop">Avg. # Clicks: </p>
+                            <p class="progress-label mobile">🖱️ </p>
+                            <p class="stat text-dark">[[stats.avgClicks]]</p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                            <p class="text-muted small progress-label desktop">Avg. Completion Time:</p>
+                            <p class="progress-label mobile">⏱️ </p>
+                            <p class="stat text-dark">[[stats.avgTime]]s</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="card-body">

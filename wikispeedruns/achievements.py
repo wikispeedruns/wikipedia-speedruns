@@ -27,7 +27,8 @@ def get_version_map():
     return {
         "1.0": version_2_1,
         "2.0": version_2_1,
-        "2.1": version_2_1
+        "2.1": version_2_1,
+        "2.2": version_2_1
     }
 
 def convert_to_standard(raw_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -36,10 +37,9 @@ def convert_to_standard(raw_data: Dict[str, Any]) -> Dict[str, Any]:
     version = path["version"]
     return version_map[version](raw_data)
 
-def check_data(raw_data: Dict[str, Any]) -> None:
-    valid = raw_data["finished"] and raw_data["user_id"]
-    if not valid:
-        raise Exception("The run_data provided is incomplete for achievements")
+def check_data(raw_data: Dict[str, Any]) -> bool:
+    return raw_data["finished"] and raw_data["user_id"]
+    
     
 
 
@@ -114,7 +114,6 @@ and makes updates to database accordingly
 """
 def get_and_update_new_achievements(cursor: DictCursor, raw_run_data: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     
-    check_data(raw_run_data)
     single_run_data = convert_to_standard(raw_run_data)
 
     achievements = get_achievements_info(cursor)
@@ -269,41 +268,3 @@ def get_all_achievements_and_progress(cursor: DictCursor, user_id: int) -> Dict[
         all_achievements[name] = entry
 
     return all_achievements      
-
-
-def main():
-
-    config = json.load(open("config/default.json"))
-    try:
-        config.update(json.load(open("config/prod.json")))
-    except FileNotFoundError:
-        pass
-
-    conn = pymysql.connect(
-        user=config["MYSQL_USER"],
-        host=config["MYSQL_HOST"],
-        password=config["MYSQL_PASSWORD"],
-        database=config["DATABASE"]
-    )
-
-    with conn.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
-
-        # cursor.execute("DELETE FROM list_of_achievements")
-        # add_all_achievements(cursor)
-
-        # get_and_update_new_achievements(cursor, test_data_5)
-
-        # user = 5
-        # all_achievements = get_all_achievements_and_progress(cursor, user)
-        # for name in all_achievements:
-        #     reached = all_achievements[name]["reached"]
-        #     out_of = all_achievements[name]["out_of"]
-        #     print(f"{name} - reached {reached} out of {out_of}")
-
-
-        conn.commit()
-        conn.close()
-
-
-if __name__ == "__main__":
-    main()

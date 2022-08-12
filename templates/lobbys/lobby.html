@@ -29,8 +29,9 @@
 <script type="module">
 import { fetchJson } from "/static/js/modules/fetch.js";
 import { serverData } from "/static/js/modules/serverData.js";
-import { getArticleTitle, articleCheck } from "/static/js/modules/wikipediaAPI/util.js";
+import { checkArticles } from "/static/js/modules/wikipediaAPI/util.js";
 import { PromptGenerator } from "/static/js/modules/generator.js"
+import { AutocompleteInput } from "/static/js/modules/autocomplete.js"
 
 const LOBBY_ID = serverData["lobby_id"];
 
@@ -38,7 +39,8 @@ var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     components: {
-        'prompt-generator': PromptGenerator
+        'prompt-generator': PromptGenerator,
+        'ac-input': AutocompleteInput
     },
     data: {
         startPrompt:"",
@@ -113,37 +115,22 @@ var app = new Vue({
 
         },
 
-        async generatePrompt(e) {
-            const prompt = await getGeneratedPrompt(this.difficulty);
-            this.startPrompt = prompt["start"];
-            this.endPrompt = prompt["end"];
+        async generateRndPrompt(prompt) {
+            [this[prompt]] = await this.$refs.pg.generatePrompt();
         },
-
 
         async addPrompt() {
             this.addPromptMessage = "";
 
-            const start = await getArticleTitle(this.startPrompt);
-            if (start === null) {
-                this.addPromptMessage = `"${this.startPrompt}" is not a Wikipedia article`;
-                return;
-            }
-
-            const end = await getArticleTitle(this.endPrompt);
-            if (end === null) {
-                this.addPromptMessage = `"${this.endPrompt}" is not a Wikipedia article`;
-                return;
-            }
-
-            const checkRes = await articleCheck(this.endPrompt);
-            if ('warning' in checkRes) {
-                this.addPromptMessage = checkRes["warning"];
+            const res = await checkArticles(this.startPrompt, this.endPrompt);
+            if(res.err) {
+                this.addPromptMessage = res.err;
                 return;
             }
 
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}/prompts`, "POST", {
-                "start": start,
-                "end": end
+                "start": res.body.start,
+                "end": res.body.end
             });
 
             this.getPrompts();
@@ -282,31 +269,35 @@ var app = new Vue({
         <form id="newPrompt" v-on:submit.prevent="addPrompt">
             <div class="my-2 row">
                 <div class="col-md-4 col-sm-6">
-                    <input  class="form-control" type="text" id="start" name="start" placeholder="Start Article" v-model="startPrompt">
+                    <div class="input-group">
+                        <ac-input :text.sync="startPrompt" placeholder="Start Article"></ac-input>
+                        <button type="button" class="btn border" style="background-color: #e9ecef;" @click="generateRndPrompt('startPrompt')">
+                            <i class="bi bi-shuffle"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <div class="mb-2 row">
                 <div class="col-md-4 col-sm-6">
-                    <input class="form-control" type="text" id="end" name="end" placeholder="End Article" v-model="endPrompt">
+                    <div class="input-group">
+                        <ac-input :text.sync="endPrompt" placeholder="End Article"></ac-input>
+                        <button type="button" class="btn border" style="background-color: #e9ecef;" @click="generateRndPrompt('endPrompt')">
+                            <i class="bi bi-shuffle"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <details class="mb-4">
-                <summary>Prompt Generation</summary>
-
-                <prompt-generator
-                    v-bind:start.sync="startPrompt"
-                    v-bind:end.sync="endPrompt"
-                ></prompt-generator>
-
-
-            </details>
-
             <input class="btn btn-primary" type="submit" value="Submit">
+
+            <details class="mt-3">
+                <summary>Random Article Generator Settings</summary>
+                <prompt-generator ref="pg" class="col-md-4 col-sm-6"></prompt-generator>
+            </details>
         </form>
 
-        <p class="text-danger">[[addPromptMessage]]</p>
+        <p v-if="addPromptMessage" class="text-danger">[[addPromptMessage]]</p>
 
 
         <hr>

@@ -46,7 +46,7 @@ def get_total_stats(username):
     TODO cache this?
     '''
 
-    query = """
+    query_sprints = """
     SELECT
         users.user_id,
         COUNT(run_id) AS total_runs,
@@ -57,14 +57,27 @@ def get_total_stats(username):
     WHERE users.username=%s
     """
 
+    query_quick_runs = """
+    SELECT
+        COUNT(run_id) AS total_runs,
+        COUNT(case finished when 1 then 1 else null end) AS total_completed_runs
+    FROM users
+    LEFT JOIN quick_runs ON quick_runs.user_id=users.user_id
+    WHERE users.username=%s
+    """
+
     with get_db().cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query, (username, ))
+        cursor.execute(query_sprints, (username, ))
 
         result = cursor.fetchone()
         if (result["user_id"] is None): 
             return "Username not found", 404
         result.pop("user_id")
 
+        cursor.execute(query_quick_runs, (username, ))
+        result_quick_runs = cursor.fetchone()
+        result["total_runs"] += result_quick_runs["total_runs"]
+        result["total_completed_runs"] += result_quick_runs["total_completed_runs"]
 
     return result, 200
 

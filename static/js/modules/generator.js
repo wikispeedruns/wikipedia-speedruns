@@ -1,8 +1,7 @@
 import { getArticleTitle } from "./wikipediaAPI/util.js";
 import { fetchJson } from "./fetch.js";
 
-async function getGeneratedPrompt(difficulty, num)
-{
+async function getGeneratedPrompt(difficulty=10000, num=1) {
     const response = await fetchJson(`/api/generator/prompt?difficulty=${difficulty}&num_articles=${num}` , "GET");
     const prompts = await response.json();
 
@@ -12,66 +11,33 @@ async function getGeneratedPrompt(difficulty, num)
 
 var PromptGenerator = {
 
-    props: {
-        // Two way binding/v-model
-        start: String,
-        end: String
-    },
-
 	data: function () {
         return {
-            logdifficulty: 3.5,
+            logDifficulty: 3.5,
         }
 	},
 
     computed: {
         difficulty() {
-            return Math.round(Math.pow(10, this.logdifficulty))
+            const diff = Math.round(Math.pow(10, this.logDifficulty));
+            const norm = Math.pow(10, Math.floor(this.logDifficulty));
+            return Math.round(diff / norm) * norm;
         },
-
-        approx_difficulty() {
-            // Returns difficulty with 2 sig figs to give a sense of how many prompts you are choosing rom
-            const rounding = Math.pow(10, Math.floor(this.logdifficulty));
-            return Math.round(this.difficulty / rounding) * rounding;
-        }
     },
 
 	methods: {
-        async generatePrompt() {
-            const [start, end] = await getGeneratedPrompt(this.difficulty, 2);
-            this.$emit('update:start', start);
-            this.$emit('update:end', end);
+        async generatePrompt(num=1) {
+            return await getGeneratedPrompt(this.difficulty, num);
         },
-        async generateStart() {
-            const [start] = await getGeneratedPrompt(this.difficulty, 1);
-            this.$emit('update:start', start);
-
-        },
-        async generateEnd() {
-            const [end] = await getGeneratedPrompt(this.difficulty, 1);
-            this.$emit('update:end', end);
-        }
 	},
 
 	template: (`
         <div>
-
-            Less Obscure <input type="range" min="2" max="5" v-model="logdifficulty" class="slider" step="0.1">
-            More Obscure  (Choosing from {{approx_difficulty}} articles)</p>
-
-            <!-- expression for 1-100 scale {{Math.floor(33 * (logdifficulty - 2)) + 1}}-->
-
-            <div class="my-2">
-                Generate a new:
-                <div class="btn-group">
-                    <button class="btn btn-primary" v-on:click.prevent="generatePrompt"> Prompt (Start and End) </button>
-                    <button class="btn btn-primary" v-on:click.prevent="generateStart"> Start </button>
-                    <button class="btn btn-primary" v-on:click.prevent="generateEnd"> End </button>
-                </div>
-            </div>
-            <p>
-                <small><a href="/generator#about"> How does this work? </a></small>
-            </p>
+            <label class="form-label" style="width: 100%;">
+                Sample size:
+                <input type="range" min="2" max="5" step="0.1" v-model="logDifficulty" class="form-range">
+                Sampling from {{difficulty}} most popular articles
+            </label>
         </div>
     `)
 };

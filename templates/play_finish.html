@@ -24,8 +24,10 @@
     <div v-cloak class="text-left">
         <div v-if="played">
             <p><h4>You found it!</h4></p>
-            <p v-if="loggedIn">Your run was submitted to the leaderboard.</p>
-            <p v-else>You are not logged in, but your run has been saved locally. Log in to upload your runs to the leaderboard!</p>
+            <template v-if="!isQuickRun">
+                <p v-if="loggedIn">Your run was submitted to the leaderboard.</p>
+                <p v-else>You are not logged in, but your run has been saved locally. Log in to upload your runs to the leaderboard!</p>
+            </template>
             <p><h4>Here's how you did:</h4></p>
         </div>
         <div class="card md">
@@ -47,10 +49,12 @@
                 </div>
 
                 <div v-if="lobbyId" class="py-3"><button @click="goToLobbyLeaderboard" class="btn btn-outline-secondary">See the lobby leaderboard</button></div>
-                <div v-else><a @click="goToLeaderboard" class="btn btn-outline-secondary" role="button">See the leaderboard</a></div>
+                <div v-else-if="isSprint"><a @click="goToLeaderboard" class="btn btn-outline-secondary" role="button">See the leaderboard</a></div>
 
                 <div v-if="lobbyId"><button @click="goToLobby" class="btn btn-outline-secondary">Return to lobby</button></div>
                 <div v-else class="py-3"><button @click="home" class="btn btn-outline-secondary">Return to home page</button></div>
+                
+                <div v-if="isQuickRun"><button @click="quickPlay" class="btn btn-outline-secondary">Play another round</button></div>
             </div>
         </div>
     </div>
@@ -59,25 +63,31 @@
 
 <div id="am">
     <br>
-    <template v-if="loggedIn&&!lobbyId">
-        <template v-if="!empty">
-            <h4>New Achievements!</h4>
-            <achievement-table class="py-4"
-                v-bind:list="list"
-                v-bind:achievements="data"
-                v-bind:basepath="'{{url_for('static', filename='achievements/icons/')}}'"
-            ></achievement-table>
+    <template v-if="isSprint">
+        <template v-if="loggedIn">
+            <template v-if="!empty">
+                <h4>New Achievements!</h4>
+                <achievement-table class="py-4"
+                    v-bind:list="list"
+                    v-bind:achievements="data"
+                    v-bind:basepath="'{{url_for('static', filename='achievements/icons/')}}'"
+                ></achievement-table>
+            </template>
+            <template v-else>
+                <h4>No new achievements unlocked</h4>
+            </template>
         </template>
         <template v-else>
-            <h4>No New Achievements Unlocked</h4>
+            <h4>Login to check possible New Achievements!</h4>
         </template>
     </template>
-    <template v-else-if="lobbyId">
-        <h4>Achievements Can Only Be Unlocked In Public Prompts</h4>
-    </template>
     <template v-else>
-        <h4>Login To Check Possible New Achievements!</h4>
+        <h4>Unlock Achievements in public prompts...</h4>
     </template>
+    
+    <br>
+    <br>
+    <br>
 </div>
 
 {% endblock %}

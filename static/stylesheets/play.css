@@ -166,8 +166,8 @@
 	left: 0;
 }
 
-#article-end-marker {
-	margin-bottom: 40vh;
+.article-end-marker {
+	padding-bottom: 40vh;
 }
 
 .HUDwrapper-mobile-inner-container {
@@ -182,6 +182,12 @@
 .play-HUD {
     min-width: 60%;
     overflow-x: hidden;
+}
+
+.hide-scroll {
+	position: relative;
+	overflow: hidden;
+	height: calc(100vh - 97px);
 }
 
 /* fix to wikipedia css */

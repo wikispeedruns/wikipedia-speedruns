@@ -2,8 +2,10 @@ import { MarathonPrompts } from "./modules/game/marathon/marathonPrompts.js";
 import { serverData } from "./modules/serverData.js";
 import { uploadLocalSprints, getLocalSprints } from "./modules/localStorage/localStorageSprint.js";
 import { uploadLocalMarathons, getLocalMarathons } from "./modules/localStorage/localStorageMarathon.js";
+import { uploadLocalQuickRuns } from "./modules/localStorage/localStorageQuickRun.js";
 import { generateStreakText } from "./modules/streaks.js";
 import { getUserLobby } from "./modules/lobby/utils.js";
+import { customPlay } from "./custom_play.js";
 
 async function getPrompts()
 {
@@ -38,6 +40,7 @@ var app = new Vue({
     el: '#app',
     components: {
         'marathon-prompts': MarathonPrompts,
+        'custom-play': customPlay
     },
     data: {
         dailyPrompts: [],
@@ -72,7 +75,7 @@ var app = new Vue({
         getDate: function (string) {
             let date = new Date(string);
             return date.toLocaleDateString();
-        }
+        },
     },
 
     created: async function() {
@@ -82,6 +85,7 @@ var app = new Vue({
         if (this.loggedIn) {
             await uploadLocalSprints();
             await uploadLocalMarathons();
+            await uploadLocalQuickRuns();
         }
 
         //this.topUsers = await getTopUsers();

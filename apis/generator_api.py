@@ -19,7 +19,7 @@ count = 0
 
 def load_page_rank(app):
     global articles, count, weights
-
+  
     with open(app.config["PAGERANK_FILE"], encoding="utf-8") as file:
         for line in file:
             (logprob, name) = line.split()
