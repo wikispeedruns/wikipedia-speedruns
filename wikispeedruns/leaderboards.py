@@ -284,6 +284,7 @@ def get_leaderboard_stats(
     
     db = get_db()
     with db.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
+        print(cursor.mogrify(query, lb_query['args']))
         cursor.execute(query, lb_query['args'])
         return cursor.fetchall()[0]
 

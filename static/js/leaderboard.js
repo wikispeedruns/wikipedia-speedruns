@@ -444,14 +444,15 @@ var app = new Vue({
             }
         }
 
-        // Prompt Stats
+        /* Prompt Stats */
         let statsEndpoint = this.lobbyId === null
         ? `/api/sprints/${this.promptId}/stats`
         : `/api/lobbys/${this.lobbyId}/prompts/${this.promptId}/stats`;
 
         var response = await fetchJson(statsEndpoint, "POST", {
+            ...args,
             "show_unfinished": true,
-            ...args
+            "user_run_mode": this.preset === "ffa" ? "first" : "all"
         });
         let statJson = await response.json();
 

@@ -162,7 +162,7 @@ def create_user():
             cursor.execute(get_id_query)
             (id,) = cursor.fetchone()
 
-            _send_confirmation_email(id, email, username, request.url_root, on_signup=True)
+            # _send_confirmation_email(id, email, username, request.url_root, on_signup=True)
 
             db.commit()
 
