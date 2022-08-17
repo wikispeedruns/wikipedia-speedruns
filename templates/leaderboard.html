@@ -11,8 +11,6 @@
 <!-- Some nice x minutes ago tags -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
 <script defer type="module" src="{{url_for('static', filename='js/leaderboard.js') }}"></script>
-
-<link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/leaderboard.css')}}">
 {% endblock %}
 
 {% block content %}
@@ -56,7 +54,7 @@
                             <!-- TODO: Add hover -->
                             <!-- TODO: Properly fetch data after navigation  -->
                             <div class="progress">
-                                <div class="progress-bar bg-success" role="progressbar" :style="{ width: stats.finishPct + '%' }" :aria-valuenow="stats.finishPct" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar success" role="progressbar" :style="{ width: stats.finishPct + '%' }" :aria-valuenow="stats.finishPct" aria-valuemin="0" aria-valuemax="100">
                                     [[stats.finishPct]]%
                                 </div>
                             </div>

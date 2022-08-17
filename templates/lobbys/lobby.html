@@ -32,6 +32,7 @@ import { serverData } from "/static/js/modules/serverData.js";
 import { checkArticles } from "/static/js/modules/wikipediaAPI/util.js";
 import { PromptGenerator } from "/static/js/modules/generator.js"
 import { AutocompleteInput } from "/static/js/modules/autocomplete.js"
+import { UserDisplay } from "/static/js/modules/userDisplay.js"
 
 const LOBBY_ID = serverData["lobby_id"];
 const successMessage = "Added prompt to lobby!";
@@ -41,7 +42,8 @@ var app = new Vue({
     el: '#app',
     components: {
         'prompt-generator': PromptGenerator,
-        'ac-input': AutocompleteInput
+        'ac-input': AutocompleteInput,
+        'user': UserDisplay
     },
     data: {
         startPrompt:"",
@@ -271,7 +273,7 @@ var app = new Vue({
                         </thead>
                         <tbody>
                             <tr v-for="user in users" v-cloak>
-                                <td>[[user.username]]</td>
+                                <td><user :username="user.username" /></td>
                                 <td>Registered User</td>
                                 <td>
                                     <div class="dropdown">
