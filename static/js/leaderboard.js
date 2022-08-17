@@ -1,6 +1,6 @@
 import { serverData } from "./modules/serverData.js"
 import { fetchJson } from "./modules/fetch.js"
-import { userDisplay } from "./modules/userDisplay.js";
+import { UserDisplay } from "./modules/userDisplay.js";
 
 
 import { pathArrowFilter } from "./modules/game/filters.js";
@@ -24,7 +24,7 @@ var LeaderboardRow = {
     ],
 
     components: {
-        'user': userDisplay
+        'user': UserDisplay
     },
 
     data: function() {
