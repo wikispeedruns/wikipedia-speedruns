@@ -1,5 +1,5 @@
 
-var userDisplay = {
+var UserDisplay = {
 
     props: {
         username: String
@@ -26,4 +26,4 @@ var userDisplay = {
     `)
 };
 
-export { userDisplay }
+export { UserDisplay };
