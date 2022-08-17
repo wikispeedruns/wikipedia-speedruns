@@ -11,7 +11,7 @@
 
 }
 
-.prompt-header h3 { 
+.prompt-header h3 {
   display: inline;
 }
 
@@ -32,6 +32,7 @@ import { serverData } from "/static/js/modules/serverData.js";
 import { checkArticles } from "/static/js/modules/wikipediaAPI/util.js";
 import { PromptGenerator } from "/static/js/modules/generator.js"
 import { AutocompleteInput } from "/static/js/modules/autocomplete.js"
+import { UserDisplay } from "/static/js/modules/userDisplay.js"
 
 const LOBBY_ID = serverData["lobby_id"];
 
@@ -40,7 +41,8 @@ var app = new Vue({
     el: '#app',
     components: {
         'prompt-generator': PromptGenerator,
-        'ac-input': AutocompleteInput
+        'ac-input': AutocompleteInput,
+        'user': UserDisplay
     },
     data: {
         startPrompt:"",
@@ -138,12 +140,12 @@ var app = new Vue({
 
         async deletePrompts() {
             if (!confirm("Are you sure you want to delete the selected prompts and their runs?")) {
-               return; 
+               return;
             }
 
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}/prompts`, "DELETE", {
                 "prompts": Array.from(this.selectedPrompts),
-            }); 
+            });
 
             this.editPrompts = false;
             this.clearSelectedPrompts();
@@ -154,7 +156,7 @@ var app = new Vue({
         async getLobbyUsers() {
 
             Promise.all([
-                fetchJson(`/api/lobbys/players/${LOBBY_ID}`, "GET"), 
+                fetchJson(`/api/lobbys/players/${LOBBY_ID}`, "GET"),
                 fetchJson(`/api/lobbys/anon_players/${LOBBY_ID}`, "GET")
             ])
             .then(responses =>
@@ -168,14 +170,14 @@ var app = new Vue({
 
         async makeHost(user_id, username) {
             if (!confirm(`Are you sure you want to make ${username} the lobby host?`)) {
-                return; 
+                return;
             }
 
             try {
                 const resp = await fetchJson(`/api/lobbys/change_host/${LOBBY_ID}`, "PATCH", {
                     "target_user_id": user_id,
                 });
-                
+
                 alert(`${username} is now host!`);
                 window.location.reload();
             } catch (e) {
@@ -213,7 +215,7 @@ var app = new Vue({
         <span id="custom-tooltip" ref="shareTooltip">Copied invite to clipboard!</span>
     </div>
 
-    
+
 
     <template v-if="lobbyInfo.user.owner">
 
@@ -233,19 +235,19 @@ var app = new Vue({
                         </thead>
                         <tbody>
                             <tr v-for="user in users" v-cloak>
-                                <td>[[user.username]]</td>
+                                <td><user :username="user.username" /></td>
                                 <td>Registered User</td>
                                 <td>
                                     <div class="dropdown">
-                                        <button class="btn btn-secondary dropdown-toggle" 
-                                                type="button" 
-                                                data-toggle="dropdown" 
-                                                aria-haspopup="true" 
+                                        <button class="btn btn-secondary dropdown-toggle"
+                                                type="button"
+                                                data-toggle="dropdown"
+                                                aria-haspopup="true"
                                                 aria-expanded="true"
                                                 @click="toggleDropdown(String(user.user_id)+'dropdown')">
                                             <small>Options</small>
                                         </button>
-                                        <div class="dropdown-menu" 
+                                        <div class="dropdown-menu"
                                             v-bind:id="String(user.user_id)+'dropdown'">
                                             <button v-if="!user.owner" class="btn btn-sm" @click="makeHost(user.user_id, user.username)">Transfer Ownership</button>
                                             <button class="btn btn-sm disabled" v-else>Currently host</button>
@@ -311,7 +313,7 @@ var app = new Vue({
             <a v-on:click="editPrompts = !editPrompts">(Edit)</a>
         </template>
     </div>
-    
+
     <div class="card">
         <div class="card-body">
             <table class="table table-hover">

@@ -1,5 +1,8 @@
 import { serverData } from "./modules/serverData.js"
 import { fetchJson } from "./modules/fetch.js"
+import { UserDisplay } from "./modules/userDisplay.js";
+
+
 import { pathArrowFilter } from "./modules/game/filters.js";
 
 const URL_PROMPT_ID = serverData["prompt_id"];
@@ -19,6 +22,10 @@ var LeaderboardRow = {
         "currentRunId",
         "pageToLink"
     ],
+
+    components: {
+        'user': UserDisplay
+    },
 
     data: function() {
         return {
@@ -46,7 +53,7 @@ var LeaderboardRow = {
 
         goToRun: function(newRunId) {
             if (newRunId === this.$props.currentRunId) return;
-            
+
             let url = new URL(window.location.href);
             url.searchParams.set('run_id', newRunId);
             window.location.replace(url);
@@ -77,7 +84,7 @@ var LeaderboardRow = {
             <td class="l-col">
                 <template v-if="run.username">
                     <strong v-if="run.run_id === currentRunId">{{run.username}}</strong>
-                    <span v-else>{{run.username}}</span>
+                    <user v-else :username="run.username" />
                 </template>
                 <template v-else-if="run.name">
                     <strong v-if="run.run_id === currentRunId">{{run.name}}</strong>
@@ -102,10 +109,10 @@ var LeaderboardRow = {
             </td>
 
             <td class="col">
-                <div 
-                    v-if="run.finished && 
-                    run.run_id === currentRunId && 
-                    (run.username === this.$parent.username || (this.$parent.preset === 'personal' && !this.$parent.loggedIn))" 
+                <div
+                    v-if="run.finished &&
+                    run.run_id === currentRunId &&
+                    (run.username === this.$parent.username || (this.$parent.preset === 'personal' && !this.$parent.loggedIn))"
                     class="button-tooltip-container col-auto py-2"
                 >
                     <button @click="copyResults(run)" id="share-btn" class="share-btn btn-1 btn-1c"><i class="bi bi-share"></i> Share</button>
@@ -319,7 +326,7 @@ var app = new Vue({
         offset: 0,
 
         preset: "",
-        
+
         // Leaderboard Stats
         stats: {
             finishPct: 0,
@@ -456,7 +463,7 @@ var app = new Vue({
         });
         let statJson = await response.json();
 
-        // TODO: Properly set data after navigation 
+        // TODO: Properly set data after navigation
         this.stats.finishPct = parseFloat(statJson['finish_pct']).toFixed(2);
         this.stats.avgClicks = parseFloat(statJson['avg_path_len']).toFixed(2);
         this.stats.avgTime = parseFloat(statJson['avg_play_time']).toFixed(2);
