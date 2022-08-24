@@ -5,5 +5,8 @@ __pycache__
 
 config/prod.json
 
+node_modules
+static/js-build
+
 .DS_Store
 .vscode
