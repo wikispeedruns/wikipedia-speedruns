@@ -5,7 +5,7 @@
     "esbuild": "^0.15.5"
   },
   "scripts": {
-    "build": "esbuild static/js/play.js --bundle --minify --outdir=static/js-build"
+    "build": "node ./build.js"
   },
   "repository": {
     "type": "git",
