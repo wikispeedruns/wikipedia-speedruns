@@ -5,7 +5,7 @@ import json
 
 
 # For local testing you can comment out this get_db import and use the below code to manually connect to the db
-# and run the file directly. Preferabley, you should use unit tests (which I have yet to write)
+# and run the file directly. Preferably, you should use unit tests (which I have yet to write)
 from db import get_db
 '''
 def get_db():
@@ -25,7 +25,6 @@ def get_db():
     return conn
 '''
 
-
 # Get runs for a prompt, with lots of options (described below)
 # See bottom of file for example usage
 def get_leaderboard_runs(
@@ -33,7 +32,7 @@ def get_leaderboard_runs(
     prompt_id: int,
     lobby_id: Optional[int] = None,
 
-    run_id = None, # inlcude the current run
+    run_id = None, # include the current run
 
     ########### global filtering ###########
     show_unfinished: bool = False,
@@ -70,6 +69,9 @@ def get_leaderboard_runs(
     ########### pagination ###########
     offset: int = 0,
     limit: Optional[int] = 20,
+
+    # only return resulting query
+    query_only: bool = False,
 ):
     # conditions is a set of templated SQL expressions to include in the final WHERE clause
     # query_args are the user inputs that will be filled by cursor.execute
@@ -114,7 +116,7 @@ def get_leaderboard_runs(
     # Filter by time
     if played_before is not None:
         if lobby_id is not None:
-            return NotImplementedError("played_before not implemneted for lobby_promts")
+            return NotImplementedError("played_before not implemented for lobby_prompts")
         else:
             conditions.append('runs.start_time <= DATE_ADD(prompts.active_start, INTERVAL %(played_before)s MINUTE)')
             query_args['played_before'] = played_before
@@ -149,7 +151,7 @@ def get_leaderboard_runs(
 
             # This is gross so let me explain this
             # Basically, we want to figure out which (finished) run for a user is his shortest.
-            #   - In terms of colums, this is the MIN(finished, path_length)
+            #   - In terms of column, this is the MIN(finished, path_length)
             #   - Instead of grouping by user (+ name for lobbies), we use a window function to calculate
             #     the order of shortest path for all runs for each user
             #   - Then in the outer query we only select the first.
@@ -189,7 +191,7 @@ def get_leaderboard_runs(
         sort_exp += ' DESC'
 
 
-    # Pagination, default 1 so all articles are chose
+    # Pagination, default 1 so all articles are chosen
     pagination_clause = '1'
     if limit is not None:
         pagination_clause = ("(`rank` BETWEEN %(page_start)s AND %(page_end)s)")
@@ -208,7 +210,7 @@ def get_leaderboard_runs(
     # Some specifics
     assert(len(conditions) > 0)
 
-    # TODO maybe dont' use * here and instead select specific columns?
+    # TODO maybe don't use * here and instead select specific columns?
     # TODO save path length elsewhere?
     # TODO query performance with row_number might not be great
 
@@ -231,9 +233,11 @@ def get_leaderboard_runs(
     ORDER BY {sort_exp}
     """
 
+    if query_only:
+        return { "query": query, "args": query_args }
+
     db = get_db()
     with db.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
-        print(cursor.mogrify(query, query_args))
         cursor.execute(query, query_args)
 
         results = cursor.fetchall()
@@ -253,6 +257,35 @@ def get_leaderboard_runs(
             "runs": results
         }
 
+
+'''
+Leaderboard Stats
+'''
+
+def get_leaderboard_stats(
+    prompt_id: int,
+    lobby_id: Optional[int] = None,
+    run_id: Optional[int] = None,
+    **kwargs
+): 
+    lb_query = get_leaderboard_runs(prompt_id, lobby_id, run_id, limit=None, offset=0, query_only=True, **kwargs)
+
+    query = f'''
+    WITH data AS (
+        {lb_query['query']}
+    )
+
+    SELECT
+        COUNT(IF(finished, 1, NULL)) / COUNT(*) * 100 AS finish_pct,
+        AVG(IF(finished, path_length, NULL)) AS avg_path_len,
+        AVG(IF(finished, play_time, NULL)) AS avg_play_time
+    FROM data
+    '''
+    
+    db = get_db()
+    with db.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
+        cursor.execute(query, lb_query['args'])
+        return cursor.fetchall()[0]
 
 '''
 if __name__ == "__main__":

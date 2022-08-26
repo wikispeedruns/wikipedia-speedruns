@@ -1,0 +1,136 @@
+/* Button CSS courtesy of https://tympanus.net/Development/CreativeButtons/ */
+/* General button style (reset) */
+.share-btn {
+	border: none;
+    border-radius: 5px;
+	font-family: inherit;
+	font-size:medium;
+	color: inherit;
+	background: #0e83cd;
+	cursor: pointer;
+	padding: 5px 10px;
+	display: inline-block;
+	/*margin: 20px 0px;*/
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	font-weight: 700;
+	outline: none;
+	position: relative;
+	-webkit-transition: all 0.3s;
+	-moz-transition: all 0.3s;
+	transition: all 0.3s;
+}
+
+.share-btn:after {
+	content: '';
+	position: absolute;
+	z-index: -1;
+	-webkit-transition: all 0.3s;
+	-moz-transition: all 0.3s;
+	transition: all 0.3s;
+}
+
+
+.share-btn:before {
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+	position: relative;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* Button 1 */
+.btn-1 {
+	color: #ffffff;
+}
+
+.btn-1c::before {
+    background: #0e83cd;
+}
+
+/* Button 1c */
+.btn-1c:after {
+	width: 0%;
+	height: 100%;
+	top: 0;
+	left: 0;
+}
+
+.btn-1c:hover,
+.btn-1c:active {
+    border:3px solid #0e83cd;
+	color: #0e83cd;
+    background: #ffffff;
+}
+
+.btn-1c:hover:after,
+.btn-1c:active:after {
+	width: 100%;
+}
+
+/* Tooltip */
+.button-tooltip-container {
+    display: flex;
+    align-items: center;
+    min-height: 10px;
+
+}
+
+#custom-tooltip, #custom-tooltip-path {
+    display: none;
+    margin-left: 5px;
+    padding: 5px 10px;
+    background-color: #000000df;
+    border-radius: 5px;
+    color: #fff;
+}
+.clickable {
+    cursor: pointer;
+}
+
+/* Completion Rate/Stats */
+.progress {
+	width: 50%;
+	margin-top: .2rem;
+}
+
+.progress-label {
+	float: left;
+	margin-right: 1em;
+}
+
+.progress-bar {
+    min-width: .1em;
+    color:black;
+    overflow: visible;
+}
+
+.success {
+    background-color: #6bd09c; 
+}
+
+.stat {
+	font-size:large;
+	font-weight: 500;
+	margin-top: -.25rem;
+}
+
+p.mobile { display: none }
+
+/* Mobile */
+@media (max-width: 768px) {                  
+    p.mobile { display: block }
+    p.desktop { display: none }
+
+	.progress {
+		width: 100%;
+	}
+
+	.progress-label,
+	.stat {
+		margin-bottom: 0;
+		margin-top:1rem;
+	}
+}

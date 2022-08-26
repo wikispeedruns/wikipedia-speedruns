@@ -12,9 +12,13 @@ let app = new Vue({
     },
 
     data: {
-        start: "Start Article",
-        end: "End Article",
+        article: "Article",
+    },
 
+    methods: {
+        async generateRndPrompt() {
+            [ this.article ] = await this.$refs.pg.generatePrompt();
+        },
     }
 
 });
@@ -27,28 +31,15 @@ let app = new Vue({
 <div id ="app">
     <h3>Prompt Generator</h3>
 
-    <div class="card" v-cloak>
-        <div class="card-body">
-            <div class="row" >
-
-                <div class="col-sm-6 py-3 text-center">
-                    <h4>[[start]]</h4>
-                </div>
-
-                <div class="col-sm-6 py-3 text-center" >
-                    <h4>[[end]]</h4>
-                </div>
-            </div>
-
-
-            <div class="row">
-                <div class="col-sm-6">
-
-                    <!-- Vue 3 this will be v-model -->
-                    <prompt-generator
-                        v-bind:start.sync="start"
-                        v-bind:end.sync="end"
-                    ></prompt-generator>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">[[article]]</h5>
+                    <prompt-generator ref="pg"></prompt-generator>
+                    <button type="button" class="btn border" style="background-color: #e9ecef;" @click="generateRndPrompt">
+                        Generate Random Wikipedia Article <i class="bi bi-shuffle"></i>
+                    </button>
                 </div>
             </div>
         </div>

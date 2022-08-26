@@ -8,79 +8,107 @@
 
 {% block content %}
 
+{% set chart_width = "400" %}
+{% set chart_height = "300" %}
+
 <div id="app">
-    <div class="box-wrapper">
-        <div class="box">
+    <div class="box-wrapper" @click.prevent>
+        <a class="box" @click="set_active('users')" :class="{active: is_active('users')}">
             <div class="stats">
+                <div class="stats__header">Total Users</div>
                 <div class="stats__amount">[[totals.users]]</div>
-                <div class="stats__caption">users</div>
                 <div class="stats__change positive">+[[weekly.user_change]] <span style="font-weight:normal;color: white;">since last week</span></div>
                 <div class="stats__change mid">[[totals.pct_goog_users]]% <span style="font-weight:normal;color: white;">google sign-ups</span></div>
             </div>
-        </div>
+        </a>
 
-        <div class="box">
+        <a class="box" @click="set_active('sprints')" :class="{active: is_active('sprints')}">
             <div class="stats">
+                <div class="stats__header">Sprint Runs</div>
                 <div class="stats__amount">[[totals.runs]]</div>
-                <div class="stats__caption">runs</div>
                 <div class="stats__change positive">+[[weekly.runs_change]] <span style="font-weight:normal;color: white;">since last week</span></div>
-                <div class="stats__change mid">[[totals.pct_user_runs]]% <span style="font-weight:normal;color: white;">registered users</span></div>
-            </div>
-        </div>
-    
-        <div class="box">
-            <div class="stats">
-                <div class="stats__amount">[[totals.finished_runs]]</div>
-                <div class="stats__caption">finished runs</div>
-                <div class="stats__change positive">+[[weekly.finished_runs_change]] <span style="font-weight:normal;color: white;">since last week</span></div>
                 <div class="stats__change mid">[[totals.pct_user_finished_runs]]% <span style="font-weight:normal;color: white;">registered users</span></div>
+                <div class="stats__change mid">[[totals.finished_runs]] <span style="font-weight:normal;color: white;">finished sprints</span></div> 
             </div>
-        </div>
-    </div>
+        </a>
 
-    <div class="box-wrapper">
-        <div class="box">
+        <a class="box" @click="set_active('marathons')" :class="{active: is_active('marathons')}">
             <div class="stats">
+                <div class="stats__header">Marathons Runs</div>
                 <div class="stats__amount">[[totals.marathon_runs]]</div>
-                <div class="stats__caption">marathons</div>
-                <!-- <div class="stats__change positive">+[[weekly.marathons_change]] <span style="font-weight:normal;color: white;">since last week</span></div> -->
-                <div class="stats__change mid">[[totals.pct_user_marathons]]% <span style="font-weight:normal;color: white;">registered users</span></div>
-            </div>
-        </div>
-
-        <div class="box">
-            <div class="stats">
-                <div class="stats__amount">[[totals.finished_marathons]]</div>
-                <div class="stats__caption">finished marathons</div>
                 <!-- <div class="stats__change positive">+[[weekly.finished_marathons_change]] <span style="font-weight:normal;color: white;">since last week</span></div> -->
-                <div class="stats__change mid">[[totals.pct_user_finished_marathons]]% <span style="font-weight:normal;color: white;">registered users</span></div>
+                <div class="stats__change mid">[[totals.pct_user_marathons]]% <span style="font-weight:normal;color: white;">registered users</span></div>
+                <div class="stats__change mid">[[totals.finished_marathons]] <span style="font-weight:normal;color: white;">finished marathons</span></div> 
+            </div>
+        </a>
+
+        <a class="box" @click="set_active('lobbies')" :class="{active: is_active('lobbies')}">
+            <div class="stats">
+                <div class="stats__header">Lobby Runs</div>
+                <div class="stats__amount">[[totals.lobby_runs]]</div>
+                <div class="stats__change positive">+[[weekly.lobby_runs_change]] <span style="font-weight:normal;color: white;">since last week</span></div>
+                <div class="stats__change mid">[[totals.created_lobbies]] <span style="font-weight:normal;color: white;">lobbies created</span></div>
+                <div class="stats__change mid">[[totals.finished_lobby_runs]] <span style="font-weight:normal;color: white;">finished lobby runs</span></div>
+            </div>
+        </a>
+    </div>
+
+    <div class="tab-content">
+        <div class="tab-pane fade" :class="{'active show': is_active('users')}">
+            <div class="col-xs-6">
+                <canvas id="daily-users" width="{{chart_width}}" height="{{chart_height}}"></canvas>
+            </div>
+            
+            <div class="col-xs-6">
+                <canvas id="daily-new-users" width="{{chart_width}}" height="{{chart_height}}"></canvas>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" :class="{'active show': is_active('sprints')}">
+            <div class="col-xs-6">
+                <canvas id="daily-runs" width="{{chart_width}}" height="{{chart_height}}"></canvas>
+            </div>
+        
+            <div class="col-xs-6">
+                <canvas id="daily-new-runs" width="{{chart_width}}" height="{{chart_height}}"></canvas>
+            </div>
+        
+            <div class="col-xs-6">
+                <canvas id="daily-active-users" width="{{chart_width}}" height="{{chart_height}}"></canvas>
+            </div>
+        
+            <div class="col-xs-6">
+                <canvas id="daily-average-user-plays" width="{{chart_width}}" height="{{chart_height}}"></canvas>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" :class="{'active show': is_active('marathons')}"></div>
+
+        <div class="tab-pane fade" :class="{'active show': is_active('lobbies')}">
+            <div class="col-xs-6">
+                <canvas id="daily-lobbies" width="{{chart_width}}" height="{{chart_height}}"></canvas>
+            </div>
+        
+            <div class="col-xs-6">
+                <canvas id="daily-new-lobbies" width="{{chart_width}}" height="{{chart_height}}"></canvas>
+            </div>
+
+            <div class="col-xs-6">
+                <canvas id="daily-lobby-runs" width="{{chart_width}}" height="{{chart_height}}"></canvas>
+            </div>
+
+            <div class="col-xs-6">
+                <canvas id="daily-new-lobby-runs" width="{{chart_width}}" height="{{chart_height}}"></canvas>
+            </div>
+
+            <div class="col-xs-6">
+                <canvas id="daily-active-lobby-users" width="{{chart_width}}" height="{{chart_height}}"></canvas>
+            </div>
+
+            <div class="col-xs-6">
+                <canvas id="daily-average-lobby-user-plays" width="{{chart_width}}" height="{{chart_height}}"></canvas>
             </div>
         </div>
     </div>
-   
-    <div class="col-xs-6">
-        <canvas id="daily-users" width="400" height="450"></canvas>
-    </div>
-    
-    <div class="col-xs-6">
-        <canvas id="daily-new-users" width="400" height="450"></canvas>
-    </div>
-        
-    <div class="col-xs-6">
-        <canvas id="daily-runs" width="400" height="450"></canvas>
-    </div>
-
-    <div class="col-xs-6">
-        <canvas id="daily-new-runs" width="400" height="450"></canvas>
-    </div>
-
-    <div class="col-xs-6">
-        <canvas id="daily-active-users" width="400" height="450"></canvas>
-    </div>
-
-    <div class="col-xs-6">
-        <canvas id="daily-average-user-plays" width="400" height="450"></canvas>
-    </div>
-
 </div>
 {% endblock %}

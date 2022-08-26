@@ -59,9 +59,44 @@ async function articleCheck(title) {
     return {}
 }
 
+async function checkArticles(start, end) {
+    const resp = {body: {}};
+
+    if(!start || !end){
+        resp.err = "Prompt is currently empty";
+        return resp;
+    }
+
+    resp.body.start = await getArticleTitle(start);
+    if (!resp.body.start) {
+        resp.err = `"${start}" is not a Wikipedia article`;
+        return resp;
+    }
+
+    resp.body.end = await getArticleTitle(end);
+    if (!resp.body.end) {
+        resp.err = `"${end}" is not a Wikipedia article`;
+        return resp;
+    }
+    
+    if(resp.body.start === resp.body.end) {
+        resp.err = "The start and end articles are the same";
+        return resp;
+    }
+
+    const checkRes = await articleCheck(resp.body.end);
+    if ('warning' in checkRes) {
+        resp.err = checkRes["warning"];
+        return resp;
+    }
+
+    return resp;
+}
+
 async function getArticleSummary(page) {
+    const encodedPage = encodeURIComponent(page);
     const resp = await fetch(
-        `https://en.wikipedia.org/api/rest_v1/page/summary/${page}`,
+        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodedPage}`,
         {
             mode: "cors"
         }
@@ -71,4 +106,17 @@ async function getArticleSummary(page) {
     return body
 }
 
-export { getArticle, getArticleTitle, getArticleSummary, articleCheck };
+async function getAutoCompleteArticles(search, numEntries = 5){
+    // https://en.wikipedia.org/w/api.php?action=opensearch&format=json&formatversion=2&search=a&namespace=0&limit=10
+    const resp = await fetch(
+        `https://en.wikipedia.org/w/api.php?action=opensearch&origin=*&format=json&formatversion=2&search=${search}&namespace=0&limit=${numEntries}`,
+        {
+            mode: "cors"
+        }
+    )
+    let body = await resp.json();
+    body = body[1]; // get the list of araticles
+    return body;
+}
+
+export { getArticle, getArticleTitle, getArticleSummary, articleCheck, checkArticles, getAutoCompleteArticles };

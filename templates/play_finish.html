@@ -8,8 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
 
-<script defer type="module" src="{{url_for('static', filename='js/play_finish.js')}}"></script>
-<script defer id='achievement' type="module" src="{{url_for('static', filename='js/achievement_data.js')}}" data="run"></script>
+<script type="module" src="{{url_for('static', filename='js/play_finish.js')}}"></script>
 
 <style>
     [v-cloak] { display: none }
@@ -24,8 +23,10 @@
     <div v-cloak class="text-left">
         <div v-if="played">
             <p><h4>You found it!</h4></p>
-            <p v-if="loggedIn">Your run was submitted to the leaderboard.</p>
-            <p v-else>You are not logged in, but your run has been saved locally. Log in to upload your runs to the leaderboard!</p>
+            <template v-if="!isQuickRun">
+                <p v-if="loggedIn">Your run was submitted to the leaderboard.</p>
+                <p v-else>You are not logged in, but your run has been saved locally. Log in to upload your runs to the leaderboard!</p>
+            </template>
             <p><h4>Here's how you did:</h4></p>
         </div>
         <div class="card md">
@@ -47,37 +48,25 @@
                 </div>
 
                 <div v-if="lobbyId" class="py-3"><button @click="goToLobbyLeaderboard" class="btn btn-outline-secondary">See the lobby leaderboard</button></div>
-                <div v-else><a @click="goToLeaderboard" class="btn btn-outline-secondary" role="button">See the leaderboard</a></div>
+                <div v-else-if="isSprint"><a @click="goToLeaderboard" class="btn btn-outline-secondary" role="button">See the leaderboard</a></div>
 
                 <div v-if="lobbyId"><button @click="goToLobby" class="btn btn-outline-secondary">Return to lobby</button></div>
                 <div v-else class="py-3"><button @click="home" class="btn btn-outline-secondary">Return to home page</button></div>
+                
+                <div v-if="isQuickRun"><button @click="quickPlay" class="btn btn-outline-secondary">Play another round</button></div>
             </div>
+        </div>
+
+        <div id="achievements">
+            <achievements v-if="isMounted"
+                v-bind:logged-in="loggedIn"
+                v-bind:is-sprint="isSprint"
+                v-bind:run-id="runId"
+                v-bind:basepath="'{{url_for('static', filename='achievements/icons/')}}'"
+            ></achievements>
         </div>
     </div>
 </template>
-</div>
-
-<div id="am">
-    <br>
-    <template v-if="loggedIn&&!lobbyId">
-        <template v-if="!empty">
-            <h4>New Achievements!</h4>
-            <achievement-table class="py-4"
-                v-bind:list="list"
-                v-bind:achievements="data"
-                v-bind:basepath="'{{url_for('static', filename='achievements/icons/')}}'"
-            ></achievement-table>
-        </template>
-        <template v-else>
-            <h4>No New Achievements Unlocked</h4>
-        </template>
-    </template>
-    <template v-else-if="lobbyId">
-        <h4>Achievements Can Only Be Unlocked In Public Prompts</h4>
-    </template>
-    <template v-else>
-        <h4>Login To Check Possible New Achievements!</h4>
-    </template>
 </div>
 
 {% endblock %}
