@@ -17,6 +17,7 @@ try{
         minify: !isDev,
         sourcemap: isDev,
         watch: isDev,
+        logLevel: "info",
         outdir: 'static/js-build',
     })
 } catch(err) {

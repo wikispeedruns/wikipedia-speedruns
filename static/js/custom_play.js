@@ -1,3 +1,4 @@
+import Vue from 'vue/dist/vue.js';
 
 import { AutocompleteInput } from "./modules/autocomplete.js";
 import { PromptGenerator } from "./modules/generator.js"

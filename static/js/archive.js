@@ -1,3 +1,5 @@
+import Vue from 'vue/dist/vue.js';
+
 import { serverData } from "./modules/serverData.js";
 import { getLocalSprints } from "./modules/localStorage/localStorageSprint.js";
 

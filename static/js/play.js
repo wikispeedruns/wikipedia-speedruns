@@ -7,6 +7,8 @@ these components should be as modular/generic as possible.
 */
 
 //JS module imports
+import Vue from 'vue/dist/vue.js';
+
 import { serverData } from "./modules/serverData.js";
 import { startRun, submitRun } from "./modules/game/runs.js";
 
@@ -89,7 +91,7 @@ let app = new Vue({
 
         elapsed: 0,             // Total time elapsed in ms (frontend)
         timerInterval: null,
-        
+
         offset: Date.now(),           // Offset time since last pause, initially approx. startTime
         isRunning: false,       // Whether the timer is running
         milliseconds: 0,        // Current ms since last pause (frontend)
@@ -169,7 +171,7 @@ let app = new Vue({
 
             submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
         },
-        
+
         loadCallback: function() {
             this.stopTimer();
         },
@@ -212,7 +214,7 @@ let app = new Vue({
 
         async start() {
             this.countdownTime = (Date.now() - this.startTime) / 1000;
-            
+
             // Set first page timeReached if start() called after first page is loaded
             if (this.path.length == 1) {
                 this.path[0]['timeReached'] = this.countdownTime;

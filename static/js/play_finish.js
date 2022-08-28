@@ -1,4 +1,6 @@
 //JS module imports
+import Vue from 'vue/dist/vue.js';
+
 import { serverData } from "./modules/serverData.js";
 import { getRun, getLobbyRun, getQuickRun } from "./modules/game/finish.js";
 import { getLocalRun } from "./modules/localStorage/localStorageSprint.js"
@@ -78,7 +80,7 @@ let app = new Vue({
     mounted: async function() {
 
         this.runType = TYPE;
-        
+
         this.loggedIn = "username" in serverData;
 
         // Make sure that a sprint can be considered for achievements
@@ -109,7 +111,7 @@ let app = new Vue({
             this.startArticle = prompt["start"];
             this.endArticle = prompt["end"];
         }
-        
+
         this.playTime = run["play_time"];
 
         this.path = run['path'].map((entry) => entry["article"])

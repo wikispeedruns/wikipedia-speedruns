@@ -1,4 +1,6 @@
 //JS module imports
+import Vue from 'vue/dist/vue.js';
+
 import { serverData } from "./modules/serverData.js";
 import { getArticleSummary } from "./modules/wikipediaAPI/util.js";
 import { submitRun, saveRun, loadRun, removeSave } from "./modules/game/marathon/runs.js";
@@ -60,7 +62,7 @@ let app = new Vue({
         reachedstop: false,  //This variable only gets flipped once, its to prevent the stop box from showing up everytime the page is loaded
         saved: false,
 
-        expandedTimebox: true, 
+        expandedTimebox: true,
         isMobile: false
     },
 

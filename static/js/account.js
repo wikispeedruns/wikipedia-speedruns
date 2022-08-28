@@ -1,3 +1,5 @@
+import Vue from 'vue/dist/vue.js';
+
 import { serverData } from "./modules/serverData.js";
 import { fetchJson } from "./modules/fetch.js";
 import { profileStatsTable } from "./modules/profileStats.js";
@@ -10,7 +12,7 @@ var app = new Vue({
     components: {
         'profile-stats-table': profileStatsTable,
     },
-    
+
     data: {
         username: "",
         loggedIn: false,
@@ -50,7 +52,7 @@ var app = new Vue({
                 },
                 body: JSON.stringify(serverData["username"])
             });
-    
+
             this.emailConfirmed = await response.text();
         },
 
@@ -59,7 +61,7 @@ var app = new Vue({
                 const response = await fetchJson("/api/users/confirm_email_request", 'POST');
                 if (response.status === 200) {
                     alert("Email verification request has been sent. ");
-                } 
+                }
             } catch (e) {
                 alert(e);
             }
@@ -76,12 +78,12 @@ var app = new Vue({
             const body = {
                 'new_username' : document.getElementById("new-username").value
             };
-            
+
             try {
                 const response = await fetchJson("/api/users/change_username", 'POST', body);
                 if (response.status === 200) {
                     window.location.reload();
-                } 
+                }
                 this.feedbackMsg = await response.text()
             } catch (e) {
                 console.log(e);
@@ -104,7 +106,7 @@ var app = new Vue({
             };
 
             try {
-                
+
                 const response = await fetchJson("/api/users/delete_account", 'DELETE', body);
                 if (response.status === 200) {
                     alert("Account has been deleted");

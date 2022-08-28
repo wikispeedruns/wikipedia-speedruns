@@ -1,3 +1,5 @@
+import Vue from 'vue/dist/vue.js';
+
 import { MarathonPrompts } from "./modules/game/marathon/marathonPrompts.js";
 import { serverData } from "./modules/serverData.js";
 import { uploadLocalSprints, getLocalSprints } from "./modules/localStorage/localStorageSprint.js";

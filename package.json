@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "dependencies": {
     "esbuild": "^0.15.5",
-    "tiny-glob": "^0.2.9"
+    "tiny-glob": "^0.2.9",
+    "vue": "^2.7.10"
   },
   "scripts": {
     "start": "node ./build.mjs -d",
