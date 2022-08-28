@@ -3,14 +3,14 @@
 {% block head %}
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
 
-<script src="{{url_for('static', filename='js/springy-master/springy.js') }}"></script>
-<script src="{{url_for('static', filename='js/springy-master/springyui.js') }}"></script>
+<script src="{{url_for('static', filename='js-build/springy-master/springy.js') }}"></script>
+<script src="{{url_for('static', filename='js-build/springy-master/springyui.js') }}"></script>
 
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/leaderboard.css')}}">
 
 <!-- Some nice x minutes ago tags -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
-<script defer type="module" src="{{url_for('static', filename='js/leaderboard.js') }}"></script>
+<script defer type="module" src="{{url_for('static', filename='js-build/leaderboard.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -43,10 +43,10 @@
 
                         <p>[[numRuns]] total runs</p>
                     </div>
-                </div>  
+                </div>
 
                 <div class="col" style="padding-left:0">
-                    <div class="card-header pt-3" style="height: 8rem;">   
+                    <div class="card-header pt-3" style="height: 8rem;">
                         <div class="row">
                             <div class="col">
                             <p class="text-muted small progress-label desktop">Completion Rate:</p>
@@ -61,7 +61,7 @@
                             </div>
                         </div>
 
-                        <div class="row"> 
+                        <div class="row">
                             <div class="col">
                             <p class="text-muted small progress-label desktop">Avg. # Clicks: </p>
                             <p class="progress-label mobile">🖱️ </p>

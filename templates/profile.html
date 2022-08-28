@@ -2,7 +2,7 @@
 {% block head %}
 
 <!-- <script src="https://vuejs.org/js/vue.js"></script> -->
-<script type="module" src="{{url_for('static', filename='js/profile.js') }}"></script>
+<script type="module" src="{{url_for('static', filename='js-build/profile.js') }}"></script>
 
 <!-- Some nice x minutes ago tags -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
@@ -14,10 +14,10 @@
 
 <div id="app" class="row" v-cloak>
     <h3 class="my-4">[[profileName]]'s Profile</h3>
-    <profile-stats-table class="col-sm-10" 
+    <profile-stats-table class="col-sm-10"
         v-bind:username="profileName"
     ></profile-stats-table>
-    <achievements 
+    <achievements
         v-bind:username="profileName"
         v-bind:basepath="'{{url_for('static', filename='achievements/icons/')}}'"
     ></achievements>

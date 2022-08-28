@@ -2,10 +2,13 @@
   "name": "wikipedia-speedruns",
   "version": "1.0.0",
   "dependencies": {
-    "esbuild": "^0.15.5"
+    "esbuild": "^0.15.5",
+    "tiny-glob": "^0.2.9"
   },
   "scripts": {
-    "build": "node ./build.js"
+    "start": "node ./build.mjs -d",
+    "build": "node ./build.mjs",
+    "lint": "eslint ./static/js"
   },
   "repository": {
     "type": "git",

@@ -5,7 +5,7 @@
 <!-- Some nice x minutes ago tags -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
 <!-- Account JS Code -->
-<script type="module" src="{{url_for('static', filename='js/account.js')}}"></script>
+<script type="module" src="{{url_for('static', filename='js-build/account.js')}}"></script>
 
 {% endblock %}
 
@@ -29,7 +29,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="card my-5">
         <div class="alert alert-info my-0" role="alert">
           <h5 class="my-0">Settings</h5>
@@ -54,7 +54,7 @@
       <profile-stats-table v-show="tab=='basic-stats'" v-bind:username="username"></profile-stats-table>
 
       <div v-if="tab=='username'" class="card" v-cloak>
-        <div class="card-body">      
+        <div class="card-body">
           <div id="username-change" class="py-3">
             <div class="form-group">
               <label for="new-username">New username</label>
@@ -71,7 +71,7 @@
       </div>
 
       <div v-if="tab=='deleteAccount'" class="card" v-cloak>
-        <div class="card-body"> 
+        <div class="card-body">
 
           <div id="deleteAccount" class="py-3">
             <div class="form-group">
@@ -86,7 +86,7 @@
             </div>
             <div class="my-4 alert alert-warning">
               <p><b>Note:</b> Deleting your account will permanently delete all of your past runs, stats, achievements. It will also permanently delete all lobbies that you are currently hosting. Change hosts for your hosted lobbies if you would like to keep them. </p>
-              
+
               <p>This change CANNOT be reverted. </p>
             </div>
             <small class="text-danger">[[feedbackMsg]]</small>
@@ -97,7 +97,7 @@
       </div>
     </div>
   </div>
-    
+
 </div>
 
 {% endblock %}

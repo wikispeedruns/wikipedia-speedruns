@@ -2,13 +2,13 @@
 
 {% block head %}
 <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='stylesheets/home.css')}}">
-<script defer type="module" src="{{url_for('static', filename='js/devblog.js') }}"></script>
+<script defer type="module" src="{{url_for('static', filename='js-build/devblog.js') }}"></script>
 {% endblock %}
 
 {% block content %}
 
 <style>
-    .indented { 
+    .indented {
         margin-left: 30px;
     }
     .accordion {
@@ -50,7 +50,7 @@
                 </div>
                 <div class="card-body px-4 py-4" style="display:none">
                     <p class="blogBody">
-                        Hey everyone! We're excited to bring you the first changelog for WikiSpeedruns! Thank you all for your support thus far and for just playing the game. The fact that you took the time to visit this corner of the website already means alot to us devs. 
+                        Hey everyone! We're excited to bring you the first changelog for WikiSpeedruns! Thank you all for your support thus far and for just playing the game. The fact that you took the time to visit this corner of the website already means alot to us devs.
                         <br><br>
                         As we continue to improve the game, we wanted to introduce a more formal version system for the game to document any major changes and fixes. So we’re happy to introduce Wikipedia Speedruns <b>Version 0.1</b>!
                         <br><br>
@@ -59,7 +59,7 @@
                         <h4 class="py-3">Feature Summary</h4>
                         <p>
                         <b>Classic sprint mode + Prompt of the Day</b>
-                        <br>The classic Wikipedia speedrunning experience with classic rules. Everyday, we’ll upload a new Prompt of the Day for you to test your skills against. You can also access any past prompts in the archive. 
+                        <br>The classic Wikipedia speedrunning experience with classic rules. Everyday, we’ll upload a new Prompt of the Day for you to test your skills against. You can also access any past prompts in the archive.
                         </p>
                         <p>
                         <b>Lobbies</b>
@@ -71,7 +71,7 @@
                         </p>
                         <p>
                         <b>Leaderboards</b>
-                        <br>After finishing a game, you’ll be able to view your own history on that prompt and the global leaderboards. 
+                        <br>After finishing a game, you’ll be able to view your own history on that prompt and the global leaderboards.
                         </p>
                         <p>
                         <b>Streaks</b>
@@ -79,7 +79,7 @@
                         </p>
                         <p>
                         <b>Achievements</b>
-                        <br>Our new achievement system tracks your runs and rewards you for reaching unique milestones on your wikipedia speedrunning journey. As of now, only completed runs on public prompts will be counted towards achievements.  
+                        <br>Our new achievement system tracks your runs and rewards you for reaching unique milestones on your wikipedia speedrunning journey. As of now, only completed runs on public prompts will be counted towards achievements.
                         </p>
                         <p>
                         <b>Prompt Generator</b>
@@ -113,7 +113,7 @@
                             <li>Tons of other small fixes here and there</li>
                         </ul>
                         <br>
-                        As an open source project, we want many aspects of our development work as community driven as possible. 
+                        As an open source project, we want many aspects of our development work as community driven as possible.
                         Please join our discord community! If you have any suggestions, feedback, or have issues to report, please shoot us an email or a message on discord.
                         <br><br>
                         Happy wiki surfing!
@@ -124,7 +124,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="w-75 mx-auto"><hr></div>
 
     <div class="row py-2 justify-content-md-center blogpost" id="blogPost5">
@@ -134,7 +134,7 @@
                     <div class="row">
                         <div class="col">
                             <h5 class="blogHeader">Game Philosophy</h5>
-                            <span class="blogAbstract">As we have released some major changes to the beta version of WikiSpeedruns, we wanted to take a moment to discuss our ‘game philosophy’ and provide some insight 
+                            <span class="blogAbstract">As we have released some major changes to the beta version of WikiSpeedruns, we wanted to take a moment to discuss our ‘game philosophy’ and provide some insight
                                 as to why we may have changed certain features.</span>
                         </div>
                         <div class="col-sm-auto">
@@ -146,36 +146,36 @@
                     <p class="blogBody">
                         <b>Fostering Competition:</b>
                         <br>
-                        Our original intent with WikiSpeedruns was to create a competitive game where you can see how quickly you can solve a prompt compared to other WikiSpeedrunners. 
-                        This was the purpose of our leaderboards. This competition can also be with yourself, which is the purpose of personal leaderboards so that you can track your own improvement by 
+                        Our original intent with WikiSpeedruns was to create a competitive game where you can see how quickly you can solve a prompt compared to other WikiSpeedrunners.
+                        This was the purpose of our leaderboards. This competition can also be with yourself, which is the purpose of personal leaderboards so that you can track your own improvement by
                         competing with yourself.
                         <br>
                         <br>
-                        However, we recognize that not everyone who enjoys WikiSpeedruns enjoys competing with strangers on a global scale. We also recognize that some people may find leaderboards to be 
+                        However, we recognize that not everyone who enjoys WikiSpeedruns enjoys competing with strangers on a global scale. We also recognize that some people may find leaderboards to be
                         discouraging, especially when there are times that are questionably fast.
                         <br>
                         <br>
-                        The natural compromise that we found for the casual and competitive players is to let WikiSpeedruns be a casual game by default. There is no pressure for players to compete to be the 
-                        fastest; instead, just enjoy the journey as you travel from the start prompt to the end prompt. However, we want to allow those competitive players to thrive as well, so they will be 
+                        The natural compromise that we found for the casual and competitive players is to let WikiSpeedruns be a casual game by default. There is no pressure for players to compete to be the
+                        fastest; instead, just enjoy the journey as you travel from the start prompt to the end prompt. However, we want to allow those competitive players to thrive as well, so they will be
                         able to opt-in to interact with global leaderboards. If at any time players desire to play casually again, they can disable global leaderboards.
                         <br>
                         <br>
                         <b>Community:</b>
                         <br>
-                        We also want to recognize how different players engage with the WikiSpeedruns community. While we love being able to see our over 10,000 different players through global leaderboards 
-                        and the dozens of players who have joined our Discord, we recognize that this may not be the community that you choose to engage with. Our private lobbies solve this problem, by 
-                        allowing you to play on a smaller scale among your friends; for some, this level of competition is ideal since this is a community of people that you actually know. We remember 
-                        our very first WikiSpeedruns tournament before we even built this website, and we want to make it easy for others to embrace that same small-scale competitive environment. 
+                        We also want to recognize how different players engage with the WikiSpeedruns community. While we love being able to see our over 10,000 different players through global leaderboards
+                        and the dozens of players who have joined our Discord, we recognize that this may not be the community that you choose to engage with. Our private lobbies solve this problem, by
+                        allowing you to play on a smaller scale among your friends; for some, this level of competition is ideal since this is a community of people that you actually know. We remember
+                        our very first WikiSpeedruns tournament before we even built this website, and we want to make it easy for others to embrace that same small-scale competitive environment.
                         <br>
                         <br>
-                        Ultimately, our goal is for players to engage with whomever they’d like, whether it be against themself, a small group of friends, or the entire WikiSpeedruns community! We also 
+                        Ultimately, our goal is for players to engage with whomever they’d like, whether it be against themself, a small group of friends, or the entire WikiSpeedruns community! We also
                         hope to start hosting our own WikiSpeedruns tournaments to continue to engage with our community.
                         <br>
                         <br>
                         <b>Player Feedback:</b>
                         <br>
-                        While we do play the daily prompts ourselves sometimes, it is helpful for us as developers to get feedback from our community. This feedback is actually part of what has informed 
-                        us while we developed our game philosophy, and spurred us to create some of these major changes. You can continue to give us feedback by contacting our <a href="mailto:support@wikispeedruns.com">support email</a>, 
+                        While we do play the daily prompts ourselves sometimes, it is helpful for us as developers to get feedback from our community. This feedback is actually part of what has informed
+                        us while we developed our game philosophy, and spurred us to create some of these major changes. You can continue to give us feedback by contacting our <a href="mailto:support@wikispeedruns.com">support email</a>,
                         or joining our <a href="https://discord.gg/mNYeB9c9db">discord</a>.
                         <br>
                         <br>
@@ -209,39 +209,39 @@
                 <div class="card-body px-4 py-4"  style="display:none">
                     <p class="blogBody">[Interviewer]: Why did you decide to start the WikiSpeedruns project?
                         <br>
-                        [Dan]: ‘On a whim we had done some wiki races on our own, and we had talked about making a website so it would be more convenient. We were bored one week without 
+                        [Dan]: ‘On a whim we had done some wiki races on our own, and we had talked about making a website so it would be more convenient. We were bored one week without
                         much homework and decided to try to make that website, and had a playable version in about a week. This was in March 2021.’
                         <br>
                         <br>
                         [I]: What has been the most rewarding part of the project so far?
                         <br>
-                        [D]: ‘Honestly, seeing people enjoy playing the game. Also people using private lobbies (check them out!) when hanging out with a group of friends or at a party. 
+                        [D]: ‘Honestly, seeing people enjoy playing the game. Also people using private lobbies (check them out!) when hanging out with a group of friends or at a party.
                         We’ve also gotten great feedback from strangers online both from Twitter and from people that have joined our Discord server.’
                         <br>
                         <br>
                         [I]: How can players interact with the WikiSpeedruns team?
                         <br>
-                        [D]: ‘We have a Discord server dedicated to that, but other channels of communication would be cool, such as through Twitter or Reddit. We are also considering 
+                        [D]: ‘We have a Discord server dedicated to that, but other channels of communication would be cool, such as through Twitter or Reddit. We are also considering
                         hosting tournaments in the future, which would allow players to interact.’
                         <br>
                         <br>
                         [I]: Have you had a particularly meaningful interaction with a player?
                         <br>
-                        [D]: ‘Personally, I was messaging these two players on the Discord that were as competitive as possible, trying to get on the leaderboard, trying to figure out 
-                        the most efficient route, which was really cool to see. The coolest single interaction ever was a person (@BeckePhysics) on twitter talking about how WikiSpeedruns 
+                        [D]: ‘Personally, I was messaging these two players on the Discord that were as competitive as possible, trying to get on the leaderboard, trying to figure out
+                        the most efficient route, which was really cool to see. The coolest single interaction ever was a person (@BeckePhysics) on twitter talking about how WikiSpeedruns
                         was his new obsession. All of us devs were excited about that one!’
                         <br>
                         <br>
                         [I]: What do you hope players get out of this game?
                         <br>
-                        [D]: ‘I just hope that they find some entertainment, especially if they are bored at work or school. More generally: sometimes you get to read about things you’ve 
+                        [D]: ‘I just hope that they find some entertainment, especially if they are bored at work or school. More generally: sometimes you get to read about things you’ve
                         never seen; hopefully people read some new pages and learn something!’
                         <br>
                         <br>
                         [I]: Any sneak peaks for future features?
                         <br>
-                        [D]: ‘We are most excited about automating a lot of the prompt generation and categorization; this can help people so they don’t have to think about their own 
-                        prompts for private lobbies. It’s really interesting to think about what makes a ‘good’ prompt, which makes this an interesting problem to automate. For now, 
+                        [D]: ‘We are most excited about automating a lot of the prompt generation and categorization; this can help people so they don’t have to think about their own
+                        prompts for private lobbies. It’s really interesting to think about what makes a ‘good’ prompt, which makes this an interesting problem to automate. For now,
                         we have a wonderful team member who generates them!’
                         <br>
                         <br>
@@ -252,7 +252,7 @@
                         <br>
                         [I]: Any final comments?
                         <br>
-                        [D]: ‘Our code is open source, contributions are welcome, and any advice related to open-source projects would be helpful since this is our first time working 
+                        [D]: ‘Our code is open source, contributions are welcome, and any advice related to open-source projects would be helpful since this is our first time working
                         on one. Additionally, if you see a bug feel free to report it on Github or email us!’
                     </p>
                 </div>
@@ -333,7 +333,7 @@
 
         var acc = document.getElementsByClassName("accordion");
         var i;
-    
+
         for (i = 0; i < acc.length; i++) {
         acc[i].addEventListener("click", function() {
             /* Toggle between hiding and showing the active panel */

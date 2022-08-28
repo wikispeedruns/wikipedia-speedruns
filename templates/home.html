@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<script defer type="module" src="{{url_for('static', filename='js/home.js') }}"></script>
+<script defer type="module" src="{{url_for('static', filename='js-build/home.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
 
 <!-- jQuery -->
@@ -40,9 +40,9 @@
         <h3 class="mb-4">Welcome<span v-cloak v-if="username"> back</span> to Wikipedia Speedruns<span  v-cloak v-if="username">, [[username]]</span>!</h3>
 
         <div class="alert alert-warning" v-cloak role="alert" v-html="streakText" v-if="loggedIn && streakText"></div>
-        
+
         <div class="alert alert-info" v-cloak role="alert" v-if="loggedIn">
-            We've just added <b>achievements</b> to the game! Visit your profile page <a v-bind:href="'/profile/' + username">here</a> to check your current progress. 
+            We've just added <b>achievements</b> to the game! Visit your profile page <a v-bind:href="'/profile/' + username">here</a> to check your current progress.
         </div>
 
         <p>The rules of this game are simple. You'll be given a starting Wikipedia article and an ending Wikipedia article. Your goal is to navigate from the starting article to the ending article using only the article links.</p>
@@ -136,7 +136,7 @@
             <div v-cloak class="card-footer text-muted" v-if="dailyPrompts.length > 0 && timeLeft">
                 New prompt in T-[[timeLeft]]
             </div>
-            
+
         </div>
 
         <hr class="my-4">
@@ -195,7 +195,7 @@
                     Create a <b><a href="/lobby/create" class="no-color">new private lobby</a></b>. Or join an existing one.
                 </template>
             </div>
-            <div class="card-body table-responsive" v-if="loggedIn === true"> 
+            <div class="card-body table-responsive" v-if="loggedIn === true">
                 <template v-if="lobbies.length > 0">
                     <table class="table table-hover">
                         <thead>
@@ -239,7 +239,7 @@
     </div>
 
     <hr class="mt-4">
-    
+
     <div class="social-menu justify-content-center mb-3">
         <a href="https://discord.gg/mNYeB9c9db" target="_blank">
             <button type="button" class="btn">

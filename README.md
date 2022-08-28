@@ -5,6 +5,7 @@ This repository holds the code for [wikispeedruns.com](https://wikispeedruns.com
 ## 1. Prerequisites
 
 - Python 3.7 or greater
+- Node
 - MySQL Server 8 [Download here](https://dev.mysql.com/downloads/)
 
 ## 2. Python Setup
@@ -26,11 +27,18 @@ For Linux
 source env/bin/activate
 ```
 
-#### Install Requirements
+#### Install Python Requirements
 Then install the requirements (with your virtual environment activated)
 ```
 pip install -r requirements.txt
 ```
+
+#### Install npm packages
+Then install the requirements (with your virtual environment activated)
+```
+npm install
+```
+
 
 ## 3. App Setup
 There are a number of scripts to help setup the web app in [scripts](scripts).
@@ -48,7 +56,7 @@ python create_db.py
 ```
 
 There is also an interactive script (with instructions in the scripts) which
-can be used to set up a local admin account. Through the admin account, 
+can be used to set up a local admin account. Through the admin account,
 prompts can be managed through `/manage`.
 ```
 cd scripts

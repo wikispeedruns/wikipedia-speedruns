@@ -24,7 +24,7 @@
         <link rel= "stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/main.css')}}">
 
         <!-- Nav JS Code -->
-        <script type="module" src="{{url_for('static', filename='js/nav.js')}}"></script>
+        <script type="module" src="{{url_for('static', filename='js-build/nav.js')}}"></script>
 
         <!-- Page specific styling/JS -->
         {% block head %}{% endblock %}
@@ -44,7 +44,7 @@
                     </a>
                     <a href="/devblog" class="version-link">V. 0.1</a>
                 </div>
-                
+
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                     <span class="navbar-toggler-icon"></span>
                 </button>

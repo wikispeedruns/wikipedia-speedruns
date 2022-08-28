@@ -1,7 +1,7 @@
 
 import { AutocompleteInput } from "./modules/autocomplete.js";
 import { PromptGenerator } from "./modules/generator.js"
-import { checkArticles } from "/static/js/modules/wikipediaAPI/util.js";
+import { checkArticles } from "./modules/wikipediaAPI/util.js";
 
 var customPlay = {
     components: {
@@ -48,7 +48,7 @@ var customPlay = {
                 console.log("start: " + start + " end: " + end);
                 resp = await checkArticles(start, end);
             } while (resp.err);
-            
+
             this.play(resp.body.start, resp.body.end);
         },
 	},
