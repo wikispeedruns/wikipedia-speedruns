@@ -309,11 +309,11 @@ def change_username():
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        
+
         try:
             cursor.execute(update_query, (new_username, id))
             db.commit()
-        
+
         except pymysql.IntegrityError:
             print("dup username")
             return (f'Username `{new_username}` already exists', 409)
@@ -332,9 +332,9 @@ def confirm_email_request():
         Request another email token be sent in as a logged in user, i.e. from profile page
     '''
     id = session["user_id"]
-    
+
     check_query = "SELECT `email_confirmed` FROM `users` WHERE `user_id`=%s"
-    
+
     query = "SELECT `email`, `username` FROM `users` WHERE `user_id`=%s"
 
     db = get_db()
@@ -344,7 +344,7 @@ def confirm_email_request():
             email_confirmed = cursor.fetchone()
             if email_confirmed[0] == 1:
                 return "Email already confirmed", 400
-        
+
         cursor.execute(query, (id, ))
         (email, username) = cursor.fetchone()
         # TODO throw error?
@@ -465,7 +465,7 @@ def delete_account():
     """
         Delete the account of the user in session
     """
-    
+
     user_query1 = """
     delete from historical_ratings where user_id = %(user_id)s
     """
@@ -488,14 +488,17 @@ def delete_account():
     delete from achievements_progress where user_id = %(user_id)s
     """
     user_query8 = """
+    delete from quick_runs where user_id = %(user_id)s
+    """
+    user_query9 = """
     delete from users where user_id = %(user_id)s
     """
-    
+
     get_hosted_lobbies_query = """
-    select lobby_id from user_lobbys 
+    select lobby_id from user_lobbys
     WHERE user_id=%(user_id)s AND owner = 1
     """
-    
+
     delete_lobbies_query1 = """
     DELETE lobby_runs FROM lobby_runs
     WHERE lobby_runs.lobby_id=%s
@@ -512,24 +515,24 @@ def delete_account():
     DELETE lobbys FROM lobbys
     WHERE lobbys.lobby_id=%s
     """
-    
+
     id = session["user_id"]
     args = {"user_id": id}
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        
+
         count = cursor.execute(get_hosted_lobbies_query, args)
-        
+
         lobbies = cursor.fetchall()
         lobby_ids = [str(x['lobby_id']) for x in lobbies]
-        
+
         if (count > 0):
             cursor.executemany(delete_lobbies_query1, lobby_ids)
             cursor.executemany(delete_lobbies_query2, lobby_ids)
             cursor.executemany(delete_lobbies_query3, lobby_ids)
             cursor.executemany(delete_lobbies_query4, lobby_ids)
-        
+
         cursor.execute(user_query1, args)
         cursor.execute(user_query2, args)
         cursor.execute(user_query3, args)
@@ -538,7 +541,8 @@ def delete_account():
         cursor.execute(user_query6, args)
         cursor.execute(user_query7, args)
         cursor.execute(user_query8, args)
-        
+        cursor.execute(user_query9, args)
+
         db.commit()
 
     return "User account deleted", 200
