@@ -76,7 +76,7 @@ export class ArticleRenderer {
 
     handleWikipediaLink(href) {
         if (href.substring(0, 1) === "#") {
-            let a = linkEl.getAttribute("href").substring(1);
+            let a = href.substring(1);
             document.getElementById(a).scrollIntoView();
 
         } else {
