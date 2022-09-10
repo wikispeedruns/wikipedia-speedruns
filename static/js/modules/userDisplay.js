@@ -15,18 +15,12 @@ var UserDisplay = {
         }
 	},
 
-    methods: {
-        goToProfile() {
-            window.location.replace(this.link);
-        }
-    },
-
     mounted: function() {
         this.link = `/profile/${this.username}`;
     },
 
     template: (`
-        <a :style="{ 'cursor': 'pointer', 'font-weight': bolded ? 'bold' : 'initial' }" @click.stop="goToProfile">{{username}}</a>
+        <a :href="link" :style="{ 'color': 'inherit', 'cursor': 'pointer', 'font-weight': bolded ? 'bold' : 'initial' }" @click.stop="">{{username}}</a>
     `)
 };
 
