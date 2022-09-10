@@ -83,8 +83,7 @@ var LeaderboardRow = {
 
             <td class="l-col">
                 <template v-if="run.username">
-                    <strong v-if="run.run_id === currentRunId">{{run.username}}</strong>
-                    <user v-else :username="run.username" />
+                    <user :username="run.username" :bolded="run.run_id === currentRunId"/>
                 </template>
                 <template v-else-if="run.name">
                     <strong v-if="run.run_id === currentRunId">{{run.name}}</strong>

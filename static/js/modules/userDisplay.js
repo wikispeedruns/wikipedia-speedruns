@@ -2,7 +2,11 @@
 var UserDisplay = {
 
     props: {
-        username: String
+        username: String,
+        bolded: {
+            type: Boolean,
+            default: false
+        }
     },
 
     data: function () {
@@ -22,7 +26,7 @@ var UserDisplay = {
     },
 
     template: (`
-        <a style="cursor:pointer" @click="goToProfile">{{username}}</a>
+        <a :style="{ 'cursor': 'pointer', 'font-weight': bolded ? 'bold' : 'initial' }" @click.stop="goToProfile">{{username}}</a>
     `)
 };
 
