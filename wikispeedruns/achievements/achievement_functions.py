@@ -130,7 +130,7 @@ def around_the_world_in_80_seconds(single_run_data: Dict[str, Any], single_run_a
     # Sliding Window Algorithm
     # for each left index (i), finds the leftmost right index (j) that contains all required articles and considers it
     # If we move the left index forward (e.g. shrink the window), the right index can either stay the same or move forward
-    # it can never shrink to the left 
+    # it can never shrink to the left
 
     while i < n:
 
@@ -148,7 +148,7 @@ def around_the_world_in_80_seconds(single_run_data: Dict[str, Any], single_run_a
         # all articles are contained in this window
         if len(current_map) == len(article_set):
             # subtracts out the loadTime, adds the first one since it doesn't actually count
-            shortest_time = min(shortest_time, 
+            shortest_time = min(shortest_time,
             path[j-1]["timeReached"] - path[i]["timeReached"] - load_time_sum + path[i]["loadTime"])
         else:
             break
@@ -186,7 +186,7 @@ def super_size_me(single_run_data: Dict[str, Any], single_run_article_map: Dict[
 
 
 
-def append_achievement(all_achievements: List[Dict[str, Any]], name: str, function: AchievementFunction, 
+def append_achievement(all_achievements: List[Dict[str, Any]], name: str, function: AchievementFunction,
 is_multi_run_achievement: bool, is_time_dependent: bool, endgoal: int = 1, default_progress: str = "0") -> None:
     entry = {
         "name" : name,
@@ -201,7 +201,7 @@ is_multi_run_achievement: bool, is_time_dependent: bool, endgoal: int = 1, defau
 
 
 def place_all_achievements_in_list() -> List[Dict[str, Any]]:
-    
+
     all_achievements: List[Dict[str, Any]] = []
 
     append_achievement(all_achievements, "meta", meta, False, False)
