@@ -158,7 +158,13 @@ let app = new Vue({
 
 
         generateResults: function(event) {
-            return `Wiki Speedruns ${this.promptId}\n${this.startArticle}\n${this.path.length - 1} 🖱️\n${(this.playTime)} ⏱️`
+            if(this.isQuickRun){
+                let link = `https://wikispeedruns.com/play/quick_play?prompt_start=${encodeURI(this.startArticle)}&prompt_end=${encodeURI(this.endArticle)}`
+                return `Wiki Speedruns ${this.promptId}\n${this.startArticle}\n${this.path.length - 1} 🖱️\n${(this.playTime)} ⏱️ \n${link}`
+            }
+            else{
+                return `Wiki Speedruns ${this.promptId}\n${this.startArticle}\n${this.path.length - 1} 🖱️\n${(this.playTime)} ⏱️`
+            }
         },
 
         generatePath: function(event) {
