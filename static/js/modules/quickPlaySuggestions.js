@@ -4,26 +4,34 @@ var quickPlaySuggestions = {
 
 	data: function () {
         return {
-            mostRecent: [{
-                start: 'test', end: 'Test'
-            }]
+            mostRecent: []
         }
 	},
+
+    created: async function () {
+        await this.getMostRecent();
+    },
 
 	methods: {
 
         async getMostRecent(num=5) {
-            const response = await fetchJson(`/api/runs/most_recent?num=${num}` , "GET");
+            const response = await fetchJson(`/api/quick_run/most_recent?num=${num}` , "GET");
             const prompts = await response.json();
-            data.mostRecent = prompts
+            this.mostRecent = prompts
         },
 	},
 
 	template: (`
         <div>
-            <div style="width: 100%;">
-                <div v-for='p in mostRecent'>
-                    (start: {{p.start}}, end: {{p.end}})
+            <div class="container" style="width: 100%;">
+                <h6>Most recent quick plays from other players</h6>
+                <div class="row" v-for='p in mostRecent'>
+                    <div class="col">
+                        {{p.prompt_start}} <span><i class="bi bi-arrow-right-short"></i></span> {{p.prompt_end}}
+                    </div>
+                    <div class="col">
+                        <a v-bind:href="'/play/quick_play?prompt_start=' + p.prompt_start + '&prompt_end='+ p.prompt_end">Play</a>
+                    </div>
                 </div>
             </div>
         </div>

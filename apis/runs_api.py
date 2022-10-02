@@ -185,3 +185,26 @@ def get_quick_run(id):
         return jsonify(result)
 
     return f'Error fetching run {id}', 500
+
+
+
+@run_api.get('/quick_run/most_recent')
+def get_most_recent_quick_run_prompts():
+    
+    num = int(request.args.get('num'))
+
+    query = '''
+    SELECT prompt_start, prompt_end From quick_runs
+    WHERE finished=1
+    Order By run_id Desc
+    limit %s;
+    '''
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (num))
+        result = cursor.fetchall()
+        db.commit()
+        
+        return jsonify(result)
+
