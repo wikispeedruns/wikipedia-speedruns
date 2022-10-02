@@ -8,7 +8,7 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 
-from wikispeedruns.achievement_functions import place_all_achievements_in_list
+from .achievement_functions import place_all_achievements_in_list
 
 import pymysql
 from pymysql.cursors import DictCursor
@@ -39,8 +39,6 @@ def convert_to_standard(raw_data: Dict[str, Any]) -> Dict[str, Any]:
 
 def check_data(raw_data: Dict[str, Any]) -> bool:
     return raw_data["finished"] and raw_data["user_id"]
-    
-    
 
 
 ReturnType = Tuple[bool, Any, Optional[int]]
@@ -62,7 +60,7 @@ class Achievement():
         self.is_time_dependent = is_time_dependent
         self.endgoal = endgoal
         self.default_progress = default_progress
-    
+
     @staticmethod
     def no_time_data(single_run_data: Dict[str, Any]) -> bool:
         return single_run_data["version"] == "1.0"
@@ -90,8 +88,8 @@ def get_achievements_info(cursor: DictCursor) -> Dict[int, Achievement]:
             raise Exception("Achievement not present in database; make sure to add all achievements")
         achievement_id = cursor.fetchone()["achievement_id"]
 
-        achievements[achievement_id] = Achievement(achievement["name"], achievement["function"], 
-        achievement["is_multi_run_achievement"], achievement["is_time_dependent"], achievement["endgoal"], 
+        achievements[achievement_id] = Achievement(achievement["name"], achievement["function"],
+        achievement["is_multi_run_achievement"], achievement["is_time_dependent"], achievement["endgoal"],
         achievement["default_progress"])
     return achievements
 
@@ -113,7 +111,6 @@ returns all the new_achievements by the user after new run (using get_new_achiev
 and makes updates to database accordingly
 """
 def get_and_update_new_achievements(cursor: DictCursor, raw_run_data: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
-    
     single_run_data = convert_to_standard(raw_run_data)
 
     achievements = get_achievements_info(cursor)
@@ -145,14 +142,14 @@ def get_new_achievements(cursor: DictCursor, single_run_data: Dict[str, Any], ac
     j = 0
 
     for achievement_id in sorted(achievements):
-        
+
         while j < len(achievements_progress) and achievements_progress[j]["achievement_id"] < achievement_id:
             j += 1
-        
+
         present_in_database = j < len(achievements_progress) and achievements_progress[j]["achievement_id"] == achievement_id
         if present_in_database and achievements_progress[j]["achieved"]:
             continue
-        
+
         current_progress = ""
         if present_in_database:
             current_progress = achievements_progress[j]["progress"]
@@ -234,7 +231,7 @@ def get_all_progress(cursor: DictCursor, user_id: int) -> List[Dict[str, Any]]:
 
 
 def get_all_achievements_and_progress(cursor: DictCursor, user_id: int) -> Dict[str, Dict[str, Any]]:
-    
+
     achievements = get_achievements_info(cursor)
     achievements_progress = get_all_progress(cursor, user_id)
     j = 0
@@ -244,7 +241,7 @@ def get_all_achievements_and_progress(cursor: DictCursor, user_id: int) -> Dict[
 
         while j < len(achievements_progress) and achievements_progress[j]["achievement_id"] < achievement_id:
             j += 1
-        
+
         name = achievements[achievement_id].name
         entry = { "out_of": achievements[achievement_id].endgoal }
 
@@ -261,10 +258,10 @@ def get_all_achievements_and_progress(cursor: DictCursor, user_id: int) -> Dict[
             reached = 0
             time_reached = None
             achieved = 0
-    
+
         entry["reached"] = reached
         entry["time_reached"] = time_reached
         entry["achieved"] = achieved
         all_achievements[name] = entry
 
-    return all_achievements      
+    return all_achievements

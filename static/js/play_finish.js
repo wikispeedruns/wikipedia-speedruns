@@ -3,6 +3,8 @@ import { serverData } from "./modules/serverData.js";
 import { getRun, getLobbyRun, getQuickRun } from "./modules/game/finish.js";
 import { getLocalRun } from "./modules/localStorage/localStorageSprint.js"
 import { getLocalQuickRun } from "./modules/localStorage/localStorageQuickRun.js";
+import { achievements } from "./modules/achievements.js";
+import { uploadLocalSprints } from "./modules/localStorage/localStorageSprint.js";
 
 import { basicCannon, fireworks, side } from "./modules/confetti.js";
 
@@ -34,6 +36,10 @@ async function getPrompt(promptId, lobbyId=null) {
 let app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
+    components: {
+        'achievements': achievements
+    },
+
     data: {
 
         runType: "",         // the type of run (lobby, sprint, quick)
@@ -52,7 +58,9 @@ let app = new Vue({
         playTime: 0,
         loggedIn: false,
 
-        played: PLAYED
+        played: PLAYED,
+
+        isMounted: false
     },
 
     computed: {
@@ -72,6 +80,11 @@ let app = new Vue({
         this.runType = TYPE;
         
         this.loggedIn = "username" in serverData;
+
+        // Make sure that a sprint can be considered for achievements
+        if (this.loggedIn) {
+            await uploadLocalSprints();
+        }
 
         this.lobbyId = LOBBY_ID;
         this.runId = RUN_ID;
@@ -103,6 +116,7 @@ let app = new Vue({
 
         if (this.played) fireworks();
 
+        this.isMounted = true;
     },
 
 
@@ -144,7 +158,12 @@ let app = new Vue({
 
 
         generateResults: function(event) {
-            return `Wiki Speedruns ${this.promptId}\n${this.startArticle}\n${this.path.length - 1} 🖱️\n${(this.playTime)} ⏱️`
+            let resultText = `Wiki Speedruns ${this.promptId}\n${this.startArticle}\n${this.path.length - 1} 🖱️\n${(this.playTime)} ⏱️`;
+            if(this.isQuickRun){
+                let link = `https://wikispeedruns.com/play/quick_play?prompt_start=${encodeURI(this.startArticle)}&prompt_end=${encodeURI(this.endArticle)}`;
+                resultText += `\n${link}`;
+            }
+            return resultText;
         },
 
         generatePath: function(event) {

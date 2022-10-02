@@ -90,6 +90,7 @@
     cursor: pointer;
 }
 
+/* Completion Rate/Stats */
 .progress {
 	width: 50%;
 	margin-top: .2rem;
@@ -98,6 +99,16 @@
 .progress-label {
 	float: left;
 	margin-right: 1em;
+}
+
+.progress-bar {
+    min-width: .1em;
+    color:black;
+    overflow: visible;
+}
+
+.success {
+    background-color: #6bd09c; 
 }
 
 .stat {

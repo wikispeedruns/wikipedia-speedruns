@@ -1,4 +1,12 @@
 
+function getLocalStorage(key) {
+    const data = localStorage.getItem(key);
+    return JSON.parse(data);
+}
+
+function setLocalStorage(key, data) {
+    localStorage.setItem(key, JSON.stringify(data));
+}
 
 function getLocalStorageRuns(key) {
     let prev_data = localStorage.getItem(key);
@@ -16,5 +24,5 @@ function addRunToLocalStorage(key, data) {
     setLocalStorageRuns(key, prev_data);
 }
 
-export { getLocalStorageRuns, addRunToLocalStorage, setLocalStorageRuns };
+export { getLocalStorage, setLocalStorage, getLocalStorageRuns, addRunToLocalStorage, setLocalStorageRuns };
 
