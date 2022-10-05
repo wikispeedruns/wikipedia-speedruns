@@ -1,10 +1,8 @@
-import Vue from 'vue/dist/vue.js';
+import { AutocompleteInput } from "./autocomplete.js";
+import { PromptGenerator } from "./generator.js"
+import { checkArticles } from "./wikipediaAPI/util.js";
 
-import { AutocompleteInput } from "../modules/autocomplete.js";
-import { PromptGenerator } from "../modules/generator.js"
-import { checkArticles } from "../modules/wikipediaAPI/util.js";
-
-var customPlay = {
+var CustomPlay = {
     components: {
         'prompt-generator': PromptGenerator,
         'ac-input': AutocompleteInput
@@ -96,4 +94,4 @@ var customPlay = {
     `)
 };
 
-export { customPlay }
+export { CustomPlay }

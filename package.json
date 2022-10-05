@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "dependencies": {
     "esbuild": "^0.15.5",
+    "springy": "^2.8.0",
     "tiny-glob": "^0.2.9",
     "vue": "^2.7.10"
   },

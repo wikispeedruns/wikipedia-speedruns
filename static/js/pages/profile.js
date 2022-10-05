@@ -1,6 +1,5 @@
-import Vue from 'vue/dist/vue.js';
+import Vue from 'vue/dist/vue.esm.js';
 
-import { serverData } from "../modules/serverData.js";
 import { profileStatsTable } from "../modules/profileStats.js";
 import { achievements } from "../modules/achievements.js";
 

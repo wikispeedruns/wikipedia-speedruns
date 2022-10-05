@@ -1,7 +1,5 @@
-//JS module imports
-import Vue from 'vue/dist/vue.js';
+import Vue from 'vue/dist/vue.esm.js';
 
-import { serverData } from "../modules/serverData.js";
 import { getArticleSummary } from "../modules/wikipediaAPI/util.js";
 import { submitRun, saveRun, loadRun, removeSave } from "../modules/game/marathon/runs.js";
 

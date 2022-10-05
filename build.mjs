@@ -19,6 +19,7 @@ try{
         watch: isDev,
         logLevel: "info",
         outdir: 'static/js-build',
+        external: ["*serverData.js"]
     })
 } catch(err) {
     process.exit(1)

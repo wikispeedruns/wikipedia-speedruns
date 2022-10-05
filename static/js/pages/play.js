@@ -9,7 +9,6 @@ these components should be as modular/generic as possible.
 //JS module imports
 import Vue from "vue/dist/vue.esm.js";
 
-import { serverData } from "../modules/serverData.js";
 import { startRun, submitRun } from "../modules/game/runs.js";
 
 import { CountdownTimer } from "../modules/game/countdown.js";

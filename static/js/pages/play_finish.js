@@ -1,7 +1,6 @@
 //JS module imports
-import Vue from 'vue/dist/vue.js';
+import Vue from 'vue/dist/vue.esm.js';
 
-import { serverData } from "../modules/serverData.js";
 import { getRun, getLobbyRun, getQuickRun } from "../modules/game/finish.js";
 import { getLocalRun } from "../modules/localStorage/localStorageSprint.js"
 import { getLocalQuickRun } from "../modules/localStorage/localStorageQuickRun.js";

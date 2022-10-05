@@ -1,3 +1,5 @@
+import Vue from "vue/dist/vue.esm.js";
+
 const USERS_COLOR = "#347aeb";
 const USERS_SUBCOLOR = "#f2a257";
 const SPRINTS_COLOR = "#9E58EE";
@@ -10,7 +12,7 @@ const LOBBIES_SUBCOLOR = "#D7AD38";
 function update_totals(totals) {
     app.totals.users = totals['users_total'];
     app.totals.google_users = totals['goog_total'];
-    
+
     app.totals.runs = totals['sprints_total'];
     app.totals.marathon_runs = totals['marathons_total'];
     app.totals.finished_runs = totals['sprints_finished'];
@@ -18,7 +20,7 @@ function update_totals(totals) {
     app.totals.lobby_runs = totals['lobby_runs_total'];
     app.totals.finished_lobby_runs = totals['lobby_runs_finished'];
     app.totals.created_lobbies = totals['lobbies_created'];
-   
+
     let user_runs = totals['user_runs'];
     let user_finished_runs = totals['user_finished_runs'];
     let user_marathons = totals['user_marathons'];
@@ -54,7 +56,7 @@ function update_daily(daily_totals) {
 
 async function get_data() {
     let response = await fetch("/api/stats/totals");
-    const totals = await response.json(); 
+    const totals = await response.json();
     update_totals(totals);
 
     response = await fetch("/api/stats/daily");
@@ -86,10 +88,10 @@ async function draw_player_graphs() {
         type: 'line',
         data: {
           labels: app.daily.users.map(({day}) => day),
-          datasets: [{ 
+          datasets: [{
               data: app.daily.users.map(({total}) => total),
               label: "Total Users",
-              borderColor: USERS_COLOR, 
+              borderColor: USERS_COLOR,
               fill: false
             },
           ]
@@ -107,7 +109,7 @@ async function draw_player_graphs() {
         type: 'line',
         data: {
           labels: app.daily.users.map(({day}) => day),
-          datasets: [{ 
+          datasets: [{
               data: app.daily.users.map(({daily_users}) => daily_users),
               label: "New Users",
               borderColor: USERS_COLOR,
@@ -130,13 +132,13 @@ async function draw_sprint_graphs() {
         type: 'line',
         data: {
           labels: app.daily.sprint_runs.map(({day}) => day),
-          datasets: [{ 
+          datasets: [{
               data: app.daily.sprint_runs.map(({total}) => total),
               label: "Total Sprint Runs",
               borderColor: SPRINTS_COLOR,
               fill: false
             },
-            { 
+            {
                 data: app.daily.finished_sprint_runs.map(({total}) => total),
                 label: "Total Finished Sprint Runs",
                 borderColor: SPRINTS_SUBCOLOR,
@@ -157,13 +159,13 @@ async function draw_sprint_graphs() {
         type: 'line',
         data: {
           labels: app.daily.sprint_runs.map(({day}) => day),
-          datasets: [{ 
+          datasets: [{
               data: app.daily.sprint_runs.map(({daily_plays}) => daily_plays),
               label: "New Sprint Runs",
               borderColor: SPRINTS_COLOR,
               fill: false
             },
-            { 
+            {
                 data: app.daily.finished_sprint_runs.map(({daily_plays}) => daily_plays),
                 label: "New Finished Sprint Runs",
                 borderColor: SPRINTS_SUBCOLOR,
@@ -194,7 +196,7 @@ async function draw_sprint_graphs() {
         type: 'line',
         data: {
           labels: app.daily.active_users.map(({day}) => day),
-          datasets: [{ 
+          datasets: [{
               data: app.daily.active_users.map(({active_users}) => active_users),
               label: "Users That Finished A Sprint Run",
               borderColor: SPRINTS_COLOR,
@@ -209,19 +211,19 @@ async function draw_sprint_graphs() {
                 }
             },
         }
-    });   
+    });
 
     new Chart("daily-average-user-plays", {
         type: 'line',
         data: {
           labels: app.daily.sprint_runs_per_user.map(({day}) => day),
-          datasets: [{ 
+          datasets: [{
               data: app.daily.sprint_runs_per_user.map(({sprint_runs_per_user}) => sprint_runs_per_user),
               label: "Average User Sprint Runs",
               borderColor: SPRINTS_COLOR,
               fill: false
             },
-            { 
+            {
                 data: app.daily.finished_sprint_runs_per_user.map(({finished_sprint_runs_per_user}) => finished_sprint_runs_per_user),
                 label: "Average Finished User Sprint Runs",
                 borderColor: SPRINTS_SUBCOLOR,
@@ -244,7 +246,7 @@ async function draw_lobby_graphs() {
         type: 'line',
         data: {
           labels: app.daily.created_lobbies.map(({day}) => day),
-          datasets: [{ 
+          datasets: [{
               data: app.daily.created_lobbies.map(({total}) => total),
               label: "Total Lobbies Created",
               borderColor: LOBBIES_COLOR,
@@ -265,7 +267,7 @@ async function draw_lobby_graphs() {
         type: 'line',
         data: {
           labels: app.daily.created_lobbies.map(({day}) => day),
-          datasets: [{ 
+          datasets: [{
               data: app.daily.created_lobbies.map(({daily_created_lobbies}) => daily_created_lobbies),
               label: "New Lobbies Created",
               borderColor: LOBBIES_COLOR,
@@ -286,13 +288,13 @@ async function draw_lobby_graphs() {
         type: 'line',
         data: {
           labels: app.daily.lobby_runs.map(({day}) => day),
-          datasets: [{ 
+          datasets: [{
               data: app.daily.lobby_runs.map(({total}) => total),
               label: "Total Lobby Runs",
               borderColor: LOBBIES_COLOR,
               fill: false
             },
-            { 
+            {
                 data: app.daily.finished_lobby_runs.map(({total}) => total),
                 label: "Total Finished Lobby Runs",
                 borderColor: LOBBIES_SUBCOLOR,
@@ -313,13 +315,13 @@ async function draw_lobby_graphs() {
         type: 'line',
         data: {
           labels: app.daily.lobby_runs.map(({day}) => day),
-          datasets: [{ 
+          datasets: [{
               data: app.daily.lobby_runs.map(({daily_plays}) => daily_plays),
               label: "New Lobby Runs",
               borderColor: LOBBIES_COLOR,
               fill: false
             },
-            { 
+            {
                 data: app.daily.finished_lobby_runs.map(({daily_plays}) => daily_plays),
                 label: "New Finished Lobby Runs",
                 borderColor: LOBBIES_SUBCOLOR,
@@ -340,7 +342,7 @@ async function draw_lobby_graphs() {
         type: 'line',
         data: {
           labels: app.daily.active_lobby_users.map(({day}) => day),
-          datasets: [{ 
+          datasets: [{
               data: app.daily.active_lobby_users.map(({active_users}) => active_users),
               label: "Users That Finished A Lobby Run",
               borderColor: LOBBIES_COLOR,

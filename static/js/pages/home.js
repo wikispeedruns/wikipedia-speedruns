@@ -1,13 +1,13 @@
-import Vue from 'vue/dist/vue.js';
+import Vue from 'vue/dist/vue.esm.js';
 
 import { MarathonPrompts } from "../modules/game/marathon/marathonPrompts.js";
-import { serverData } from "../modules/serverData.js";
+import { CustomPlay } from "../modules/customPlay.js";
+
 import { uploadLocalSprints, getLocalSprints } from "../modules/localStorage/localStorageSprint.js";
 import { uploadLocalMarathons, getLocalMarathons } from "../modules/localStorage/localStorageMarathon.js";
 import { uploadLocalQuickRuns } from "../modules/localStorage/localStorageQuickRun.js";
 import { generateStreakText } from "../modules/streaks.js";
 import { getUserLobby } from "../modules/lobby/utils.js";
-import { customPlay } from "./custom_play.js";
 
 async function getPrompts()
 {
@@ -42,7 +42,7 @@ var app = new Vue({
     el: '#app',
     components: {
         'marathon-prompts': MarathonPrompts,
-        'custom-play': customPlay
+        'custom-play': CustomPlay
     },
     data: {
         dailyPrompts: [],

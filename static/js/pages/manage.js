@@ -1,4 +1,4 @@
-import Vue from 'vue/dist/vue.js';
+import Vue from 'vue/dist/vue.esm.js';
 
 import { fetchJson } from "../modules/fetch.js";
 import { getPath } from "../modules/scraper.js";

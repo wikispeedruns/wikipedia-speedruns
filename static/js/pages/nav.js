@@ -1,7 +1,6 @@
 
-import Vue from 'vue/dist/vue.js';
+import Vue from 'vue/dist/vue.esm.js';
 
-import { serverData } from "../modules/serverData.js";
 
 
 var app = new Vue({

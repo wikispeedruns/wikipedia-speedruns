@@ -1,6 +1,5 @@
-import Vue from 'vue/dist/vue.js';
+import Vue from 'vue/dist/vue.esm.js';
 
-import { serverData } from "../modules/serverData.js"
 
 const pg = serverData["pg"];
 const sortMode = serverData["sortMode"];

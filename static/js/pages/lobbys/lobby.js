@@ -1,5 +1,6 @@
+import Vue from "vue/dist/vue.esm.js";
+
 import { fetchJson } from "../../modules/fetch.js";
-import { serverData } from "../../modules/serverData.js";
 import { checkArticles } from "../../modules/wikipediaAPI/util.js";
 import { PromptGenerator } from "../../modules/generator.js"
 import { AutocompleteInput } from "../../modules/autocomplete.js"

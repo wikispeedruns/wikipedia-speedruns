@@ -1,5 +1,6 @@
+import Vue from "vue/dist/vue.esm.js";
+
 import { fetchJson } from "../../modules/fetch.js";
-import { serverData } from "../../modules/serverData.js";
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
