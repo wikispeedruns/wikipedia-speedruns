@@ -1,5 +1,4 @@
-//make sure to include this in the pages that we want to show confettis on:
-//<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+const confetti = require('canvas-confetti');
 
 const defaultColors = [
     '#26ccff',

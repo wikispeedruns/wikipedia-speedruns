@@ -1,4 +1,6 @@
 import Vue from "vue/dist/vue.esm.js";
+const Chart = require('chart.js');
+
 
 const USERS_COLOR = "#347aeb";
 const USERS_SUBCOLOR = "#f2a257";
