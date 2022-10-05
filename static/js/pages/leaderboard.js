@@ -4,8 +4,6 @@ import { fetchJson } from "../modules/fetch.js"
 import { UserDisplay } from "../modules/userDisplay.js";
 import { pathArrowFilter } from "../modules/game/filters.js";
 
-
-
 const URL_PROMPT_ID = serverData["prompt_id"];
 const URL_LOBBY_ID = serverData["lobby_id"] || null;
 

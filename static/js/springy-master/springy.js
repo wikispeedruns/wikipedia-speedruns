@@ -685,7 +685,7 @@
 			t.layout.eachNode(function(node, point) {
 				t.drawNode(node, point.p);
 			});
-			
+
 			if (t.onRenderFrame !== undefined) { t.onRenderFrame(); }
 		}, this.onRenderStop, this.onRenderStart);
 	};

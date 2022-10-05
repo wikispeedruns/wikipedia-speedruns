@@ -3,7 +3,6 @@ import Vue from 'vue/dist/vue.esm.js';
 import { fetchJson } from "../modules/fetch.js";
 import { profileStatsTable } from "../modules/profileStats.js";
 
-
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
