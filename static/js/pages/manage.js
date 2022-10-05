@@ -1,8 +1,8 @@
 import Vue from 'vue/dist/vue.js';
 
-import { fetchJson } from "./modules/fetch.js";
-import { getPath } from "./modules/scraper.js";
-import { getArticleTitle, articleCheck } from "./modules/wikipediaAPI/util.js";
+import { fetchJson } from "../modules/fetch.js";
+import { getPath } from "../modules/scraper.js";
+import { getArticleTitle, articleCheck } from "../modules/wikipediaAPI/util.js";
 
 Vue.component('prompt-item', {
     props: ['prompt'],

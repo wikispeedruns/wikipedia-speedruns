@@ -1,8 +1,8 @@
 import Vue from 'vue/dist/vue.js';
 
-import { serverData } from "./modules/serverData.js";
-import { profileStatsTable } from "./modules/profileStats.js";
-import { achievements } from "./modules/achievements.js";
+import { serverData } from "../modules/serverData.js";
+import { profileStatsTable } from "../modules/profileStats.js";
+import { achievements } from "../modules/achievements.js";
 
 var app = new Vue({
     delimiters: ['[[', ']]'],

@@ -7,16 +7,16 @@ these components should be as modular/generic as possible.
 */
 
 //JS module imports
-import Vue from 'vue/dist/vue.js';
+import Vue from "vue/dist/vue.esm.js";
 
-import { serverData } from "./modules/serverData.js";
-import { startRun, submitRun } from "./modules/game/runs.js";
+import { serverData } from "../modules/serverData.js";
+import { startRun, submitRun } from "../modules/game/runs.js";
 
-import { CountdownTimer } from "./modules/game/countdown.js";
-import { ArticleRenderer } from "./modules/game/articleRenderer.js";
-import { PagePreview } from "./modules/game/pagePreview.js";
+import { CountdownTimer } from "../modules/game/countdown.js";
+import { ArticleRenderer } from "../modules/game/articleRenderer.js";
+import { PagePreview } from "../modules/game/pagePreview.js";
 
-import { startLocalRun, submitLocalRun } from "./modules/localStorage/localStorageSprint.js";
+import { startLocalRun, submitLocalRun } from "../modules/localStorage/localStorageSprint.js";
 
 // retrieve the unique prompt_id of the prompt to load
 const PROMPT_ID = serverData["prompt_id"] || null;
@@ -138,6 +138,7 @@ let app = new Vue({
             console.log("Not logged in, uploading start of run to local storage")
         }
 
+
         this.offset = this.startTime;
 
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.isScroll ? null : this.showPreview, this.isScroll ? null : this.hidePreview || null, this.loadCallback);
@@ -160,6 +161,9 @@ let app = new Vue({
             document.addEventListener("unload", this.updateRun, {capture: true});
             document.addEventListener("beforeunload", this.updateRun, {capture: true});
         }
+
+        console.log(serverData)
+
     },
 
 

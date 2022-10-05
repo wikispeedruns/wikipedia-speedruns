@@ -1,19 +1,19 @@
 //JS module imports
 import Vue from 'vue/dist/vue.js';
 
-import { serverData } from "./modules/serverData.js";
-import { getArticleSummary } from "./modules/wikipediaAPI/util.js";
-import { submitRun, saveRun, loadRun, removeSave } from "./modules/game/marathon/runs.js";
+import { serverData } from "../modules/serverData.js";
+import { getArticleSummary } from "../modules/wikipediaAPI/util.js";
+import { submitRun, saveRun, loadRun, removeSave } from "../modules/game/marathon/runs.js";
 
-import { CountdownTimer } from "./modules/game/countdown.js";
-import { MarathonHelp } from "./modules/game/marathon/help.js";
-import { FinishPage } from "./modules/game/marathon/finish.js";
-import { ArticleRenderer } from "./modules/game/articleRenderer.js";
-import { PagePreview } from "./modules/game/pagePreview.js";
+import { CountdownTimer } from "../modules/game/countdown.js";
+import { MarathonHelp } from "../modules/game/marathon/help.js";
+import { FinishPage } from "../modules/game/marathon/finish.js";
+import { ArticleRenderer } from "../modules/game/articleRenderer.js";
+import { PagePreview } from "../modules/game/pagePreview.js";
 
-import { basicCannon, fireworks, side } from "./modules/confetti.js";
+import { basicCannon, fireworks, side } from "../modules/confetti.js";
 
-import { submitLocalRun } from "./modules/localStorage/localStorageMarathon.js";
+import { submitLocalRun } from "../modules/localStorage/localStorageMarathon.js";
 
 //retrieve the unique prompt_id of the prompt to load
 const PROMPT_ID = serverData["prompt_id"];

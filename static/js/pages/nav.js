@@ -1,7 +1,7 @@
 
 import Vue from 'vue/dist/vue.js';
 
-import { serverData } from "./modules/serverData.js";
+import { serverData } from "../modules/serverData.js";
 
 
 var app = new Vue({

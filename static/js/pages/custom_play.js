@@ -1,8 +1,8 @@
 import Vue from 'vue/dist/vue.js';
 
-import { AutocompleteInput } from "./modules/autocomplete.js";
-import { PromptGenerator } from "./modules/generator.js"
-import { checkArticles } from "./modules/wikipediaAPI/util.js";
+import { AutocompleteInput } from "../modules/autocomplete.js";
+import { PromptGenerator } from "../modules/generator.js"
+import { checkArticles } from "../modules/wikipediaAPI/util.js";
 
 var customPlay = {
     components: {

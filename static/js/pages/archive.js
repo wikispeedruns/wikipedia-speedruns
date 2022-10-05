@@ -1,7 +1,7 @@
 import Vue from 'vue/dist/vue.js';
 
-import { serverData } from "./modules/serverData.js";
-import { getLocalSprints } from "./modules/localStorage/localStorageSprint.js";
+import { serverData } from "../modules/serverData.js";
+import { getLocalSprints } from "../modules/localStorage/localStorageSprint.js";
 
 
 /* This really would be better if we had a SPA huh */

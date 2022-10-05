@@ -5,7 +5,7 @@ const isDev = process.argv.includes("-d");
 
 // Note that this is not "watched", new files will not be built unless node is restarted
 // Also note that we only include top level files
-let entryPoints = await glob("./static/js/*.js");
+let entryPoints = await glob("./static/js/pages/**/*.js");
 console.log("Building the following files:")
 console.log(entryPoints);
 

@@ -1,8 +1,8 @@
 import Vue from 'vue/dist/vue.js';
 
-import { serverData } from "./modules/serverData.js";
-import { fetchJson } from "./modules/fetch.js";
-import { profileStatsTable } from "./modules/profileStats.js";
+import { serverData } from "../modules/serverData.js";
+import { fetchJson } from "../modules/fetch.js";
+import { profileStatsTable } from "../modules/profileStats.js";
 
 
 var app = new Vue({

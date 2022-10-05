@@ -1,7 +1,7 @@
 import Vue from 'vue/dist/vue.js';
 
-import { serverData } from "./modules/serverData.js";
-import { ArticleRenderer } from "./modules/game/articleRenderer.js";
+import { serverData } from "../modules/serverData.js";
+import { ArticleRenderer } from "../modules/game/articleRenderer.js";
 
 const run_id = serverData["run_id"];
 const div_name = "wikipedia-frame";

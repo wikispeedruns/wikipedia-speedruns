@@ -1,7 +1,7 @@
-import { serverData } from "./modules/serverData.js"
-import { fetchJson } from "./modules/fetch.js"
-import { UserDisplay } from "./modules/userDisplay.js";
-import { pathArrowFilter } from "./modules/game/filters.js";
+import { serverData } from "../modules/serverData.js"
+import { fetchJson } from "../modules/fetch.js"
+import { UserDisplay } from "../modules/userDisplay.js";
+import { pathArrowFilter } from "../modules/game/filters.js";
 
 
 

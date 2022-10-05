@@ -14,8 +14,8 @@ TODO going back too far (i.e. after a page has been clicked breaks it)
 // JS module imports
 import Vue from 'vue/dist/vue.js';
 
-import { ArticleRenderer } from "./modules/game/articleRenderer.js";
-import { PagePreview } from "./modules/game/pagePreview.js";
+import { ArticleRenderer } from "../modules/game/articleRenderer.js";
+import { PagePreview } from "../modules/game/pagePreview.js";
 
 /* Given a DOM element `element`, overlay a div with a transparent yellow
  * background temporarily
