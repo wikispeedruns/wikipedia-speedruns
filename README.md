@@ -106,3 +106,27 @@ pytest
 
 Note that these tests are also run in Docker upon making a PR using Github workflows.
 In the future we may setup docker to run tests as well.
+
+
+## (Optional) Scraper Setup
+
+The asynchronous task queue for scraper tasks are supported by 2 extra tools, celery 
+and redis. Celery is installed as a python requirement, but redis (https://redis.io/)
+needs to be installed and run separately (similar to the SQL server, see website
+for instructions). The scraper task_queue also requires the `scraper_graph`,
+which can be downloaded locally (contact one of the maintainers)
+
+Rather than computing the path as part of the request, which freezes up the server,
+flask passes off the scraper tasks to another process managed by celery (and 
+communicates through redis). These tasks are defined using python decorators, examples
+of which can be seen [here](https://github.com/wikispeedruns/wikipedia-speedruns/blob/scraper_task_queue/apis/scraper_api.py).
+
+#### Windows setup
+
+Unfortunately, neither celery nor redis are supported on windows. So if you have
+a windows development machine, you will have to run the server through WSL. Note
+that if you want to keep your windows MySQL instance, you need to figure out
+which port the host windows machine is exposed on in WSL. See [this Stack Overflow
+post](https://superuser.com/questions/1536619/connect-to-mysql-from-wsl2). Note 
+that this changes everytime WSL is restarted.
+
