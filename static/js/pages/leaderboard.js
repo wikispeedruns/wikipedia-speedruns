@@ -1,4 +1,5 @@
 import Vue from "vue/dist/vue.esm.js"
+import moment from "moment/moment.js";
 
 import { fetchJson } from "../modules/fetch.js"
 import { UserDisplay } from "../modules/userDisplay.js";
