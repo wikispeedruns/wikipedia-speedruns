@@ -5,6 +5,7 @@ This repository holds the code for [wikispeedruns.com](https://wikispeedruns.com
 ## 1. Prerequisites
 
 - Python 3.7 or greater
+- Node
 - MySQL Server 8 [Download here](https://dev.mysql.com/downloads/)
 
 ## 2. Python Setup
@@ -26,11 +27,18 @@ For Linux
 source env/bin/activate
 ```
 
-#### Install Requirements
+#### Install Python Requirements
 Then install the requirements (with your virtual environment activated)
 ```
 pip install -r requirements.txt
 ```
+
+#### Install npm packages
+Then install the requirements (with your virtual environment activated)
+```
+npm install
+```
+
 
 ## 3. App Setup
 There are a number of scripts to help setup the web app in [scripts](scripts).
@@ -78,8 +86,14 @@ Or in Windows Powershell
 $env:FLASK_ENV="development"
 ```
 
-#### Start the server
+#### Start the frontend build
 From the top level directory
+```
+npm run start
+```
+
+#### Start the server
+In a separate shell, from the top level directory
 ```
 flask run
 ```
@@ -102,14 +116,14 @@ In the future we may setup docker to run tests as well.
 
 ## (Optional) Scraper Setup
 
-The asynchronous task queue for scraper tasks are supported by 2 extra tools, celery 
+The asynchronous task queue for scraper tasks are supported by 2 extra tools, celery
 and redis. Celery is installed as a python requirement, but redis (https://redis.io/)
 needs to be installed and run separately (similar to the SQL server, see website
 for instructions). The scraper task_queue also requires the `scraper_graph`,
 which can be downloaded locally (contact one of the maintainers)
 
 Rather than computing the path as part of the request, which freezes up the server,
-flask passes off the scraper tasks to another process managed by celery (and 
+flask passes off the scraper tasks to another process managed by celery (and
 communicates through redis). These tasks are defined using python decorators, examples
 of which can be seen [here](https://github.com/wikispeedruns/wikipedia-speedruns/blob/scraper_task_queue/apis/scraper_api.py).
 
@@ -119,6 +133,6 @@ Unfortunately, neither celery nor redis are supported on windows. So if you have
 a windows development machine, you will have to run the server through WSL. Note
 that if you want to keep your windows MySQL instance, you need to figure out
 which port the host windows machine is exposed on in WSL. See [this Stack Overflow
-post](https://superuser.com/questions/1536619/connect-to-mysql-from-wsl2). Note 
+post](https://superuser.com/questions/1536619/connect-to-mysql-from-wsl2). Note
 that this changes everytime WSL is restarted.
 

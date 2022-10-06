@@ -7,14 +7,15 @@ these components should be as modular/generic as possible.
 */
 
 //JS module imports
-import { serverData } from "./modules/serverData.js";
-import { startRun, submitRun } from "./modules/game/runs.js";
+import Vue from "vue/dist/vue.esm.js";
 
-import { CountdownTimer } from "./modules/game/countdown.js";
-import { ArticleRenderer } from "./modules/game/articleRenderer.js";
-import { PagePreview } from "./modules/game/pagePreview.js";
+import { startRun, submitRun } from "../modules/game/runs.js";
 
-import { startLocalRun, submitLocalRun } from "./modules/localStorage/localStorageSprint.js";
+import { CountdownTimer } from "../modules/game/countdown.js";
+import { ArticleRenderer } from "../modules/game/articleRenderer.js";
+import { PagePreview } from "../modules/game/pagePreview.js";
+
+import { startLocalRun, submitLocalRun } from "../modules/localStorage/localStorageSprint.js";
 
 // retrieve the unique prompt_id of the prompt to load
 const PROMPT_ID = serverData["prompt_id"] || null;
@@ -89,7 +90,7 @@ let app = new Vue({
 
         elapsed: 0,             // Total time elapsed in ms (frontend)
         timerInterval: null,
-        
+
         offset: Date.now(),           // Offset time since last pause, initially approx. startTime
         isRunning: false,       // Whether the timer is running
         milliseconds: 0,        // Current ms since last pause (frontend)
@@ -136,6 +137,7 @@ let app = new Vue({
             console.log("Not logged in, uploading start of run to local storage")
         }
 
+
         this.offset = this.startTime;
 
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.isScroll ? null : this.showPreview, this.isScroll ? null : this.hidePreview || null, this.loadCallback);
@@ -158,6 +160,9 @@ let app = new Vue({
             document.addEventListener("unload", this.updateRun, {capture: true});
             document.addEventListener("beforeunload", this.updateRun, {capture: true});
         }
+
+        console.log(serverData)
+
     },
 
 
@@ -169,7 +174,7 @@ let app = new Vue({
 
             submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
         },
-        
+
         loadCallback: function() {
             this.stopTimer();
         },
@@ -212,7 +217,7 @@ let app = new Vue({
 
         async start() {
             this.countdownTime = (Date.now() - this.startTime) / 1000;
-            
+
             // Set first page timeReached if start() called after first page is loaded
             if (this.path.length == 1) {
                 this.path[0]['timeReached'] = this.countdownTime;

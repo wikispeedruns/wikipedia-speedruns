@@ -3,7 +3,7 @@
 {% block head %}
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
 
-<script defer type="module" src="{{url_for('static', filename='js/marathon_prompt.js') }}"></script>
+<script defer type="module" src="{{url_for('static', filename='js-build/marathon_prompt.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -12,11 +12,11 @@
     <div class="col-xl-12">
         <h4 class="my-4">[[username]]'s Marathon Record</h4>
         <div class="card">
-            
+
             <div class="card-body">
 
                 <p>[[runs.length]] total runs</p>
-                
+
                 <table class="table table-hover">
                     <thead>
                         <th class="fit" scope="col">Prompt #</th>

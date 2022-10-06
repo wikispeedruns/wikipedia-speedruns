@@ -1,4 +1,5 @@
-import { serverData } from "./modules/serverData.js"
+import Vue from 'vue/dist/vue.esm.js';
+
 
 const pg = serverData["pg"];
 const sortMode = serverData["sortMode"];
@@ -81,11 +82,11 @@ var app = new Vue({
         sortStatus: function(tab) {
             if (this.sortMode === tab) {
                 return `<i class="bi bi-chevron-down"></i>`
-            }   
+            }
             return `<i class="bi bi-dash-lg"></i>`
         },
 
-        
+
     },
 
     mounted: async function() {

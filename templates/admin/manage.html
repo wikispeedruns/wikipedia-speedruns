@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<script type="module" src="{{url_for('static', filename='js/manage.js') }}"></script>
+<script type="module" src="{{url_for('static', filename='js-build/admin/manage.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -19,7 +19,7 @@
 
     <path-generator></path-generator>
 
-    
+
 
     <div class="row">
 
@@ -94,8 +94,8 @@
             </template>
 
         </div>
-    </div> 
-    
+    </div>
+
     <marathon-section v-bind:marathonprompts="marathon" v-on:reload-prompts="getPrompts"
     ></marathon-section>
 

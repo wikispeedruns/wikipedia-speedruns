@@ -1,4 +1,3 @@
-import { serverData } from "./serverData.js";
 
 var profileStatsTable = {
 
@@ -42,22 +41,22 @@ var profileStatsTable = {
 	methods: {
 
         async get_data() {
-        
+
             try {
                 let response = await fetch("/api/profiles/" + this.username + "/stats");
                 if (response.status != 200) {
                     alert(await response.text());
                     window.location.href = "/";
                 }
-                const runs = await response.json(); 
-            
+                const runs = await response.json();
+
                 response = await fetch("/api/profiles/" + this.username);
                 if (response.status != 200) {
                     alert(await response.text());
                     window.location.href = "/";
                 }
-                const user = await response.json(); 
-            
+                const user = await response.json();
+
                 this.basicStats.username.val = this.username;
                 this.basicStats.totalratedruns.val = runs['total_runs'];
                 this.basicStats.promptsplayed.val = runs['total_prompts'];
@@ -68,7 +67,6 @@ var profileStatsTable = {
 
             } catch (error) {
                 console.error(error);
-                //window.location.href = "/error";
             }
         },
 	},

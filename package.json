@@ -1,0 +1,22 @@
+{
+  "name": "wikipedia-speedruns",
+  "version": "1.0.0",
+  "dependencies": {
+    "canvas-confetti": "^1.5.1",
+    "chart.js": "^3.9.1",
+    "esbuild": "^0.15.5",
+    "moment": "^2.29.4",
+    "tiny-glob": "^0.2.9",
+    "vue": "^2.7.10"
+  },
+  "scripts": {
+    "start": "node ./build.mjs -d",
+    "build": "node ./build.mjs",
+    "lint": "eslint ./static/js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wikispeedruns/wikipedia-speedruns.git"
+  },
+  "homepage": "https://github.com/wikispeedruns/wikipedia-speedruns#readme"
+}
