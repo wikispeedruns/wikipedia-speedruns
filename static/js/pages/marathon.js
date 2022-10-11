@@ -10,6 +10,7 @@ import { ArticleRenderer } from "../modules/game/articleRenderer.js";
 import { PagePreview } from "../modules/game/pagePreview.js";
 
 import { basicCannon, fireworks, side } from "../modules/confetti.js";
+const confetti = require('canvas-confetti');
 
 import { submitLocalRun } from "../modules/localStorage/localStorageMarathon.js";
 
@@ -165,7 +166,6 @@ let app = new Vue({
 
             if (hitcheckpoint) {
                 let el = this.checkpoints.shift()
-                console.log(el)
                 this.activeCheckpoints[checkpointindex] = el
 
                 conf();
