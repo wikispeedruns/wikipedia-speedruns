@@ -138,7 +138,7 @@ let app = new Vue({
     methods : {
 
         pageCallback: function(page, loadTime) {
-
+            window.scrollTo(0, 0);
             this.hidePreview();
 
             if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
