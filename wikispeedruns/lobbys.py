@@ -132,12 +132,12 @@ def delete_lobby_prompts(lobby_id: int, prompts: List[int]) -> bool:
 
     query_start = 'DELETE FROM'
     query_body = 'WHERE lobby_id=%(lobby_id)s AND prompt_id IN %(prompts)s'
-    
+
     query_args = {
         "lobby_id": lobby_id,
         "prompts": tuple(prompts)
     }
-    
+
     db = get_db()
     with db.cursor() as cursor:
         for table in tables:
@@ -173,60 +173,6 @@ def get_lobby_user_info(lobby_id: int, user_id: Optional[int]) -> Optional[dict]
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (lobby_id, user_id))
         return cursor.fetchone()
-
-
-# Lobby Runs
-def get_lobby_runs(lobby_id: int, prompt_id: Optional[int]=None):
-    query = """
-        SELECT run_id, prompt_id, users.username, name, start_time, end_time, play_time, finished, `path`
-        FROM lobby_runs
-        LEFT JOIN users ON users.user_id=lobby_runs.user_id
-        WHERE lobby_id=%(lobby_id)s AND path IS NOT NULL AND finished IS TRUE
-    """
-
-    query_args = {
-        "lobby_id": lobby_id
-    }
-
-    if (prompt_id):
-        query += " AND prompt_id=%(prompt_id)s"
-        query_args["prompt_id"] = prompt_id
-
-    query += " ORDER BY play_time"
-
-    db = get_db()
-
-    with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query, query_args)
-        results = cursor.fetchall()
-        for run in results:
-            run['path'] = json.loads(run['path'])['path']
-
-        return results
-
-def get_lobby_run(lobby_id: int, run_id: int):
-    query = """
-        SELECT run_id, prompt_id, users.username, name, start_time, end_time, play_time, `path`
-        FROM lobby_runs
-        LEFT JOIN users ON users.user_id=lobby_runs.user_id
-        WHERE lobby_id=%(lobby_id)s AND run_id=%(run_id)s
-    """
-
-    query_args = {
-        "lobby_id": lobby_id,
-        "run_id": run_id
-    }
-
-    db = get_db()
-
-    with db.cursor(cursor=DictCursor) as cursor:
-        # print(cursor.mogrify(query, query_args))
-        cursor.execute(query, query_args)
-        results = cursor.fetchone()
-
-        results['path'] = json.loads(results['path'])['path']
-        return results
-
 
 
 def get_user_lobbys(user_id: int):
@@ -272,7 +218,7 @@ def change_lobby_host(lobby_id: int, target_user_id: int):
     SET owner=1
     WHERE user_id=%(target_user_id)s AND lobby_id=%(lobby_id)s
     """
-    
+
     db = get_db()
     with db.cursor() as cursor:
         cursor.execute(remove_host_query, {
@@ -280,12 +226,12 @@ def change_lobby_host(lobby_id: int, target_user_id: int):
         })
 
         cursor.execute(set_host_query, {
-            "target_user_id": target_user_id, 
+            "target_user_id": target_user_id,
             "lobby_id": lobby_id
         })
         db.commit()
 
-        return True    
+        return True
 
 
 
@@ -295,27 +241,27 @@ def get_lobby_users(lobby_id: int):
     LEFT JOIN users ON user_lobbys.user_id = users.user_id
     WHERE lobby_id=%s
     """
-    
+
     db = get_db()
 
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (lobby_id,))
         results = cursor.fetchall()
-        
+
         return results
-    
-    
-    
+
+
+
 def get_lobby_anon_users(lobby_id: int):
     query = """
     SELECT DISTINCT name FROM lobby_runs
     WHERE lobby_id=%s AND user_id IS NULL
     """
-    
+
     db = get_db()
 
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (lobby_id,))
         results = cursor.fetchall()
-        
+
         return results
