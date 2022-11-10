@@ -96,6 +96,17 @@ CREATE TABLE IF NOT EXISTS `lobbys` (
     `create_date` DATETIME NOT NULL,
     `active_date` DATETIME NULL,
     `rules` JSON NULL,
+    /*
+    Schema for rules. In general, we need to be backwards compatible, so
+    these should have default values or default behavior if the fields are missing
+    {
+        hide_end_prompts: (false)
+        restrict_leaderboard_access: (false)
+        require_account: (false)
+    }
+    */
+
+
     PRIMARY KEY (`lobby_id`)
 );
 
