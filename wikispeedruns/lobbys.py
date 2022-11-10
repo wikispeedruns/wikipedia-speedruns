@@ -23,6 +23,9 @@ class LobbyPrompt(TypedDict):
 def _random_passcode() -> str:
     return "".join([str(secrets.randbelow(10)) for _ in range(6)])
 
+# TODO these checks could get a little expensive (lots of separate db queires)
+# consolidating them in a separate module
+
 def check_membership(lobby_id: int, session: dict) -> bool:
     user_id = session.get("user_id")
     if get_lobby_user_info(lobby_id, user_id) is not None:
@@ -35,9 +38,61 @@ def check_membership(lobby_id: int, session: dict) -> bool:
     return False
 
 
-def check_other_membership(lobby_id: int, target_user_id: int) -> bool:
-    if get_lobby_user_info(lobby_id, target_user_id) is not None:
+def check_user_membership(lobby_id: int, user_id: int) -> bool:
+    if get_lobby_user_info(lobby_id, user_id) is not None:
         return True
+
+    return False
+
+
+def check_prompt_end_visibility(lobby_id: int, session: dict) -> bool:
+    user_id = session.get("user_id")
+    user_info = get_lobby_user_info(lobby_id, user_id)
+
+    # Owner always needs to view prompts
+    if user_info and user_info["owner"]:
+        return True
+
+    # Check lobby rules
+    lobby = get_lobby(lobby_id)
+    return not lobby["rules"].get("hide_prompt_end", False)
+
+
+def check_leaderboard_access(lobby_id: int, prompt_id: int, session: dict) -> bool:
+    user_id = session.get("user_id")
+
+    lobby = get_lobby(lobby_id)
+
+    # if lobby rules don't restrict leaderboard access
+    if not lobby["rules"].get("restrict_leaderboard_access", False):
+        return True
+
+    user_info = get_lobby_user_info(lobby_id, user_id)
+    # Owner can always view leaderboard
+    if user_info and user_info["owner"]:
+        return True
+
+    played_query = "SELECT COUNT(*) as played FROM lobby_runs WHERE lobby_id=%s AND prompt_id=%s"
+    # check to see if played by user/anon user
+    if user_info is not None:
+        played_query += " AND user_id=%s"
+        args = (lobby_id, prompt_id, user_id)
+    else:
+        if "lobbys" not in session: return False
+        name = session["lobbys"].get(str(lobby_id))
+        if name is None: return False
+
+        played_query += " AND name=%s"
+        args = (lobby_id, prompt_id, name)
+
+    with get_db().cursor(cursor=DictCursor) as cursor:
+        print(cursor.mogrify(played_query, args))
+        cursor.execute(played_query, args)
+        res = cursor.fetchone()
+
+
+    if res is not None:
+        return res["played"] > 0
 
     return False
 
@@ -87,7 +142,15 @@ def get_lobby(lobby_id: int) -> Optional[dict]:
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (lobby_id,))
-        return cursor.fetchone()
+        lobby = cursor.fetchone()
+
+        try:
+            lobby["rules"] = json.loads(lobby["rules"])
+        except ValueError:
+            lobby["rules"] = {}
+
+    return lobby
+
 
 # Lobby Prompt Management
 
@@ -126,6 +189,7 @@ def get_lobby_prompts(lobby_id: int, prompt_id: Optional[int]=None ) -> List[Lob
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, query_args)
         return cursor.fetchall()
+
 
 def delete_lobby_prompts(lobby_id: int, prompts: List[int]) -> bool:
     tables = ['lobby_runs', 'lobby_prompts']
@@ -173,6 +237,60 @@ def get_lobby_user_info(lobby_id: int, user_id: Optional[int]) -> Optional[dict]
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (lobby_id, user_id))
         return cursor.fetchone()
+
+
+# Lobby Runs
+def get_lobby_runs(lobby_id: int, prompt_id: Optional[int]=None):
+    query = """
+        SELECT run_id, prompt_id, users.username, name, start_time, end_time, play_time, finished, `path`
+        FROM lobby_runs
+        LEFT JOIN users ON users.user_id=lobby_runs.user_id
+        WHERE lobby_id=%(lobby_id)s AND path IS NOT NULL AND finished IS TRUE
+    """
+
+    query_args = {
+        "lobby_id": lobby_id
+    }
+
+    if (prompt_id):
+        query += " AND prompt_id=%(prompt_id)s"
+        query_args["prompt_id"] = prompt_id
+
+    query += " ORDER BY play_time"
+
+    db = get_db()
+
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, query_args)
+        results = cursor.fetchall()
+        for run in results:
+            run['path'] = json.loads(run['path'])['path']
+
+        return results
+
+def get_lobby_run(lobby_id: int, run_id: int):
+    query = """
+        SELECT run_id, prompt_id, users.username, name, start_time, end_time, play_time, `path`
+        FROM lobby_runs
+        LEFT JOIN users ON users.user_id=lobby_runs.user_id
+        WHERE lobby_id=%(lobby_id)s AND run_id=%(run_id)s
+    """
+
+    query_args = {
+        "lobby_id": lobby_id,
+        "run_id": run_id
+    }
+
+    db = get_db()
+
+    with db.cursor(cursor=DictCursor) as cursor:
+        # print(cursor.mogrify(query, query_args))
+        cursor.execute(query, query_args)
+        results = cursor.fetchone()
+
+        results['path'] = json.loads(results['path'])['path']
+        return results
+
 
 
 def get_user_lobbys(user_id: int):

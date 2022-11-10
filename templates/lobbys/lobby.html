@@ -163,7 +163,7 @@
                         </td>
 
                         <td>[[prompt.start]]</td>
-                        <td>[[prompt.end]]</td>
+                        <td>[[prompt.end || "-"]]</td>
 
                         <td><a v-bind:href="'/lobby/' + lobbyInfo.lobby_id + '/leaderboard/' + prompt.prompt_id">Results</a></td>
                         <td v-if="editPrompts">
