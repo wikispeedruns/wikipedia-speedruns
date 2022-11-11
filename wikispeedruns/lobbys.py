@@ -20,11 +20,27 @@ class LobbyPrompt(TypedDict):
     start: str
     end: str
 
+    played: bool
+
 def _random_passcode() -> str:
     return "".join([str(secrets.randbelow(10)) for _ in range(6)])
 
-# TODO these checks could get a little expensive (lots of separate db queires)
-# consolidating them in a separate module
+def parse_session(lobby_id: int, session: dict) -> Optional[Tuple[str, str]]:
+    '''
+    Given session and lobby, returns the tuple (column name, value, is_owner)
+    corresponding to the user's entries in the lobbys_run table
+    '''
+    user_id = session.get("user_id")
+    user_info = get_lobby_user_info(lobby_id, user_id)
+
+    if user_info is not None:
+        return ("user_id", user_id, user_info["owner"])
+
+    if "lobbys" in session and str(lobby_id) in session["lobbys"] is not None:
+        return ("name", session["lobbys"][str(lobby_id)], False)
+
+    return None
+
 
 def check_membership(lobby_id: int, session: dict) -> bool:
     user_id = session.get("user_id")
@@ -172,17 +188,37 @@ def add_lobby_prompt(lobby_id: int, start: int, end: int) -> bool:
 
         return True
 
+# passing session here is a bit messy
+def get_lobby_prompts(lobby_id: int, prompt_id: Optional[int]=None, session: Optional[dict]=None) -> List[LobbyPrompt]:
+    ## TODO user_id?]
 
-def get_lobby_prompts(lobby_id: int, prompt_id: Optional[int]=None ) -> List[LobbyPrompt]:
-    ## TODO user_id?
-    query = "SELECT prompt_id, start, end FROM lobby_prompts WHERE lobby_id=%(lobby_id)s"
+    query = f"SELECT prompt_id, start, end FROM lobby_prompts WHERE lobby_id=%(lobby_id)s {'AND prompt_id=%(prompt_id)s' if prompt_id else ''}"
 
     query_args = {
         "lobby_id": lobby_id
     }
 
+    player = None if session is None else parse_session(lobby_id, session)
+    if player is not None:
+        # TODO handle prompt_id better
+        query = f"""
+        SELECT p.prompt_id, start, end, played FROM lobby_prompts AS p
+        LEFT JOIN  (
+            SELECT lobby_id, prompt_id, COUNT(*) AS played
+            FROM lobby_runs
+            WHERE
+                {player[0]}=%(player_value)s
+                AND lobby_id=%(lobby_id)s {"AND prompt_id=%(prompt_id)s" if prompt_id else ""}
+            GROUP BY lobby_id, prompt_id
+        ) r
+        ON r.prompt_id = p.prompt_id AND r.lobby_id = p.lobby_id
+        WHERE p.lobby_id=%(lobby_id)s {"AND p.prompt_id=%(prompt_id)s" if prompt_id else ""}
+        """
+
+        query_args["player_value"] = player[1]
+
+
     if (prompt_id):
-        query += " AND prompt_id=%(prompt_id)s"
         query_args["prompt_id"] = prompt_id
 
     db = get_db()

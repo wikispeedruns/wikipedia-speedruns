@@ -114,12 +114,16 @@ def get_lobby_prompts(lobby_id, prompt_id):
     if not lobbys.check_membership(lobby_id, session):
         return "You are not a member of this lobby", 401
 
-    prompts = lobbys.get_lobby_prompts(lobby_id, prompt_id)
-
+    prompts = lobbys.get_lobby_prompts(lobby_id, prompt_id, session)
     if prompt_id is None:
         # TODO base this on whether a prompt is played or not
         if not lobbys.check_prompt_end_visibility(lobby_id, session):
-            prompts = [{**p, "end": None} for p in prompts]
+            prompts = [
+                {
+                    **p,
+                    "end": p["end"] if p["played"] else None
+                } for p in prompts
+            ]
         return jsonify(prompts)
     else:
         if len(prompts) == 0:
