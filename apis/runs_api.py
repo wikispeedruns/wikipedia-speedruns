@@ -199,16 +199,17 @@ def get_most_recent_quick_run_prompts():
     SELECT prompt_start, prompt_end From quick_runs
     WHERE finished=1 AND end_time BETWEEN 
         DATE_SUB(DATE(NOW()), INTERVAL 5 DAY)
-        AND DATE_SUB(DATE(NOW()), INTERVAL 2 DAY);
+        AND NOW()
+	group by prompt_start, prompt_end
     ''' 
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query)
+        cursor.execute(query, (num,))
         result = cursor.fetchall()
         db.commit()
-        result = [dict(t) for t in {tuple(d.items()) for d in result}] # remove duplicates
-        result = random.choices(result, k=min(num, len(result))) #pick up to num prompts to show
+        
+        result = random.choices(result, k=min(num, len(result)))
         
         return jsonify(result)
 
