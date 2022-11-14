@@ -205,7 +205,7 @@ def get_most_recent_quick_run_prompts():
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query, (num,))
+        cursor.execute(query)
         result = cursor.fetchall()
         db.commit()
         
