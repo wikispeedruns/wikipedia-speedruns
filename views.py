@@ -130,7 +130,7 @@ def get_replay_page():
 
 @views.route('/account', methods=['GET'])
 def get_user_account_page():
-    return render_with_data('users/account.html')
+    return render_with_data('account.html')
 
 # Finish pages
 @views.route('/finish', methods=['GET'])

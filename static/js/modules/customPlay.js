@@ -1,10 +1,9 @@
+import { AutocompleteInput } from "./autocomplete.js";
+import { PromptGenerator } from "./generator.js"
+import { checkArticles } from "./wikipediaAPI/util.js";
+import { quickPlaySuggestions } from "./quickPlaySuggestions.js"
 
-import { AutocompleteInput } from "./modules/autocomplete.js";
-import { PromptGenerator } from "./modules/generator.js"
-import { quickPlaySuggestions } from "./modules/quickPlaySuggestions.js"
-import { checkArticles } from "/static/js/modules/wikipediaAPI/util.js";
-
-var customPlay = {
+var CustomPlay = {
     components: {
         'prompt-generator': PromptGenerator,
         'ac-input': AutocompleteInput,
@@ -50,7 +49,7 @@ var customPlay = {
                 console.log("start: " + start + " end: " + end);
                 resp = await checkArticles(start, end);
             } while (resp.err);
-            
+
             this.play(resp.body.start, resp.body.end);
         },
 	},
@@ -102,4 +101,4 @@ var customPlay = {
     `)
 };
 
-export { customPlay }
+export { CustomPlay }

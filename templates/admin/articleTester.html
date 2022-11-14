@@ -10,43 +10,9 @@
 <!-- play.js stylesheet -->
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/play.css')}}">
 
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-
 {% block head %}
 
-<script type="module">
-import { ArticleRenderer } from "/static/js/modules/game/articleRenderer.js";
-import { basicCannon } from "/static/js/modules/confetti.js";
-
-var app = new Vue({
-    delimiters: ['[[', ']]'],
-    el: '#app',
-    data: {
-        article: "",
-        message: "",
-        renderer: null,
-    },
-
-    methods: {
-        async loadArticle() {
-            this.renderer.loadPage(this.article);
-        },
-
-        pageCallback(article, loadTime) {
-            this.message = (`'${article}' took ${loadTime/1000} seconds to load`);
-            console.log(this.message);
-
-            basicCannon(0, 0, false, 315)
-            basicCannon(1, 0, false, 225) 
-        }
-    },
-
-    mounted: function() {
-        let frame = document.getElementById("testFrame");
-        this.renderer = new ArticleRenderer(frame, this.pageCallback);
-    }
-});
-</script>
+<script type="module" src="{{url_for('static', filename='js-build/admin/articleTester.js') }}"></script>
 {% endblock %}
 
 {% block content %}

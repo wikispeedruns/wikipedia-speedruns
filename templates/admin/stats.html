@@ -1,8 +1,7 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
-<script type="module" src="{{url_for('static', filename='js/stats.js') }}"></script>
+<script type="module" src="{{url_for('static', filename='js-build/admin/stats.js') }}"></script>
 <link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/stats.css')}}">
 {% endblock %}
 
@@ -28,7 +27,7 @@
                 <div class="stats__amount">[[totals.runs]]</div>
                 <div class="stats__change positive">+[[weekly.runs_change]] <span style="font-weight:normal;color: white;">since last week</span></div>
                 <div class="stats__change mid">[[totals.pct_user_finished_runs]]% <span style="font-weight:normal;color: white;">registered users</span></div>
-                <div class="stats__change mid">[[totals.finished_runs]] <span style="font-weight:normal;color: white;">finished sprints</span></div> 
+                <div class="stats__change mid">[[totals.finished_runs]] <span style="font-weight:normal;color: white;">finished sprints</span></div>
             </div>
         </a>
 
@@ -38,7 +37,7 @@
                 <div class="stats__amount">[[totals.marathon_runs]]</div>
                 <!-- <div class="stats__change positive">+[[weekly.finished_marathons_change]] <span style="font-weight:normal;color: white;">since last week</span></div> -->
                 <div class="stats__change mid">[[totals.pct_user_marathons]]% <span style="font-weight:normal;color: white;">registered users</span></div>
-                <div class="stats__change mid">[[totals.finished_marathons]] <span style="font-weight:normal;color: white;">finished marathons</span></div> 
+                <div class="stats__change mid">[[totals.finished_marathons]] <span style="font-weight:normal;color: white;">finished marathons</span></div>
             </div>
         </a>
 
@@ -58,7 +57,7 @@
             <div class="col-xs-6">
                 <canvas id="daily-users" width="{{chart_width}}" height="{{chart_height}}"></canvas>
             </div>
-            
+
             <div class="col-xs-6">
                 <canvas id="daily-new-users" width="{{chart_width}}" height="{{chart_height}}"></canvas>
             </div>
@@ -68,15 +67,15 @@
             <div class="col-xs-6">
                 <canvas id="daily-runs" width="{{chart_width}}" height="{{chart_height}}"></canvas>
             </div>
-        
+
             <div class="col-xs-6">
                 <canvas id="daily-new-runs" width="{{chart_width}}" height="{{chart_height}}"></canvas>
             </div>
-        
+
             <div class="col-xs-6">
                 <canvas id="daily-active-users" width="{{chart_width}}" height="{{chart_height}}"></canvas>
             </div>
-        
+
             <div class="col-xs-6">
                 <canvas id="daily-average-user-plays" width="{{chart_width}}" height="{{chart_height}}"></canvas>
             </div>
@@ -88,7 +87,7 @@
             <div class="col-xs-6">
                 <canvas id="daily-lobbies" width="{{chart_width}}" height="{{chart_height}}"></canvas>
             </div>
-        
+
             <div class="col-xs-6">
                 <canvas id="daily-new-lobbies" width="{{chart_width}}" height="{{chart_height}}"></canvas>
             </div>

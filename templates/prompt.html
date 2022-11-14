@@ -2,11 +2,10 @@
 
 {% block head %}
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script src="{{url_for('static', filename='js-build/springy-master/springy.js') }}"></script>
+<script src="{{url_for('static', filename='js-build/springy-master/springyui.js') }}"></script>
 
-<script src="{{url_for('static', filename='js/springy-master/springy.js') }}"></script>
-<script src="{{url_for('static', filename='js/springy-master/springyui.js') }}"></script>
-
-<script defer type="module" src="{{url_for('static', filename='js/prompt.js') }}"></script>
+<script defer type="module" src="{{url_for('static', filename='js-build/prompt.js') }}"></script>
 {% endblock %}
 
 {% block content %}

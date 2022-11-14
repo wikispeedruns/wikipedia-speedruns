@@ -1,5 +1,7 @@
-import { fetchAsync, fetchJson } from "./modules/fetch.js";
-import { getArticleTitle, articleCheck } from "./modules/wikipediaAPI/util.js";
+import Vue from 'vue/dist/vue.esm.js';
+
+import { fetchAsync, fetchJson } from "../../modules/fetch.js";
+import { getArticleTitle, articleCheck } from "../../modules/wikipediaAPI/util.js";
 
 Vue.component('prompt-item', {
     props: ['prompt'],
@@ -328,7 +330,7 @@ Vue.component('marathon-section', {
                     <div>Starting Article: {{start}}</div>
                     <div>Starting Checkpoints:
                         <ol>
-                        <template v-for="(item, index) in startcp" :key="index">
+                        <template v-for="(item, index) in startcp">
                             <li>{{item}}
                                 <button v-on:click="moveup(index, 0)"><i class="bi bi-chevron-up"></i></button>
                                 <button v-on:click="movedown(index, 0)"><i class="bi bi-chevron-down"></i></button>
@@ -417,8 +419,6 @@ var app = new Vue({
             this.unused = prompts.filter(p => !p["used"]);
             const used = prompts.filter(p => p["used"]);
 
-            console.log(used)
-
             let daily = used.filter(p => p["rated"]);
             let weeklys = used.filter(p => !p["rated"]);
 
@@ -443,7 +443,6 @@ var app = new Vue({
             })
 
             let cur = new Date();
-            console.log(cur)
 
             // Change cur to first day of this week
             cur.setUTCDate(cur.getUTCDate() - cur.getUTCDay());
@@ -452,7 +451,6 @@ var app = new Vue({
             for (let i = 0; i < 2; i++) {
                 let end = new Date(cur)
                 end.setDate(cur.getDate() + 7);
-                console.log(end)
                 this.weeks.push({
                     start: this.toISODate(cur),
                     end: this.toISODate(end),

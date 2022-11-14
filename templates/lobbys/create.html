@@ -2,40 +2,7 @@
 
 {% block head %}
 
-<script type="module">
-// TODO rules
-import { fetchJson } from "/static/js/modules/fetch.js";
-
-var app = new Vue({
-    delimiters: ['[[', ']]'],
-    el: '#app',
-    data: {
-        name: "",
-        desc: "",
-    },
-
-    methods: {
-        async handleSubmit() {
-            let requestBody = {
-                // TODO rules
-                rules: {}
-            }
-
-            // Only add these fields if not empty
-            if (this.name) requestBody["name"] = this.name;
-            if (this.desc) requestBody["desc"] = this.desc;
-
-            let resp = await fetchJson("/api/lobbys", "POST", requestBody);
-            const lobby_id = (await resp.json())["lobby_id"];
-
-            window.location.href = `/lobby/${lobby_id}`
-        }
-    }
-
-});
-
-
-</script>
+<script type="module" src="{{url_for('static', filename='js-build/lobbys/create.js')}}"></script>
 
 {% endblock %}
 

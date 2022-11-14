@@ -1,6 +1,7 @@
-import { serverData } from "./modules/serverData.js";
-import { profileStatsTable } from "./modules/profileStats.js";
-import { achievements } from "./modules/achievements.js";
+import Vue from 'vue/dist/vue.esm.js';
+
+import { profileStatsTable } from "../modules/profileStats.js";
+import { achievements } from "../modules/achievements.js";
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
@@ -17,6 +18,6 @@ var app = new Vue({
     created: async function() {
         if ("profile_name" in serverData) {
             this.profileName = serverData["profile_name"];
-        } 
+        }
     },
 });

@@ -1,10 +1,12 @@
-import { serverData } from "./modules/serverData.js";
+
+import Vue from 'vue/dist/vue.esm.js';
+
 
 
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#nav',
-    
+
     data: {
         username: "",
         loggedIn: false,

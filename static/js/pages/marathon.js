@@ -1,17 +1,18 @@
-//JS module imports
-import { serverData } from "./modules/serverData.js";
-import { getArticleSummary } from "./modules/wikipediaAPI/util.js";
-import { submitRun, saveRun, loadRun, removeSave } from "./modules/game/marathon/runs.js";
+import Vue from 'vue/dist/vue.esm.js';
 
-import { CountdownTimer } from "./modules/game/countdown.js";
-import { MarathonHelp } from "./modules/game/marathon/help.js";
-import { FinishPage } from "./modules/game/marathon/finish.js";
-import { ArticleRenderer } from "./modules/game/articleRenderer.js";
-import { PagePreview } from "./modules/game/pagePreview.js";
+import { getArticleSummary } from "../modules/wikipediaAPI/util.js";
+import { submitRun, saveRun, loadRun, removeSave } from "../modules/game/marathon/runs.js";
 
-import { basicCannon, fireworks, side } from "./modules/confetti.js";
+import { CountdownTimer } from "../modules/game/countdown.js";
+import { MarathonHelp } from "../modules/game/marathon/help.js";
+import { FinishPage } from "../modules/game/marathon/finish.js";
+import { ArticleRenderer } from "../modules/game/articleRenderer.js";
+import { PagePreview } from "../modules/game/pagePreview.js";
 
-import { submitLocalRun } from "./modules/localStorage/localStorageMarathon.js";
+import { basicCannon, fireworks, side } from "../modules/confetti.js";
+const confetti = require('canvas-confetti');
+
+import { submitLocalRun } from "../modules/localStorage/localStorageMarathon.js";
 
 //retrieve the unique prompt_id of the prompt to load
 const PROMPT_ID = serverData["prompt_id"];
@@ -60,7 +61,7 @@ let app = new Vue({
         reachedstop: false,  //This variable only gets flipped once, its to prevent the stop box from showing up everytime the page is loaded
         saved: false,
 
-        expandedTimebox: true, 
+        expandedTimebox: true,
         isMobile: false
     },
 
@@ -137,7 +138,7 @@ let app = new Vue({
     methods : {
 
         pageCallback: function(page, loadTime) {
-
+            window.scrollTo(0, 0);
             this.hidePreview();
 
             if (this.path.length == 0 || this.path[this.path.length - 1] != page) {
@@ -165,7 +166,6 @@ let app = new Vue({
 
             if (hitcheckpoint) {
                 let el = this.checkpoints.shift()
-                console.log(el)
                 this.activeCheckpoints[checkpointindex] = el
 
                 conf();

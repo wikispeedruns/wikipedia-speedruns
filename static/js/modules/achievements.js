@@ -1,3 +1,5 @@
+import moment from "moment/moment.js";
+
 import { achievement_list } from "../../achievements/metadata.js";
 import { getLocalStorage, setLocalStorage } from "./localStorage/localStorage.js";
 
@@ -186,7 +188,7 @@ var achievements = {
             else {
                 if(!this.isSprint) return `Unlock achievements in public prompts...`;
                 if(!this.loggedIn) return `Login to check possible New Achievements!`;
-                else return this.isEmpty ? `No new achievements unlocked` : 
+                else return this.isEmpty ? `No new achievements unlocked` :
                             this.count == 1 ? `${this.achieved} New Achievement!` :
                                               `${this.achieved} New Achievements!`;
             }
@@ -232,7 +234,7 @@ var achievements = {
                 if(!this.loggedIn || !this.isSprint){
                     return;
                 }
-                
+
                 let localData = getLocalStorage(achievement_storage);
                 if(localData === null || localData["run_id"] != this.runId){
                     const response = await fetch('/api/achievements/process/' + this.runId, {method: 'PATCH'});

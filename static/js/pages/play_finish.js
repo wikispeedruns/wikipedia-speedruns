@@ -1,12 +1,13 @@
 //JS module imports
-import { serverData } from "./modules/serverData.js";
-import { getRun, getLobbyRun, getQuickRun } from "./modules/game/finish.js";
-import { getLocalRun } from "./modules/localStorage/localStorageSprint.js"
-import { getLocalQuickRun } from "./modules/localStorage/localStorageQuickRun.js";
-import { achievements } from "./modules/achievements.js";
-import { uploadLocalSprints } from "./modules/localStorage/localStorageSprint.js";
+import Vue from 'vue/dist/vue.esm.js';
 
-import { basicCannon, fireworks, side } from "./modules/confetti.js";
+import { getRun, getLobbyRun, getQuickRun } from "../modules/game/finish.js";
+import { getLocalRun } from "../modules/localStorage/localStorageSprint.js"
+import { getLocalQuickRun } from "../modules/localStorage/localStorageQuickRun.js";
+import { achievements } from "../modules/achievements.js";
+import { uploadLocalSprints } from "../modules/localStorage/localStorageSprint.js";
+
+import { basicCannon, fireworks, side } from "../modules/confetti.js";
 
 // Get lobby if a lobby_prompt
 const LOBBY_ID = serverData["lobby_id"] || null;
@@ -78,7 +79,7 @@ let app = new Vue({
     mounted: async function() {
 
         this.runType = TYPE;
-        
+
         this.loggedIn = "username" in serverData;
 
         // Make sure that a sprint can be considered for achievements
@@ -109,7 +110,7 @@ let app = new Vue({
             this.startArticle = prompt["start"];
             this.endArticle = prompt["end"];
         }
-        
+
         this.playTime = run["play_time"];
 
         this.path = run['path'].map((entry) => entry["article"])
