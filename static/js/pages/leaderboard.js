@@ -429,7 +429,7 @@ var app = new Vue({
 
         if (resp.status === 401) {
             // TODO do something better here
-            alert(await resp.text());
+            alert("Unable to fetch leaderboards");
             window.history.back();
             return;
         }

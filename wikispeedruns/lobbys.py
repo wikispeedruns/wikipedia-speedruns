@@ -115,7 +115,7 @@ def check_leaderboard_access(lobby_id: int, prompt_id: int, session: dict) -> bo
 
 # TODO let non users also create lobbies?
 def create_lobby(user_id: int,
-                 rules: str=None,
+                 rules: Optional[str]=None,
                  name: Optional[str]=None,
                  desc: Optional[str]=None) -> Optional[int]:
     lobby_query = """
@@ -166,6 +166,40 @@ def get_lobby(lobby_id: int) -> Optional[dict]:
             lobby["rules"] = {}
 
     return lobby
+
+
+
+def update_lobby(lobby_id: int,
+                 rules: Optional[str]=None,
+                 name: Optional[str]=None,
+                 desc: Optional[str]=None) -> Optional[int]:
+    query = """
+        UPDATE lobbys SET {}
+        FROM lobbys
+        WHERE lobby_id=%s
+    """
+
+    cols = []
+    args = []
+
+    if rules is not None:
+        cols += "rules=%s"
+        args += rules
+
+    if name is not None:
+        cols += "name=%s"
+        args += name
+
+    if desc is not None:
+        cols += "desc=%s"
+        args += desc
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query.format(",".join(cols)), args)
+        db.commit()
+
+    return True
 
 
 # Lobby Prompt Management

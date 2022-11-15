@@ -89,8 +89,25 @@ def get_lobby(lobby_id):
     return lobby_info
 
 
-# Prompts
+@lobby_api.patch("/<int:lobby_id>")
+@check_request_json({"rules": OptionalArg(dict), "name": OptionalArg(str), "desc": OptionalArg(str)})
+def update_lobby(lobby_id):
 
+    user_id = session.get("user_id")
+    user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
+
+    if user_info is None or not user_info["owner"]:
+        return "Only the owner can add prompts to this lobby", 401
+
+    rules = request.json.get("rules")
+    name = request.json.get("name")
+    desc = request.json.get("desc")
+
+    lobbys.update_lobby(rules=rules, name=name, desc=desc)
+
+    return "Updated lobby", 200
+
+# Prompts
 @lobby_api.post("/<int:lobby_id>/prompts")
 @check_user
 @check_request_json({"start": str, "end": str})
