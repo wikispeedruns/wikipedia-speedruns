@@ -7,20 +7,47 @@
 {% endblock %}
 
 {% block content %}
-<div id="app" class="col-lg-4 col-md-6" >
+<div id="app" class="col-lg-8 col-md-12" >
     <form id="createForm" v-on:submit.prevent="handleSubmit">
         <div class="mb-3">
-            <label for="name" class="form-label">Name (Optional*)</label>
+            <label for="name" class="form-label"> <b>Name</b> (Optional*)</label>
             <input v-model="name" id="name" class="form-control">
         </div>
         <div class="mb-3">
-            <label for="desc" class="form-label">Description (Optional)</label>
+            <label for="desc" class="form-label"><b>Description</b> (Optional)</label>
             <textarea v-model="desc" id="desc" class="form-control"></textarea>
         </div>
 
-        <p>
-            Custom rules coming soon!
-        </p>
+
+        <details class="mb-3">
+            <summary>Custom Rules</summary>
+
+            <div class="form-check">
+
+                <input class="form-check-input" type="checkbox" id="comp-mode-checkbox" v-model="competitiveMode">
+                <label class="form-check-label" for="comp-mode-checkbox">
+                    <b>Competitive mode</b>
+                    <span class="text-muted fw-light">
+                        players can't see end prompt, and can only see leaderboard after playing
+                    </span>
+                </label>
+            </div>
+
+            <!--
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="req-acc-checkbox" v-model="requireAccount">
+                <label class="form-check-label" for="req-acc-checkbox">
+                    <b>Require accounts</b>
+                    <span class="text-muted fw-light">
+                        disables option to join with passcode, users must have a wikispeedruns account
+                    </span>
+                </label>
+            </div> -->
+
+
+
+        </details>
+
 
         <button type="submit" class="btn btn-light">Create Lobby</button>
 

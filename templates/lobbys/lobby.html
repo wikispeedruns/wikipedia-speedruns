@@ -163,9 +163,21 @@
                         </td>
 
                         <td>[[prompt.start]]</td>
-                        <td>[[prompt.end]]</td>
+                        <td v-bind:title="prompt.end === null ? 'Hidden due to competitive mode' : ''" >[[prompt.end || "-"]]</td>
 
-                        <td><a v-bind:href="'/lobby/' + lobbyInfo.lobby_id + '/leaderboard/' + prompt.prompt_id">Results</a></td>
+                        <td>
+                            <a
+                                v-if="prompt.end !== null"
+                                v-bind:href="'/lobby/' + lobbyInfo.lobby_id + '/leaderboard/' + prompt.prompt_id"
+                            >
+                                Results
+                            </a>
+                            <span v-else class="text-muted" title="Play to see the results!">
+                                Results
+                            </span>
+
+
+                        </td>
                         <td v-if="editPrompts">
                             <input type="checkbox" :value="prompt.prompt_id" v-model="selectedPrompts">
                         </td>
