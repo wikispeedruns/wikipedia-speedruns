@@ -161,8 +161,8 @@ def get_lobby(lobby_id: int) -> Optional[dict]:
         lobby = cursor.fetchone()
 
         try:
-            lobby["rules"] = json.loads(lobby["rules"])
-        except ValueError:
+            lobby["rules"] = json.loads(lobby.get("rules", "{}"))
+        except TypeError:
             lobby["rules"] = {}
 
     return lobby
