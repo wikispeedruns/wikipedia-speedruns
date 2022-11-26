@@ -57,13 +57,11 @@ function update_daily(daily_totals) {
 }
 
 async function get_data() {
-    let response = await fetch("/api/stats/totals");
-    const totals = await response.json();
-    update_totals(totals);
+    let response = await fetch("/api/stats/all");
+    const all_stats = await response.json();
 
-    response = await fetch("/api/stats/daily");
-    const daily_totals = await response.json();
-    update_daily(daily_totals);
+    update_totals(all_stats);
+    update_daily(all_stats);
 
     calculate_weekly_change();
 }

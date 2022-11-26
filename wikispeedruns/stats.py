@@ -1,11 +1,37 @@
 import gzip
 import json
 
+from enum import Enum
 from datetime import datetime
 from db import get_db, get_db_version
 from pymysql.cursors import DictCursor
 from flask import jsonify, make_response
 from util.flaskjson import CustomJSONEncoder
+
+class AggregateStat(Enum):
+    USERS = 'total_users',
+    GOOGLE_USERS = 'total_google_users',
+
+    RUNS = 'total_runs',
+    FINISHED_RUNS = 'total_finished_runs',
+    USER_RUNS = 'total_user_runs',
+    FINISHED_USER_RUNS = 'total_finished_user_runs',
+
+    QUICK_RUNS = 'total_quick_runs',
+    FINISHED_QUICK_RUNS = 'total_finished_quick_runs',
+    USER_QUICK_RUNS = 'total_user_quick_runs',
+    FINISHED_USER_QUICK_RUNS = 'total_finished_user_quick_runs',
+
+    MARATHONS = 'total_marathons',
+    FINISHED_MARATHONS = 'total_finished_marathons',
+    USER_MARATHONS = 'total_user_marathons',
+    FINISHED_USER_MARATHONS = 'total_finished_user_marathons',
+
+    LOBBIES = 'total_created_lobbies',
+    LOBBY_RUNS = 'total_lobby_runs',
+    FINISHED_LOBBY_RUNS = 'total_finished_lobby_runs'
+
+AggStat = AggregateStat
 
 def calculate_stats() -> dict:
     totals_json = calculate_total_stats()
@@ -27,33 +53,32 @@ def calculate_stats() -> dict:
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (stat_json_str, datetime.now())) 
-        
+
     db.commit()
 
 def calculate_total_stats():
     queries = {}
-    queries['total_users'] = "SELECT COUNT(*) AS users_total FROM users"
-    queries['total_google_users'] = 'SELECT COUNT(*) AS goog_total FROM users WHERE hash=""'
+    queries[AggStat.USERS] = "SELECT COUNT(*) AS users_total FROM users"
+    queries[AggStat.GOOGLE_USERS] = 'SELECT COUNT(*) AS goog_total FROM users WHERE hash=""'
 
-    queries['total_runs'] = "SELECT COUNT(*) AS sprints_total FROM sprint_runs"
+    queries[AggStat.RUNS] = "SELECT COUNT(*) AS sprints_total FROM sprint_runs"
+    queries[AggStat.FINISHED_RUNS] = "SELECT COUNT(*) AS sprints_finished FROM sprint_runs WHERE finished"
+    queries[AggStat.USER_RUNS] = "SELECT COUNT(*) AS user_runs FROM sprint_runs WHERE user_id IS NOT NULL"
+    queries[AggStat.FINISHED_USER_RUNS] = "SELECT COUNT(*) AS user_finished_runs FROM sprint_runs WHERE user_id IS NOT NULL AND finished"
 
-    queries['total_finished_runs'] = "SELECT COUNT(*) AS sprints_finished FROM sprint_runs WHERE finished"
-    queries['total_user_runs'] = "SELECT COUNT(*) AS user_runs FROM sprint_runs WHERE user_id IS NOT NULL"
-    queries['total_finished_user_runs'] = "SELECT COUNT(*) AS user_finished_runs FROM sprint_runs WHERE user_id IS NOT NULL AND finished"
+    queries[AggStat.QUICK_RUNS] = "SELECT COUNT(*) AS quick_runs_total FROM quick_runs"
+    queries[AggStat.FINISHED_QUICK_RUNS] = "SELECT COUNT(*) AS quick_runs_finished FROM quick_runs WHERE finished"
+    queries[AggStat.USER_QUICK_RUNS] = "SELECT COUNT(*) AS user_quick_runs FROM quick_runs WHERE user_id IS NOT NULL"
+    queries[AggStat.FINISHED_USER_QUICK_RUNS] = "SELECT COUNT(*) AS user_finished_quick_runs FROM quick_runs WHERE user_id IS NOT NULL AND finished"
 
-    queries['total_quick_runs'] = "SELECT COUNT(*) AS quick_runs_total FROM quick_runs"
-    queries['total_finished_quick_runs'] = "SELECT COUNT(*) AS quick_runs_finished FROM quick_runs WHERE finished"
-    queries['total_user_quick_runs'] = "SELECT COUNT(*) AS user_quick_runs FROM quick_runs WHERE user_id IS NOT NULL"
-    queries['total_finished_user_quick_runs'] = "SELECT COUNT(*) AS user_finished_quick_runs FROM quick_runs WHERE user_id IS NOT NULL AND finished"
-
-    queries['total_marathons'] = "SELECT COUNT(*) AS marathons_total FROM marathonruns"
-    queries['total_finished_marathons'] = "SELECT COUNT(*) AS marathons_finished FROM marathonruns where finished=TRUE"
-    queries['total_user_marathons'] = "SELECT COUNT(*) AS user_marathons FROM marathonruns WHERE user_id IS NOT NULL"
-    queries['total_finished_user_marathons'] = "SELECT COUNT(*) AS user_finished_marathons FROM marathonruns WHERE user_id IS NOT NULL AND finished=TRUE"
+    queries[AggStat.MARATHONS] = "SELECT COUNT(*) AS marathons_total FROM marathonruns"
+    queries[AggStat.FINISHED_MARATHONS] = "SELECT COUNT(*) AS marathons_finished FROM marathonruns where finished=TRUE"
+    queries[AggStat.USER_MARATHONS] = "SELECT COUNT(*) AS user_marathons FROM marathonruns WHERE user_id IS NOT NULL"
+    queries[AggStat.FINISHED_USER_MARATHONS] = "SELECT COUNT(*) AS user_finished_marathons FROM marathonruns WHERE user_id IS NOT NULL AND finished=TRUE"
     
-    queries['total_created_lobbies'] = "SELECT COUNT(*) AS lobbies_created FROM lobbys"
-    queries['total_lobby_runs'] = "SELECT COUNT(*) AS lobby_runs_total FROM lobby_runs"
-    queries['total_finished_lobby_runs'] = "SELECT COUNT(*) AS lobby_runs_finished FROM lobby_runs WHERE user_id IS NOT NULL AND finished=TRUE"
+    queries[AggStat.LOBBIES] = "SELECT COUNT(*) AS lobbies_created FROM lobbys"
+    queries[AggStat.LOBBY_RUNS] = "SELECT COUNT(*) AS lobby_runs_total FROM lobby_runs"
+    queries[AggStat.FINISHED_LOBBY_RUNS] = "SELECT COUNT(*) AS lobby_runs_finished FROM lobby_runs WHERE user_id IS NOT NULL AND finished=TRUE"
     results = {}
 
     db = get_db()
