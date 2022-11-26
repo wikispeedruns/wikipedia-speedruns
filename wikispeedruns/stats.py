@@ -33,7 +33,7 @@ class AggregateStat(Enum):
 
 AggStat = AggregateStat
 
-def calculate_stats() -> dict:
+async def async_calculate_stats() -> dict:
     totals_json = calculate_total_stats()
     daily_json = calculate_daily_stats()
 

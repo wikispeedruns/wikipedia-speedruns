@@ -1,3 +1,4 @@
+import asyncio
 import json
 from flask import Blueprint, jsonify
 from db import get_db
@@ -10,10 +11,9 @@ stats_api = Blueprint("stats", __name__, url_prefix="/api/stats")
 
 @stats_api.get("/calculate")
 @check_admin
-def async_calculate_stats():
-    # start a thread, process queries
-    stats.calculate_stats()
-    return 'succ', 200
+def calculate_stats():
+    asyncio.create_task(stats.async_calculate_stats())
+    return 'Success', 200
 
 @stats_api.get("/all")
 @check_admin
