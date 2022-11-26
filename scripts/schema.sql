@@ -2,7 +2,7 @@
     This file should have parity with the actual database.
     For any changes to the database, those changes should be reflected here.
 
-    Schema Version: 2.2
+    Schema Version: 2.3
     This version number should be incremented with any change to the schema.
     Keep this up-to-date with db.py
 */
@@ -231,3 +231,9 @@ CREATE TABLE IF NOT EXISTS `quick_runs` (
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
 );
 
+-- Stats
+CREATE TABLE IF NOT EXISTS `computed_stats` (
+    `stats_json` JSON NOT NULL,
+    `timestamp` TIMESTAMP(3) NOT NULL,
+    PRIMARY KEY (`timestamp`)      
+);

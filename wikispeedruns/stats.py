@@ -1,10 +1,34 @@
 import gzip
 import json
 
-from db import get_db
+from datetime import datetime
+from db import get_db, get_db_version
 from pymysql.cursors import DictCursor
 from flask import jsonify, make_response
 from util.flaskjson import CustomJSONEncoder
+
+def calculate_stats() -> dict:
+    totals_json = calculate_total_stats()
+    daily_json = calculate_daily_stats()
+
+    merged_json = totals_json
+    merged_json.update(daily_json)
+
+    stat_json_str = json.dumps({
+        'version': get_db_version(),
+        'stats': merged_json
+    }, cls=CustomJSONEncoder)
+
+    query = '''
+    INSERT INTO `computed_stats` (`stats_json`, `timestamp`) 
+    VALUES (%s, %s)
+    '''
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (stat_json_str, datetime.now())) 
+        
+    db.commit()
 
 def calculate_total_stats():
     queries = {}
@@ -37,7 +61,8 @@ def calculate_total_stats():
         for _, query in queries.items():
             cursor.execute(query)
             results.update(cursor.fetchall()[0])
-        return jsonify(results)
+    
+    return results
 
 def calculate_daily_stats():
     queries = {}
@@ -343,9 +368,4 @@ def calculate_daily_stats():
             cursor.execute(query)
             results[name] = cursor.fetchall()
     
-    content = gzip.compress(json.dumps(results, cls=CustomJSONEncoder).encode('utf8'), compresslevel=5)
-    response = make_response(content)
-    response.headers['Content-Length'] = len(content)
-    response.headers['Content-Encoding'] = 'gzip'
-
-    return response
+    return results
