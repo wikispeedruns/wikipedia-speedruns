@@ -58,11 +58,13 @@ function update_daily(daily_totals) {
 
 async function get_data() {
     let response = await fetch("/api/stats/all");
-    const all_stats = await response.json();
+    let res_json = await response.json();
+    const all_stats = JSON.parse(res_json['stats_json'])['stats'];
 
     update_totals(all_stats);
     update_daily(all_stats);
 
+    app.last_updated = new Date(res_json['timestamp']);
     calculate_weekly_change();
 }
 
@@ -431,7 +433,8 @@ var app = new Vue({
             finished_lobby_runs_per_user: [],
             active_lobby_users: []
         },
-        active_tab: 'users'
+        active_tab: 'users',
+        last_updated: ''
     },
     methods: {
         is_active(tab_name) {

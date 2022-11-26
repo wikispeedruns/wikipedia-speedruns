@@ -127,3 +127,7 @@ canvas {
 .mid {
 	color: #ede53b;
 }
+
+.updated-time {
+    text-align: center;
+}
