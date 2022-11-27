@@ -1,4 +1,6 @@
 import Vue from "vue/dist/vue.esm.js";
+import { fetchJson } from "../../modules/fetch.js";
+
 const Chart = require('chart.js');
 
 
@@ -442,7 +444,19 @@ var app = new Vue({
         },
         set_active(tab_name) {
             this.active_tab = tab_name
-        }
+        },
+        async refresh_stats(event) {
+            try {
+                const response = await fetchJson("/api/stats/calculate", 'GET');
+                if (response.status === 200) {
+                    alert("New stat calculation underway.");
+                } else if (response.status === 503) {
+                    alert("Server currently processing stats! Check back in a bit.");
+                }
+            } catch (e) {
+                alert(e);
+            }
+        },
     },
 
     created: async function () {

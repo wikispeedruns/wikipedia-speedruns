@@ -1,13 +1,13 @@
-import gzip
 import json
 
+from multiprocessing import Lock
 from enum import Enum
 from datetime import datetime
 from db import get_db, get_db_version
 from pymysql.cursors import DictCursor
-from flask import jsonify, make_response
 from util.flaskjson import CustomJSONEncoder
 
+calc_stat_lock = Lock()
 class AggregateStat(Enum):
     USERS = 'total_users',
     GOOGLE_USERS = 'total_google_users',
@@ -33,9 +33,9 @@ class AggregateStat(Enum):
 
 AggStat = AggregateStat
 
-async def async_calculate_stats() -> dict:
-    totals_json = calculate_total_stats()
-    daily_json = calculate_daily_stats()
+def calculate() -> dict:
+    totals_json = _calculate_total_stats()
+    daily_json = _calculate_daily_stats()
 
     merged_json = totals_json
     merged_json.update(daily_json)
@@ -56,7 +56,7 @@ async def async_calculate_stats() -> dict:
 
     db.commit()
 
-def calculate_total_stats():
+def _calculate_total_stats():
     queries = {}
     queries[AggStat.USERS] = "SELECT COUNT(*) AS users_total FROM users"
     queries[AggStat.GOOGLE_USERS] = 'SELECT COUNT(*) AS goog_total FROM users WHERE hash=""'
@@ -89,7 +89,7 @@ def calculate_total_stats():
     
     return results
 
-def calculate_daily_stats():
+def _calculate_daily_stats():
     queries = {}
     queries['daily_new_users'] = '''
     WITH data AS (
