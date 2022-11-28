@@ -49,19 +49,20 @@ def _create_run(prompt_id, lobby_id=None, user_id=None, name=None):
     '''
 
     query_args = {
-        "prompt_id" : prompt_id
+        "prompt_id" : prompt_id,
+        "start_time": datetime.now(),
     }
 
 
     if lobby_id is None:
-        query = "INSERT INTO `sprint_runs` (`prompt_id`,`user_id`) \
-                 VALUES (%(prompt_id)s, %(user_id)s);"
+        query = "INSERT INTO `sprint_runs` (`prompt_id`,`user_id`, `start_time`) \
+                 VALUES (%(prompt_id)s, %(user_id)s, %(start_time)s);"
 
         query_args["user_id"] = user_id
 
     else:
-        query = "INSERT INTO `lobby_runs` (`lobby_id`, `prompt_id`,  `user_id`, `name`) \
-                 VALUES (%(lobby_id)s, %(prompt_id)s, %(user_id)s, %(name)s)"
+        query = "INSERT INTO `lobby_runs` (`lobby_id`, `prompt_id`,  `user_id`, `start_time`, `name`) \
+                 VALUES (%(lobby_id)s, %(prompt_id)s, %(user_id)s, %(start_time)s, %(name)s)"
 
         if (user_id is None and name is None):
             raise ValueError("'user_id' or 'name' should be defined for lobby prompt")
