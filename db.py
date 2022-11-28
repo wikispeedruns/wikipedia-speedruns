@@ -50,4 +50,5 @@ def use_instance_db(conn={}):
         _instance_db = pymysql.connect(**conn)
         yield _instance_db
     finally:
-        _instance_db.close()
+        if _instance_db is not None:
+            _instance_db.close()
