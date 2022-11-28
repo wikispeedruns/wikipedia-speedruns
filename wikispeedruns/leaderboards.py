@@ -25,6 +25,51 @@ def get_db():
     return conn
 '''
 
+LEADERBOARD_COLUMNS = ['run_id',
+        'start_time',
+        'end_time',
+        'play_time',
+        'finished',
+        'path',
+        'prompt_id',
+        'user_id',
+        'username',
+        'rank',
+        'numRuns',
+        'path_length']
+
+BASE_ALIAS = 'runs'
+OUTER_ALIAS = 'processed_runs'
+
+def _query_select_columns(table):
+    separator = ', '
+    if __debug__:
+        separator = ',\n\t'
+
+    return separator.join([f'{table}.{column}' for column in LEADERBOARD_COLUMNS])
+
+def _query_current_run_clause(table, run_id=None):
+    if run_id is None:
+        return '0'
+
+    return f'({table}.run_id = %(run_id)s AND {table}.prompt_id = %(prompt_id)s)'
+
+def _query_sort_expr(table, sort_mode, sort_asc):
+    sort_exp = ''
+    if (sort_mode == 'time'):
+        sort_exp = 'play_time'
+    elif (sort_mode == 'length'):
+        sort_exp = f"JSON_LENGTH({table}.`path`, '$.path'), play_time"
+    elif (sort_mode == 'start'):
+        sort_exp = 'start_time'
+    else:
+        raise ValueError(f"Invalid sort mode '{sort_mode}'")
+
+    if not sort_asc:
+        sort_exp += ' DESC'
+    
+    return sort_exp
+
 # Get runs for a prompt, with lots of options (described below)
 # See bottom of file for example usage
 def get_leaderboard_runs(
@@ -175,22 +220,6 @@ def get_leaderboard_runs(
             raise ValueError(f"Invalid user_run_mode '{user_run_mode}'")
 
 
-
-    # Sorting
-    sort_exp = ''
-    if (sort_mode == 'time'):
-        sort_exp = 'play_time'
-    elif (sort_mode == 'length'):
-        sort_exp = "JSON_LENGTH(runs.`path`, '$.path'), play_time" # note this relies on the select aliasing a path_length column below
-    elif (sort_mode == 'start'):
-        sort_exp = 'start_time'
-    else:
-        raise ValueError(f"Invalid sort mode '{sort_mode}'")
-
-    if not sort_asc:
-        sort_exp += ' DESC'
-
-
     # Pagination, default 1 so all articles are chosen
     pagination_clause = '1'
     if limit is not None:
@@ -198,39 +227,41 @@ def get_leaderboard_runs(
         query_args['page_start'] = offset + 1
         query_args['page_end'] = offset + limit
 
+    # Sorting
+    base_sort_expr = _query_sort_expr(BASE_ALIAS, sort_mode, sort_asc)
+    outer_sort_expr = _query_sort_expr(OUTER_ALIAS, sort_mode, sort_asc)
 
     # Current Run
-    current_run_clause = '0'
+    base_current_run_clause = _query_current_run_clause(BASE_ALIAS, run_id)
+    outer_current_run_clause = _query_current_run_clause(OUTER_ALIAS, run_id)
     if run_id is not None:
-        # TODO this is gross and hacky and relies on runs being the alias for both outer and
-        # actual table
-        current_run_clause = 'runs.run_id = %(run_id)s'
         query_args['run_id'] = run_id
 
     # Some specifics
     assert(len(conditions) > 0)
 
-    # TODO maybe don't use * here and instead select specific columns?
     # TODO save path length elsewhere?
     # TODO query performance with row_number might not be great
 
     query = f"""
-    SELECT runs.* FROM (
+    SELECT
+        {_query_select_columns(OUTER_ALIAS)}
+    FROM (
         SELECT
-            runs.*,
+            {BASE_ALIAS}.*,
             users.username,
-            ROW_NUMBER() OVER (ORDER BY {sort_exp}) AS `rank`,
+            ROW_NUMBER() OVER (ORDER BY {base_sort_expr}) AS `rank`,
             COUNT(*) OVER () AS numRuns,
-            JSON_LENGTH(runs.`path`, '$.path') AS path_length
-        FROM {base_table} AS runs
+            JSON_LENGTH({BASE_ALIAS}.`path`, '$.path') AS path_length
+        FROM {base_table} AS {BASE_ALIAS} 
         LEFT JOIN {prompts_table} AS prompts ON {prompts_join}
-        LEFT JOIN users ON users.user_id=runs.user_id
+        LEFT JOIN users ON users.user_id={BASE_ALIAS}.user_id
         {group_subquery}
-        WHERE ({' AND '.join(conditions)}) OR {current_run_clause}
-        ORDER BY {sort_exp}
-    ) AS runs
-    WHERE {pagination_clause} OR {current_run_clause}
-    ORDER BY {sort_exp}
+        WHERE ({' AND '.join(conditions)}) OR {base_current_run_clause}
+        ORDER BY {base_sort_expr}
+    ) AS {OUTER_ALIAS} 
+    WHERE {pagination_clause} OR {outer_current_run_clause}
+    ORDER BY {outer_sort_expr}
     """
 
     if query_only:
