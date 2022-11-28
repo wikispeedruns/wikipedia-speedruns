@@ -5,7 +5,7 @@ from pymysql.cursors import DictCursor
 from wikispeedruns import stats
 from util.decorators import check_admin
 from util.lock_utils import locked
-from util.process_utils import start_process
+from util.process_utils import start_process_with_db
 
 stats_api = Blueprint("stats", __name__, url_prefix="/api/stats")
 
@@ -19,7 +19,7 @@ def calculate_stats():
     if locked(stats.calc_stat_lock):
         return 'Stat calculation in progress, check back later.', 503
 
-    start_process(_calc_stats, (stats.calc_stat_lock,))
+    start_process_with_db(_calc_stats, (stats.calc_stat_lock,))
     return 'Success', 200
 
 @stats_api.get("/all")
