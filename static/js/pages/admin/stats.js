@@ -58,8 +58,8 @@ function update_daily(daily_totals) {
     app.daily.active_lobby_users = daily_totals['active_lobby_users'];
 }
 
-async function get_data() {
-    let response = await fetch("/api/stats/all");
+async function get_data(res=null) {
+    let response = res ?? await fetch("/api/stats/all");
     let res_json = await response.json();
     const all_stats = JSON.parse(res_json['stats_json'])['stats'];
 
@@ -436,7 +436,9 @@ var app = new Vue({
             active_lobby_users: []
         },
         active_tab: 'users',
-        last_updated: ''
+        loading: false,
+        last_updated: '',
+        last_request_time: ''
     },
     methods: {
         is_active(tab_name) {
@@ -445,14 +447,34 @@ var app = new Vue({
         set_active(tab_name) {
             this.active_tab = tab_name
         },
+        async poll_stats() {
+            let response = await fetch("/api/stats/all");
+            let res_json = await response.json(); 
+            let last_updated = new Date(res_json['timestamp']);
+
+            // Check if the most recently updated time is past the request time
+            // Otherwise check again in 5 seconds
+            if (last_updated >= this.last_request_time) {
+                this.loading = false;
+                window.location.reload();
+                return;
+            }
+
+            setTimeout(this.poll_stats, 5 * 1000);
+        },
         async refresh_stats(event) {
             try {
                 const response = await fetchJson("/api/stats/calculate", 'GET');
                 if (response.status === 200) {
                     alert("New stat calculation underway.");
+                    this.last_request_time = new Date();
+                    this.loading = true;
                 } else if (response.status === 503) {
                     alert("Server currently processing stats! Check back in a bit.");
                 }
+                
+                // Check in 30s to see if stats are done calculating
+                setTimeout(this.poll_stats, 30 * 1000);
             } catch (e) {
                 alert(e);
             }
