@@ -52,7 +52,7 @@ def calculate() -> dict:
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query, (stat_json_str, datetime.now())) 
+        cursor.execute(query, (stat_json_str, datetime.now().isoformat())) 
 
     db.commit()
 

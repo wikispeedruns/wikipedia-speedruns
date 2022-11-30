@@ -12,7 +12,8 @@
 
 <div id="app">
     <div class="updated-time">Last Updated: [[last_updated.toLocaleString()]]     
-        <a href="#" @click="refresh_stats"><i class="bi bi-arrow-clockwise"></i></a>
+        <a v-if="!loading" href="#" @click="refresh_stats"><i class="bi bi-arrow-clockwise"></i></a>
+        <div v-else>Loading... [[load_time_sec]]</div>
     </div>
     <div class="box-wrapper" @click.prevent>
         <a class="box" @click="set_active('users')" :class="{active: is_active('users')}">

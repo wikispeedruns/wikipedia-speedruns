@@ -35,16 +35,12 @@ def close_db(exception):
         db.close()
 
 @contextmanager
-def use_instance_db(conn={}):
+def use_instance_db(conn):
     """
     Usage: 
-    with use_instance_db() as db:
+    with use_instance_db(conn) as db:
         do stuff with db
     """
-    if not conn:
-        # Needs to have app context if no conn info passed in
-        conn = get_conn_info() 
-
     try:
         global _instance_db
         _instance_db = pymysql.connect(**conn)
