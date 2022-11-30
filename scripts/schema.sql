@@ -2,7 +2,7 @@
     This file should have parity with the actual database.
     For any changes to the database, those changes should be reflected here.
 
-    Schema Version: 2.2
+    Schema Version: 2.3
     This version number should be incremented with any change to the schema.
     Keep this up-to-date with db.py
 */
@@ -231,3 +231,26 @@ CREATE TABLE IF NOT EXISTS `quick_runs` (
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
 );
 
+-- Stats
+CREATE TABLE IF NOT EXISTS `computed_stats` (
+    `stats_json` JSON NOT NULL,
+    /*
+    {
+        version: number - The database version number.
+        stats: dict[stat_name: str, stat_val: number | Any] - See stats.py for list of included stats. Newer stats not guaranteed to be included in older runs.
+    }
+        example stats payload:
+        stats: {
+            .
+            .
+            daily_quick_runs: []
+            daily_sprints: [{daily_plays: 41, day: "2022-11-09", total: "41"}, {daily_plays: 41, day: "2022-11-10", total: "82"},…]
+            goog_total: 0
+            lobbies_created: 41
+            .
+            .
+        }
+    */
+    `timestamp` TIMESTAMP(3) NOT NULL,
+    PRIMARY KEY (`timestamp`)      
+);
