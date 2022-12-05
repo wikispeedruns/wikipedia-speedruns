@@ -35,7 +35,8 @@ def convert_to_standard(raw_data: Dict[str, Any]) -> Dict[str, Any]:
     version_map = get_version_map()
     path = json.loads(raw_data["path"])
     version = path["version"]
-    return version_map[version](raw_data)
+    version_func = version_map[version] if version in version_map else version_2_1
+    return version_func(raw_data)
 
 def check_data(raw_data: Dict[str, Any]) -> bool:
     return raw_data["finished"] and raw_data["user_id"]
