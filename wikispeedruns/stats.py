@@ -16,9 +16,9 @@ class AggregateStat(Enum):
     WAU = 'weekly_active_users',
     MAU = 'monthly_active_users',
 
-    FDAU = 'daily_active_users_finished_run',
-    FWAU = 'weekly_active_users_finished_run',
-    FMAU = 'monthly_active_users_finished_run',
+    FDAU = 'daily_active_users_finished',
+    FWAU = 'weekly_active_users_finished',
+    FMAU = 'monthly_active_users_finished',
 
     RUNS = 'total_runs',
     FINISHED_RUNS = 'total_finished_runs',
@@ -64,18 +64,42 @@ def calculate() -> dict:
 
     db.commit()
 
+def _active_user_query(freq, finished=False):
+    mapping = {'daily':'DAY', 'weekly':'WEEK', 'monthly':'MONTH'}
+    if freq not in mapping:
+        raise KeyError(f'{freq} not in {{daily, weekly, monthly}}')
+
+    finished_cond = ''
+    finished_col_name = ''
+    if finished:
+        finished_cond = 'finished AND'
+        finished_col_name = '_finished'
+
+    return f'''
+    SELECT COUNT(DISTINCT user_id) AS {freq}_active_users{finished_col_name} 
+    FROM (
+        SELECT DISTINCT user_id
+        FROM sprint_runs
+        WHERE {finished_cond} start_time > NOW() - INTERVAL 1 {mapping[freq]}
+        UNION
+        SELECT DISTINCT user_id
+        FROM lobby_runs
+        WHERE {finished_cond} start_time > NOW() - INTERVAL 1 {mapping[freq]}
+    ) users
+    '''
+    
 def _calculate_total_stats():
     queries = {}
     queries[AggStat.USERS] = "SELECT COUNT(*) AS users_total FROM users"
     queries[AggStat.GOOGLE_USERS] = 'SELECT COUNT(*) AS goog_total FROM users WHERE hash=""'
     
-    queries[AggStat.DAU] = "SELECT COUNT(DISTINCT user_id) AS daily_active_users FROM sprint_runs WHERE user_id IS NOT NULL AND start_time > NOW() - INTERVAL 1 DAY"
-    queries[AggStat.WAU] = "SELECT COUNT(DISTINCT user_id) AS weekly_active_users FROM sprint_runs WHERE user_id IS NOT NULL AND start_time > NOW() - INTERVAL 1 WEEK"
-    queries[AggStat.MAU] = "SELECT COUNT(DISTINCT user_id) AS monthly_active_users FROM sprint_runs WHERE user_id IS NOT NULL AND start_time > NOW() - INTERVAL 1 MONTH"
+    queries[AggStat.DAU] = _active_user_query('daily')
+    queries[AggStat.WAU] = _active_user_query('weekly')
+    queries[AggStat.MAU] = _active_user_query('monthly')
 
-    queries[AggStat.FDAU] = "SELECT COUNT(DISTINCT user_id) AS daily_active_users_finished_run FROM sprint_runs WHERE user_id IS NOT NULL AND finished AND start_time > NOW() - INTERVAL 1 DAY"
-    queries[AggStat.FWAU] = "SELECT COUNT(DISTINCT user_id) AS weekly_active_users_finished_run FROM sprint_runs WHERE user_id IS NOT NULL AND finished AND start_time > NOW() - INTERVAL 1 WEEK"
-    queries[AggStat.FMAU] = "SELECT COUNT(DISTINCT user_id) AS monthly_active_users_finished_run FROM sprint_runs WHERE user_id IS NOT NULL AND finished AND start_time > NOW() - INTERVAL 1 MONTH"
+    queries[AggStat.FDAU] = _active_user_query('daily', finished=True)
+    queries[AggStat.FWAU] = _active_user_query('weekly', finished=True)
+    queries[AggStat.FMAU] = _active_user_query('monthly', finished=True)
 
     queries[AggStat.RUNS] = "SELECT COUNT(*) AS sprints_total FROM sprint_runs"
     queries[AggStat.FINISHED_RUNS] = "SELECT COUNT(*) AS sprints_finished FROM sprint_runs WHERE finished"
