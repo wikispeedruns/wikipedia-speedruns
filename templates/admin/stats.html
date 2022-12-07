@@ -56,6 +56,15 @@
     </div>
 
     <div class="tab-content">
+        <div class="active-user-group">
+            <div class="active-user-box daily grow">DAU [[totals.daily_active_users]]</div>
+            <div class="active-user-box weekly grow">WAU [[totals.weekly_active_users]]</div>
+            <div class="active-user-box monthly grow">MAU [[totals.monthly_active_users]]</div>
+            <div></div>
+            <div class="active-user-box daily grow">FDAU [[totals.daily_active_users_finished]]</div>
+            <div class="active-user-box weekly grow">FWAU [[totals.daily_active_users_finished]]</div>
+            <div class="active-user-box monthly grow">FMAU [[totals.daily_active_users_finished]]</div>
+        </div>
         <div class="tab-pane fade" :class="{'active show': is_active('users')}">
             <div class="col-xs-6">
                 <canvas id="daily-users" width="{{chart_width}}" height="{{chart_height}}"></canvas>

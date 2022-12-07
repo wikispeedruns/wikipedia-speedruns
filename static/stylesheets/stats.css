@@ -90,6 +90,36 @@ canvas {
 	padding: 1em;
 }
 
+.daily {
+    background: #1976D2;
+}
+
+.weekly {
+    background: #1565C0;
+}
+
+.monthly {
+    background: #0D47A1;
+}
+
+.active-user-group {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: .6em;
+}
+
+.active-user-box {
+    border-radius: 5px;
+
+    margin-bottom: 2em;
+    margin-top: .5em;
+
+    padding-left: .5em;
+    padding-right: .5em;
+    color: white;
+}
+
 .stats {
 	color: #fff;
 	position: relative;
@@ -130,4 +160,12 @@ canvas {
 
 .updated-time {
     text-align: center;
+}
+
+.grow { 
+    transition: all .1s ease-in-out; 
+}
+    
+.grow:hover { 
+    transform: scale(1.05); 
 }
