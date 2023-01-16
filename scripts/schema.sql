@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS `lobby_prompts` (
     `prompt_id` INT NOT NULL,
     `start` VARCHAR(255) NOT NULL,
     `end` VARCHAR(255) NOT NULL,
-    `language` VARCHAR(3) NOT NULL,
+    `language` VARCHAR(31) NOT NULL,
     PRIMARY KEY (`lobby_id`, `prompt_id`),
     FOREIGN KEY (`lobby_id`) REFERENCES `lobbys`(`lobby_id`)
 );
@@ -227,7 +227,7 @@ CREATE TABLE IF NOT EXISTS `quick_runs` (
     */
     `prompt_start` VARCHAR(255) NOT NULL,
     `prompt_end` VARCHAR(255) NOT NULL,
-    `language` VARCHAR(3) NOT NULL,
+    `language` VARCHAR(31) NOT NULL,
     `user_id` INT,
     PRIMARY KEY (`run_id`),
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
