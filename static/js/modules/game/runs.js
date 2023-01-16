@@ -1,10 +1,10 @@
 import { fetchJson } from "../fetch.js";
 
-async function startRun(promptId, lobbyId, promptStart, promptEnd) {
+async function startRun(promptId, lobbyId, promptStart, promptEnd, language) {
 
     let endpoint = null;
     if(promptId == null) {
-        endpoint = `/api/quick_runs/runs?prompt_start=${promptStart}&prompt_end=${promptEnd}`;
+        endpoint = `/api/quick_runs/runs?prompt_start=${promptStart}&prompt_end=${promptEnd}&lang=${language}`;
     }
     else if(lobbyId == null) endpoint = `/api/sprints/${promptId}/runs`;
     else endpoint = `/api/lobbys/${lobbyId}/prompts/${promptId}/runs`;

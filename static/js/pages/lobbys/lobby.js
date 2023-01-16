@@ -1,7 +1,7 @@
 import Vue from "vue/dist/vue.esm.js";
 
 import { fetchJson } from "../../modules/fetch.js";
-import { checkArticles } from "../../modules/wikipediaAPI/util.js";
+import { checkArticles, getSupportedLanguages, getRandomArticle } from "../../modules/wikipediaAPI/util.js";
 import { PromptGenerator } from "../../modules/generator.js"
 import { AutocompleteInput } from "../../modules/autocomplete.js"
 import { UserDisplay } from "../../modules/userDisplay.js"
@@ -20,6 +20,8 @@ var app = new Vue({
     data: {
         startPrompt:"",
         endPrompt:"",
+        language: "en",
+        languages: [],
         addPromptMessage:"",
 
         prompts: [],
@@ -53,6 +55,7 @@ var app = new Vue({
 
     mounted: function() {
         this.link = window.location.href;
+        this.getLanguages();
     },
 
     methods: {
@@ -100,8 +103,16 @@ var app = new Vue({
 
         },
 
+        async getLanguages() {
+            this.languages = await getSupportedLanguages();
+        },
+
         async generateRndPrompt(prompt) {
-            [this[prompt]] = await this.$refs.pg.generatePrompt();
+            if (this.language === 'en') {
+                [this[prompt]] = await this.$refs.pg.generatePrompt();
+            } else {
+                this[prompt] = await getRandomArticle(this.language);
+            }
         },
 
         clearMessage() {
@@ -117,15 +128,18 @@ var app = new Vue({
         async considerPrompt() {
             this.addPromptMessage = "";
 
-            const res = await checkArticles(this.startPrompt, this.endPrompt);
+            const res = await checkArticles(this.startPrompt, this.endPrompt, this.language);
             if(res.err) {
                 this.addPromptMessage = res.err;
                 return;
             }
 
+            console.log(res);
+
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}/prompts`, "POST", {
                 "start": res.body.start,
-                "end": res.body.end
+                "end": res.body.end,
+                "language": res.body.lang,
             });
             if(resp.status !== 200){
                 this.addPromptMessage = "Error adding prompt to database"

@@ -17,7 +17,7 @@ def get_conn_info():
 
 # Keep up to date with scripts/schema.sql
 def get_db_version():
-    return '2.3'
+    return '2.4'
 
 def get_db():
     if _instance_db:

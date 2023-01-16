@@ -110,7 +110,7 @@ def update_lobby(lobby_id):
 # Prompts
 @lobby_api.post("/<int:lobby_id>/prompts")
 @check_user
-@check_request_json({"start": str, "end": str})
+@check_request_json({"start": str, "end": str, "language": str})
 def add_lobby_prompt(lobby_id):
     user_id = session.get("user_id")
     user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
@@ -120,8 +120,9 @@ def add_lobby_prompt(lobby_id):
 
     start = request.json["start"]
     end = request.json["end"]
+    language = request.json["language"]
 
-    lobbys.add_lobby_prompt(lobby_id, start, end)
+    lobbys.add_lobby_prompt(lobby_id, start, end, language)
     return "Prompt Added!", 200
 
 

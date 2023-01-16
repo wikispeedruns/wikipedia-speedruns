@@ -89,15 +89,16 @@ def create_lobby_run(prompt_id: int, lobby_id: int, user_id: Optional[int] = Non
 def create_sprint_run(prompt_id: int, user_id=Optional[int]) -> int:
     return _create_run(prompt_id=prompt_id, user_id=user_id, name=None)
 
-def create_quick_run(prompt_start: str, prompt_end: str, user_id: Optional[int] = None) -> int:
+def create_quick_run(prompt_start: str, prompt_end: str, language: str, user_id: Optional[int] = None) -> int:
     query_args = {
         "prompt_start": prompt_start,
         "prompt_end": prompt_end,
+        "language": language,
         "user_id": user_id
     }
 
-    query = "INSERT INTO `quick_runs` (`prompt_start`, `prompt_end`, `user_id`) \
-        VALUES (%(prompt_start)s, %(prompt_end)s, %(user_id)s);"
+    query = "INSERT INTO `quick_runs` (`prompt_start`, `prompt_end`, `language`, `user_id`) \
+        VALUES (%(prompt_start)s, %(prompt_end)s, %(language)s, %(user_id)s);"
     
     sel_query = "SELECT LAST_INSERT_ID()"
 

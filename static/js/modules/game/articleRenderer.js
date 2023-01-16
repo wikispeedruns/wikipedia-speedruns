@@ -5,12 +5,13 @@ export class ArticleRenderer {
     /* frame: DOM element (i.e. through getElementById) to render article in
      * pageCallback: Called upon loading an article, should expect new page and load time
      */
-    constructor(frame, pageCallback, mouseEnter, mouseLeave, loadCallback=null) {
+    constructor(frame, pageCallback, mouseEnter, mouseLeave, loadCallback, language) {
         this.frame = frame;
         this.pageCallback = pageCallback;
         this.loadCallback = loadCallback;
         this.mouseEnter = mouseEnter;
         this.mouseLeave = mouseLeave;
+        this.language = language;
     }
 
     async loadPage(page) {
@@ -21,7 +22,7 @@ export class ArticleRenderer {
 
             const isMobile = window.screen.width < 768;
             const startTime = Date.now();
-            const body = await getArticle(page, isMobile);
+            const body = await getArticle(page, isMobile, this.language);
 
             this.frame.innerHTML = body["text"]["*"];
 
@@ -54,7 +55,7 @@ export class ArticleRenderer {
                 }
                 el.removeAttribute("title");
 
-                if (!isMobile && el.hasAttribute("href") && el.getAttribute("href").startsWith("/wiki/")) {
+                if (this.mouseEnter && this.mouseLeave && !isMobile && el.hasAttribute("href") && el.getAttribute("href").startsWith("/wiki/")) {
                     el.onmouseenter = this.mouseEnter;
                     el.onmouseleave = this.mouseLeave;
                 }

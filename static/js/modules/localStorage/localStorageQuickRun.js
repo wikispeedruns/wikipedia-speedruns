@@ -3,11 +3,12 @@ import { getLocalStorageRuns, addRunToLocalStorage, setLocalStorageRuns } from "
 
 const location = "WS-S-quick-runs"
 
-function startLocalQuickRun(promptStart, promptEnd, runId) {
+function startLocalQuickRun(promptStart, promptEnd, runId, language) {
     const data = {
         run_id: runId,
         prompt_start: promptStart,
-        prompt_end: promptEnd
+        prompt_end: promptEnd,
+        language: language,
     };
 
     const key = location;
@@ -15,10 +16,11 @@ function startLocalQuickRun(promptStart, promptEnd, runId) {
     addRunToLocalStorage(key, data);
 }
 
-function submitLocalQuickRun(promptStart, promptEnd, runId, startTime, endTime, finished, path) {
+function submitLocalQuickRun(promptStart, promptEnd, runId, startTime, endTime, finished, path, language) {
     let data = {
         prompt_start: promptStart,
         prompt_end: promptEnd,
+        language: language,
         start_time: startTime,
         end_time: endTime,
         finished: finished,

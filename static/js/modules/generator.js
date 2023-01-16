@@ -6,7 +6,7 @@ async function getGeneratedPrompt(difficulty=10000, num=1) {
     const prompts = await response.json();
 
     // Load prompts simultaneously
-    return await Promise.all(prompts.map(getArticleTitle));
+    return await Promise.all(prompts.map(prompt => getArticleTitle(prompt)));
 }
 
 var PromptGenerator = {
