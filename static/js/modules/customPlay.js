@@ -65,7 +65,7 @@ var CustomPlay = {
                     start = await getRandomArticle(this.language);
                     end = await getRandomArticle(this.language);
                 }
-                
+
                 console.log("start: " + start + " end: " + end);
                 resp = await checkArticles(start, end, this.language);
             } while (resp.err);
@@ -79,8 +79,8 @@ var CustomPlay = {
             <div class="row">
                 <div class="col-md-2 mb-2">
                     <select class="form-select" v-model="language">
-                        <option selected>en</option>
-                        <option v-for="lang in languages">{{ lang }}</option>
+                        <option selected value="en"> English (en) </option>
+                        <option v-for="lang in languages" v-bind:value="lang.code">{{ lang.name }} ({{lang.code}})</option>
                     </select>
                 </div>
                 <div class="col-md mb-2">

@@ -70,7 +70,7 @@ async function checkArticles(start, end, lang = 'en') {
         resp.err = `"${end}" is not a Wikipedia article`;
         return resp;
     }
-    
+
     if(resp.body.start === resp.body.end) {
         resp.err = "The start and end articles are the same";
         return resp;
@@ -128,7 +128,10 @@ async function getSupportedLanguages() {
         if (langprop.code && langprop.site) {
             for (const siteprop of langprop.site) {
                 if (siteprop.code === 'wiki') {
-                    langs.push(langprop.code);
+                    langs.push( {
+                        "code": langprop.code,
+                        "name": langprop.name
+                    });
                     break;
                 }
             }

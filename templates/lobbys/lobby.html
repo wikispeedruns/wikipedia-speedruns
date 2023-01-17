@@ -107,8 +107,8 @@
             <div class="my-2 row">
                 <div class="col-md-6 col-sm-8">
                     <select class="form-select" v-model="language">
-                        <option selected>en</option>
-                        <option v-for="lang in languages">[[lang]]</option>
+                        <option selected value="en"> English (en) </option>
+                        <option v-for="lang in languages" v-bind:value="lang.code">[[lang.name]] ([[lang.code]])</option>
                     </select>
                 </div>
             </div>
