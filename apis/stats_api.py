@@ -10,7 +10,7 @@ from util.process_utils import start_process_with_db
 stats_api = Blueprint("stats", __name__, url_prefix="/api/stats")
 
 def _calc_stats(lock):
-    with lock: 
+    with lock:
         stats.calculate()
 
 @stats_api.get("/calculate")
@@ -25,14 +25,11 @@ def calculate_stats():
 @stats_api.get("/all")
 @check_admin
 def get_total_stats():
+    # see https://stackoverflow.com/a/67266529/5613935 for some issues with doing this other ways
     most_recent_stats_query = """
-    SELECT 
-        stats_json, 
-        DATE_FORMAT(timestamp, '%Y-%m-%dT%TZ') AS timestamp
-    FROM `computed_stats` 
-    ORDER BY `timestamp` 
-    DESC 
-    LIMIT 1
+        SELECT stats_json, DATE_FORMAT(timestamp, '%Y-%m-%dT%TZ')
+        FROM `computed_stats`
+        WHERE timestamp IN (SELECT MAX(timestamp) FROM `computed_stats`);
     """
 
     db = get_db()
