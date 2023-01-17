@@ -25,7 +25,15 @@ def calculate_stats():
 @stats_api.get("/all")
 @check_admin
 def get_total_stats():
-    most_recent_stats_query = 'SELECT * FROM `computed_stats` ORDER BY `timestamp` DESC LIMIT 1'
+    most_recent_stats_query = """
+    SELECT 
+        stats_json, 
+        DATE_FORMAT(timestamp, '%Y-%m-%dT%TZ') AS timestamp
+    FROM `computed_stats` 
+    ORDER BY `timestamp` 
+    DESC 
+    LIMIT 1
+    """
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:

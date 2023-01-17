@@ -2,7 +2,7 @@ import json
 
 from multiprocessing import Lock
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, timezone
 from db import get_db, get_db_version
 from pymysql.cursors import DictCursor
 from util.flaskjson import CustomJSONEncoder
@@ -52,7 +52,7 @@ def calculate() -> dict:
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query, (stat_json_str, datetime.now())) 
+        cursor.execute(query, (stat_json_str, datetime.now(timezone.utc))) 
 
     db.commit()
 

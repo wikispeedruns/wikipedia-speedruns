@@ -437,6 +437,7 @@ var app = new Vue({
         },
         active_tab: 'users',
         loading: false,
+        load_time_sec: 0,
         last_updated: '',
         last_request_time: ''
     },
@@ -469,6 +470,8 @@ var app = new Vue({
                     alert("New stat calculation underway.");
                     this.last_request_time = new Date();
                     this.loading = true;
+                    this.load_time_sec = 0;
+                    this.countLoadTimer();
                 } else if (response.status === 503) {
                     alert("Server currently processing stats! Check back in a bit.");
                 }
@@ -479,6 +482,14 @@ var app = new Vue({
                 alert(e);
             }
         },
+        countLoadTimer() {
+            if (this.loading) {
+                setTimeout(() => {
+                    this.load_time_sec += 1
+                    this.countLoadTimer()
+                }, 1000)
+            }
+        }
     },
 
     created: async function () {
