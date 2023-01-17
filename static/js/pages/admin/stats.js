@@ -25,6 +25,13 @@ function update_totals(totals) {
     app.totals.finished_lobby_runs = totals['lobby_runs_finished'];
     app.totals.created_lobbies = totals['lobbies_created'];
 
+    app.totals.daily_active_users = totals['daily_active_users'];
+    app.totals.weekly_active_users = totals['weekly_active_users'];
+    app.totals.monthly_active_users = totals['weekly_active_users'];
+    app.totals.daily_active_users_finished = totals['daily_active_users_finished'];
+    app.totals.weekly_active_users_finished = totals['weekly_active_users_finished'];
+    app.totals.monthly_active_users_finished = totals['monthly_active_users_finished'];
+
     let user_runs = totals['user_runs'];
     let user_finished_runs = totals['user_finished_runs'];
     let user_marathons = totals['user_marathons'];
@@ -414,6 +421,12 @@ var app = new Vue({
             pct_user_finished_runs: 0.0,
             pct_user_marathons: 0.0,
             pct_user_finished_marathons: 0.0,
+            daily_active_users: 0,
+            weekly_active_users: 0,
+            monthly_active_users: 0,
+            daily_active_users_finished: 0,
+            weekly_active_users_finished: 0,
+            monthly_active_users_finished: 0,
         },
         weekly: {
             user_change: 0.0,
