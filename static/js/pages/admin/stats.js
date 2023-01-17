@@ -27,7 +27,7 @@ function update_totals(totals) {
 
     app.totals.daily_active_users = totals['daily_active_users'];
     app.totals.weekly_active_users = totals['weekly_active_users'];
-    app.totals.monthly_active_users = totals['weekly_active_users'];
+    app.totals.monthly_active_users = totals['monthly_active_users'];
     app.totals.daily_active_users_finished = totals['daily_active_users_finished'];
     app.totals.weekly_active_users_finished = totals['weekly_active_users_finished'];
     app.totals.monthly_active_users_finished = totals['monthly_active_users_finished'];
@@ -463,7 +463,7 @@ var app = new Vue({
         },
         async poll_stats() {
             let response = await fetch("/api/stats/all");
-            let res_json = await response.json(); 
+            let res_json = await response.json();
             let last_updated = new Date(res_json['timestamp']);
 
             // Check if the most recently updated time is past the request time
@@ -488,7 +488,7 @@ var app = new Vue({
                 } else if (response.status === 503) {
                     alert("Server currently processing stats! Check back in a bit.");
                 }
-                
+
                 // Check in 30s to see if stats are done calculating
                 setTimeout(this.poll_stats, 30 * 1000);
             } catch (e) {
