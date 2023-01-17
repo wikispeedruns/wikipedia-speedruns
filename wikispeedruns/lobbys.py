@@ -204,10 +204,10 @@ def update_lobby(lobby_id: int,
 
 # Lobby Prompt Management
 
-def add_lobby_prompt(lobby_id: int, start: int, end: int) -> bool:
+def add_lobby_prompt(lobby_id: int, start: int, end: int, language: str) -> bool:
     query = """
-    INSERT INTO lobby_prompts (lobby_id, start, end, prompt_id)
-    SELECT %(lobby_id)s, %(start)s, %(end)s, IFNULL(MAX(prompt_id) + 1, 1)
+    INSERT INTO lobby_prompts (lobby_id, start, end, language, prompt_id)
+    SELECT %(lobby_id)s, %(start)s, %(end)s, %(language)s, IFNULL(MAX(prompt_id) + 1, 1)
     FROM lobby_prompts WHERE lobby_id=%(lobby_id)s;
     """
 
@@ -216,7 +216,8 @@ def add_lobby_prompt(lobby_id: int, start: int, end: int) -> bool:
         cursor.execute(query, {
             "lobby_id": lobby_id,
             "start": start,
-            "end": end
+            "end": end,
+            "language": language
         })
         db.commit()
 
@@ -226,7 +227,7 @@ def add_lobby_prompt(lobby_id: int, start: int, end: int) -> bool:
 def get_lobby_prompts(lobby_id: int, prompt_id: Optional[int]=None, session: Optional[dict]=None) -> List[LobbyPrompt]:
     ## TODO user_id?]
 
-    query = f"SELECT prompt_id, start, end FROM lobby_prompts WHERE lobby_id=%(lobby_id)s {'AND prompt_id=%(prompt_id)s' if prompt_id else ''}"
+    query = f"SELECT prompt_id, start, end, language FROM lobby_prompts WHERE lobby_id=%(lobby_id)s {'AND prompt_id=%(prompt_id)s' if prompt_id else ''}"
 
     query_args = {
         "lobby_id": lobby_id
@@ -236,7 +237,7 @@ def get_lobby_prompts(lobby_id: int, prompt_id: Optional[int]=None, session: Opt
     if player is not None:
         # TODO handle prompt_id better
         query = f"""
-        SELECT p.prompt_id, start, end, played FROM lobby_prompts AS p
+        SELECT p.prompt_id, start, end, language, played FROM lobby_prompts AS p
         LEFT JOIN  (
             SELECT lobby_id, prompt_id, COUNT(*) AS played
             FROM lobby_runs

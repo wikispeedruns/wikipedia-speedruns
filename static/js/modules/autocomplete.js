@@ -9,6 +9,10 @@ var AutocompleteInput = {
             type: String,
             default: ""
         },
+        lang: {
+            type: String,
+            default: "en",
+        },
         placeholder: {
             type: String,
             default: "Type in an article..."
@@ -30,7 +34,7 @@ var AutocompleteInput = {
 
     methods: {
         async setAutocomplete(timeCalled) {
-            this.acList = await getAutoCompleteArticles(this.text);
+            this.acList = await getAutoCompleteArticles(this.text, this.lang);
             // only show if there was no recent inputs during the getting stage
             if(this.lastInputTime === timeCalled) this.open();
             else this.clearList();
@@ -104,7 +108,7 @@ var AutocompleteInput = {
     },
 
     template: (`
-        <div ref="list" style="flex-grow: 1;">
+        <div ref="list" class="col">
             <input
                 class="form-control"
                 type="text"

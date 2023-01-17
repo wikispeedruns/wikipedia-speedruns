@@ -47,6 +47,7 @@ let app = new Vue({
 
         startArticle: "",    // For all game modes, this is the first article to load
         endArticle: "",      // For sprint games. Reaching this article will trigger game finishing sequence
+        language: "",        // For quick play and lobbies
         path: [],             // array to store the user's current path so far, submitted with run
 
         promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
@@ -102,6 +103,7 @@ let app = new Vue({
         if(this.isQuickRun){
             this.startArticle = run["prompt_start"];
             this.endArticle = run["prompt_end"];
+            this.language = run['language'];
         }
         else{
             this.promptId = run['prompt_id'];
@@ -109,6 +111,7 @@ let app = new Vue({
 
             this.startArticle = prompt["start"];
             this.endArticle = prompt["end"];
+            this.language = prompt["language"];
         }
 
         this.playTime = run["play_time"];
@@ -159,9 +162,12 @@ let app = new Vue({
 
 
         generateResults: function(event) {
-            let resultText = `Wiki Speedruns ${this.promptId}\n${this.startArticle}\n${this.path.length - 1} 🖱️\n${(this.playTime)} ⏱️`;
+            let resultText = `Wiki Speedruns\n${this.startArticle}\n${this.path.length - 1} 🖱️\n${(this.playTime)} ⏱️`;
             if(this.isQuickRun){
-                let link = `https://wikispeedruns.com/play/quick_play?prompt_start=${encodeURI(this.startArticle)}&prompt_end=${encodeURI(this.endArticle)}`;
+                const link = `https://wikispeedruns.com/play/quick_play?prompt_start=${this.startArticle}&prompt_end=${this.endArticle}${this.language ? '&lang=' + this.language : ''}`;
+                resultText += `\n${link}`;
+            } else if (this.isSprint) {
+                const link = `https://wikispeedruns.com/play/${this.promptId}`;
                 resultText += `\n${link}`;
             }
             return resultText;

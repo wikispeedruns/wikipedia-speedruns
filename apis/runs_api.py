@@ -34,9 +34,10 @@ def create_quick_run():
     try:
         prompt_start = request.args.get('prompt_start')
         prompt_end = request.args.get('prompt_end')
-        if prompt_start is None or prompt_end is None:
+        lang = request.args.get('lang', None)
+        if prompt_start is None or prompt_end is None or lang is None:
             return "Invalid request", 400
-        run_id = runs.create_quick_run(prompt_start, prompt_end, session.get("user_id"))
+        run_id = runs.create_quick_run(prompt_start, prompt_end, lang, session.get("user_id"))
         return jsonify({"run_id": run_id})
     except ValueError:
         return "Page Not Found", 404
@@ -167,7 +168,7 @@ def get_run(id):
 def get_quick_run(id):
 
     query = '''
-    SELECT run_id, start_time, end_time, play_time, finished, path, prompt_start, prompt_end, user_id
+    SELECT run_id, start_time, end_time, play_time, finished, path, prompt_start, prompt_end, user_id, language
     FROM quick_runs
     WHERE run_id=%s
     '''

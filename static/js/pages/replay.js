@@ -47,7 +47,7 @@ var app = new Vue({
         this.firstArticle  = this.path[0];
         this.lastArticle = this.path[this.path.length - 1];
 
-        this.renderer = new ArticleRenderer(document.getElementById(div_name), (_) => {}, null, null);
+        this.renderer = new ArticleRenderer(document.getElementById(div_name), (_) => {});
         await this.renderer.loadPage(this.path[0]);
     },
 

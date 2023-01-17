@@ -30,10 +30,13 @@ const LOBBY_ID = serverData["lobby_id"] || null;
 // Get if auto scroll is on
 const IS_SCROLL_ON = serverData["scroll"] || null;
 
+// Get language
+const LANGUAGE = serverData["lang"];
+
 async function getPrompt(promptId, lobbyId=null) {
 
     if(promptId == null){
-        return {start: PROMPT_START, end: PROMPT_END};
+        return {start: PROMPT_START, end: PROMPT_END, language: LANGUAGE};
     }
 
     const url = (lobbyId === null) ? `/api/sprints/${promptId}` : `/api/lobbys/${lobbyId}/prompts/${promptId}`;
@@ -64,6 +67,7 @@ let app = new Vue({
         startArticle: "",    // For all game modes, this is the first article to load
         endArticle: "",      // For sprint games. Reaching this article will trigger game finishing sequence
         currentArticle: "",
+        language: "",
         path: [],             // List of objects to store granular run data, submitted on exit/finish
         /* path object format:
         {
@@ -123,6 +127,7 @@ let app = new Vue({
 
         this.startArticle = prompt["start"];
         this.endArticle = prompt["end"];
+        this.language = prompt["language"];
 
         // !! forces bool if played is not a field
         this.promptPlayed = !!prompt["played"];
@@ -131,16 +136,16 @@ let app = new Vue({
 
         this.currentArticle = this.startArticle;
 
-        this.runId = await startRun(PROMPT_ID, LOBBY_ID, PROMPT_START, PROMPT_END);
+        this.runId = await startRun(PROMPT_ID, LOBBY_ID, PROMPT_START, PROMPT_END, LANGUAGE);
         if (!this.loggedIn && this.lobbyId == null) {
-            startLocalRun(PROMPT_ID, PROMPT_START, PROMPT_END, this.runId);
+            startLocalRun(PROMPT_ID, PROMPT_START, PROMPT_END, this.runId, LANGUAGE);
             console.log("Not logged in, uploading start of run to local storage")
         }
 
 
         this.offset = this.startTime;
 
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.isScroll ? null : this.showPreview, this.isScroll ? null : this.hidePreview || null, this.loadCallback);
+        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, !this.isScroll && this.showPreview, !this.isScroll && this.hidePreview, this.loadCallback, this.language);
         await this.renderer.loadPage(this.startArticle);
 
 
@@ -255,7 +260,7 @@ let app = new Vue({
 
             this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
             if (!this.loggedIn && this.lobbyId == null) {
-                submitLocalRun(PROMPT_ID, PROMPT_START, PROMPT_END, this.runId, this.startTime, this.endTime, this.finished, this.path);
+                submitLocalRun(PROMPT_ID, PROMPT_START, PROMPT_END, this.runId, this.startTime, this.endTime, this.finished, this.path, LANGUAGE);
                 console.log("Not logged in, submitting run to local storage");
                 //console.log(this.runId)
             }

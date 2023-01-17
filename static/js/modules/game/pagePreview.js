@@ -2,6 +2,10 @@ import { getArticleSummary } from "../wikipediaAPI/util.js";
 
 var PagePreview = {
 
+    props: [
+        'lang'
+    ],
+
 	data: function () {
         return {
             previewContent: null,
@@ -22,7 +26,7 @@ var PagePreview = {
 
             const href = e.currentTarget.getAttribute("href");
             const title = href.split('/wiki/').pop();
-            const promises = [ getArticleSummary(title) ];
+            const promises = [ getArticleSummary(title, this.lang) ];
 
             if (e.type !== "click") {
                 promises.push(new Promise(resolve => setTimeout(resolve, 600)));
