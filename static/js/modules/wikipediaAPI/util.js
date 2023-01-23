@@ -1,6 +1,6 @@
 async function getArticle(page, isMobile = false, lang = 'en') {
     const resp = await fetch(
-        `https://${lang}.wikipedia.org/w/api.php?redirects=1&disableeditsection=true&format=json&origin=*&action=parse&prop=text&page=${page}${isMobile ? '&mobileformat=1' : ''}`,
+        `https://${lang}.wikipedia.org/w/api.php?redirects=1&disableeditsection=true&format=json&origin=*&action=parse&prop=text&useskin=vector&page=${page}${isMobile ? '&mobileformat=1' : ''}`,
         {
             mode: "cors"
         }
