@@ -1,10 +1,35 @@
-async function getArticle(page, isMobile = false, lang = 'en') {
-    const resp = await fetch(
-        `https://${lang}.wikipedia.org/w/api.php?redirects=1&disableeditsection=true&format=json&origin=*&action=parse&prop=text&useskin=vector&page=${page}${isMobile ? '&mobileformat=1' : ''}`,
-        {
-            mode: "cors"
+async function getArticle(page, isMobile = false, lang = 'en', revisionDate=null) {
+
+    let url = `https://${lang}.wikipedia.org/w/api.php?redirects=1&disableeditsection=true&format=json&origin=*&action=parse&prop=text&useskin=vector`;
+
+    if (isMobile) {
+        url += "&mobileformat=1";
+    }
+
+
+    // If given a reivision date (string), use that to query the last revision before the given date.
+    if (revisionDate) {
+
+        let revisionurl = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=revisions&redirects=1&titles=${page}`
+            + `&formatversion=2&rvdir=older&rvprop=timestamp|ids&rvlimit=1&rvstart=${revisionDate}`;
+
+        const resp = await fetch(revisionurl, {mode: "cors"});
+        const body = await resp.json();
+
+        if ("error" in body) {
+            return null;
         }
-    )
+
+        // eww
+        const rev_id = body["query"]["pages"][0]["revisions"][0]["revid"];
+        url += `&oldid=${rev_id}`;
+    } else {
+        url += `&page=${page}`;
+    }
+
+
+
+    const resp = await fetch(url, {mode: "cors"})
     const body = await resp.json()
 
     if ("error" in body) {

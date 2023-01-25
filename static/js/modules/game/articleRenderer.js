@@ -4,14 +4,22 @@ export class ArticleRenderer {
 
     /* frame: DOM element (i.e. through getElementById) to render article in
      * pageCallback: Called upon loading an article, should expect new page and load time
+     *
+     * mouseEnter, mouseLeave: function handlers for hovering over links (i.e. to display a preview)
+     *
+     * loadCallback: callback when page is started to load, lets callers add time
+     *
+     * revisionDate: date for article revisions are tied to.
      */
-    constructor(frame, pageCallback, mouseEnter, mouseLeave, loadCallback, language) {
+    constructor(frame, pageCallback, mouseEnter, mouseLeave, loadCallback, language, revisionDate) {
         this.frame = frame;
         this.pageCallback = pageCallback;
         this.loadCallback = loadCallback;
         this.mouseEnter = mouseEnter;
         this.mouseLeave = mouseLeave;
         this.language = language;
+
+        this.revisionDate = revisionDate;
     }
 
     async loadPage(page) {
@@ -22,7 +30,7 @@ export class ArticleRenderer {
 
             const isMobile = window.screen.width < 768;
             const startTime = Date.now();
-            const body = await getArticle(page, isMobile, this.language);
+            const body = await getArticle(page, isMobile, this.language, this.revisionDate);
 
             this.frame.innerHTML = body["text"]["*"];
 
