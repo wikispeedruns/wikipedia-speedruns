@@ -77,13 +77,8 @@ let app = new Vue({
         }
         */
 
-        promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
-        promptRated: false,
-        promptPlayed: false,
-        promptActive: false,
-
-        promptStart: null,     // or get the actual prompt for quick run
-        promptEnd: null,
+        promptId: null,        // Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
+        revisionDate: null,
 
         lobbyId: null,
         runId: -1,          //unique ID for the current run. This gets populated upon start of run
@@ -134,6 +129,9 @@ let app = new Vue({
         this.promptActive = !!prompt["active"];
         this.promptRated = !!prompt["rated"];
 
+        // Use the release date of teh prompt (if it exists) to determine the article revision
+        this.revisionDate = prompt?.["active_start"];
+
         this.currentArticle = this.startArticle;
 
         this.runId = await startRun(PROMPT_ID, LOBBY_ID, PROMPT_START, PROMPT_END, LANGUAGE);
@@ -145,7 +143,14 @@ let app = new Vue({
 
         this.offset = this.startTime;
 
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, !this.isScroll && this.showPreview, !this.isScroll && this.hidePreview, this.loadCallback, this.language);
+        this.renderer = new ArticleRenderer(
+            document.getElementById("wikipedia-frame"),
+            this.pageCallback,
+            !this.isScroll && this.showPreview,
+            !this.isScroll && this.hidePreview,
+            this.loadCallback,
+            this.language,
+            this.revisionDate);
         await this.renderer.loadPage(this.startArticle);
 
 
