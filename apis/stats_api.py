@@ -27,7 +27,9 @@ def calculate_stats():
 def get_total_stats():
     # see https://stackoverflow.com/a/67266529/5613935 for some issues with doing this other ways
     most_recent_stats_query = """
-        SELECT stats_json, DATE_FORMAT(timestamp, '%Y-%m-%dT%TZ')
+        SELECT 
+            stats_json, 
+            DATE_FORMAT(timestamp, '%Y-%m-%dT%TZ') AS timestamp
         FROM `computed_stats`
         WHERE timestamp IN (SELECT MAX(timestamp) FROM `computed_stats`);
     """
