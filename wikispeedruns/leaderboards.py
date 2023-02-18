@@ -41,12 +41,18 @@ LEADERBOARD_COLUMNS = ['run_id',
 BASE_ALIAS = 'runs'
 OUTER_ALIAS = 'processed_runs'
 
-def _query_select_columns(table):
+def _query_select_columns(table, lobby_id=None):
     separator = ', '
     if __debug__:
         separator = ',\n\t'
 
-    return separator.join([f'{table}.{column}' for column in LEADERBOARD_COLUMNS])
+    columns = LEADERBOARD_COLUMNS.copy()
+
+    if lobby_id is not None:
+        columns += ["name"]
+
+    print(columns)
+    return separator.join([f'{table}.{column}' for column in columns])
 
 def _query_current_run_clause(table, run_id=None):
     if run_id is None:
@@ -67,7 +73,7 @@ def _query_sort_expr(table, sort_mode, sort_asc):
 
     if not sort_asc:
         sort_exp += ' DESC'
-    
+
     return sort_exp
 
 # Get runs for a prompt, with lots of options (described below)
@@ -245,7 +251,7 @@ def get_leaderboard_runs(
 
     query = f"""
     SELECT
-        {_query_select_columns(OUTER_ALIAS)}
+        {_query_select_columns(OUTER_ALIAS, lobby_id=lobby_id)}
     FROM (
         SELECT
             {BASE_ALIAS}.*,
@@ -253,13 +259,13 @@ def get_leaderboard_runs(
             ROW_NUMBER() OVER (ORDER BY {base_sort_expr}) AS `rank`,
             COUNT(*) OVER () AS numRuns,
             JSON_LENGTH({BASE_ALIAS}.`path`, '$.path') AS path_length
-        FROM {base_table} AS {BASE_ALIAS} 
+        FROM {base_table} AS {BASE_ALIAS}
         LEFT JOIN {prompts_table} AS prompts ON {prompts_join}
         LEFT JOIN users ON users.user_id={BASE_ALIAS}.user_id
         {group_subquery}
         WHERE ({' AND '.join(conditions)}) OR {base_current_run_clause}
         ORDER BY {base_sort_expr}
-    ) AS {OUTER_ALIAS} 
+    ) AS {OUTER_ALIAS}
     WHERE {pagination_clause} OR {outer_current_run_clause}
     ORDER BY {outer_sort_expr}
     """
@@ -298,7 +304,7 @@ def get_leaderboard_stats(
     lobby_id: Optional[int] = None,
     run_id: Optional[int] = None,
     **kwargs
-): 
+):
     lb_query = get_leaderboard_runs(prompt_id, lobby_id, run_id, limit=None, offset=0, query_only=True, **kwargs)
 
     query = f'''
@@ -312,7 +318,7 @@ def get_leaderboard_stats(
         AVG(IF(finished, play_time, NULL)) AS avg_play_time
     FROM data
     '''
-    
+
     db = get_db()
     with db.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
         cursor.execute(query, lb_query['args'])
