@@ -276,7 +276,7 @@ def get_leaderboard_runs(
     db = get_db()
     with db.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
         cursor.execute(query, query_args)
-        print(cursor.mogrify(query, query_args))
+        # print(cursor.mogrify(query, query_args)) #debug
 
         results = cursor.fetchall()
         numRuns = 0
