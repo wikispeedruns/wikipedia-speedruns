@@ -57,6 +57,7 @@ def create_app(test_config=None):
     from apis.leaderboard_api import leaderboard_api
     from apis.generator_api import generator_api, load_page_rank
     from apis.achievements_api import achievements_api
+    from apis.community_prompts_api import community_prompts_api
     from views import views
 
     app.register_blueprint(sprint_api)
@@ -72,6 +73,7 @@ def create_app(test_config=None):
     app.register_blueprint(views)
     app.register_blueprint(leaderboard_api)
     app.register_blueprint(achievements_api)
+    app.register_blueprint(community_prompts_api)
 
     # Hacky way to load in
     try:
