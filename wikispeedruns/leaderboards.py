@@ -51,7 +51,7 @@ def _query_select_columns(table, lobby_id=None):
     if lobby_id is not None:
         columns += ["name"]
 
-    print(columns)
+    # print(columns)
     return separator.join([f'{table}.{column}' for column in columns])
 
 def _query_current_run_clause(table, run_id=None):
@@ -212,7 +212,7 @@ def get_leaderboard_runs(
                 JOIN (
                     SELECT run_id,
                     ROW_NUMBER() OVER (PARTITION BY user_id {", `name`" if base_table == "lobby_runs" else ""}
-                                    ORDER BY NOT finished, JSON_LENGTH({base_table}.`path`, '$.path')) AS shortest_path_rank
+                                    ORDER BY NOT finished, JSON_LENGTH({base_table}.`path`, '$.path'), play_time) AS shortest_path_rank
                     FROM {base_table}
                     WHERE prompt_id=%(prompt_id)s {"AND lobby_id=%(lobby_id)s" if base_table == "lobby_runs" else ""}
                 ) AS grouped_runs
@@ -276,6 +276,7 @@ def get_leaderboard_runs(
     db = get_db()
     with db.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
         cursor.execute(query, query_args)
+        # print(cursor.mogrify(query, query_args)) #debug
 
         results = cursor.fetchall()
         numRuns = 0
