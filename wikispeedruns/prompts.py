@@ -63,6 +63,29 @@ def add_sprint_prompt(start: str, end: str) -> Optional[int]:
         id = cursor.fetchone()[0]
         db.commit()
         return id
+    
+    
+def add_community_sprint_prompt(start: str, 
+                                end: str, 
+                                user_id: int, 
+                                submitted_time: str, 
+                                anonymous: bool) -> Optional[int]:
+    '''
+    Add a prompt from the community section
+    '''
+    query = """
+    INSERT INTO sprint_prompts (start, end, cmty_added_by, cmty_submitted_time, cmty_anonymous) 
+    VALUES (%s, %s, %s, %s, %s);
+    """
+    sel_query = "SELECT LAST_INSERT_ID()"
+
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute(query, (start, end, user_id, submitted_time, anonymous))
+        cursor.execute(sel_query)
+        id = cursor.fetchone()[0]
+        db.commit()
+        return id
 
 
 def delete_prompt(prompt_id: int, prompt_type: PromptType) -> bool:

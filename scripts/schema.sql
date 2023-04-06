@@ -265,9 +265,11 @@ CREATE TABLE IF NOT EXISTS `cmty_pending_prompts_sprints` (
     `pending_prompt_id` INT NOT NULL AUTO_INCREMENT,
     `start` VARCHAR(255) NOT NULL,
     `end` VARCHAR(255) NOT NULL,
-    `user_id` BOOLEAN NOT NULL DEFAULT 0,
+    `user_id` INT NOT NULL,
     `submitted_time` TIMESTAMP(3) NULL,
-    PRIMARY KEY (`pending_prompt_id`)
+    `anonymous` BOOLEAN NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (`pending_prompt_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
 );
 
 CREATE TABLE IF NOT EXISTS `cmty_pending_prompts_marathon` (
@@ -275,7 +277,9 @@ CREATE TABLE IF NOT EXISTS `cmty_pending_prompts_marathon` (
     `start` VARCHAR(255) NOT NULL,
     `initcheckpoints` TEXT NOT NULL,
     `checkpoints` TEXT NOT NULL,
-    `user_id` BOOLEAN NOT NULL DEFAULT 0,
+    `user_id` INT NOT NULL,
     `submitted_time` TIMESTAMP(3) NULL,
-    PRIMARY KEY (`pending_prompt_id`)
+    `anonymous` BOOLEAN NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (`pending_prompt_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
 );

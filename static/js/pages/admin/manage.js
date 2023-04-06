@@ -173,6 +173,95 @@ Vue.component('path-generator', {
 
 });
 
+Vue.component('approve-pending', {
+    data: function() {
+        return {
+            prompts: []
+        }
+    },
+
+    methods: {
+        async getPending() {
+            try {
+                const resp = await (await fetchJson("/api/community_prompts/get_pending_sprints")).json();
+                if (resp.length > 10) {
+                    this.prompts = resp.slice(0, 9);
+                } else {
+                    this.prompts = resp
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        },
+
+        async approve(prompt_id, anonymous) {
+            try {
+                await fetchJson("/api/community_prompts/approve_sprint", "POST", {
+                    pending_id: prompt_id,
+                    anonymous: anonymous
+                });
+            } catch (e) {
+                console.log(e);
+            }
+            await this.getPending();
+        },
+
+        async reject(prompt_id) {
+            try {
+                await fetchJson("/api/community_prompts/reject_sprint", "DELETE", {
+                    pending_id: prompt_id
+                });
+            } catch (e) {
+                console.log(e);
+            }
+            await this.getPending();
+        }
+    },
+
+    created: async function() {
+        await this.getPending();
+    },
+
+    template: (`
+    <div class="card-body">
+        <template v-if="prompts.length > 0">
+            Cmty pending Sprints
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Pending ID</th>    
+                        <th scope="col">Username</th>
+                        <th scope="col">Date Submitted</th>
+                        <th scope="col">Start</th>
+                        <th scope="col">End</th>
+                        <th scope="col">Anonymous</th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="prompt in prompts" v-cloak>
+                        <td>{{prompt.pending_prompt_id}}</td>
+                        <td>{{prompt.username}}</td>
+                        <td>{{prompt.submitted_time}}</td>
+                        <td>{{prompt.start}}</td>
+                        <td>{{prompt.end}}</td>
+                        <td>{{prompt.anonymous}}</td>
+                        <td><button v-on:click="approve(prompt.pending_prompt_id, prompt.anonymous)">Approve</button></td>
+                        <td><button v-on:click="approve(prompt.pending_prompt_id, 1)">Approve as anon.</button></td>
+                        <td><button v-on:click="reject(prompt.pending_prompt_id)">Reject</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </template>
+        <template v-else>
+            No pending prompts
+        </template>
+    </div>
+    `)
+});
+
 
 Vue.component('marathon-item', {
     props: ['prompt'],

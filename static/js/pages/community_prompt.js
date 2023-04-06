@@ -9,6 +9,7 @@ var app = new Vue({
     data: {
         startPrompt: "",
         endPrompt: "",
+        anonymous: true
     },
 
     methods: {
@@ -35,7 +36,8 @@ var app = new Vue({
             try {
                 const response = await fetchJson("/api/community_prompts/submit_sprint_prompt", "POST", {
                     "start": start,
-                    "end": end
+                    "end": end,
+                    "anonymous": this.anonymous
                 })
 
             } catch (e) {
