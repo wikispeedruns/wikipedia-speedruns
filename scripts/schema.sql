@@ -31,8 +31,12 @@ CREATE TABLE IF NOT EXISTS `sprint_prompts` (
     `active_start` DATETIME NULL,
     `active_end` DATETIME NULL,
     `used` BOOLEAN AS (NOT (active_start IS NULL OR active_end IS NULL)) VIRTUAL,
+    `cmty_added_by` INT NOT NULL DEFAULT -1, 
+    `cmty_anonymous` BOOL NOT NULL DEFAULT TRUE, 
+    `cmty_submitted_time` TIMESTAMP(3),
     PRIMARY KEY (`prompt_id`),
-    INDEX (`active_start`, `active_end`)
+    INDEX (`active_start`, `active_end`),
+    FOREIGN KEY (`cmty_added_by`) REFERENCES `users`(`user_id`)
 );
 
 CREATE TABLE IF NOT EXISTS `sprint_runs` (
@@ -72,7 +76,11 @@ CREATE TABLE IF NOT EXISTS `marathonprompts` (
     `checkpoints` TEXT NOT NULL,
     `public` BOOLEAN NOT NULL DEFAULT 0,
     `seed` INT NOT NULL,
-    PRIMARY KEY (`prompt_id`)
+    `cmty_added_by` INT NOT NULL DEFAULT -1, 
+    `cmty_anonymous` BOOL NOT NULL DEFAULT TRUE, 
+    `cmty_submitted_time` TIMESTAMP(3),
+    PRIMARY KEY (`prompt_id`),
+    FOREIGN KEY (`cmty_added_by`) REFERENCES `users`(`user_id`)
 );
 
 CREATE TABLE IF NOT EXISTS `marathonruns` (
@@ -277,6 +285,7 @@ CREATE TABLE IF NOT EXISTS `cmty_pending_prompts_marathon` (
     `start` VARCHAR(255) NOT NULL,
     `initcheckpoints` TEXT NOT NULL,
     `checkpoints` TEXT NOT NULL,
+    `seed` INT NOT NULL,
     `user_id` INT NOT NULL,
     `submitted_time` TIMESTAMP(3) NULL,
     `anonymous` BOOLEAN NOT NULL DEFAULT TRUE,

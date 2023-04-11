@@ -3,9 +3,14 @@ import Vue from 'vue/dist/vue.esm.js';
 import { fetchAsync, fetchJson } from "../modules/fetch.js";
 import { getArticleTitle, articleCheck } from "../modules/wikipediaAPI/util.js";
 
+import { MarathonBuilder } from '../modules/prompts/marathon-submit.js';
+
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
+    components: {
+        'marathon-builder': MarathonBuilder
+    },
     data: {
         startPrompt: "",
         endPrompt: "",

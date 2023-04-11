@@ -8,6 +8,7 @@
 
 <div id="app">
 
+    <div>
     <form id="newPrompt" v-on:submit.prevent="newPrompt">
         <label for="start">Start Article:</label>
         <input type="text" id="start" name="start" v-model="startPrompt">
@@ -19,6 +20,10 @@
 
         <input type="submit" value="Submit">
     </form>
+    </div>
 
+    <marathon-builder v-bind:admin="false"></marathon-builder>
 </div>
+
+
 {% endblock %}
