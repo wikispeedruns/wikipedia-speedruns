@@ -17,9 +17,6 @@ def interleave_pending_prompts(prompts_sql_output, tcol="submitted_time", ucol="
     
     if len(prompts_sql_output) <= N: return prompts_sql_output
     
-    print('lmao')
-    print(prompts_sql_output)
-    
     user_map = {}
     for item in prompts_sql_output:
         if item[ucol] in user_map: user_map[item[ucol]].append(item)
