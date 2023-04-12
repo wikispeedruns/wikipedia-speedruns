@@ -186,11 +186,7 @@ Vue.component('approve-pending', {
         async getPending() {
             try {
                 const resp = await (await fetchJson("/api/community_prompts/get_pending_sprints")).json();
-                if (resp.length > 10) {
-                    this.prompts = resp.slice(0, 9);
-                } else {
-                    this.prompts = resp
-                }
+                this.prompts = resp
             } catch (e) {
                 console.log(e);
             }

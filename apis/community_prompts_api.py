@@ -13,6 +13,31 @@ import json
 community_prompts_api = Blueprint('community_prompts', __name__, url_prefix='/api/community_prompts')
 
 
+def interleave_pending_prompts(prompts_sql_output, tcol="submitted_time", ucol="username", N=10):
+    
+    if len(prompts_sql_output) <= N: return prompts_sql_output
+    
+    print('lmao')
+    print(prompts_sql_output)
+    
+    user_map = {}
+    for item in prompts_sql_output:
+        if item[ucol] in user_map: user_map[item[ucol]].append(item)
+        else: user_map[item[ucol]] = [item]
+    for user in user_map:
+        user_map[user].sort(key=lambda x: x[tcol])
+
+    output = []
+
+    while len(output) < N:
+        for user in user_map:
+            if len(user_map[user]):
+                output.append(user_map[user].pop(0))
+
+    return output
+
+
+
 @community_prompts_api.post('/submit_sprint_prompt')
 @check_user
 @check_request_json({"start": str, "end": str, "anonymous": bool})
@@ -79,7 +104,7 @@ def submit_marathon_prompt():
 
 @community_prompts_api.get('/get_pending_sprints')
 @check_admin
-def get_all_pending_sprints():
+def get_pending_sprints():
     query = """
     SELECT pending_prompt_id, start, end, submitted_time, anonymous, username FROM cmty_pending_prompts_sprints
     LEFT JOIN users
@@ -90,11 +115,12 @@ def get_all_pending_sprints():
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query)
         results = cursor.fetchall()
-        return jsonify(results)
+        topresults = interleave_pending_prompts(results)
+        return jsonify(topresults)
     
 @community_prompts_api.get('/get_pending_marathons')
 @check_admin
-def get_all_pending_marathons():
+def get_pending_marathons():
     query = """
     SELECT pending_prompt_id, start, initcheckpoints, seed, checkpoints, submitted_time, anonymous, username FROM cmty_pending_prompts_marathon
     LEFT JOIN users
@@ -105,7 +131,8 @@ def get_all_pending_marathons():
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query)
         results = cursor.fetchall()
-        return jsonify(results)
+        topresults = interleave_pending_prompts(results)
+        return jsonify(topresults)
     
 
 @community_prompts_api.post('/approve_sprint')
