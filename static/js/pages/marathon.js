@@ -62,7 +62,10 @@ let app = new Vue({
         saved: false,
 
         expandedTimebox: true,
-        isMobile: false
+        isMobile: false,
+
+        anonymous: null,
+        created_username: null
     },
 
     computed: {
@@ -131,6 +134,10 @@ let app = new Vue({
         }
 
         this.startArticle = prompt['start'];
+        
+        this.anonymous = prompt["cmty_anonymous"]
+        this.created_username = prompt["username"]
+
         this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview);
     },
 

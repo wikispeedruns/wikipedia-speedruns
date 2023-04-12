@@ -62,7 +62,10 @@ let app = new Vue({
 
         played: PLAYED,
 
-        isMounted: false
+        isMounted: false,
+
+        anonymous: null,
+        created_username: null
     },
 
     computed: {
@@ -112,6 +115,9 @@ let app = new Vue({
             this.startArticle = prompt["start"];
             this.endArticle = prompt["end"];
             this.language = prompt["language"];
+
+            this.anonymous = prompt["cmty_anonymous"]
+            this.created_username = prompt["username"]
         }
 
         this.playTime = run["play_time"];

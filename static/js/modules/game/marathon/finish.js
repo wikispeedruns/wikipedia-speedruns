@@ -14,7 +14,9 @@ var FinishPage = {
         "saved",
         "checkpointLimit",
         "username",
-        "loggedIn"
+        "loggedIn",
+        "anonymous",
+        "createdUsername"
     ],
 
     methods: {
@@ -80,6 +82,17 @@ var FinishPage = {
         <div class="card md">
             <div class="card-body">
                 <p><h4><strong class="font-italic">"{{startArticle}}"</strong></h4></p>
+                <p>Prompt Created By: 
+                    <template v-if="createdUsername && anonymous">
+                        <strong>Anonymous User</strong>
+                    </template>
+                    <template v-else-if="createdUsername">
+                        <strong>{{createdUsername}}</strong>
+                    </template>
+                    <template v-else>
+                        <strong>Wikispeedrun Team</strong>
+                    </template>
+                </p>
                 <p>Time: <strong>{{(finalTime / 1000).toFixed(3)}} </strong>Seconds</p>
                 <p>Number of unique articles visited: <strong>{{numVisitedUnique}}</strong></p>
                 <p>Number of checkpoints visited: <strong>{{numCheckpointsVisited}}</strong></p>

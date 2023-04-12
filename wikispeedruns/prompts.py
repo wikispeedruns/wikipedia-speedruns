@@ -140,7 +140,13 @@ def get_prompt(prompt_id: int, prompt_type: PromptType, user_id: Optional[int]=N
     Get a specific prompt
     '''
     if (prompt_type == "sprint"):
-        query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts WHERE prompt_id=%s"
+        query = """
+        SELECT prompt_id, start, end, rated, active_start, active_end, cmty_added_by, cmty_anonymous, cmty_submitted_time, username
+        FROM sprint_prompts
+        LEFT JOIN users
+        ON users.user_id = sprint_prompts.cmty_added_by
+        WHERE prompt_id=%s
+        """
     # elif (prompt_type == "marathon")
 
     db = get_db()
@@ -162,14 +168,19 @@ def _construct_prompt_user_query(prompt_type: PromptType, user_id: Optional[int]
 
     # 1. Determine which fields are needed
     # if prompt_type == marathon probably change these fields
-    fields = ['p.prompt_id', 'start', 'end', 'rated', 'active_start', 'active_end']
+    fields = ['p.prompt_id', 'start', 'end', 'rated', 'active_start', 'active_end',
+              'cmty_added_by', 'cmty_anonymous', 'cmty_submitted_time', 'username']
     args = {}
 
     if user_id:
         fields.append('played')
 
     query = f"SELECT {','.join(fields)} FROM {prompt_type}_prompts AS p"
-
+    
+    query += f"""
+    LEFT JOIN users
+    ON users.user_id = p.cmty_added_by
+    """
 
     # 2. Add neccesary join/args for user info (TODO could in the future get best run?)
     if user_id:
@@ -216,7 +227,7 @@ def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, of
     Get all prompts for archive, including currently active
     '''
     if (prompt_type == "sprint"):
-        query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts"
+        query = "SELECT prompt_id, start, end, rated, active_start, active_end, cmty_added_by, cmty_anonymous, cmty_submitted_time, username FROM sprint_prompts"
     # elif (prompt_type == "marathon")
 
     query, args = _construct_prompt_user_query(prompt_type, user_id)
@@ -248,8 +259,13 @@ def get_managed_prompts(prompt_type: PromptType) -> List[Prompt]:
     Get all prompts for admins, all active, unused, and upcoming prompts
     '''
     if (prompt_type == "sprint"):
-        query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts"
+        query = "SELECT prompt_id, start, end, rated, active_start, active_end, cmty_added_by, cmty_anonymous, cmty_submitted_time, username FROM sprint_prompts"
     # elif (prompt_type == "marathon")
+    
+    query += f"""
+    LEFT JOIN users
+    ON users.user_id = {prompt_type}_prompts.cmty_added_by
+    """
 
     # Minus 7 to see more recently active prompts
     query += " WHERE used = 0 OR active_end >= DATE_ADD(NOW(), INTERVAL -7 DAY)"
