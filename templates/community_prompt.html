@@ -7,22 +7,17 @@
 {% block content %}
 
 <div id="app">
-
-    <div>
-    <form id="newPrompt" v-on:submit.prevent="newPrompt">
-        <label for="start">Start Article:</label>
-        <input type="text" id="start" name="start" v-model="startPrompt">
-        <label for="end">End Article:</label>
-        <input type="text" id="end" name="end" v-model="endPrompt">
-
-        <input type="checkbox" id="anony" name="anony" v-model="anonymous">
-        <label for="anony">Anonymous Submission</label>
-
-        <input type="submit" value="Submit">
-    </form>
+    <div class="card">
+        <div class="card-body">
+            <sprint-builder v-bind:admin="false"></sprint-builder>
+        </div>
     </div>
-
-    <marathon-builder v-bind:admin="false"></marathon-builder>
+    <div class="card">
+        <div class="card-body">
+            <marathon-builder v-bind:admin="false"></marathon-builder>
+        </div>
+    </div>
+    
 </div>
 
 

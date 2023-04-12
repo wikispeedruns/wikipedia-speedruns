@@ -1,11 +1,16 @@
 import { getArticleTitle } from "../wikipediaAPI/util.js";
 import { fetchJson } from "../fetch.js";
+import { PromptGenerator } from "../generator.js"
+import { AutocompleteInput } from "../autocomplete.js";
 
 var MarathonBuilder = {
 
-    props: [
-        'admin'
-    ],
+    props: ['admin'],
+
+    components: {
+        'prompt-generator': PromptGenerator,
+        'ac-input': AutocompleteInput
+    },
 
     data: function() {
         return {
@@ -13,63 +18,66 @@ var MarathonBuilder = {
             startcp: [],
             cp: [],
             seed: "0",
-            anonymous: true
+            anonymous: true,
+            placeholder: "",
+            articleCheckMessage: "",
+            language: "en",
         }
     },
 
     methods: {
+
+        async generateRndPrompt(prompt) {
+            [this[prompt]] = await this.$refs.pg.generatePrompt();
+        },
+
         submitPrompt: async function() {
             
             if (this.startcp.length != 5) throw new Error("Need 5 starting checkpoints");
             if (this.cp.length < 40) throw new Error("Need 40+ checkpoints");
 
-            if (this.admin) {
-                await this.submitAsAdmin();
-            } else {
-                await this.submitAsCmty();
+            try {
+                if (this.admin) {
+                    await this.submitAsAdmin();
+                } else {
+                    await this.submitAsCmty();
+                }
+            } catch (e) {
+                this.articleCheckMessage = e
+                console.log(e);
             }
         },
 
         submitAsAdmin: async function() {
-            try {
-                const response = await fetchJson("/api/marathon/add/", 'POST', {'data': this.$data })
-                if (response.status != 200) {
-                    // For user facing interface, do something other than this
-                    alert(await response.text());
-                    return;
-                }
-                document.getElementById("generatedMarathonText").innerHTML = "Prompt submit success. Refresh to see recently added prompt"
-            } catch (e) {
-                document.getElementById("generatedMarathonText").innerHTML = e
-                console.log(e);
+            const response = await fetchJson("/api/marathon/add/", 'POST', {'data': this.$data })
+            if (response.status != 200) {
+                // For user facing interface, do something other than this
+                alert(await response.text());
+                return;
             }
+            this.articleCheckMessage = "Prompt submit success. Refresh to see recently added prompt"
         },
 
         submitAsCmty: async function() {
-            try {
-                const response = await fetchJson("/api/community_prompts/submit_marathon_prompt", 'POST', {
-                    'data': this.$data,
-                    "anonymous": this.anonymous }
-                )
-                if (response.status != 200) {
-                    // For user facing interface, do something other than this
-                    alert(await response.text());
-                    return;
-                }
-                document.getElementById("generatedMarathonText").innerHTML = "Prompt submitted for approval"
-            } catch (e) {
-                document.getElementById("generatedMarathonText").innerHTML = e
-                console.log(e);
+            const response = await fetchJson("/api/community_prompts/submit_marathon_prompt", 'POST', {
+                'data': this.$data,
+                "anonymous": this.anonymous }
+            )
+            if (response.status != 200) {
+                // For user facing interface, do something other than this
+                alert(await response.text());
+                return;
             }
+            this.articleCheckMessage = "Prompt submitted for approval"
         },
 
         addArticle: async function(mode) {
-            if (document.getElementById("inputField").value.length < 1) return;
+            if (this.placeholder.length < 1) return;
 
-            let a = await getArticleTitle(document.getElementById("inputField").value)
+            let a = await getArticleTitle(this.placeholder)
 
             if (this.cp.includes(a) || this.startcp.includes(a) || this.start == a ) {
-                document.getElementById("generatedMarathonText").innerHTML = "Article already exists"
+                this.articleCheckMessage = "Article already exists"
                 return
             }
 
@@ -118,11 +126,11 @@ var MarathonBuilder = {
 
         loadGeneric: async function() {
             while (this.cp.length < 40) {
-                document.getElementById("inputField").value = String(this.cp.length)
+                this.placeholder = String(this.cp.length)
                 await this.addArticle(3)
             }
             while (this.startcp.length < 5) {
-                document.getElementById("inputField").value = String(this.startcp.length + 40)
+                this.placeholder = String(this.startcp.length + 40)
                 await this.addArticle(1)
             }
         }
@@ -139,69 +147,82 @@ var MarathonBuilder = {
     },
 
     template: (`
-        <div>
-            <div v-if="admin">submitting as admin</div>
-            <div v-else>submitting as cmty</div>
-            <div>
-                <div class="input-group">
-                    <label class="input-group-text" for="seedField">Seed:</label>
-                    <input class="form-control" type="text" name="seedField" v-model="seed">
+        <div class="row">
+            <div class="col-sm">
+                <div>Starting Article: {{start}}</div>
+                <div>Starting Checkpoints:
+                    <ol>
+                    <template v-for="(item, index) in startcp">
+                        <li>{{item}}
+                            <button v-on:click="moveup(index, 0)"><i class="bi bi-chevron-up"></i></button>
+                            <button v-on:click="movedown(index, 0)"><i class="bi bi-chevron-down"></i></button>
+                            <button v-on:click="deleteA(index, 0)"><i class="bi bi-trash"></i></button>
+                        </li>
+                    </template>
+                    </ol>
+                </div>
+                <div>Reserve Checkpoints:
+                    <ol>
+                    <template v-for="(item, index) in cp">
+                        <li>{{item}}
+                            <button v-on:click="moveup(index, 1)"><i class="bi bi-chevron-up"></i></button>
+                            <button v-on:click="movedown(index, 1)"><i class="bi bi-chevron-down"></i></button>
+                            <button v-on:click="deleteA(index, 1)"><i class="bi bi-trash"></i></button>
+                        </li>
+                    </template>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="col-sm">
+                <div class="row">
+                    <div class="col-sm mb-2">
+                        <div class="input-group flex-nowrap">
+                            <ac-input :text.sync="placeholder" :lang="language" placeholder="Article" id="inputField"></ac-input>
+                            <button type="button" class="btn border quick-play" @click="generateRndPrompt('placeholder')">
+                                <i class="bi bi-shuffle"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-sm mb-2">
+                        <div class="input-group flex-nowrap">
+                            <input class="form-control" type="text" name="seedField" v-model="seed">
+                        </div>
+                    </div>
+                    <p v-if="articleCheckMessage" class="text-danger mb-0">{{articleCheckMessage}}</p>
                 </div>
 
-                <div>
-                    <div>Starting Article: {{start}}</div>
-                    <div>Starting Checkpoints:
-                        <ol>
-                        <template v-for="(item, index) in startcp">
-                            <li>{{item}}
-                                <button v-on:click="moveup(index, 0)"><i class="bi bi-chevron-up"></i></button>
-                                <button v-on:click="movedown(index, 0)"><i class="bi bi-chevron-down"></i></button>
-                                <button v-on:click="deleteA(index, 0)"><i class="bi bi-trash"></i></button>
-                            </li>
-                        </template>
-                        </ol>
-                    </div>
-                    <div>Reserve Checkpoints:
-                        <ol>
-                        <template v-for="(item, index) in cp">
-                            <li>{{item}}
-                                <button v-on:click="moveup(index, 1)"><i class="bi bi-chevron-up"></i></button>
-                                <button v-on:click="movedown(index, 1)"><i class="bi bi-chevron-down"></i></button>
-                                <button v-on:click="deleteA(index, 1)"><i class="bi bi-trash"></i></button>
-                            </li>
-                        </template>
-                        </ol>
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label class="input-group-text" for="inputField">Add checkpoint:</label>
-                    <input class="form-control" type="text" name="inputField" id="inputField">
-                </div>
-                <hr>
-                <div>
+                <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
                     <button v-on:click="addArticle(0)">Set start</button>
                 </div>
-                <div>
-                    <button v-on:click="addArticle(1)">Add article to starting checkpoints (end of list)</button>
-                    <button v-on:click="addArticle(2)">Add article to starting checkpoints (start of list)</button>
+
+                <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
+                    <button v-on:click="addArticle(1)">Add to END of starting checkpoints</button>
+                    <button v-on:click="addArticle(2)">Add to START of starting checkpoints</button>
                 </div>
-                <div>
-                    <button v-on:click="addArticle(3)" id="addInputToCPEnd">Add article to checkpoints (end of list)</button>
-                    <button v-on:click="addArticle(4)">Add article to checkpoints (start of list)</button>
-                </div>
-                <div>
-                    <button id="genMarathonPromptButton" v-on:click="submitPrompt">Click to submit prompt</button>
-                    <button id="loadgeneric" v-on:click="loadGeneric">Load Generic</button>
+
+                <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
+                    <button v-on:click="addArticle(3)" id="addInputToCPEnd">Add to END of checkpoints</button>
+                    <button v-on:click="addArticle(4)">Add to START of checkpoints</button>
                 </div>
                 
-                <form id="marathon" v-if="!admin">
-                    <input type="checkbox" id="anony" name="anony" v-model="anonymous">
-                    <label for="anony">Anonymous Submission</label>
-                </form>
+                <div class="form-check" v-if="!admin">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="checkbox" v-model="anonymous">
+                        Anonymous Submission
+                    </label>
+                </div>
+
+                <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
+                    <button type="button" class="btn quick-play" v-on:click="submitPrompt">Submit</button>
+                    <button type="button" class="btn quick-play" v-on:click="loadGeneric">Load Example</button>
+                </div>
+
+                <details>
+                    <summary>Random Article Generator Settings</summary>
+                    <prompt-generator ref="pg"></prompt-generator>
+                </details>
             </div>
-            <hr>
-            <div id="generatedMarathonText"></div>
         </div>
     `)
 };

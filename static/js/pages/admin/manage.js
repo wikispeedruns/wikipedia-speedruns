@@ -4,6 +4,7 @@ import { fetchAsync, fetchJson } from "../../modules/fetch.js";
 import { getArticleTitle, articleCheck } from "../../modules/wikipediaAPI/util.js";
 
 import { MarathonBuilder } from '../../modules/prompts/marathon-submit.js';
+import { SprintBuilder } from '../../modules/prompts/sprint-submit.js';
 
 Vue.component('prompt-item', {
     props: ['prompt'],
@@ -431,7 +432,8 @@ var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
     components: {
-        'marathon-builder': MarathonBuilder
+        'marathon-builder': MarathonBuilder,
+        'sprint-builder': SprintBuilder
     },
     data: {
         unused: [],
@@ -506,39 +508,6 @@ var app = new Vue({
                 }
             }
         },
-
-        async newPrompt(event) {
-
-            const start = await getArticleTitle(this.startPrompt);
-            if (!start) {
-                alert(`Invalid article name "${this.startPrompt}"`);
-                return;
-            }
-
-            const end = await getArticleTitle(this.endPrompt);
-            if (!end) {
-                alert(`Invalid article name "${this.endPrompt}"`);
-                return;
-            }
-
-            const checkRes = await articleCheck(this.endPrompt);
-            if ('warning' in checkRes) {
-                alert(checkRes["warning"]);
-                return;
-            }
-
-            try {
-                const response = await fetchJson("/api/sprints/", "POST", {
-                    "start": start,
-                    "end": end
-                })
-
-            } catch (e) {
-                console.log(e);
-            }
-
-            this.getPrompts();
-        }
 
     } // End methods
 }); // End vue

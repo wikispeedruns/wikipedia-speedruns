@@ -6,18 +6,21 @@
 
 {% block content %}
 <div id="app">
-    <form id="newPrompt" v-on:submit.prevent="newPrompt">
-        <label for="start">Start Article:</label>
-        <input type="text" id="start" name="start" v-model="startPrompt">
-        <label for="end">End Article:</label>
-        <input type="text" id="end" name="end" v-model="endPrompt">
 
-        <input type="submit" value="Submit">
-    </form>
-
-    <path-checker></path-checker>
-
-    <path-generator></path-generator>
+    <div class="card">
+        <div class="card-body">
+            <sprint-builder 
+                v-bind:admin="true"
+                v-on:refreshprompts="getPrompts"
+            ></sprint-builder>
+        </div>
+        <div class="card-body">
+            <path-checker></path-checker>
+        </div>
+        <div class="card-body">
+            <path-generator></path-generator>
+        </div>
+    </div>
 
     <approve-pending></approve-pending>
 
@@ -95,10 +98,20 @@
 
         </div>
     </div>
-
-    <marathon-builder v-bind:admin="true"></marathon-builder>
-    <marathon-list></marathon-list>
-    <marathon-pending-list></marathon-pending-list>
+    <div class="card">
+        <div class="card-body">
+            <marathon-builder v-bind:admin="true"></marathon-builder>
+        </div>
+        <div class="card-body">
+            <marathon-list></marathon-list>
+        </div>
+        <div class="card-body">
+            <marathon-pending-list></marathon-pending-list>
+        </div>
+    </div>
+    
+    
+    
 
     <!--
 
