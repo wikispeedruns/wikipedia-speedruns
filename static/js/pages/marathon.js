@@ -300,7 +300,7 @@ window.onbeforeunload = function() {
 // Disable find hotkeys, players will be given a warning
 window.addEventListener("keydown", function(e) {
     //disable find
-    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) {
+    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && (e.keyCode == 70 || e.keyCode == 71))) {
         e.preventDefault();
         this.alert("WARNING: Attempt to Find in page. This will be recorded.");
     }
