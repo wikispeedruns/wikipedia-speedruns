@@ -92,6 +92,8 @@ var MarathonBuilder = {
             } else if (mode == 4) {
                 this.cp.unshift(a)
             }
+
+            this.placeholder = ""
         },
 
         moveup: function (ind, mode) {
@@ -133,6 +135,14 @@ var MarathonBuilder = {
                 this.placeholder = String(this.startcp.length + 40)
                 await this.addArticle(1)
             }
+        }, 
+
+        clear: function() {
+            this.start= "United States"
+            this.startcp= []
+            this.cp= []
+            this.seed= "0"
+            this.placeholder= ""
         }
     },
 
@@ -149,28 +159,36 @@ var MarathonBuilder = {
     template: (`
         <div class="row">
             <div class="col-sm">
-                <div>Starting Article: {{start}}</div>
-                <div>Starting Checkpoints:
-                    <ol>
-                    <template v-for="(item, index) in startcp">
-                        <li>{{item}}
-                            <button v-on:click="moveup(index, 0)"><i class="bi bi-chevron-up"></i></button>
-                            <button v-on:click="movedown(index, 0)"><i class="bi bi-chevron-down"></i></button>
-                            <button v-on:click="deleteA(index, 0)"><i class="bi bi-trash"></i></button>
-                        </li>
-                    </template>
-                    </ol>
+                <div>Starting Article: <strong>{{start}}</strong></div>
+                <div class="my-2">Starting Checkpoints:
+                    <table class="table">
+                        <tbody>
+                            <tr v-for="(item, index) in startcp" v-cloak>
+                                <td style="padding: 0 !important">{{index + 1}}.</td>
+                                <td style="padding: 0 !important"><strong>{{item}}</strong></td>
+                                <td style="padding: 0 !important">
+                                    <button v-on:click="moveup(index, 0)"><i class="bi bi-chevron-up"></i></button>
+                                    <button v-on:click="movedown(index, 0)"><i class="bi bi-chevron-down"></i></button>
+                                    <button v-on:click="deleteA(index, 0)"><i class="bi bi-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div>Reserve Checkpoints:
-                    <ol>
-                    <template v-for="(item, index) in cp">
-                        <li>{{item}}
-                            <button v-on:click="moveup(index, 1)"><i class="bi bi-chevron-up"></i></button>
-                            <button v-on:click="movedown(index, 1)"><i class="bi bi-chevron-down"></i></button>
-                            <button v-on:click="deleteA(index, 1)"><i class="bi bi-trash"></i></button>
-                        </li>
-                    </template>
-                    </ol>
+                <div class="my-2">Reserve Checkpoints (In order):
+                    <table class="table">
+                        <tbody>
+                            <tr v-for="(item, index) in cp" v-cloak>
+                                <td style="padding: 0 !important">{{index + 1}}.</td>
+                                <td style="padding: 0 !important"><strong>{{item}}</strong></td>
+                                <td style="padding: 0 !important">
+                                    <button v-on:click="moveup(index, 1)"><i class="bi bi-chevron-up"></i></button>
+                                    <button v-on:click="movedown(index, 1)"><i class="bi bi-chevron-down"></i></button>
+                                    <button v-on:click="deleteA(index, 1)"><i class="bi bi-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -184,25 +202,27 @@ var MarathonBuilder = {
                             </button>
                         </div>
                     </div>
-                    <div class="col-sm mb-2">
+                    <!--<div class="col-sm mb-2">
                         <div class="input-group flex-nowrap">
                             <input class="form-control" type="text" name="seedField" v-model="seed">
                         </div>
-                    </div>
+                    </div>-->
                     <p v-if="articleCheckMessage" class="text-danger mb-0">{{articleCheckMessage}}</p>
                 </div>
 
                 <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
                     <button v-on:click="addArticle(0)">Set start</button>
                 </div>
-
                 <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
                     <button v-on:click="addArticle(1)">Add to END of starting checkpoints</button>
+                </div>
+                <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
                     <button v-on:click="addArticle(2)">Add to START of starting checkpoints</button>
                 </div>
-
                 <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
                     <button v-on:click="addArticle(3)" id="addInputToCPEnd">Add to END of checkpoints</button>
+                </div>
+                <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
                     <button v-on:click="addArticle(4)">Add to START of checkpoints</button>
                 </div>
                 
@@ -215,13 +235,55 @@ var MarathonBuilder = {
 
                 <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
                     <button type="button" class="btn quick-play" v-on:click="submitPrompt">Submit</button>
-                    <button type="button" class="btn quick-play" v-on:click="loadGeneric">Load Example</button>
+                    <button type="button" class="btn quick-play" v-on:click="loadGeneric" v-if="admin">Load Example</button>
+                    <button type="button" class="btn quick-play" v-on:click="clear">Clear All</button>
                 </div>
 
                 <details>
                     <summary>Random Article Generator Settings</summary>
                     <prompt-generator ref="pg"></prompt-generator>
                 </details>
+
+                <details class="my-2" v-show="!admin">
+                <summary><strong>Prompt building tips: Marathon</strong></summary>
+                <p>
+                  Here are some tips for building a good marathon prompt - with a
+                  higher likelihood of admin approval
+                </p>
+                <ol>
+                  <li>
+                    Smilar to sprint prompts,
+                    <strong
+                      >a good marathon prompt should be challenging, but still very
+                      much possible.</strong
+                    >
+                  </li>
+                  <li>
+                    Each checkpoint reached gives a player 5 more clicks. So,
+                    <strong
+                      >the average distance between articles should be around 5
+                      clicks</strong
+                    >.
+                  </li>
+                  <li>
+                    Compared to sprint prompts, marathons have a slower pace and
+                    encourages a more thoughtful style of play. However, because of
+                    limitations on number of links a player can use, having some
+                    concept association between checkpoints is more important.
+                  </li>
+                  <li>
+                    The starting checkpoints will all appear at once. Reserve
+                    checkpoints will be presented to the player in the listed order.
+                    Keep that in mind if you want to guide the player in a specific
+                    direction.
+                  </li>
+                  <li>
+                    <strong>Don't make it too easy!</strong> Players are expected to run out of
+                    clicks in the middle of the game, so feel free to ramp up the
+                    difficulty for some of the later reserve checkpoints >:)
+                  </li>
+                </ol>
+              </details>
             </div>
         </div>
     `)

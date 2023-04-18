@@ -9,5 +9,8 @@ var app = new Vue({
     components: {
         'marathon-builder': MarathonBuilder,
         'sprint-builder': SprintBuilder
+    },
+    data: {
+        tab: ""
     }
 }); // End vue
