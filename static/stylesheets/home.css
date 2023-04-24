@@ -66,25 +66,6 @@
 	font-size: small;
 }
 
-.quick-play {
-	background-color: #f8f9fa;
-	border: 1px solid #f8f9fa;
-	color: #3c4043;
-}
-
-.quick-play:hover {
-	box-shadow: 0 1px 1px rgb(0 0 0 / 10%);
-  background-color: #f8f9fa;
-  border: 1px solid #dadce0 !important;
-  color: #202124;
-}
-
-.quick-play:focus {
-	border: 1px solid #4285f4;
-  outline: none;
-  box-shadow: none;
-}
-
 nav[data-toggle="toc"] {
   top: 97px;
 }

@@ -40,17 +40,19 @@ var SprintBuilder = {
             try {
                 if (this.admin) {
                     await this.submitAsAdmin();
+                    this.articleCheckMessage = "Prompt submit success. "
                 } else {
                     await this.submitAsCmty();
+                    this.articleCheckMessage = "Prompt submitted for approval!"
                 }
+
+                this.$emit("refreshprompts")
+
+                this.start = ""
+                this.end = ""
             } catch (e) {
                 console.log(e);
             }
-
-            this.$emit("refreshprompts")
-
-            this.start = ""
-            this.end = ""
         },
 
         async submitAsAdmin() {

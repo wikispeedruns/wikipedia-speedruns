@@ -32,11 +32,11 @@ var MarathonBuilder = {
         },
 
         submitPrompt: async function() {
-            
-            if (this.startcp.length != 5) throw new Error("Need 5 starting checkpoints");
-            if (this.cp.length < 40) throw new Error("Need 40+ checkpoints");
 
             try {
+                if (this.startcp.length != 5) throw new Error("Need exactly 5 starting checkpoints. Add or remove starting checkpoints");
+                if (this.cp.length < 40) throw new Error("Need 40 or more reserve checkpoints. Add more reserve checkpoints");
+
                 if (this.admin) {
                     await this.submitAsAdmin();
                 } else {
@@ -68,7 +68,7 @@ var MarathonBuilder = {
                 alert(await response.text());
                 return;
             }
-            this.articleCheckMessage = "Prompt submitted for approval"
+            this.articleCheckMessage = "Prompt submitted for approval."
         },
 
         addArticle: async function(mode) {
@@ -77,7 +77,7 @@ var MarathonBuilder = {
             let a = await getArticleTitle(this.placeholder)
 
             if (this.cp.includes(a) || this.startcp.includes(a) || this.start == a ) {
-                this.articleCheckMessage = "Article already exists"
+                this.articleCheckMessage = "Article already exists. "
                 return
             }
 
@@ -166,10 +166,10 @@ var MarathonBuilder = {
                             <tr v-for="(item, index) in startcp" v-cloak>
                                 <td style="padding: 0 !important">{{index + 1}}.</td>
                                 <td style="padding: 0 !important"><strong>{{item}}</strong></td>
-                                <td style="padding: 0 !important">
-                                    <button v-on:click="moveup(index, 0)"><i class="bi bi-chevron-up"></i></button>
-                                    <button v-on:click="movedown(index, 0)"><i class="bi bi-chevron-down"></i></button>
-                                    <button v-on:click="deleteA(index, 0)"><i class="bi bi-trash"></i></button>
+                                <td style="padding: 0 !important; text-align:right">
+                                    <button class="btn quick-play" v-on:click="moveup(index, 0)"><i class="bi bi-chevron-up"></i></button>
+                                    <button class="btn quick-play" v-on:click="movedown(index, 0)"><i class="bi bi-chevron-down"></i></button>
+                                    <button class="btn quick-play" v-on:click="deleteA(index, 0)"><i class="bi bi-trash"></i></button>
                                 </td>
                             </tr>
                         </tbody>
@@ -181,10 +181,10 @@ var MarathonBuilder = {
                             <tr v-for="(item, index) in cp" v-cloak>
                                 <td style="padding: 0 !important">{{index + 1}}.</td>
                                 <td style="padding: 0 !important"><strong>{{item}}</strong></td>
-                                <td style="padding: 0 !important">
-                                    <button v-on:click="moveup(index, 1)"><i class="bi bi-chevron-up"></i></button>
-                                    <button v-on:click="movedown(index, 1)"><i class="bi bi-chevron-down"></i></button>
-                                    <button v-on:click="deleteA(index, 1)"><i class="bi bi-trash"></i></button>
+                                <td style="padding: 0 !important; text-align:right">
+                                    <button class="btn quick-play" v-on:click="moveup(index, 1)"><i class="bi bi-chevron-up"></i></button>
+                                    <button class="btn quick-play" v-on:click="movedown(index, 1)"><i class="bi bi-chevron-down"></i></button>
+                                    <button class="btn quick-play" v-on:click="deleteA(index, 1)"><i class="bi bi-trash"></i></button>
                                 </td>
                             </tr>
                         </tbody>
@@ -211,19 +211,19 @@ var MarathonBuilder = {
                 </div>
 
                 <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
-                    <button v-on:click="addArticle(0)">Set start</button>
+                    <button class="btn quick-play" v-on:click="addArticle(0)">Set start</button>
                 </div>
                 <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
-                    <button v-on:click="addArticle(1)">Add to END of starting checkpoints</button>
+                    <button class="btn quick-play" v-on:click="addArticle(1)">Add to END of starting checkpoints</button>
                 </div>
                 <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
-                    <button v-on:click="addArticle(2)">Add to START of starting checkpoints</button>
+                    <button class="btn quick-play" v-on:click="addArticle(2)">Add to START of starting checkpoints</button>
                 </div>
                 <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
-                    <button v-on:click="addArticle(3)" id="addInputToCPEnd">Add to END of checkpoints</button>
+                    <button class="btn quick-play" v-on:click="addArticle(3)" id="addInputToCPEnd">Add to END of checkpoints</button>
                 </div>
                 <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
-                    <button v-on:click="addArticle(4)">Add to START of checkpoints</button>
+                    <button class="btn quick-play" v-on:click="addArticle(4)">Add to START of checkpoints</button>
                 </div>
                 
                 <div class="form-check" v-if="!admin">
