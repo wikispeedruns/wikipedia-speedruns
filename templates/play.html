@@ -133,17 +133,6 @@
                 ⓘ
             </small>
         </p>
-        <p v-if="promptId && !lobbyId">Prompt Created By: 
-            <template v-if="created_username && anonymous">
-                <strong>Anonymous User</strong>
-            </template>
-            <template v-else-if="created_username">
-                <strong>[[created_username]]</strong>
-            </template>
-            <template v-else>
-                <strong>Wikispeedruns Team</strong> with love <3
-            </template>
-        </p>
     </countdown-timer>
 
     <div v-show="started && !finished" id="main">

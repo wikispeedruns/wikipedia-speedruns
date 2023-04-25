@@ -180,18 +180,6 @@
     <countdown-timer v-on:start-game="start">
         <p>Starting Article: <strong>[[startArticle]]</strong></p>
         <p>Starting Checkpoints: <strong>[[activeCheckpoints]]</strong></p>
-        <p>Prompt Created By: 
-            <template v-if="created_username && anonymous">
-                <strong>Anonymous User</strong>
-            </template>
-            <template v-else-if="created_username">
-                <strong>[[created_username]]</strong>
-            </template>
-            <template v-else>
-                <strong>Wikispeedruns Team</strong> with love <3
-            </template>
-        </p>
-
     </countdown-timer>
 
     <finish-page
