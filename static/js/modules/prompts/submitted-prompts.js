@@ -52,7 +52,7 @@ var SubmittedSprints = {
     template: (`
     <div>
         <div class="row my-3">
-            <h5>Approved Submissions</h5>
+            <h5>Approved Sprint Submissions</h5>
             <div class="col">
                 <template v-if="approved.length > 0">
                     <table class="table table-hover">
@@ -90,7 +90,7 @@ var SubmittedSprints = {
         </div>
         
         <div class="row my-3">
-            <h5>Pending Submissions</h5>
+            <h5>Pending Sprint Submissions</h5>
             <div class="col">
                 <template v-if="pending.length > 0">
                     <table class="table table-hover">
@@ -168,7 +168,7 @@ var SubmittedMarathons = {
     template: (`
     <div>
         <div class="row my-3">
-            <h5>Approved Submissions</h5>
+            <h5>Approved Marathon Submissions</h5>
             <div class="col">
                 <template v-if="approved.length > 0">
                     <table class="table table-hover">
@@ -202,7 +202,7 @@ var SubmittedMarathons = {
         </div>
         
         <div class="row my-3">
-            <h5>Pending Submissions</h5>
+            <h5>Pending Marathon Submissions</h5>
             <div class="col">
                 <template v-if="pending.length > 0">
                     <table class="table table-hover">
