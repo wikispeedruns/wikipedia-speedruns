@@ -53,7 +53,7 @@ var SubmittedSprints = {
     <div>
         <div class="row my-3">
             <h5>Approved Sprint Submissions</h5>
-            <div class="col">
+            <div class="col table-responsive">
                 <template v-if="approved.length > 0">
                     <table class="table table-hover">
                         <thead>
@@ -63,19 +63,19 @@ var SubmittedSprints = {
                                 <th scope="col">Plays</th>
                                 <th scope="col">Start</th>
                                 <th scope="col">End</th>
-                                <th scope="col">Anony.</th>
+                                <th scope="col"><small>Anony.</small></th>
                                 <th scope="col"></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="prompt in approved" v-cloak>
-                                <td>{{prompt.moment_str}}</td>
-                                <td>{{prompt.publish_moment_str}}</td>
+                                <td><small>{{prompt.moment_str}}</small></td>
+                                <td><small>{{prompt.publish_moment_str}}</small></td>
                                 <td>{{prompt.total_plays}}</td>
                                 <td>{{prompt.start}}</td>
                                 <td>{{prompt.end}}</td>
-                                <td>{{prompt.anonymous}}</td>
-                                <td><a v-if="prompt.used && new Date() > new Date(prompt.active_start)" v-bind:href="'/leaderboard/' + prompt.prompt_id">Leaderboard</a></td>
+                                <td><small>{{prompt.anonymous ? 'Y' : 'N'}}</small></td>
+                                <td><small><a v-if="prompt.used && new Date() > new Date(prompt.active_start)" v-bind:href="'/leaderboard/' + prompt.prompt_id">Leaderboard</a></small></td>
                             </tr>
                         </tbody>
                     </table>
@@ -91,7 +91,7 @@ var SubmittedSprints = {
         
         <div class="row my-3">
             <h5>Pending Sprint Submissions</h5>
-            <div class="col">
+            <div class="col table-responsive">
                 <template v-if="pending.length > 0">
                     <table class="table table-hover">
                         <thead>
@@ -99,15 +99,15 @@ var SubmittedSprints = {
                                 <th scope="col">Submitted</th>
                                 <th scope="col">Start</th>
                                 <th scope="col">End</th>
-                                <th scope="col">Anonymous</th>
+                                <th scope="col"><small>Anonymous</small></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="prompt in pending" v-cloak>
-                                <td>{{prompt.moment_str}}</td>
+                                <td><small>{{prompt.moment_str}}</small></td>
                                 <td>{{prompt.start}}</td>
                                 <td>{{prompt.end}}</td>
-                                <td>{{prompt.anonymous}}</td>
+                                <td><small>{{prompt.anonymous ? 'Y' : 'N'}}</small></td>
                             </tr>
                         </tbody>
                     </table>
@@ -169,7 +169,7 @@ var SubmittedMarathons = {
     <div>
         <div class="row my-3">
             <h5>Approved Marathon Submissions</h5>
-            <div class="col">
+            <div class="col table-responsive">
                 <template v-if="approved.length > 0">
                     <table class="table table-hover">
                         <thead>
@@ -177,17 +177,17 @@ var SubmittedMarathons = {
                                 <th scope="col">Submitted</th>
                                 <th scope="col">Plays</th>
                                 <th scope="col">Start</th>
-                                <th scope="col">Init. Checkpoints</th>
-                                <th scope="col">Anony.</th>
+                                <th scope="col"><small>Init. Checkpoints</small></th>
+                                <th scope="col"><small>Anony.</small></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="prompt in approved" v-cloak>
-                                <td>{{prompt.moment_str}}</td>
+                                <td><small>{{prompt.moment_str}}</small></td>
                                 <td>{{prompt.total_plays}}</td>
                                 <td>{{prompt.start}}</td>
-                                <td>{{prompt.initcheckpoints}}</td>
-                                <td>{{prompt.anonymous}}</td>
+                                <td><small>{{prompt.initcheckpoints}}</small></td>
+                                <td><small>{{prompt.anonymous ? 'Y' : 'N'}}</small></td>
                             </tr>
                         </tbody>
                     </table>
@@ -203,23 +203,23 @@ var SubmittedMarathons = {
         
         <div class="row my-3">
             <h5>Pending Marathon Submissions</h5>
-            <div class="col">
+            <div class="col table-responsive">
                 <template v-if="pending.length > 0">
                     <table class="table table-hover">
                         <thead>
                             <tr>
                                 <th scope="col">Submitted</th>
                                 <th scope="col">Start</th>
-                                <th scope="col">Init. Checkpoints</th>
-                                <th scope="col">Anonymous</th>
+                                <th scope="col"><small>Init. Checkpoints</small></th>
+                                <th scope="col"><small>Anonymous</small></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="prompt in pending" v-cloak>
-                                <td>{{prompt.moment_str}}</td>
+                                <td><small>{{prompt.moment_str}}</small></td>
                                 <td>{{prompt.start}}</td>
-                                <td>{{prompt.initcheckpoints}}</td>
-                                <td>{{prompt.anonymous}}</td>
+                                <td><small>{{prompt.initcheckpoints}}</small></td>
+                                <td><small>{{prompt.anonymous ? 'Y' : 'N'}}</small></td>
                             </tr>
                         </tbody>
                     </table>

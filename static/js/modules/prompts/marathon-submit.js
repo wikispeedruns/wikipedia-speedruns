@@ -214,10 +214,7 @@ var MarathonBuilder = {
                     <button class="btn quick-play" v-on:click="addArticle(0)">Set start</button>
                 </div>
                 <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
-                    <button class="btn quick-play" v-on:click="addArticle(1)">Add to END of starting checkpoints</button>
-                </div>
-                <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
-                    <button class="btn quick-play" v-on:click="addArticle(2)">Add to START of starting checkpoints</button>
+                    <button class="btn quick-play" v-on:click="addArticle(1)">Add to starting checkpoints</button>
                 </div>
                 <div class="gap-2 d-flex justify-content-center justify-content-md-start my-3">
                     <button class="btn quick-play" v-on:click="addArticle(3)" id="addInputToCPEnd">Add to END of checkpoints</button>
