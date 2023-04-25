@@ -15,5 +15,12 @@ var app = new Vue({
     },
     data: {
         tab: ""
-    }
+    },
+
+    created: async function() {
+        if (!("username" in serverData)) {
+            alert("Must be logged in to view this page!")
+            window.location.href = "/login";  // redirect home if not logged in
+        }
+    },
 }); // End vue
