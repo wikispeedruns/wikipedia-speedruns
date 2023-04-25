@@ -441,6 +441,8 @@ var app = new Vue({
 
         startPrompt: "",
         endPrompt: "",
+
+        tab: "sprint-build"
     },
 
     created: async function() {
