@@ -30,14 +30,38 @@
               class="list-group-item list-group-item-action"
               v-on:click="tab='sprint'"
             >
-              Sprint
+              Sprint Builder
             </button>
             <button
               type="button"
               class="list-group-item list-group-item-action"
               v-on:click="tab='marathon'"
             >
-              Marathon
+              Marathon Builder
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card my-4">
+        <div class="alert alert-info my-0" role="alert">
+          <h5 class="my-0">Submitted Status</h5>
+        </div>
+        <div class="card-body">
+          <div class="list-group">
+            <button
+              type="button"
+              class="list-group-item list-group-item-action"
+              v-on:click="tab='sprint-status'"
+            >
+              Submitted Sprints
+            </button>
+            <button
+              type="button"
+              class="list-group-item list-group-item-action"
+              v-on:click="tab='marathon-status'"
+            >
+              Submitted Marathons
             </button>
           </div>
         </div>
@@ -56,6 +80,19 @@
           <marathon-builder v-bind:admin="false"></marathon-builder>
         </div>
       </div>
+
+      <div v-if="tab=='sprint-status'" class="card" v-cloak>
+        <div class="card-body">
+          <submitted-sprints></submitted-sprints>
+        </div>
+      </div>
+
+      <div v-if="tab=='marathon-status'" class="card" v-cloak>
+        <div class="card-body">
+          <submitted-marathons></submitted-marathons>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>

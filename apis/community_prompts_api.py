@@ -238,3 +238,92 @@ def reject_marathon():
         cursor.execute(query)
         db.commit()
         return f'Deleted pending prompt {pending_id}', 200
+    
+    
+    
+@community_prompts_api.get('/get_user_pending_sprints')
+@check_user
+def get_user_pending_sprints():
+    query = """
+    SELECT start, end, submitted_time, anonymous FROM cmty_pending_prompts_sprints
+    WHERE cmty_pending_prompts_sprints.user_id = %(user_id)s
+    """
+    
+    query_args = {
+        'user_id': session['user_id']
+    }
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, query_args)
+        results = cursor.fetchall()
+        return jsonify(results)
+    
+    
+    
+@community_prompts_api.get('/get_user_approved_sprints')
+@check_user
+def get_user_approved_sprints():
+    query = """
+    SELECT start, end, used, cmty_submitted_time as submitted_time, cmty_anonymous as anonymous, sprint_prompts.prompt_id as prompt_id, count(run_id) as total_plays, active_start FROM sprint_prompts
+    LEFT JOIN sprint_runs ON
+        sprint_prompts.prompt_id = sprint_runs.prompt_id
+    WHERE sprint_prompts.cmty_added_by = %(user_id)s
+    GROUP BY prompt_id
+    """
+    
+    query_args = {
+        'user_id': session['user_id']
+    }
+    
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, query_args)
+        results = cursor.fetchall()
+        return jsonify(results)
+    
+    
+    
+    
+@community_prompts_api.get('/get_user_pending_marathons')
+@check_user
+def get_user_pending_marathons():
+    query = """
+    SELECT start, initcheckpoints, submitted_time, anonymous FROM cmty_pending_prompts_marathon
+    WHERE cmty_pending_prompts_marathon.user_id = %(user_id)s
+    """
+    
+    query_args = {
+        'user_id': session['user_id']
+    }
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, query_args)
+        results = cursor.fetchall()
+        return jsonify(results)
+    
+    
+    
+@community_prompts_api.get('/get_user_approved_marathons')
+@check_user
+def get_user_approved_marathons():
+    query = """
+    SELECT start, initcheckpoints, 
+        cmty_submitted_time as submitted_time, 
+        cmty_anonymous as anonymous, 
+        marathonprompts.prompt_id as prompt_id, 
+        count(run_id) as total_plays FROM marathonprompts
+    LEFT JOIN marathonruns ON
+        marathonprompts.prompt_id = marathonruns.prompt_id
+    WHERE marathonprompts.cmty_added_by = %(user_id)s
+    GROUP BY prompt_id
+    """
+    
+    query_args = {
+        'user_id': session['user_id']
+    }
+    
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, query_args)
+        results = cursor.fetchall()
+        return jsonify(results)
