@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 
 import json
 
@@ -10,6 +10,9 @@ from util.flaskjson import CustomJSONEncoder
 
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
+
+from prometheus_flask_exporter import PrometheusMetrics
+
 
 from wikispeedruns import lobbys
 def create_app(test_config=None):
@@ -39,6 +42,11 @@ def create_app(test_config=None):
             traces_sample_rate=0
         )
 
+    # Note, this would have to be exported globally if we want custom metrics
+    # doing something like this:
+    # https://github.com/rycus86/prometheus_flask_exporter#app-factory-pattern
+    # For now this is fine, to just get the defaults
+    metrics = PrometheusMetrics(app)
 
     db.init_app(app)
     mail.init_app(app)
@@ -74,6 +82,13 @@ def create_app(test_config=None):
     app.register_blueprint(leaderboard_api)
     app.register_blueprint(achievements_api)
     app.register_blueprint(community_prompts_api)
+
+    metrics.register_default(
+        metrics.counter(
+            'by_path_counter', 'Request count by request paths',
+            labels={'path': lambda: request.path}
+        )
+    )
 
     # Hacky way to load in
     try:
