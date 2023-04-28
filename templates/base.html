@@ -48,6 +48,10 @@
 
                     <div class="navbar-nav ms-auto">
 
+                        <li class="nav-item mx-2">
+                            <a class="nav-link text-center" v-bind:href="'/contribute'">Contribute</a>
+                        </li>
+
                         <template v-if="loggedIn">
 
                             <template v-if="isAdmin">
@@ -55,10 +59,6 @@
                                 <a class="nav-link" v-bind:href="'/stats'">Stats</a>
                                 <a class="nav-link" v-bind:href="'/manage'">Manage</a>
                             </template>
-
-                            <li class="nav-item">
-                                <a class="nav-link" v-bind:href="'/contribute'">Contribute</a>
-                            </li>
                             
                             <li class="nav-item">
                                 <a class="nav-link active" v-bind:href="'/profile/' + username">[[username]]</a>
