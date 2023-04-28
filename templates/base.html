@@ -49,7 +49,7 @@
                     <div class="navbar-nav ms-auto">
 
                         <li class="nav-item mx-2">
-                            <a class="nav-link text-center" v-bind:href="'/contribute'">Contribute</a>
+                            <a class="nav-link" v-bind:class="loggedIn ? '': 'text-center'" v-bind:href="'/contribute'">Contribute</a>
                         </li>
 
                         <template v-if="loggedIn">
@@ -60,11 +60,11 @@
                                 <a class="nav-link" v-bind:href="'/manage'">Manage</a>
                             </template>
                             
-                            <li class="nav-item">
+                            <li class="nav-item mx-2">
                                 <a class="nav-link active" v-bind:href="'/profile/' + username">[[username]]</a>
                             </li>
 
-                            <li class="nav-item align-middle my-auto">
+                            <li class="nav-item align-middle my-auto mx-2">
                                 <button class="btn align-middle my-auto" style="background-color:transparent" v-on:click="accountPage"><i class="bi bi-gear"></i></button>
                             </li>
                         </template>
