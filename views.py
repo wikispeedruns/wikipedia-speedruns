@@ -230,6 +230,6 @@ def get_gen_error_page():
 
 
 # cmty prompts
-@views.route('/cmty', methods=['GET'])
+@views.route('/contribute', methods=['GET'])
 def get_cmty_page():
-    return render_with_data('community_prompt.html')
+    return render_with_data('contribute.html')

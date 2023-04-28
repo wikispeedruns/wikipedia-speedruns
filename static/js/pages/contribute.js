@@ -14,13 +14,11 @@ var app = new Vue({
         'submitted-marathons': SubmittedMarathons
     },
     data: {
-        tab: ""
+        tab: "",
+        loggedIn: false
     },
 
     created: async function() {
-        if (!("username" in serverData)) {
-            alert("Must be logged in to view this page!")
-            window.location.href = "/login";  // redirect home if not logged in
-        }
+        this.loggedIn = "username" in serverData
     },
 }); // End vue
