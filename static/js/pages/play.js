@@ -103,7 +103,10 @@ let app = new Vue({
         expandedTimebox: true,
         isMobile: false,
 
-        isScroll: null
+        isScroll: null,
+
+        anonymous: null,
+        created_username: null
     },
 
     mounted: async function() {
@@ -131,6 +134,9 @@ let app = new Vue({
 
         // Use the release date of teh prompt (if it exists) to determine the article revision
         this.revisionDate = prompt?.["active_start"];
+
+        this.anonymous = prompt["cmty_anonymous"]
+        this.created_username = prompt["username"]
 
         this.currentArticle = this.startArticle;
 

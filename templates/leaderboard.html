@@ -25,21 +25,35 @@
         <div class="card">
             <div class="row">
                 <div class="col-8" style="padding-right:0">
-                    <div class="card-header pt-3" style="height: 8rem;">
+                    <div class="card-header pt-3" style="height: 9rem;">
 
-                        <h4>Prompt [[prompt.prompt_id || ""]]</h4>
+                        <span>
+                            <h4>Prompt [[prompt.prompt_id || ""]]<span v-if="!lobbyId">
+                            </h4>
+                        </span>
 
                         <h6 v-if="available">
                             <strong>[[prompt.start]]</strong> to <strong v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>
                         </h6>
+                        
+                        <small> Prompt created by: 
+                            <template v-if="prompt.username && prompt.cmty_anonymous">
+                                <strong>Anonymous User</strong>
+                            </template>
+                            <template v-else-if="prompt.username">
+                                <strong>[[prompt.username]]</strong>
+                            </template>
+                            <template v-else>
+                                <strong>Wikispeedruns Team</strong>
+                            </template>
+                        </small>
 
-
-                        <p>[[numRuns]] total runs</p>
+                        <p class="my-1">[[numRuns]] total runs</p>
                     </div>
                 </div>
 
                 <div class="col" style="padding-left:0">
-                    <div class="card-header pt-3" style="height: 8rem;">
+                    <div class="card-header pt-3" style="height: 9rem;">
                         <div class="row">
                             <div class="col">
                             <p class="text-muted small progress-label desktop">Completion Rate:</p>

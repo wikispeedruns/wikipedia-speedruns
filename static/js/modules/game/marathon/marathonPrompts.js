@@ -39,6 +39,7 @@ var MarathonPrompts = {
                             <th scope="col">Prompt #</th>
                             <th scope="col">Starting Article</th>
                             <th scope="col">Starting Checkpoints</th>
+                            <th scope="col">Source</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -46,6 +47,14 @@ var MarathonPrompts = {
                             <td>{{prompt.prompt_id}} (<a v-bind:href="'/play/marathon/' + prompt.prompt_id">play</a>)</td>
                             <td>{{prompt.start}}</td>
                             <td>{{prompt.initcheckpoints}}</td>
+                            <td>
+                                <template v-if="prompt.username">
+                                    <small>Community</small>
+                                </template>
+                                <template v-else class="text-muted">
+                                    <small>Official</small>
+                                </template>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

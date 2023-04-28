@@ -2,7 +2,7 @@
     This file should have parity with the actual database.
     For any changes to the database, those changes should be reflected here.
 
-    Schema Version: 2.4
+    Schema Version: 2.5
     This version number should be incremented with any change to the schema.
     Keep this up-to-date with db.py
 */
@@ -31,8 +31,12 @@ CREATE TABLE IF NOT EXISTS `sprint_prompts` (
     `active_start` DATETIME NULL,
     `active_end` DATETIME NULL,
     `used` BOOLEAN AS (NOT (active_start IS NULL OR active_end IS NULL)) VIRTUAL,
+    `cmty_added_by` INT DEFAULT NULL, 
+    `cmty_anonymous` BOOL NOT NULL DEFAULT TRUE, 
+    `cmty_submitted_time` TIMESTAMP(3),
     PRIMARY KEY (`prompt_id`),
-    INDEX (`active_start`, `active_end`)
+    INDEX (`active_start`, `active_end`),
+    FOREIGN KEY (`cmty_added_by`) REFERENCES `users`(`user_id`)
 );
 
 CREATE TABLE IF NOT EXISTS `sprint_runs` (
@@ -72,7 +76,11 @@ CREATE TABLE IF NOT EXISTS `marathonprompts` (
     `checkpoints` TEXT NOT NULL,
     `public` BOOLEAN NOT NULL DEFAULT 0,
     `seed` INT NOT NULL,
-    PRIMARY KEY (`prompt_id`)
+    `cmty_added_by` INT DEFAULT NULL, 
+    `cmty_anonymous` BOOL NOT NULL DEFAULT TRUE, 
+    `cmty_submitted_time` TIMESTAMP(3),
+    PRIMARY KEY (`prompt_id`),
+    FOREIGN KEY (`cmty_added_by`) REFERENCES `users`(`user_id`)
 );
 
 CREATE TABLE IF NOT EXISTS `marathonruns` (
@@ -255,4 +263,32 @@ CREATE TABLE IF NOT EXISTS `computed_stats` (
     */
     `timestamp` TIMESTAMP(3) NOT NULL,
     PRIMARY KEY (`timestamp`)      
+);
+
+
+
+
+-- community (cmty) prompts
+CREATE TABLE IF NOT EXISTS `cmty_pending_prompts_sprints` (
+    `pending_prompt_id` INT NOT NULL AUTO_INCREMENT,
+    `start` VARCHAR(255) NOT NULL,
+    `end` VARCHAR(255) NOT NULL,
+    `user_id` INT NOT NULL,
+    `submitted_time` TIMESTAMP(3) NULL,
+    `anonymous` BOOLEAN NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (`pending_prompt_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
+);
+
+CREATE TABLE IF NOT EXISTS `cmty_pending_prompts_marathon` (
+    `pending_prompt_id` INT NOT NULL AUTO_INCREMENT,
+    `start` VARCHAR(255) NOT NULL,
+    `initcheckpoints` TEXT NOT NULL,
+    `checkpoints` TEXT NOT NULL,
+    `seed` INT NOT NULL,
+    `user_id` INT NOT NULL,
+    `submitted_time` TIMESTAMP(3) NULL,
+    `anonymous` BOOLEAN NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (`pending_prompt_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
 );

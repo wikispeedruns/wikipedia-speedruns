@@ -45,6 +45,10 @@
             will be based on a snapshot of the Wikipedia article from before the prompt is created.
         </div>
 
+        <div class="alert alert-info" v-cloak role="alert">
+            <b>NEW FEATURE!</b> Submit a sprint or marathon prompt for the community to try <a href="/contribute">here</a>!
+        </div>
+
         <div class="alert alert-warning" v-cloak role="alert" v-html="streakText" v-if="loggedIn && streakText"></div>
 
         <p>The rules of this game are simple. You'll be given a starting Wikipedia article and an ending Wikipedia article. Your goal is to navigate from the starting article to the ending article using only the article links.</p>
@@ -110,6 +114,7 @@
                             <tr>
                                 <th scope="col">Prompt #</th>
                                 <th scope="col">Starting Article</th>
+                                <th scope="col">Source</th>
                                 <th class="text-center"></th>
                             </tr>
                         </thead>
@@ -118,7 +123,14 @@
                                 <td>[[prompt.prompt_id]]</span><span v-if="loggedIn"> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</span></td>
 
                                 <td>[[prompt.start]]</td>
-
+                                <td>
+                                    <template v-if="prompt.username">
+                                        <small>Community</small>
+                                    </template>
+                                    <template v-else class="text-muted">
+                                        <small>Official</small>
+                                    </template>
+                                </td>
                                 <td class="text-center">
                                     <template v-if="prompt.played">
                                         <a v-bind:href="'/leaderboard/' + prompt.prompt_id">Results</a>
@@ -135,8 +147,8 @@
                     Don’t see anything? Shoot us a message on <a href="https://discord.gg/mNYeB9c9db" target="_blank">Discord</a> or via <a href="mailto:support@wikispeedruns.com">email</a> and we’ll fix that right away!
                 </template>
             </div>
-            <div v-cloak class="card-footer text-muted" v-if="dailyPrompts.length > 0 && timeLeft">
-                New prompt in T-[[timeLeft]]
+            <div v-cloak class="card-footer text-muted">
+                <span v-if="dailyPrompts.length > 0 && timeLeft">New prompt in T-[[timeLeft]]. </span>Submit a prompt idea <a href="/contribute">here</a>!
             </div>
 
         </div>
@@ -154,6 +166,7 @@
                         <tr>
                             <th scope="col">Prompt #</th>
                             <th scope="col">Starting Article</th>
+                            <th scope="col">Source</th>
                             <th class="text-center"></th>
                         </tr>
                     </thead>
@@ -163,6 +176,14 @@
                                 [[prompt.prompt_id]] (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)
                             </td>
                             <td>[[prompt.start]]</td>
+                            <td>
+                                <template v-if="prompt.username">
+                                    <small>Community</small>
+                                </template>
+                                <template v-else class="text-muted">
+                                    <small>Official</small>
+                                </template>
+                            </td>
                             <td class="text-center">
                                 <template v-if="prompt.played">
                                     <a v-bind:href="'/leaderboard/' + prompt.prompt_id">Results</a>

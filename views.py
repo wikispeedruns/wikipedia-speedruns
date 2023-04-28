@@ -227,3 +227,9 @@ def get_devblog_page():
 def get_gen_error_page():
     return render_with_data('users/generic_error.html')
 
+
+
+# cmty prompts
+@views.route('/contribute', methods=['GET'])
+def get_cmty_page():
+    return render_with_data('contribute.html')
