@@ -10,7 +10,4 @@ pytest==6.2.5
 celery[redis]
 
 cryptography
-
-# Monitoring
 sentry-sdk[flask]
-prometheus-flask-exporter==0.22.4
