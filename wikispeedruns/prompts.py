@@ -108,6 +108,29 @@ def delete_prompt(prompt_id: int, prompt_type: PromptType) -> bool:
             return False
 
 
+def set_prompt_as_unused(prompt_id: int, prompt_type: PromptType) -> bool:
+    '''
+    Sets a prompt as unused, returning whether it could be removed. Raises exception on not found
+    '''
+    query = f"""
+    UPDATE {prompt_type}_prompts
+    SET active_start = NULL, active_end = NULL, rated = 0
+    WHERE prompt_id = %s;
+    """
+    
+    db = get_db()
+    with db.cursor() as cursor:
+        try:
+            res = cursor.execute(query, (prompt_id))
+            if (res == 0): raise PromptNotFoundError()
+
+            db.commit()
+            return res == 1
+
+        except pymysql.IntegrityError:
+            return False
+
+
 
 def set_ranked_daily_prompt(prompt_id: int, day: datetime.date) -> bool:
     '''

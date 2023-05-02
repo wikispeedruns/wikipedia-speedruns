@@ -7,7 +7,7 @@ import { MarathonBuilder } from '../../modules/prompts/marathon-submit.js';
 import { SprintBuilder } from '../../modules/prompts/sprint-submit.js';
 
 Vue.component('prompt-item', {
-    props: ['prompt'],
+    props: ['prompt', 'unused'],
 
     data: function() {
         return {
@@ -23,6 +23,13 @@ Vue.component('prompt-item', {
             if (resp.status == 200) this.$emit('delete-prompt')
             else alert(await resp.text())
         },
+
+        async removePrompt() {
+            const resp = await fetchJson("/api/sprints/set_unused/" + this.prompt.prompt_id, "PATCH");
+
+            if (resp.status == 200) this.$emit('remove-prompt')
+            else alert(await resp.text())
+        },
     },
 
     template: (`
@@ -35,6 +42,9 @@ Vue.component('prompt-item', {
 
         <button v-on:click="deletePrompt" type="button" class="btn btn-default">
             <i class="bi bi-trash"></i>
+        </button>
+        <button v-if="!unused" v-on:click="removePrompt" type="button" class="btn btn-default">
+            <i class="bi bi-arrow-counterclockwise"></i>
         </button>
     </li>`)
 });

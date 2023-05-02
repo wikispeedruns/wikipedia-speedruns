@@ -39,6 +39,17 @@ def delete_prompt(id):
             return "Could not delete prompt, may already have run(s)", 400
     except prompts.PromptNotFoundError:
         return "Prompt {id} not found!", 404
+    
+@sprint_api.patch('/set_unused/<id>')
+@check_admin
+def set_prompt_as_unused(id):
+    try:
+        if prompts.set_prompt_as_unused(id, "sprint"):
+            return "Prompt set to unused!", 200
+        else:
+            return "Could not set prompt as unused, check server response", 400
+    except prompts.PromptNotFoundError:
+        return "Prompt {id} not found!", 404
 
 @sprint_api.patch('/<id>')
 @check_admin

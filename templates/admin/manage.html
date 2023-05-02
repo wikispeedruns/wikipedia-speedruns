@@ -109,6 +109,7 @@
                                 v-bind:prompt="p"
                                 v-bind:key="p.prompt_id"
                                 v-on:change="getPrompts"
+                                v-bind:unused="true"
                             >
                             </prompt-item>
                         </ul>
@@ -160,6 +161,7 @@
                                                 v-bind:rated="true"
                                                 v-on:delete-prompt="getPrompts"
                                                 v-on:move-prompt="getPrompts"
+                                                v-on:remove-prompt="getPrompts"
                                             >
                                             </prompt-set>
                                         </td>
