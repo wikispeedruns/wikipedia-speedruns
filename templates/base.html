@@ -49,6 +49,10 @@
                     <div class="navbar-nav ms-auto">
 
                         <li class="nav-item mx-2">
+                            <a class="nav-link" v-bind:class="loggedIn ? '': 'text-center'" v-bind:href="'/about'">About</a>
+                        </li>
+
+                        <li class="nav-item mx-2">
                             <a class="nav-link" v-bind:class="loggedIn ? '': 'text-center'" v-bind:href="'/contribute'">Contribute</a>
                         </li>
 

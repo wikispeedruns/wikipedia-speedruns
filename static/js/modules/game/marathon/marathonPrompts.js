@@ -27,7 +27,7 @@ var MarathonPrompts = {
         <div class="card">
             <div class="alert alert-info my-0" role="alert">
                 <h5 class="my-0">Marathon Mode</h5>
-                Tired of racing against the clock? Try marathon! Visit checkpoints to get more clicks—five for each. Keep going until your clicks run out.
+                Tired of racing against the clock? Visit checkpoints to get more clicks—five for each. Keep going until your clicks run out.
             </div>
             <div class="card-body table-responsive">
 
