@@ -51,18 +51,20 @@
 
         <div class="alert alert-warning" v-cloak role="alert" v-html="streakText" v-if="loggedIn && streakText"></div>
 
-        <p>🏁 <b>Explore the world's largest encyclopedia with lightning speed!</b> Navigate from a starting Wikipedia article to the target using only links shown in each page as fast as you can. </p>
+        <p>🏁 <b>Explore the world's largest encyclopedia with lightning speed!</b> Start from one Wikipedia page and navigate to the goal page as fast as you can!</p>
             
-        <p>First time? Play the <a href="/play/tutorial">tutorial</a>!</p>
+        <p>Remember, luck is king, so put on your lucky hat, grab your lucky socks, and let the games begin!</p>
 
-        <p>Try our new prompt generator <a href="/generator">here</a>!</p>
+        <p>First time? Play the <a href="/play/tutorial">tutorial</a></p>
+
+        <p>Try our new prompt generator <a href="/generator">here</a></p>
 
         <template v-cloak>
             <p v-if="loggedIn === true && lobbies.length > 0">
                 See your active lobbies <a href="#user-lobbies">here</a> or <a href="/lobby/create">create a new private lobby</a>.
             </p>
             <p v-if="loggedIn === true && lobbies.length == 0">
-                Playing with friends? Create a new private lobby <a href="/lobby/create">here</a>!
+                Playing with friends? Create a new private lobby <a href="/lobby/create">here</a>
             </p>
             <p v-if="loggedIn === false">
                 <a href="/login">Log in</a>/<a href="/register">Register</a> to create a new private lobby and play with your friends!
