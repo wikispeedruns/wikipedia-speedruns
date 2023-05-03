@@ -168,7 +168,7 @@ let app = new Vue({
 
 
         generateResults: function(event) {
-            let resultText = `Wiki Speedruns\n${this.startArticle}\n${this.path.length - 1} 🖱️\n${(this.playTime)} ⏱️`;
+            let resultText = `WikiSpeedruns\n${this.startArticle}\n${this.path.length - 1} 🖱️\n${(this.playTime)} ⏱️`;
             if(this.isQuickRun){
                 const link = `https://wikispeedruns.com/play/quick_play?prompt_start=${this.startArticle}&prompt_end=${this.endArticle}${this.language ? '&lang=' + this.language : ''}`;
                 resultText += `\n${link}`;

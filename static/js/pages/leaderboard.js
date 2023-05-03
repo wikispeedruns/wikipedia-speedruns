@@ -48,7 +48,7 @@ var LeaderboardRow = {
         },
 
         generateResults: function(run) {
-            return `Wiki Speedruns ${run.prompt_id}\n${this.$parent.prompt.start}\n${run.path.length - 1} 🖱️\n${(run.play_time)} ⏱️`
+            return `WikiSpeedruns ${run.prompt_id}\n${this.$parent.prompt.start}\n${run.path.length - 1} 🖱️\n${(run.play_time)} ⏱️`
         },
 
         goToRun: function(newRunId) {

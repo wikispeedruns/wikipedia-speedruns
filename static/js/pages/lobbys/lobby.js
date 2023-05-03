@@ -61,7 +61,7 @@ var app = new Vue({
     methods: {
 
         copyInviteLink() {
-            const link = `Join my Wikispeedruns lobby\n${window.location.href}\nPasscode: ${this.lobbyInfo.passcode}`
+            const link = `Join my WikiSpeedruns lobby\n${window.location.href}\nPasscode: ${this.lobbyInfo.passcode}`
             document.getElementById("custom-tooltip").style.display = "inline";
             navigator.clipboard.writeText(link);
             setTimeout(function() {
