@@ -146,3 +146,16 @@ def get_prompt(id):
         return "You must be logged in to play this daily prompt", 401
 
     return prompt
+
+
+@sprint_api.get('/check_runs/<int:id>')
+@check_admin
+def check_if_prompt_has_runs(id):
+    return {'has_runs': prompts.check_if_prompt_has_runs(id, "sprint")}
+
+@sprint_api.delete('/clear_runs/<int:id>')
+@check_admin
+def clear_runs(id):
+    prompts.clear_runs_for_prompt(id, "sprint")
+    return "Cleared prompts", 200
+

@@ -296,3 +296,37 @@ def get_managed_prompts(prompt_type: PromptType) -> List[Prompt]:
     with db.cursor(cursor=DictCursor) as cur:
         cur.execute(query)
         return [compute_visibility(p) for p in cur.fetchall()]
+    
+    
+    
+def check_if_prompt_has_runs(prompt_id: int, prompt_type: PromptType) -> bool:
+    '''
+    Check if prompt has existing runs, returns a boolean
+    '''
+
+    query = f"SELECT COUNT(*) AS n FROM {prompt_type}_runs WHERE prompt_id = %(prompt_id)s"
+    args = {
+        'prompt_id': prompt_id,
+    }
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cur:
+        cur.execute(query, args)
+        n = cur.fetchone()['n']
+        return n > 0
+    
+    
+def clear_runs_for_prompt(prompt_id: int, prompt_type: PromptType):
+    '''
+    Clear existing runs for a prompt
+    '''
+
+    query = f"DELETE FROM {prompt_type}_runs WHERE prompt_id = %(prompt_id)s"
+    args = {
+        'prompt_id': prompt_id,
+    }
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cur:
+        cur.execute(query, args)
+        db.commit()

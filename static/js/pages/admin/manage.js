@@ -18,10 +18,22 @@ Vue.component('prompt-item', {
     methods: {
 
         async deletePrompt() {
-            const resp = await fetchJson("/api/sprints/" + this.prompt.prompt_id, "DELETE");
+            const resps = await (await fetchJson("/api/sprints/check_runs/" + this.prompt.prompt_id)).json();
 
+            if (resps['has_runs']) {
+                if (confirm("Prompt " + String(this.prompt.prompt_id) + " has runs. Delete?")) {
+                    const clear_resp = await fetchJson("/api/sprints/clear_runs/" + this.prompt.prompt_id, "DELETE");
+                    if (clear_resp.status != 200) {
+                        alert(await clear_resp.text())
+                        return
+                    }
+                } else { return }
+            }
+
+            const resp = await fetchJson("/api/sprints/" + this.prompt.prompt_id, "DELETE");
             if (resp.status == 200) this.$emit('delete-prompt')
             else alert(await resp.text())
+            
         },
 
         async removePrompt() {
