@@ -66,7 +66,7 @@ var app = new Vue({
         },
 
         copyInvite: function (lobby) {
-            const link = `Join my Wikispeedruns lobby\n${window.location.origin}/lobby/${lobby.lobby_id}\nPasscode: ${lobby.passcode}`
+            const link = `Join my WikiSpeedruns lobby\n${window.location.origin}/lobby/${lobby.lobby_id}\nPasscode: ${lobby.passcode}`
             navigator.clipboard.writeText(link);
             document.getElementById("custom-tooltip-"+lobby.lobby_id).innerHTML = "Invite copied!";
             setTimeout(function() {

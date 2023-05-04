@@ -54,7 +54,7 @@ var FinishPage = {
             else if (this.numCheckpointsVisited <= 35) rank = "Overachiever"
             else rank = "We didn't plan for anyone to get this far"
 
-            return `Wiki Speedruns Marathon ${this.promptId}\n${this.startArticle}\n${this.numCheckpointsVisited} 🚩\nStatus: ${rank}`
+            return `WikiSpeedruns Marathon ${this.promptId}\n${this.startArticle}\n${this.numCheckpointsVisited} 🚩\nStatus: ${rank}`
         },
 
         genPathsToCheckpoints: function() {

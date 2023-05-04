@@ -38,7 +38,7 @@ def _send_reset_email(id, email, username, hashed, url_root):
     token = create_reset_token(id, hashed)
     link = f"{url_root}reset/{id}/{token}"
 
-    msg = Message("Reset Your Password - Wikispeedruns.com",
+    msg = Message("Reset Your Password - WikiSpeedruns.com",
       recipients=[email])
 
     msg.body = f"Hello {username},\n\n You are receiving this email because we received a request to reset your password. If this wasn't you, you can ignore this email. Otherwise, please follow this link: {link}"
@@ -50,7 +50,7 @@ def _send_confirmation_email(id, email, username, url_root, on_signup=False):
     token = create_confirm_token(id)
     link = url_root + "confirm/" + token
 
-    msg = Message("Confirm your Email - Wikispeedruns.com", recipients=[email])
+    msg = Message("Confirm your Email - WikiSpeedruns.com", recipients=[email])
 
     msg.body = f"Hello {username},\n\nClick the following link to confirm your email: {link}"
     msg.html = render_template('emails/confirm.html', link=link, user=username, on_signup=on_signup)
