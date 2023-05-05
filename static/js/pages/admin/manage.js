@@ -533,5 +533,39 @@ var app = new Vue({
             }
         },
 
+        async autoPopulate() {
+            let empty_days = []
+
+            this.weeks.forEach((week) => {
+                week['days'].forEach((day) => {
+                    if (day['prompts'].length == 0) {
+                        empty_days.push(day['date']);
+                    }
+                });
+            });
+
+            let unused = this.unused.map((x) => x);
+
+            while (empty_days.length > 0 && unused.length > 0) {
+                let day = empty_days.shift()
+                let p = unused.shift()
+                await this.moveToDay(p['prompt_id'], day, day, true)
+            }
+            
+            await this.getPrompts();
+        },
+
+        async moveToDay(prompt_id, start, end, rated) {
+            const response = await fetchJson("/api/sprints/" + prompt_id, "PATCH", {
+                "startDate": start,
+                "endDate": end,
+                "rated": rated,
+            });
+
+            if (response.status != 200) {
+                alert(await response.text());
+            }
+        }
+
     } // End methods
 }); // End vue

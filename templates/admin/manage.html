@@ -102,8 +102,10 @@
                     <div class="col-sm-6"> <div class="card mb-5"> <div class="card-body">
             
                         <h4> Unused: </h4>
+
+                        <button type="button" class="btn quick-play" v-on:click="autoPopulate">Auto populate [[weeks.length]] weeks</button>
             
-                        <ul>
+                        <ul class="my-3">
                             <prompt-item
                                 v-for="p in unused"
                                 v-bind:prompt="p"
@@ -114,8 +116,6 @@
                             </prompt-item>
                         </ul>
                     </div></div></div>
-            
-            
                 </div>
             
                 <div class="row">
