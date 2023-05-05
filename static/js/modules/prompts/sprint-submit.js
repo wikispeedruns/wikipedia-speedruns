@@ -37,12 +37,15 @@ var SprintBuilder = {
                 return;
             }
 
+            let start_title = resp.body.start
+            let end_title = resp.body.end
+
             try {
                 if (this.admin) {
-                    await this.submitAsAdmin();
+                    await this.submitAsAdmin(start_title, end_title);
                     this.articleCheckMessage = "Prompt submit success. "
                 } else {
-                    await this.submitAsCmty();
+                    await this.submitAsCmty(start_title, end_title);
                     this.articleCheckMessage = "Prompt submitted for approval!"
                 }
 
@@ -55,17 +58,18 @@ var SprintBuilder = {
             }
         },
 
-        async submitAsAdmin() {
+        async submitAsAdmin(start, end) {
             const response = await fetchJson("/api/sprints/", "POST", {
-                "start": this.start,
-                "end": this.end
+                "start": start,
+                "end": end
             })
         },
         
-        async submitAsCmty() {
+        async submitAsCmty(start, end) {
+            console.log(start, end)
             const response = await fetchJson("/api/community_prompts/submit_sprint_prompt", "POST", {
-                "start": this.start,
-                "end": this.end,
+                "start": start,
+                "end": end,
                 "anonymous": this.anonymous
             })
         }
