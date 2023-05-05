@@ -66,7 +66,6 @@ var SprintBuilder = {
         },
         
         async submitAsCmty(start, end) {
-            console.log(start, end)
             const response = await fetchJson("/api/community_prompts/submit_sprint_prompt", "POST", {
                 "start": start,
                 "end": end,
