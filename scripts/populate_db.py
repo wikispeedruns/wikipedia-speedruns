@@ -256,12 +256,13 @@ def populate_lobby_prompts(cursor):
                 "lobby_id": lobby_id,
                 "prompt_id": prompt_id + i + 1,
                 "start": prompt_start,
-                "end": prompt_end
+                "end": prompt_end,
+                "language": "en",
             })
 
     prompt_query = """
-        INSERT INTO `lobby_prompts` (`lobby_id`, `prompt_id`, `start`, `end`)
-        VALUES (%(lobby_id)s, %(prompt_id)s, %(start)s, %(end)s);
+        INSERT INTO `lobby_prompts` (`lobby_id`, `prompt_id`, `start`, `end`, `language`)
+        VALUES (%(lobby_id)s, %(prompt_id)s, %(start)s, %(end)s, %(language)s);
     """
     cursor.executemany(prompt_query, prompts)
 
