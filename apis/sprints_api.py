@@ -39,6 +39,17 @@ def delete_prompt(id):
             return "Could not delete prompt, may already have run(s)", 400
     except prompts.PromptNotFoundError:
         return "Prompt {id} not found!", 404
+    
+@sprint_api.patch('/set_unused/<id>')
+@check_admin
+def set_prompt_as_unused(id):
+    try:
+        if prompts.set_prompt_as_unused(id, "sprint"):
+            return "Prompt set to unused!", 200
+        else:
+            return "Could not set prompt as unused, check server response", 400
+    except prompts.PromptNotFoundError:
+        return "Prompt {id} not found!", 404
 
 @sprint_api.patch('/<id>')
 @check_admin
@@ -135,3 +146,16 @@ def get_prompt(id):
         return "You must be logged in to play this daily prompt", 401
 
     return prompt
+
+
+@sprint_api.get('/check_runs/<int:id>')
+@check_admin
+def check_if_prompt_has_runs(id):
+    return {'has_runs': prompts.check_if_prompt_has_runs(id, "sprint")}
+
+@sprint_api.delete('/clear_runs/<int:id>')
+@check_admin
+def clear_runs(id):
+    prompts.clear_runs_for_prompt(id, "sprint")
+    return "Cleared prompts", 200
+

@@ -7,7 +7,7 @@ import { MarathonBuilder } from '../../modules/prompts/marathon-submit.js';
 import { SprintBuilder } from '../../modules/prompts/sprint-submit.js';
 
 Vue.component('prompt-item', {
-    props: ['prompt'],
+    props: ['prompt', 'unused'],
 
     data: function() {
         return {
@@ -18,9 +18,28 @@ Vue.component('prompt-item', {
     methods: {
 
         async deletePrompt() {
-            const resp = await fetchJson("/api/sprints/" + this.prompt.prompt_id, "DELETE");
+            const resps = await (await fetchJson("/api/sprints/check_runs/" + this.prompt.prompt_id)).json();
 
+            if (resps['has_runs']) {
+                if (confirm("Prompt " + String(this.prompt.prompt_id) + " has runs. Delete?")) {
+                    const clear_resp = await fetchJson("/api/sprints/clear_runs/" + this.prompt.prompt_id, "DELETE");
+                    if (clear_resp.status != 200) {
+                        alert(await clear_resp.text())
+                        return
+                    }
+                } else { return }
+            }
+
+            const resp = await fetchJson("/api/sprints/" + this.prompt.prompt_id, "DELETE");
             if (resp.status == 200) this.$emit('delete-prompt')
+            else alert(await resp.text())
+            
+        },
+
+        async removePrompt() {
+            const resp = await fetchJson("/api/sprints/set_unused/" + this.prompt.prompt_id, "PATCH");
+
+            if (resp.status == 200) this.$emit('remove-prompt')
             else alert(await resp.text())
         },
     },
@@ -35,6 +54,9 @@ Vue.component('prompt-item', {
 
         <button v-on:click="deletePrompt" type="button" class="btn btn-default">
             <i class="bi bi-trash"></i>
+        </button>
+        <button v-if="!unused" v-on:click="removePrompt" type="button" class="btn btn-default">
+            <i class="bi bi-arrow-counterclockwise"></i>
         </button>
     </li>`)
 });
@@ -510,6 +532,40 @@ var app = new Vue({
                 }
             }
         },
+
+        async autoPopulate() {
+            let empty_days = []
+
+            this.weeks.forEach((week) => {
+                week['days'].forEach((day) => {
+                    if (day['prompts'].length == 0) {
+                        empty_days.push(day['date']);
+                    }
+                });
+            });
+
+            let unused = this.unused.map((x) => x);
+
+            while (empty_days.length > 0 && unused.length > 0) {
+                let day = empty_days.shift()
+                let p = unused.shift()
+                await this.moveToDay(p['prompt_id'], day, day, true)
+            }
+            
+            await this.getPrompts();
+        },
+
+        async moveToDay(prompt_id, start, end, rated) {
+            const response = await fetchJson("/api/sprints/" + prompt_id, "PATCH", {
+                "startDate": start,
+                "endDate": end,
+                "rated": rated,
+            });
+
+            if (response.status != 200) {
+                alert(await response.text());
+            }
+        }
 
     } // End methods
 }); // End vue
