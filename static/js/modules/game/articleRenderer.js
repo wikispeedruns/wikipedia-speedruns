@@ -13,6 +13,8 @@ export class ArticleRenderer {
      */
     constructor(frame, pageCallback, mouseEnter, mouseLeave, loadCallback, language, revisionDate) {
         this.frame = frame;
+        this.frame.classList.add("wiki-insert");
+
         this.pageCallback = pageCallback;
         this.loadCallback = loadCallback;
         this.mouseEnter = mouseEnter;
@@ -23,14 +25,21 @@ export class ArticleRenderer {
     }
 
     async loadPage(page) {
+
+        const isMobile = window.screen.width < 768;
+        const startTime = Date.now();
+        const body = await getArticle(page, isMobile, this.language, this.revisionDate);
+
         try {
+            // This is all in a try because something was throwing errors here, most likely because
+            // we don't handle the wikipedia HTML correctly in some edge cases. This is a blanket solution
+            // that just makes sure the essential functions work. Really, we should try and find the root cause
+            // and fix that. However, we have not been able to reproduce it.
+            // TODO add some sort of frontend eror montiroing so we can figure it out
+
             if (this.loadCallback) {
                 this.loadCallback();
             }
-
-            const isMobile = window.screen.width < 768;
-            const startTime = Date.now();
-            const body = await getArticle(page, isMobile, this.language, this.revisionDate);
 
             this.frame.innerHTML = body["text"]["*"];
 
@@ -51,7 +60,11 @@ export class ArticleRenderer {
             // disableFindableLinks(this.frame);
             stripNamespaceLinks(this.frame);
 
-            this.frame.classList.add("wiki-insert");
+        } catch (error) {
+            console.error("Error rendering in page somewhere:", error)
+            console.error(error)
+
+        } finally {
             this.frame.querySelectorAll("a, area").forEach((el) => {
                 // Load href here so inspect element can't change link destination
                 const href = el.getAttribute("href");
@@ -70,16 +83,8 @@ export class ArticleRenderer {
             });
 
             this.pageCallback(body["title"], Date.now() - startTime);
-
-        } catch (error) {
-
-            console.log(error)
-            // Reenable all links if loadPage fails
-            this.frame.querySelectorAll("a, area").forEach((el) => {
-                // Arrow function to prevent this from being overwritten
-                el.onclick = (e) => this.handleWikipediaLink(e);
-            });
         }
+
     }
 
 
