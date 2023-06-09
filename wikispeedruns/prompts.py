@@ -136,7 +136,7 @@ def set_ranked_daily_prompt(prompt_id: int, day: datetime.date) -> bool:
     '''
     Given a currently unused prompt, set it as one of the the ranked daily for 'day'
     '''
-    query = f"UPDATE sprint_prompts SET active_start=%s, active_end=%s, rated=1 WHERE prompt_id=%s"
+    query = "UPDATE sprint_prompts SET active_start=%s, active_end=%s, rated=1 WHERE prompt_id=%s"
 
     db = get_db()
     with db.cursor() as cur:
