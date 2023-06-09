@@ -145,7 +145,7 @@ def approve_sprint():
     WHERE pending_prompt_id = %s
     """
     
-    del_query = f"DELETE FROM cmty_pending_prompts_sprints WHERE pending_prompt_id = {pending_id};"
+    del_query = "DELETE FROM cmty_pending_prompts_sprints WHERE pending_prompt_id = %s;"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
@@ -158,7 +158,7 @@ def approve_sprint():
             result['submitted_time'], 
             anonymous
         )
-        cursor.execute(del_query)
+        cursor.execute(del_query, (pending_id, ))
         db.commit()
         return jsonify({"new_prompt_id": new_prompt_id})
     
@@ -170,11 +170,11 @@ def reject_sprint():
     
     pending_id = request.json['pending_id']
         
-    query = f"DELETE FROM cmty_pending_prompts_sprints WHERE pending_prompt_id = {pending_id};"
+    query = "DELETE FROM cmty_pending_prompts_sprints WHERE pending_prompt_id = %s;"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query)
+        cursor.execute(query, (pending_id, ))
         db.commit()
         return f'Deleted pending prompt {pending_id}', 200
     
@@ -193,7 +193,7 @@ def approve_marathon():
     WHERE pending_prompt_id = %s
     """
     
-    del_query = f"DELETE FROM cmty_pending_prompts_marathon WHERE pending_prompt_id = {pending_id};"
+    del_query = "DELETE FROM cmty_pending_prompts_marathon WHERE pending_prompt_id = %s;"
     
     insert_query = """
     INSERT INTO `marathonprompts` (start, initcheckpoints, checkpoints, seed, cmty_anonymous, cmty_added_by, cmty_submitted_time) 
@@ -219,7 +219,7 @@ def approve_marathon():
         cursor.execute(insert_query, query_args)
         cursor.execute(sel_query)
         new_prompt_id = cursor.fetchone()['LAST_INSERT_ID()']
-        cursor.execute(del_query)
+        cursor.execute(del_query, (pending_id, ))
         db.commit()
         return jsonify({"new_prompt_id": new_prompt_id})
     
@@ -231,11 +231,11 @@ def reject_marathon():
     
     pending_id = request.json['pending_id']
         
-    query = f"DELETE FROM cmty_pending_prompts_marathon WHERE pending_prompt_id = {pending_id};"
+    query = "DELETE FROM cmty_pending_prompts_marathon WHERE pending_prompt_id = %s;"
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query)
+        cursor.execute(query, pending_id, )
         db.commit()
         return f'Deleted pending prompt {pending_id}', 200
     
