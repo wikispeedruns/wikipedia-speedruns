@@ -170,7 +170,11 @@ let app = new Vue({
         generateResults: function(event) {
             let resultText = `WikiSpeedruns\n${this.startArticle}\n${this.path.length - 1} 🖱️\n${(this.playTime)} ⏱️`;
             if(this.isQuickRun){
-                const link = `https://wikispeedruns.com/play/quick_play?prompt_start=${this.startArticle}&prompt_end=${this.endArticle}${this.language ? '&lang=' + this.language : ''}`;
+                let link = `https://wikispeedruns.com/play/quick_play`;
+                link += `?prompt_start=${articleToUrl(this.startArticle)}`;
+                link += `&prompt_end=${articleToUrl(this.endArticle)}`;
+                link += `${this.language ? '&lang=' + this.language : ''}`;
+                
                 resultText += `\n${link}`;
             } else if (this.isSprint) {
                 const link = `https://wikispeedruns.com/play/${this.promptId}`;
@@ -193,4 +197,8 @@ let app = new Vue({
         },
     }
 })
+
+function articleToUrl(article) {
+    return article.replace(/\s/g, '%20');
+}
 
