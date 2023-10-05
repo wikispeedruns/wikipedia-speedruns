@@ -26,6 +26,7 @@
                             <th scope="col"><a v-on:click="toggleSort('prompt')">Prompt # </a></th>
                             <th scope="col">Starting Article</th>
                             <th scope="col">Ending Article</th>
+                            <th scope="col">Created By</th>
                             <th class="text-center" scope="col">Played</th>
                             <th></th>
                             <th></th>
@@ -36,6 +37,17 @@
                                 <td>[[prompt.prompt_id]] </td>
                                 <td>[[prompt.start]]</td>
                                 <td>[[prompt.end || '-']]</td>
+                                <td>
+                                    <template v-if="prompt.username && prompt.cmty_anonymous">
+                                        <small>Anon User</small>
+                                    </template>
+                                    <template v-else-if="prompt.username">
+                                        <small>[[prompt.username]]</small>
+                                    </template>
+                                    <template v-else>
+                                        <small>WS Team</small>
+                                    </template>
+                                </td>
                                 <td class="text-center"><span v-if="prompt.played"><i class="bi bi-check-lg"></i></span></td>
                                 <td><a v-bind:href="'/play/' + prompt.prompt_id">Play</a></td>
                                 <td><a v-bind:href="'/leaderboard/' + prompt.prompt_id">Results</a></td>
