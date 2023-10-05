@@ -36,7 +36,7 @@
                             <strong>[[prompt.start]]</strong> to <strong v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>
                         </h6>
                         
-                        <small> Prompt created by: 
+                        <small v-if="!lobbyId"> Prompt created by: 
                             <template v-if="prompt.username && prompt.cmty_anonymous">
                                 <strong>Anonymous User</strong>
                             </template>
