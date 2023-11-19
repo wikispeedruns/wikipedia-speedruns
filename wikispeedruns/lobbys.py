@@ -454,3 +454,23 @@ def get_lobby_anon_users(lobby_id: int):
         results = cursor.fetchall()
 
         return results
+    
+
+def delete_lobby(lobby_id) -> bool:
+    setCheckOff = """
+    SET FOREIGN_KEY_CHECKS=OFF
+    """
+    query = """
+    DELETE FROM lobbys 
+    WHERE lobby_id=%s
+    """
+    setCheckOn= """
+    SET FOREIGN_KEY_CHECKS=ON
+    """
+    db = get_db()
+    with db.cursor() as cursor:
+            cursor.execute(setCheckOff)
+            cursor.execute(query, (lobby_id,))
+            db.commit()
+
+            return True
