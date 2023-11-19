@@ -2808,7 +2808,10 @@ figure[typeof~="mw:Audio/Frame"] > figcaption {
   /* Links */
   .wiki-insert a {
     text-decoration: none;
+    /* 
+    Commented out for dark mode
     color: #0645ad;
+    */
     background: none;
   }
   .wiki-insert a:not([href]) {
@@ -2851,7 +2854,8 @@ figure[typeof~="mw:Audio/Frame"] > figcaption {
   .wiki-insert h4,
   .wiki-insert h5,
   .wiki-insert h6 {
-    color: #000;
+    /* Replaced #000 with Bootstrap body color*/
+    color: var(--bs-body-color);
     margin: 0;
     padding-top: 0.5em;
     padding-bottom: 0.17em;
