@@ -948,3 +948,8 @@ span.mwe-math-mathml-inline {
 .mw-special-Book #coll-downloadbox {
 	display: none;
 }
+
+/* Only activated for dark mode. added to table div's and toc div's */
+.wiki-dark {
+	filter: invert(1) hue-rotate(180deg)!important;
+}
