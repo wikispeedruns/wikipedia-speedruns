@@ -74,8 +74,9 @@
                         </template>
 
                         <template v-else>
-                            <a class="btn btn-light" href="/register">Register</a>
-                            <a class="btn btn-light" href="/login">Login</a>
+                            <button v-on:click="switchTheme()">Switch Theme</button>
+                            <a class="btn" href="/register">Register</a>
+                            <a class="btn" href="/login">Login</a>
                         </template>
                     </div>
                 </div>
