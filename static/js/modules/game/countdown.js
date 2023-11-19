@@ -57,6 +57,7 @@ var CountdownTimer = {
         const promise3 = new Promise(resolve => document.body.addEventListener("keydown", 
             (event) => {
                     if(event.code === 'Space') {
+                        // prevent automatic scrolling when spacebar is pressed
                         event.preventDefault()
                         resolve()
                     }
