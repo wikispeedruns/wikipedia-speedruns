@@ -53,7 +53,7 @@ var CountdownTimer = {
             document.getElementById("start-btn").addEventListener("click", r, {once: true})
         )
 
-        // Condition 3: "immediate start" spacebar
+        // Condition 3: "immediate start" spacebar press
         const promise3 = new Promise(resolve => document.body.addEventListener("keydown", 
             (event) => {
                     if(event.code === 'Space') {
@@ -76,7 +76,7 @@ var CountdownTimer = {
             <slot></slot>
             <p>Good Luck!</p>
 
-            <div><button id="start-btn" class="btn btn-outline-secondary">(Don't want to wait? Click here or press spacebar start immediately!)</button></div>
+            <div><button id="start-btn" class="btn btn-outline-secondary">Click here or press spacebar to start immediately!</button></div>
         </div>
         <div v-show="countdownRemaining < 700" class="mirroredimgblock">
             <img src="/static/assets/startgun.gif" class="startgun">
