@@ -1341,7 +1341,11 @@ figure[typeof~="mw:Audio/Frame"] > figcaption {
    * The rules here should only define the layout, not color or typography.
    */
    .wiki-insert body {
-    background-color: #f8f9fa;
+    /* 
+      Overrode original with bootstrap variable
+      background-color: #f8f9fa; 
+    */
+    background-color: var(--bs-body-bg);
     color: #202122;
     overflow-y: scroll;
   }
@@ -2286,7 +2290,8 @@ figure[typeof~="mw:Audio/Frame"] > figcaption {
   /* Thumbnails */
   .wiki-insert div.thumbinner {
     border: 1px solid #c8ccd1;
-    background-color: #f8f9fa;
+    /*  override */
+    background-color: var(--bs-body-bg);
     font-size: 94%;
   }
   .thumbimage {
@@ -2640,7 +2645,11 @@ figure[typeof~="mw:Audio/Frame"] > figcaption {
   }
   .wikitable > tr > th,
   .wikitable > * > tr > th {
-    background-color: #eaecf0;
+    /*
+      Overriden originally: with bootstrap variables 
+      background-color: #eaecf0; 
+    */
+    background-color: var(--bs-body-bg);
     text-align: center;
   }
   .wikitable > caption {

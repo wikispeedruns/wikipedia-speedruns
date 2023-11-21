@@ -953,3 +953,21 @@ span.mwe-math-mathml-inline {
 .wiki-dark {
 	filter: invert(1) hue-rotate(180deg)!important;
 }
+
+#wikipedia-frame table {
+	color: var(--bs-body-color);
+	background-color: var(--bs-body-bg);
+}
+
+#wikipedia-frame #toc {
+	color: var(--bs-body-color);
+	background-color: var(--bs-body-bg);
+} 
+
+/* #wikipedia-frame table {
+	background-color: blue;
+}
+
+#wikipedia-frame #toc {
+	background-color: blue;
+} */
