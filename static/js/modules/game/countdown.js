@@ -53,7 +53,19 @@ var CountdownTimer = {
             document.getElementById("start-btn").addEventListener("click", r, {once: true})
         )
 
-        await Promise.any([promise1, promise2]);
+        // Condition 3: "immediate start" spacebar press
+        const promise3 = new Promise(resolve => document.body.addEventListener("keydown", 
+            (event) => {
+                    if(event.code === 'Space') {
+                        // prevent automatic scrolling when spacebar is pressed
+                        event.preventDefault()
+                        resolve()
+                    }
+                }, 
+            {once: true})
+        )
+
+        await Promise.any([promise1, promise2, promise3]);
         this.started = true;
         this.$emit('start-game');
     },
@@ -64,7 +76,7 @@ var CountdownTimer = {
             <slot></slot>
             <p>Good Luck!</p>
 
-            <div><button id="start-btn" class="btn btn-outline-secondary">(Don't want to wait? Start immediately!)</button></div>
+            <div><button id="start-btn" class="btn btn-outline-secondary">Click here or press spacebar to start immediately!</button></div>
         </div>
         <div v-show="countdownRemaining < 700" class="mirroredimgblock">
             <img src="/static/assets/startgun.gif" class="startgun">
