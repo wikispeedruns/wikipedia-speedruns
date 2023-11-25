@@ -2,7 +2,7 @@
     This file should have parity with the actual database.
     For any changes to the database, those changes should be reflected here.
 
-    Schema Version: 2.5
+    Schema Version: 2.6
     This version number should be incremented with any change to the schema.
     Keep this up-to-date with db.py
 */
@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS `lobbys` (
     `passcode` VARCHAR(16) NOT NULL,     -- Not a hash, should be auto genearted
     `create_date` DATETIME NOT NULL,
     `active_date` DATETIME NULL,
+    `isHidden` BOOLEAN DEFAULT 0,
     `rules` JSON NULL,
     /*
     Schema for rules. In general, we need to be backwards compatible, so
