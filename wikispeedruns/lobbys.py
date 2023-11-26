@@ -375,7 +375,8 @@ def get_user_lobbys(user_id: int):
         active_date,
         rules,
         user_lobbys.owner,
-        count(prompt_id) as n_prompts
+        count(prompt_id) as n_prompts,
+        isHidden
     FROM lobbys
     LEFT JOIN user_lobbys ON user_lobbys.lobby_id=lobbys.lobby_id
     LEFT JOIN lobby_prompts ON lobby_prompts.lobby_id=lobbys.lobby_id
@@ -456,20 +457,16 @@ def get_lobby_anon_users(lobby_id: int):
         return results
     
 
-def delete_lobby(lobby_id) -> bool:
-    setCheckOff = """
-    SET FOREIGN_KEY_CHECKS=OFF
-    """
+def hide_lobby(lobby_id) -> bool:
+
     query = """
-    DELETE FROM lobbys 
-    WHERE lobby_id=%s
+    UPDATE lobbys
+    SET isHidden = 1
+    WHERE lobby_id = %s
     """
-    setCheckOn= """
-    SET FOREIGN_KEY_CHECKS=ON
-    """
+
     db = get_db()
     with db.cursor() as cursor:
-            cursor.execute(setCheckOff)
             cursor.execute(query, (lobby_id,))
             db.commit()
 

@@ -214,7 +214,7 @@ var app = new Vue({
             document.getElementById(id).classList.toggle("active-dropdown")
         },
 
-        async deleteLobby(){
+        async hideLobby(){
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}`, "DELETE");
         }
     }
