@@ -228,21 +228,23 @@
                         </thead>
                         <tbody>
                             <tr v-for="lobby in lobbies" v-cloak>
-                                <td>
-                                    <a v-bind:href="'/lobby/' + lobby.lobby_id">
-                                        <template v-if="lobby.name">[[lobby.name]]</template><template v-else>Lobby [[lobby.lobby_id]]</template>
-                                    </a>
-                                    <span v-if="lobby.desc" style="cursor: help;" :title="lobby.desc">ⓘ</span>
-                                </td>
-                                <td>[[getDate(lobby.create_date)]]</td>
-                                <td>[[lobby.n_prompts]]</td>
-                                <td  class="align-middle">
-                                    <span v-if="lobby.owner == 1"><i class="bi bi-check-lg"></i></span>
-                                    <span v-else>-</span>
-                                </td>
-                                <td class="text-center text-nowrap" >
-                                    <button v-bind:id="'custom-tooltip-'+lobby.lobby_id" v-on:click="copyInvite(lobby)" type="button" class="btn btn-default px-0 py-0" style="font-size: 12px !important">- Copy invite -</button>
-                                </td>
+                                <template v-if="!lobby.isHidden">
+                                    <td>
+                                        <a v-bind:href="'/lobby/' + lobby.lobby_id">
+                                            <template v-if="lobby.name">[[lobby.name]]</template><template v-else>Lobby [[lobby.lobby_id]]</template>
+                                        </a>
+                                        <span v-if="lobby.desc" style="cursor: help;" :title="lobby.desc">ⓘ</span>
+                                    </td>
+                                    <td>[[getDate(lobby.create_date)]]</td>
+                                    <td>[[lobby.n_prompts]]</td>
+                                    <td  class="align-middle">
+                                        <span v-if="lobby.owner == 1"><i class="bi bi-check-lg"></i></span>
+                                        <span v-else>-</span>
+                                    </td>
+                                    <td class="text-center text-nowrap" >
+                                        <button v-bind:id="'custom-tooltip-'+lobby.lobby_id" v-on:click="copyInvite(lobby)" type="button" class="btn btn-default px-0 py-0" style="font-size: 12px !important">- Copy invite -</button>
+                                    </td>
+                                </template>
                             </tr>
                         </tbody>
                     </table>
