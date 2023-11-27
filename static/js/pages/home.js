@@ -103,7 +103,6 @@ var app = new Vue({
                 this.hiddenLobbies++;
             }
         }
-        console.log(this.hiddenLobbies);
 
         if (this.activePrompts.length === 0) {
             this.activePrompts = await getBackupPrompts();
