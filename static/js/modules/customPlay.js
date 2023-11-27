@@ -1,13 +1,11 @@
 import { AutocompleteInput } from "./autocomplete.js";
 import { PromptGenerator } from "./generator.js"
 import { checkArticles, getSupportedLanguages, getRandomArticle } from "./wikipediaAPI/util.js";
-import { quickPlaySuggestions } from "./quickPlaySuggestions.js"
 
 var CustomPlay = {
     components: {
         'prompt-generator': PromptGenerator,
-        'ac-input': AutocompleteInput,
-        'quick-play-suggestions': quickPlaySuggestions
+        'ac-input': AutocompleteInput
     },
 
     data: function () {
@@ -119,11 +117,6 @@ var CustomPlay = {
             <details v-show="language === 'en'">
                 <summary>Random Article Generator Settings</summary>
                 <prompt-generator ref="pg"></prompt-generator>
-            </details>
-
-            <details>
-                <summary>Recommended Prompts</summary>
-                <quick-play-suggestions ref="pg"></quick-play-suggestions>
             </details>
         </div>
     `)
