@@ -35,8 +35,9 @@ def process_for_achievements(run_id):
 
 @achievements_api.get('/user/<username>')
 def get_all_achievements(username):
+    query = "SELECT user_id FROM users WHERE username = %s"
     with get_db().cursor(cursor=DictCursor) as cursor:
-        rows = cursor.execute(f"SELECT user_id FROM users WHERE username = '{username}'")
+        rows = cursor.execute(query, (username,))
         if rows == 0:
             return "User not found", 404
         user_id = cursor.fetchone()["user_id"]

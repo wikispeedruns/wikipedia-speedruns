@@ -1,0 +1,119 @@
+{% extends 'base.html' %} {% block head %}
+<script
+  type="module"
+  src="{{url_for('static', filename='js-build/contribute.js') }}"
+></script>
+{% endblock %} {% block content %}
+
+<div id="app">
+  <div>
+    <h1 class="mb-4" v-cloak>Contribute</h1>
+    <p>
+      Create a fun prompt for the entire Wikipedia Speedruns community to enjoy!
+    </p>
+    <p>
+      Prompts submitted will be subject to admin approval. Once approved, Sprints
+      and Marathons will be featured in the public prompt pool.
+    </p>
+    <p class="mb-4">
+      You may also submit a prompt anonymously. Doing so will hide your username for players that play your prompt. 
+    </p>
+    <hr class="my-4" />
+
+    <div class="row" v-if="!loggedIn">
+      <p>You must be logged in to submit prompt ideas. <b><a href="/login">Log in</a></b> or <b><a href="/register">Register</a></b>.</p>
+    </div>
+    <div class="row justify-content-md-center py-4" v-else>
+      <div class="col-sm-3">
+        <div class="card">
+          <div class="alert alert-info my-0" role="alert">
+            <h5 class="my-0">Prompt Builder</h5>
+          </div>
+          <div class="card-body">
+            <div class="list-group">
+              <button
+                type="button"
+                class="list-group-item list-group-item-action"
+                v-on:click="tab='sprint'"
+              >
+                Sprint Builder
+              </button>
+              <button
+                type="button"
+                class="list-group-item list-group-item-action"
+                v-on:click="tab='marathon'"
+              >
+                Marathon Builder
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card my-4">
+          <div class="alert alert-info my-0" role="alert">
+            <h5 class="my-0">Submitted Status</h5>
+          </div>
+          <div class="card-body">
+            <div class="list-group">
+              <button
+                type="button"
+                class="list-group-item list-group-item-action"
+                v-on:click="tab='sprint-status'"
+              >
+                Submitted Sprints
+              </button>
+              <button
+                type="button"
+                class="list-group-item list-group-item-action"
+                v-on:click="tab='marathon-status'"
+              >
+                Submitted Marathons
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div v-if="tab=='sprint'" class="card" v-cloak>
+          <div class="card-body">
+            <sprint-builder v-bind:admin="false"></sprint-builder>
+          </div>
+        </div>
+
+        <div v-if="tab=='marathon'" class="card" v-cloak>
+          <div class="card-body">
+            <marathon-builder v-bind:admin="false"></marathon-builder>
+          </div>
+        </div>
+
+        <div v-if="tab=='sprint-status'" class="card" v-cloak>
+          <div class="card-body">
+            <submitted-sprints></submitted-sprints>
+          </div>
+        </div>
+
+        <div v-if="tab=='marathon-status'" class="card" v-cloak>
+          <div class="card-body">
+            <submitted-marathons></submitted-marathons>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <p>
+      Have a suggestion for the website or a bug to report? Join our <b><a href="https://discord.gg/mNYeB9c9db" target="_blank">Discord server</a></b> and reach out to us! 
+    </p>
+    <p>
+      Check out our <b><a href="https://github.com/wikispeedruns/wikipedia-speedruns" target="_blank">GitHub repository</a></b> if you'd like to contribute as a developer! 
+    </p>
+    <p>
+      If you'd like to continue supporting our work, <a class="custom-dbox-popup" href="https://donorbox.org/buy-us-a-coffee-9">buy us a coffee</a>! :)
+    </p>
+  </div>
+</div>
+
+{% endblock %}

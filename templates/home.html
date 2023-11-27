@@ -39,30 +39,32 @@
     <div>
         <h3 class="mb-4">Welcome<span v-cloak v-if="username"> back</span> to Wikipedia Speedruns<span  v-cloak v-if="username">, [[username]]</span>!</h3>
 
-        <div class="alert alert-warning" v-cloak role="alert" v-html="streakText" v-if="loggedIn && streakText"></div>
-
-        <div class="alert alert-info" v-cloak role="alert" v-if="loggedIn">
-            We've just added <b>achievements</b> to the game! Visit your profile page <a v-bind:href="'/profile/' + username">here</a> to check your current progress.
+        <!---->
+        <div class="alert alert-info" v-cloak role="alert" v-if="new Date() < new Date('2023-01-31')">
+            We've noticed some users have been editing articles on Wikipedia to add links. <b>These edits no longer affect our site.</b> Each article
+            will be based on a snapshot of the Wikipedia article from before the prompt is created.
         </div>
 
-        <p>The rules of this game are simple. You'll be given a starting Wikipedia article and an ending Wikipedia article. Your goal is to navigate from the starting article to the ending article using only the article links.</p>
-        <p>Some other things to keep in mind:</p>
-        <ul>
-            <li>Any link (outside the navigation bar at the top) is fair game.</li>
-            <li>You can't use the browser find tool.</li>
-            <li>Reloading the page or clicking the browser back button will end your run.</li>
-        </ul>
-        <p>Remember, luck is king, so put on your lucky hat, grab your lucky socks, and let the games begin!</p>
-        <p>First time? Play the <a href="/play/tutorial">tutorial</a>!</p>
+        <div class="alert alert-info" v-cloak role="alert">
+            <b>NEW FEATURE!</b> Submit a sprint or marathon prompt for the community to try <a href="/contribute">here</a>!
+        </div>
 
-        <p>Try our new prompt generator <a href="/generator">here</a>!</p>
+        <div class="alert alert-warning" v-cloak role="alert" v-html="streakText" v-if="loggedIn && streakText"></div>
+
+        <p>🏁 <b>Explore the world's largest encyclopedia with lightning speed!</b> Start from one Wikipedia page and navigate to the goal page as fast as you can!</p>
+            
+        <p>Remember, luck is king, so put on your lucky hat, grab your lucky socks, and let the games begin!</p>
+
+        <p>First time? Play the <a href="/play/tutorial">tutorial</a></p>
+
+        <p>Try our new prompt generator <a href="/generator">here</a></p>
 
         <template v-cloak>
             <p v-if="loggedIn === true && lobbies.length > 0">
                 See your active lobbies <a href="#user-lobbies">here</a> or <a href="/lobby/create">create a new private lobby</a>.
             </p>
             <p v-if="loggedIn === true && lobbies.length == 0">
-                Playing with friends? Create a new private lobby <a href="/lobby/create">here</a>!
+                Playing with friends? Create a new private lobby <a href="/lobby/create">here</a>
             </p>
             <p v-if="loggedIn === false">
                 <a href="/login">Log in</a>/<a href="/register">Register</a> to create a new private lobby and play with your friends!
@@ -108,6 +110,7 @@
                             <tr>
                                 <th scope="col">Prompt #</th>
                                 <th scope="col">Starting Article</th>
+                                <th scope="col">Source</th>
                                 <th class="text-center"></th>
                             </tr>
                         </thead>
@@ -116,7 +119,14 @@
                                 <td>[[prompt.prompt_id]]</span><span v-if="loggedIn"> (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)</span></td>
 
                                 <td>[[prompt.start]]</td>
-
+                                <td>
+                                    <template v-if="prompt.username">
+                                        <small>Community</small>
+                                    </template>
+                                    <template v-else class="text-muted">
+                                        <small>Official</small>
+                                    </template>
+                                </td>
                                 <td class="text-center">
                                     <template v-if="prompt.played">
                                         <a v-bind:href="'/leaderboard/' + prompt.prompt_id">Results</a>
@@ -133,8 +143,8 @@
                     Don’t see anything? Shoot us a message on <a href="https://discord.gg/mNYeB9c9db" target="_blank">Discord</a> or via <a href="mailto:support@wikispeedruns.com">email</a> and we’ll fix that right away!
                 </template>
             </div>
-            <div v-cloak class="card-footer text-muted" v-if="dailyPrompts.length > 0 && timeLeft">
-                New prompt in T-[[timeLeft]]
+            <div v-cloak class="card-footer text-muted">
+                <span v-if="dailyPrompts.length > 0 && timeLeft">New prompt in T-[[timeLeft]]. </span>Submit a prompt idea <a href="/contribute">here</a>!
             </div>
 
         </div>
@@ -152,6 +162,7 @@
                         <tr>
                             <th scope="col">Prompt #</th>
                             <th scope="col">Starting Article</th>
+                            <th scope="col">Source</th>
                             <th class="text-center"></th>
                         </tr>
                     </thead>
@@ -161,6 +172,14 @@
                                 [[prompt.prompt_id]] (<a v-bind:href="'/play/' + prompt.prompt_id">play</a>)
                             </td>
                             <td>[[prompt.start]]</td>
+                            <td>
+                                <template v-if="prompt.username">
+                                    <small>Community</small>
+                                </template>
+                                <template v-else class="text-muted">
+                                    <small>Official</small>
+                                </template>
+                            </td>
                             <td class="text-center">
                                 <template v-if="prompt.played">
                                     <a v-bind:href="'/leaderboard/' + prompt.prompt_id">Results</a>

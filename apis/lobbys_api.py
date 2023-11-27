@@ -71,8 +71,6 @@ def get_lobby(lobby_id):
     if not lobbys.check_membership(lobby_id, session):
         return "You do not have access to this lobby", 401
 
-
-
     lobby_info = lobbys.get_lobby(lobby_id)
     if lobby_info is None:
         return "Lobby does not exist", 404
@@ -91,11 +89,28 @@ def get_lobby(lobby_id):
     return lobby_info
 
 
-# Prompts
+@lobby_api.patch("/<int:lobby_id>")
+@check_request_json({"rules": OptionalArg(dict), "name": OptionalArg(str), "desc": OptionalArg(str)})
+def update_lobby(lobby_id):
 
+    user_id = session.get("user_id")
+    user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
+
+    if user_info is None or not user_info["owner"]:
+        return "Only the owner can add prompts to this lobby", 401
+
+    rules = request.json.get("rules")
+    name = request.json.get("name")
+    desc = request.json.get("desc")
+
+    lobbys.update_lobby(rules=rules, name=name, desc=desc)
+
+    return "Updated lobby", 200
+
+# Prompts
 @lobby_api.post("/<int:lobby_id>/prompts")
 @check_user
-@check_request_json({"start": str, "end": str})
+@check_request_json({"start": str, "end": str, "language": str})
 def add_lobby_prompt(lobby_id):
     user_id = session.get("user_id")
     user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
@@ -105,27 +120,35 @@ def add_lobby_prompt(lobby_id):
 
     start = request.json["start"]
     end = request.json["end"]
+    language = request.json["language"]
 
-    lobbys.add_lobby_prompt(lobby_id, start, end)
+    lobbys.add_lobby_prompt(lobby_id, start, end, language)
     return "Prompt Added!", 200
 
 
-# TODO allow anonymous users?
 @lobby_api.get('/<int:lobby_id>/prompts', defaults={'prompt_id' : None})
 @lobby_api.get("/<int:lobby_id>/prompts/<int:prompt_id>")
 def get_lobby_prompts(lobby_id, prompt_id):
     if not lobbys.check_membership(lobby_id, session):
         return "You are not a member of this lobby", 401
 
-    prompts = lobbys.get_lobby_prompts(lobby_id, prompt_id)
-
+    prompts = lobbys.get_lobby_prompts(lobby_id, prompt_id, session)
     if prompt_id is None:
+        # TODO base this on whether a prompt is played or not
+        if not lobbys.check_prompt_end_visibility(lobby_id, session):
+            prompts = [
+                {
+                    **p,
+                    "end": p["end"] if p["played"] else None
+                } for p in prompts
+            ]
         return jsonify(prompts)
     else:
         if len(prompts) == 0:
             return "Prompt not found", 404
 
         return jsonify(prompts[0])
+
 
 @lobby_api.delete("/<int:lobby_id>/prompts")
 @check_user
@@ -141,6 +164,7 @@ def delete_lobby_prompts(lobby_id):
 
     lobbys.delete_lobby_prompts(lobby_id, prompts)
     return "Prompts Deleted!", 200
+
 
 # Runs
 @lobby_api.get("/<int:lobby_id>/prompts/<int:prompt_id>/runs")
@@ -167,36 +191,36 @@ def get_lobby_run(lobby_id, run_id):
 @lobby_api.get("/user_lobbys")
 @check_user
 def get_user_lobbies():
-    
+
     user_id = session.get("user_id")
     lobbies = lobbys.get_user_lobbys(user_id)
-    
+
     return jsonify(lobbies), 200
 
 
 @lobby_api.get("/players/<int:lobby_id>")
 @check_user
 def get_lobby_users(lobby_id):
-    
+
     user_id = session.get("user_id")
-    
+
     user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
     if user_info is None or not user_info["owner"]:
         return "Only the host can check the list of lobby users", 401
-    
+
     return jsonify(lobbys.get_lobby_users(lobby_id)), 200
 
 
 @lobby_api.get("/anon_players/<int:lobby_id>")
 @check_user
 def get_lobby_anon_users(lobby_id):
-    
+
     user_id = session.get("user_id")
-    
+
     user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
     if user_info is None or not user_info["owner"]:
         return "Only the host can check the list of lobby users", 401
-    
+
     return jsonify(lobbys.get_lobby_anon_users(lobby_id)), 200
 
 
@@ -205,19 +229,19 @@ def get_lobby_anon_users(lobby_id):
 @check_user
 @check_request_json({"target_user_id": int})
 def change_lobby_host(lobby_id):
-    
+
     user_id = session.get("user_id")
     target_user_id = request.json["target_user_id"]
-    
+
     user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
     if user_info is None or not user_info["owner"]:
         return "Only the host can change host to another user", 401
-    
+
     if user_id == target_user_id:
         return "User is already lobby host!", 400
-    if not lobbys.check_other_membership(lobby_id, target_user_id):
+    if not lobbys.check_user_membership(lobby_id, target_user_id):
         return "Target user is not a member of this lobby", 400
-    
+
     lobbys.change_lobby_host(lobby_id, target_user_id)
-    
+
     return "Lobby host changed successfully", 200

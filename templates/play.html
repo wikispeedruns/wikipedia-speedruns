@@ -43,12 +43,6 @@
                             Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
                         </div>
 
-                            <!-- COMMENTING OUT FOR NOW, IN CASE WE NEED IT IN THE FUTURE FOR WHEN WE DO PERSONAL LEADERBOARDS
-                            <div v-if="promptRated" class="col-sm-auto text-nowrap pe-8 py-2">
-                                Mode: <br>
-                                <b class="text-danger" v-if="!promptPlayed && promptActive">Rated</b>
-                                <b v-else>Practice</b>
-                            </div>-->
 
                         <div class="col-sm-auto  text-nowrap py-2 mr-auto">
                             <button @click="expandedTimebox = !expandedTimebox"
@@ -130,7 +124,7 @@
         </div>
     </div>
 
-    <page-preview ref="pagePreview"></page-preview>
+    <page-preview ref="pagePreview" :lang="language"></page-preview>
 
     <countdown-timer id="countdown-box" v-on:start-game="start">
         <p>Starting Article: <strong>[[startArticle]]</strong></p>

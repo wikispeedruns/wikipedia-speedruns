@@ -27,7 +27,7 @@ var MarathonPrompts = {
         <div class="card">
             <div class="alert alert-info my-0" role="alert">
                 <h5 class="my-0">Marathon Mode</h5>
-                Tired of racing against the clock? Try marathon! Visit checkpoints to get more clicks—five for each. Keep going until your clicks run out.
+                Tired of racing against the clock? Visit checkpoints to get more clicks—five for each. Keep going until your clicks run out.
             </div>
             <div class="card-body table-responsive">
 
@@ -39,6 +39,7 @@ var MarathonPrompts = {
                             <th scope="col">Prompt #</th>
                             <th scope="col">Starting Article</th>
                             <th scope="col">Starting Checkpoints</th>
+                            <th scope="col">Source</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -46,6 +47,14 @@ var MarathonPrompts = {
                             <td>{{prompt.prompt_id}} (<a v-bind:href="'/play/marathon/' + prompt.prompt_id">play</a>)</td>
                             <td>{{prompt.start}}</td>
                             <td>{{prompt.initcheckpoints}}</td>
+                            <td>
+                                <template v-if="prompt.username">
+                                    <small>Community</small>
+                                </template>
+                                <template v-else class="text-muted">
+                                    <small>Official</small>
+                                </template>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

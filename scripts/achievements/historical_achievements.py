@@ -28,7 +28,7 @@ def remove_all_achievements_and_progress(cursor):
 
 def get_all_runs(cursor):
     query = """
-    SELECT `start_time`, `end_time`, `play_time`, `finished`, `path`, `user_id`, `run_id` FROM sprint_runs
+    SELECT `start_time`, `end_time`, `play_time`, `finished`, `path`, `user_id`, `run_id` FROM sprint_runs WHERE user_id IS NOT NULL
     """
     cursor.execute(query)
     return list(cursor.fetchall())
@@ -61,7 +61,7 @@ def place_in_database(cursor, achievements_progress):
     INSERT INTO achievements_progress (user_id, achievement_id, progress, progress_as_number, achieved)
     VALUES (%(user_id)s, %(achievement_id)s, %(progress)s, %(progress_as_number)s, %(achieved)s)
     """
-    cursor.executemany(query, not_achieved)        
+    cursor.executemany(query, not_achieved)
 
 
 
@@ -76,7 +76,7 @@ def process_run(single_run_data, achievements, achievements_progress):
             single_run_article_map[article] += 1
         else:
             single_run_article_map[article] = 1
-    
+
 
     for achievement_id in achievements:
 
@@ -117,7 +117,7 @@ def process_run(single_run_data, achievements, achievements_progress):
                 "progress_as_number": new_progress_as_number,
                 "achieved": achieved,
                 "time_achieved": None
-            }        
+            }
 
         if achieved:
             achievements_progress[key]["time_achieved"] = single_run_data["end_time"]
@@ -130,7 +130,7 @@ def set_all_sprint_runs(cursor, id_list):
 
 
 def historical_achievements(db_name):
-    
+
     while True:
         val = input("Are you sure you want to reconsider all run data?: (yes/no)")
         if val.lower() == "yes":
@@ -140,7 +140,7 @@ def historical_achievements(db_name):
             return
         else:
             print("This is not a valid format for (yes/no); try again")
-    
+
 
     config = json.load(open("../../config/default.json"))
     try:
@@ -173,7 +173,7 @@ def historical_achievements(db_name):
                 id_list.append(run_id)
             except:
                 failed.append(run_id)
-        
+
         place_in_database(cursor, achievements_progress)
         set_all_sprint_runs(cursor, id_list)
 
@@ -181,7 +181,7 @@ def historical_achievements(db_name):
 
         conn.commit()
         conn.close()
-    
+
     print("Process Complete")
 
 
@@ -194,4 +194,3 @@ if __name__ == '__main__':
     args = parser.parse_args()
     historical_achievements(args.db_name)
 
-    

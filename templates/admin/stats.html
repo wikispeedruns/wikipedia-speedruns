@@ -11,6 +11,43 @@
 {% set chart_height = "300" %}
 
 <div id="app">
+    <div class="updated-time">Last Updated: [[last_updated.toLocaleString()]]     
+        <a v-if="!loading" href="#" @click="refresh_stats"><i class="bi bi-arrow-clockwise"></i></a>
+        <div v-else>Loading... [[load_time_sec]]</div>
+    </div>
+        <div class="active-user-group">
+            <div class="active-user-box daily grow"
+                title="Daily Active Users - # of users who started either a sprint or lobby run">
+                DAU [[totals.daily_active_users]] 
+            </div>
+
+            <div class="active-user-box weekly grow"
+                title="Weekly Active Users - # of users who started either a sprint or lobby run">
+                WAU [[totals.weekly_active_users]]
+            </div>                
+
+            <div class="active-user-box monthly grow"
+                title="Monthly Active Users - # of users who started either a sprint or lobby run">
+                MAU [[totals.monthly_active_users]]
+            </div>   
+
+            <div></div>
+
+            <div class="active-user-box daily grow"
+                title="Finished Runs DAU - # of users who finished either a sprint or lobby run">
+                FDAU [[totals.daily_active_users_finished]] 
+            </div>
+
+            <div class="active-user-box weekly grow"
+                title="Finished Runs WAU - # of users who finished either a sprint or lobby run">
+                FWAU [[totals.weekly_active_users_finished]] 
+            </div>
+
+            <div class="active-user-box monthly grow"
+                title="Finished Runs MAU - # of users who finished either a sprint or lobby run">
+                FMAU [[totals.monthly_active_users_finished]] 
+            </div>
+        </div>
     <div class="box-wrapper" @click.prevent>
         <a class="box" @click="set_active('users')" :class="{active: is_active('users')}">
             <div class="stats">

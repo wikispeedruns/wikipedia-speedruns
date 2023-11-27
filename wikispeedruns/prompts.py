@@ -63,6 +63,29 @@ def add_sprint_prompt(start: str, end: str) -> Optional[int]:
         id = cursor.fetchone()[0]
         db.commit()
         return id
+    
+    
+def add_community_sprint_prompt(start: str, 
+                                end: str, 
+                                user_id: int, 
+                                submitted_time: str, 
+                                anonymous: bool) -> Optional[int]:
+    '''
+    Add a prompt from the community section
+    '''
+    query = """
+    INSERT INTO sprint_prompts (start, end, cmty_added_by, cmty_submitted_time, cmty_anonymous) 
+    VALUES (%s, %s, %s, %s, %s);
+    """
+    sel_query = "SELECT LAST_INSERT_ID()"
+
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute(query, (start, end, user_id, submitted_time, anonymous))
+        cursor.execute(sel_query)
+        id = cursor.fetchone()[0]
+        db.commit()
+        return id
 
 
 def delete_prompt(prompt_id: int, prompt_type: PromptType) -> bool:
@@ -85,12 +108,35 @@ def delete_prompt(prompt_id: int, prompt_type: PromptType) -> bool:
             return False
 
 
+def set_prompt_as_unused(prompt_id: int, prompt_type: PromptType) -> bool:
+    '''
+    Sets a prompt as unused, returning whether it could be removed. Raises exception on not found
+    '''
+    query = f"""
+    UPDATE {prompt_type}_prompts
+    SET active_start = NULL, active_end = NULL, rated = 0
+    WHERE prompt_id = %s;
+    """
+    
+    db = get_db()
+    with db.cursor() as cursor:
+        try:
+            res = cursor.execute(query, (prompt_id))
+            if (res == 0): raise PromptNotFoundError()
+
+            db.commit()
+            return res == 1
+
+        except pymysql.IntegrityError:
+            return False
+
+
 
 def set_ranked_daily_prompt(prompt_id: int, day: datetime.date) -> bool:
     '''
     Given a currently unused prompt, set it as one of the the ranked daily for 'day'
     '''
-    query = f"UPDATE sprint_prompts SET active_start=%s, active_end=%s, rated=1 WHERE prompt_id=%s"
+    query = "UPDATE sprint_prompts SET active_start=%s, active_end=%s, rated=1 WHERE prompt_id=%s"
 
     db = get_db()
     with db.cursor() as cur:
@@ -117,7 +163,13 @@ def get_prompt(prompt_id: int, prompt_type: PromptType, user_id: Optional[int]=N
     Get a specific prompt
     '''
     if (prompt_type == "sprint"):
-        query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts WHERE prompt_id=%s"
+        query = """
+        SELECT prompt_id, start, end, rated, active_start, active_end, cmty_added_by, cmty_anonymous, cmty_submitted_time, username
+        FROM sprint_prompts
+        LEFT JOIN users
+        ON users.user_id = sprint_prompts.cmty_added_by
+        WHERE prompt_id=%s
+        """
     # elif (prompt_type == "marathon")
 
     db = get_db()
@@ -139,14 +191,19 @@ def _construct_prompt_user_query(prompt_type: PromptType, user_id: Optional[int]
 
     # 1. Determine which fields are needed
     # if prompt_type == marathon probably change these fields
-    fields = ['p.prompt_id', 'start', 'end', 'rated', 'active_start', 'active_end']
+    fields = ['p.prompt_id', 'start', 'end', 'rated', 'active_start', 'active_end',
+              'cmty_added_by', 'cmty_anonymous', 'cmty_submitted_time', 'username']
     args = {}
 
     if user_id:
         fields.append('played')
 
     query = f"SELECT {','.join(fields)} FROM {prompt_type}_prompts AS p"
-
+    
+    query += f"""
+    LEFT JOIN users
+    ON users.user_id = p.cmty_added_by
+    """
 
     # 2. Add neccesary join/args for user info (TODO could in the future get best run?)
     if user_id:
@@ -193,7 +250,7 @@ def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, of
     Get all prompts for archive, including currently active
     '''
     if (prompt_type == "sprint"):
-        query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts"
+        query = "SELECT prompt_id, start, end, rated, active_start, active_end, cmty_added_by, cmty_anonymous, cmty_submitted_time, username FROM sprint_prompts"
     # elif (prompt_type == "marathon")
 
     query, args = _construct_prompt_user_query(prompt_type, user_id)
@@ -225,8 +282,13 @@ def get_managed_prompts(prompt_type: PromptType) -> List[Prompt]:
     Get all prompts for admins, all active, unused, and upcoming prompts
     '''
     if (prompt_type == "sprint"):
-        query = "SELECT prompt_id, start, end, rated, active_start, active_end FROM sprint_prompts"
+        query = "SELECT prompt_id, start, end, rated, active_start, active_end, cmty_added_by, cmty_anonymous, cmty_submitted_time, username FROM sprint_prompts"
     # elif (prompt_type == "marathon")
+    
+    query += f"""
+    LEFT JOIN users
+    ON users.user_id = {prompt_type}_prompts.cmty_added_by
+    """
 
     # Minus 7 to see more recently active prompts
     query += " WHERE used = 0 OR active_end >= DATE_ADD(NOW(), INTERVAL -7 DAY)"
@@ -234,3 +296,37 @@ def get_managed_prompts(prompt_type: PromptType) -> List[Prompt]:
     with db.cursor(cursor=DictCursor) as cur:
         cur.execute(query)
         return [compute_visibility(p) for p in cur.fetchall()]
+    
+    
+    
+def check_if_prompt_has_runs(prompt_id: int, prompt_type: PromptType) -> bool:
+    '''
+    Check if prompt has existing runs, returns a boolean
+    '''
+
+    query = f"SELECT COUNT(*) AS n FROM {prompt_type}_runs WHERE prompt_id = %(prompt_id)s"
+    args = {
+        'prompt_id': prompt_id,
+    }
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cur:
+        cur.execute(query, args)
+        n = cur.fetchone()['n']
+        return n > 0
+    
+    
+def clear_runs_for_prompt(prompt_id: int, prompt_type: PromptType):
+    '''
+    Clear existing runs for a prompt
+    '''
+
+    query = f"DELETE FROM {prompt_type}_runs WHERE prompt_id = %(prompt_id)s"
+    args = {
+        'prompt_id': prompt_id,
+    }
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cur:
+        cur.execute(query, args)
+        db.commit()

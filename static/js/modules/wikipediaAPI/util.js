@@ -1,10 +1,35 @@
-async function getArticle(page, isMobile) {
-    const resp = await fetch(
-        `https://en.wikipedia.org/w/api.php?redirects=1&disableeditsection=true&format=json&origin=*&action=parse&prop=text&page=${page}${isMobile ? '&mobileformat=1' : ''}`,
-        {
-            mode: "cors"
+async function getArticle(page, isMobile = false, lang = 'en', revisionDate=null) {
+
+    let url = `https://${lang}.wikipedia.org/w/api.php?redirects=1&disableeditsection=true&format=json&origin=*&action=parse&prop=text&useskin=vector`;
+
+    if (isMobile) {
+        url += "&mobileformat=1";
+    }
+
+
+    // If given a reivision date (string), use that to query the last revision before the given date.
+    if (revisionDate) {
+
+        let revisionurl = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=revisions&redirects=1&titles=${page}`
+            + `&formatversion=2&rvdir=older&rvprop=timestamp|ids&rvlimit=1&rvstart=${revisionDate}`;
+
+        const resp = await fetch(revisionurl, {mode: "cors"});
+        const body = await resp.json();
+
+        if ("error" in body) {
+            return null;
         }
-    )
+
+        // eww
+        const rev_id = body["query"]["pages"][0]["revisions"][0]["revid"];
+        url += `&oldid=${rev_id}`;
+    } else {
+        url += `&page=${page}`;
+    }
+
+
+
+    const resp = await fetch(url, {mode: "cors"})
     const body = await resp.json()
 
     if ("error" in body) {
@@ -14,9 +39,9 @@ async function getArticle(page, isMobile) {
     }
 }
 
-async function getArticleTitle(title) {
+async function getArticleTitle(title, lang = 'en') {
     const resp = await fetch(
-        `https://en.wikipedia.org/w/api.php?redirects=1&format=json&origin=*&action=parse&prop=displaytitle&page=${title}`, {
+        `https://${lang}.wikipedia.org/w/api.php?redirects=1&format=json&origin=*&action=parse&prop=displaytitle&page=${title}`, {
             mode: "cors"
         }
     )
@@ -29,37 +54,27 @@ async function getArticleTitle(title) {
     }
 }
 
-async function articleCheck(title) {
-    if (title.startsWith("File:") ||
-        title.startsWith("Wikipedia:") ||
-        title.startsWith("Category:") ||
-        title.startsWith("Help:")) {
-            return {warning: `ERROR: \'${title}\' is a namespaced article, may be impossible to reach. Please choose a different end article.`}
-    }
-
+async function articleCheck(title, lang = 'en') {
     const resp = await fetch(
-        `https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=categories&titles=${title}&cllimit=10`, {
+        `https://${lang}.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=pageprops&ppprop=disambiguation&titles=${title}&formatversion=2`,
+        {
             mode: "cors"
         }
     )
-    const body = await resp.json()
+    const body = await resp.json();
 
-    const id = Object.keys(body['query']['pages'])[0]
-    const cats = body['query']['pages'][id]['categories']
+    if (body['query']['pages'][0]['ns'] !== 0) {
+        return {warning: `ERROR: \'${title}\' is a namespaced article, may be impossible to reach. Please choose a different end article.`}
+    }
 
-    for (const cat of cats) {
-        if (cat['title'] === "Category:All article disambiguation pages" || 
-            cat['title'] === "Category:All disambiguation pages" || 
-            cat['title'] === "Category:Disambiguation pages" || 
-            cat['title'] === "Category:Disambiguation pages with short descriptions" ) {
-            return {warning: `ERROR: \'${title}\' is a disambiguation page and may be impossible to reach. Try checking the full title of the intended article on Wikipedia.`}
-        }
+    if (body['query']['pages'][0]['pageprops']) {
+        return {warning: `ERROR: \'${title}\' is a disambiguation page and may be impossible to reach. Try checking the full title of the intended article on Wikipedia.`}
     }
 
     return {}
 }
 
-async function checkArticles(start, end) {
+async function checkArticles(start, end, lang = 'en') {
     const resp = {body: {}};
 
     if(!start || !end){
@@ -67,24 +82,26 @@ async function checkArticles(start, end) {
         return resp;
     }
 
-    resp.body.start = await getArticleTitle(start);
+    resp.body.lang = lang;
+
+    resp.body.start = await getArticleTitle(start, lang);
     if (!resp.body.start) {
         resp.err = `"${start}" is not a Wikipedia article`;
         return resp;
     }
 
-    resp.body.end = await getArticleTitle(end);
+    resp.body.end = await getArticleTitle(end, lang);
     if (!resp.body.end) {
         resp.err = `"${end}" is not a Wikipedia article`;
         return resp;
     }
-    
+
     if(resp.body.start === resp.body.end) {
         resp.err = "The start and end articles are the same";
         return resp;
     }
 
-    const checkRes = await articleCheck(resp.body.end);
+    const checkRes = await articleCheck(resp.body.end, lang);
     if ('warning' in checkRes) {
         resp.err = checkRes["warning"];
         return resp;
@@ -93,10 +110,9 @@ async function checkArticles(start, end) {
     return resp;
 }
 
-async function getArticleSummary(page) {
-    const encodedPage = encodeURIComponent(page);
+async function getArticleSummary(page, lang = 'en') {
     const resp = await fetch(
-        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodedPage}`,
+        `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${page}`,
         {
             mode: "cors"
         }
@@ -106,10 +122,10 @@ async function getArticleSummary(page) {
     return body
 }
 
-async function getAutoCompleteArticles(search, numEntries = 5){
+async function getAutoCompleteArticles(search, lang = 'en', numEntries = 5){
     // https://en.wikipedia.org/w/api.php?action=opensearch&format=json&formatversion=2&search=a&namespace=0&limit=10
     const resp = await fetch(
-        `https://en.wikipedia.org/w/api.php?action=opensearch&origin=*&format=json&formatversion=2&search=${search}&namespace=0&limit=${numEntries}`,
+        `https://${lang}.wikipedia.org/w/api.php?action=opensearch&origin=*&format=json&formatversion=2&search=${search}&namespace=0&limit=${numEntries}`,
         {
             mode: "cors"
         }
@@ -119,4 +135,46 @@ async function getAutoCompleteArticles(search, numEntries = 5){
     return body;
 }
 
-export { getArticle, getArticleTitle, getArticleSummary, articleCheck, checkArticles, getAutoCompleteArticles };
+async function getSupportedLanguages() {
+    const resp = await fetch(
+        'https://www.mediawiki.org/w/api.php?action=sitematrix&origin=*&format=json&smtype=language&formatversion=2',
+        {
+            mode: "cors"
+        }
+    )
+    let body = await resp.json();
+
+    body = body['sitematrix'];
+    delete body['count'];
+
+    let langs = [];
+
+    for (const [, langprop] of Object.entries(body)) {
+        if (langprop.code && langprop.site) {
+            for (const siteprop of langprop.site) {
+                if (siteprop.code === 'wiki') {
+                    langs.push( {
+                        "code": langprop.code,
+                        "name": langprop.name
+                    });
+                    break;
+                }
+            }
+        }
+    }
+
+    return langs;
+}
+
+async function getRandomArticle(lang = 'en') {
+    const resp = await fetch(
+        `https://${lang}.wikipedia.org/w/api.php?action=query&origin=*&format=json&list=random&formatversion=2&rnnamespace=0&rnlimit=1`,
+        {
+            mode: "cors"
+        }
+    )
+    const body = await resp.json();
+    return body['query']['random'][0]['title'];
+}
+
+export { getArticle, getArticleTitle, getArticleSummary, articleCheck, checkArticles, getAutoCompleteArticles, getSupportedLanguages, getRandomArticle };

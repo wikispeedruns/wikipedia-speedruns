@@ -3,8 +3,11 @@ import Vue from 'vue/dist/vue.esm.js';
 import { fetchAsync, fetchJson } from "../../modules/fetch.js";
 import { getArticleTitle, articleCheck } from "../../modules/wikipediaAPI/util.js";
 
+import { MarathonBuilder } from '../../modules/prompts/marathon-submit.js';
+import { SprintBuilder } from '../../modules/prompts/sprint-submit.js';
+
 Vue.component('prompt-item', {
-    props: ['prompt'],
+    props: ['prompt', 'unused'],
 
     data: function() {
         return {
@@ -15,9 +18,28 @@ Vue.component('prompt-item', {
     methods: {
 
         async deletePrompt() {
-            const resp = await fetchJson("/api/sprints/" + this.prompt.prompt_id, "DELETE");
+            const resps = await (await fetchJson("/api/sprints/check_runs/" + this.prompt.prompt_id)).json();
 
+            if (resps['has_runs']) {
+                if (confirm("Prompt " + String(this.prompt.prompt_id) + " has runs. Delete?")) {
+                    const clear_resp = await fetchJson("/api/sprints/clear_runs/" + this.prompt.prompt_id, "DELETE");
+                    if (clear_resp.status != 200) {
+                        alert(await clear_resp.text())
+                        return
+                    }
+                } else { return }
+            }
+
+            const resp = await fetchJson("/api/sprints/" + this.prompt.prompt_id, "DELETE");
             if (resp.status == 200) this.$emit('delete-prompt')
+            else alert(await resp.text())
+            
+        },
+
+        async removePrompt() {
+            const resp = await fetchJson("/api/sprints/set_unused/" + this.prompt.prompt_id, "PATCH");
+
+            if (resp.status == 200) this.$emit('remove-prompt')
             else alert(await resp.text())
         },
     },
@@ -32,6 +54,9 @@ Vue.component('prompt-item', {
 
         <button v-on:click="deletePrompt" type="button" class="btn btn-default">
             <i class="bi bi-trash"></i>
+        </button>
+        <button v-if="!unused" v-on:click="removePrompt" type="button" class="btn btn-default">
+            <i class="bi bi-arrow-counterclockwise"></i>
         </button>
     </li>`)
 });
@@ -173,6 +198,91 @@ Vue.component('path-generator', {
 
 });
 
+Vue.component('approve-pending', {
+    data: function() {
+        return {
+            prompts: []
+        }
+    },
+
+    methods: {
+        async getPending() {
+            try {
+                const resp = await (await fetchJson("/api/community_prompts/get_pending_sprints")).json();
+                this.prompts = resp
+            } catch (e) {
+                console.log(e);
+            }
+        },
+
+        async approve(prompt_id, anonymous) {
+            try {
+                await fetchJson("/api/community_prompts/approve_sprint", "POST", {
+                    pending_id: prompt_id,
+                    anonymous: anonymous
+                });
+            } catch (e) {
+                console.log(e);
+            }
+            await this.getPending();
+        },
+
+        async reject(prompt_id) {
+            try {
+                await fetchJson("/api/community_prompts/reject_sprint", "DELETE", {
+                    pending_id: prompt_id
+                });
+            } catch (e) {
+                console.log(e);
+            }
+            await this.getPending();
+        }
+    },
+
+    created: async function() {
+        await this.getPending();
+    },
+
+    template: (`
+    <div class="card-body">
+        <template v-if="prompts.length > 0">
+            Cmty pending Sprints
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Pending ID</th>    
+                        <th scope="col">Username</th>
+                        <th scope="col">Date Submitted</th>
+                        <th scope="col">Start</th>
+                        <th scope="col">End</th>
+                        <th scope="col">Anonymous</th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="prompt in prompts" v-cloak>
+                        <td>{{prompt.pending_prompt_id}}</td>
+                        <td>{{prompt.username}}</td>
+                        <td>{{prompt.submitted_time}}</td>
+                        <td>{{prompt.start}}</td>
+                        <td>{{prompt.end}}</td>
+                        <td>{{prompt.anonymous}}</td>
+                        <td><button v-on:click="approve(prompt.pending_prompt_id, prompt.anonymous)">Approve</button></td>
+                        <td><button v-on:click="approve(prompt.pending_prompt_id, 1)">Approve as anon.</button></td>
+                        <td><button v-on:click="reject(prompt.pending_prompt_id)">Reject</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </template>
+        <template v-else>
+            No pending prompts
+        </template>
+    </div>
+    `)
+});
+
 
 Vue.component('marathon-item', {
     props: ['prompt'],
@@ -201,102 +311,72 @@ Vue.component('marathon-item', {
         <button v-on:click="deletePrompt" type="button" class="btn btn-default" >
             <i class="bi bi-trash"></i>
         </button>
-        <button v-on:click="copyPrompt" type="button" class="btn btn-default" >
-            <i class="bi bi-clipboard"></i>
-        </button>
+    </li>`)
+});
+
+
+Vue.component('marathon-pending-item', {
+    props: ['prompt'],
+
+    methods: {
+
+        async approve(prompt_id, anonymous) {
+            try {
+                await fetchJson("/api/community_prompts/approve_marathon", "POST", {
+                    pending_id: prompt_id,
+                    anonymous: anonymous
+                });
+            } catch (e) {
+                console.log(e);
+            }
+            await this.$emit('refresh');
+        },
+
+        async reject(prompt_id) {
+            try {
+                await fetchJson("/api/community_prompts/reject_marathon", "DELETE", {
+                    pending_id: prompt_id
+                });
+            } catch (e) {
+                console.log(e);
+            }
+            await this.$emit('refresh');
+        }
+    },
+
+    template: (`
+    <li>
+        <strong>{{prompt.pending_prompt_id}}</strong>: {{prompt.username}}, {{prompt.submitted_time}}, {{prompt.anonymous}}
+        <div>{{prompt.start}}</div>
+        <div>{{prompt.initcheckpoints}}</div>
+        <div>{{prompt.checkpoints}}</div>
+        <div>
+            <button v-on:click="approve(prompt.pending_prompt_id, prompt.anonymous)">Approve</button></td>
+            <button v-on:click="approve(prompt.pending_prompt_id, 1)">Approve as anon.</button></td>
+            <button v-on:click="reject(prompt.pending_prompt_id)">Reject</button>
+        </div>
     </li>`)
 });
 
 
 
-
-Vue.component('marathon-section', {
-
-    props: ['marathonprompts'],
+Vue.component('marathon-list', {
 
     data: function() {
         return {
-            start: "United States",
-            startcp: [],
-            cp: [],
-            seed: "0",
+            prompts: []
         }
     },
 
+    created: async function(){
+        await this.getMarathonPrompts();
+    },
+
     methods: {
-        submitPrompt: async function() {
-            try {
 
-                if (this.startcp.length != 5) throw new Error("Need 5 starting checkpoints");
-                if (this.cp.length < 40) throw new Error("Need 40+ checkpoints");
-
-                const response = await fetchJson("/api/marathon/add/", 'POST', {'data': this.$data })
-
-                if (response.status != 200) {
-                    // For user facing interface, do something other than this
-                    alert(await response.text());
-                    return;
-                }
-
-                document.getElementById("generatedMarathonText").innerHTML = "Prompt submit success. Refresh to see recently added prompt"
-
-            } catch (e) {
-                document.getElementById("generatedMarathonText").innerHTML = e
-                console.log(e);
-            }
-        },
-
-        addArticle: async function(mode) {
-            if (document.getElementById("inputField").value.length < 1) return;
-
-            let a = await getArticleTitle(document.getElementById("inputField").value)
-
-            if (this.cp.includes(a) || this.startcp.includes(a)) {
-                document.getElementById("generatedMarathonText").innerHTML = "Article already exists"
-                return
-            }
-
-            if (mode == 0) {
-                this.start = a
-            } else if (mode == 1) {
-                this.startcp.push(a)
-            } else if (mode == 2) {
-                this.startcp.unshift(a)
-            } else if (mode == 3) {
-                this.cp.push(a)
-            } else if (mode == 4) {
-                this.cp.unshift(a)
-            }
-        },
-
-        moveup: function (ind, mode) {
-            if (ind == 0) return;
-            if (mode == 0) {
-                [this.startcp[ind-1], this.startcp[ind]] = [this.startcp[ind], this.startcp[ind-1]];
-            } else if (mode == 1) {
-                [this.cp[ind-1], this.cp[ind]] = [this.cp[ind], this.cp[ind-1]];
-            }
-            this.$forceUpdate();
-        },
-
-        movedown: function (ind, mode) {
-            if (mode == 0) {
-                if (ind == this.startcp.length-1) return;
-                [this.startcp[ind], this.startcp[ind+1]] = [this.startcp[ind+1], this.startcp[ind]];
-            } else if (mode == 1) {
-                if (ind == this.cp.length-1) return;
-                [this.cp[ind], this.cp[ind+1]] = [this.cp[ind+1], this.cp[ind]];
-            }
-            this.$forceUpdate();
-        },
-
-        deleteA: function(ind, mode) {
-            if (mode == 0) {
-                this.startcp.splice(ind,1)
-            } else if (mode == 1) {
-                this.cp.splice(ind,1)
-            }
-            this.$forceUpdate();
+        async getMarathonPrompts() {
+            const marathonprompts = await (await fetchJson("/api/marathon/all")).json();
+            this.prompts = marathonprompts;
         },
 
         copyPrompt: function(prompt) {
@@ -308,82 +388,58 @@ Vue.component('marathon-section', {
         }
     },
 
-    mounted: function() {
-        let input = document.getElementById("inputField");
-        input.addEventListener("keyup", function(event) {
-            if (event.keyCode === 13) {
-                event.preventDefault();
-                document.getElementById("addInputToCPEnd").click();
-            }
-        });
-    },
-
     template: (`
         <div>
-            <div>
-                <div class="input-group">
-                    <label class="input-group-text" for="seedField">Seed:</label>
-                    <input class="form-control" type="text" name="seedField" v-model="seed">
-                </div>
-
-                <div>
-                    <div>Starting Article: {{start}}</div>
-                    <div>Starting Checkpoints:
-                        <ol>
-                        <template v-for="(item, index) in startcp">
-                            <li>{{item}}
-                                <button v-on:click="moveup(index, 0)"><i class="bi bi-chevron-up"></i></button>
-                                <button v-on:click="movedown(index, 0)"><i class="bi bi-chevron-down"></i></button>
-                                <button v-on:click="deleteA(index, 0)"><i class="bi bi-trash"></i></button>
-                            </li>
-                        </template>
-                        </ol>
-                    </div>
-                    <div>Reserve Checkpoints:
-                        <ol>
-                        <template v-for="(item, index) in cp">
-                            <li>{{item}}
-                                <button v-on:click="moveup(index, 1)"><i class="bi bi-chevron-up"></i></button>
-                                <button v-on:click="movedown(index, 1)"><i class="bi bi-chevron-down"></i></button>
-                                <button v-on:click="deleteA(index, 1)"><i class="bi bi-trash"></i></button>
-                            </li>
-                        </template>
-                        </ol>
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label class="input-group-text" for="inputField">Add checkpoint:</label>
-                    <input class="form-control" type="text" name="inputField" id="inputField">
-                </div>
-                <div>
-                    <button v-on:click="addArticle(0)">Set start</button>
-                </div>
-                <div>
-                    <button v-on:click="addArticle(1)">Add article to starting checkpoints (end of list)</button>
-                    <button v-on:click="addArticle(2)">Add article to starting checkpoints (start of list)</button>
-                </div>
-                <div>
-                    <button v-on:click="addArticle(3)" id="addInputToCPEnd">Add article to checkpoints (end of list)</button>
-                    <button v-on:click="addArticle(4)">Add article to checkpoints (start of list)</button>
-                </div>
-                <button id="genMarathonPromptButton" v-on:click="submitPrompt">Click to submit prompt</button>
-            </div>
-            <hr>
-            <div id="generatedMarathonText"></div>
-            <hr>
             <div class="row">
                 <div class="col px-0"> <div class="card"> <div class="card-body">
                     <h4> Marathon prompts: </h4>
                     <ul>
                         <marathon-item
-                            v-for="p in marathonprompts"
+                            v-for="p in prompts"
                             v-bind:prompt="p"
                             v-bind:key="p.prompt_id"
-                            v-on:change="emit('reload-prompts')"
-                            v-on:copy-prompt="copyPrompt(p)"
                         >
                         </marathon-item>
+                    </ul>
+                </div></div></div>
+            </div>
+        </div>
+    `)
+});
+
+Vue.component('marathon-pending-list', {
+
+    data: function() {
+        return {
+            prompts: []
+        }
+    },
+
+    created: async function(){
+        await this.getMarathonPendingPrompts();
+    },
+
+    methods: {
+
+        async getMarathonPendingPrompts() {
+            const marathonprompts = await (await fetchJson("/api/community_prompts/get_pending_marathons")).json();
+            this.prompts = marathonprompts;
+        },
+    },
+
+    template: (`
+        <div>
+            <div class="row">
+                <div class="col px-0"> <div class="card"> <div class="card-body">
+                    <h4> Pending marathon prompts: </h4>
+                    <ul>
+                        <marathon-pending-item
+                            v-for="p in prompts"
+                            v-bind:prompt="p"
+                            v-bind:key="p.prompt_id"
+                            v-on:refresh="getMarathonPendingPrompts"
+                        >
+                        </marathon-pending-item>
                     </ul>
                 </div></div></div>
             </div>
@@ -397,13 +453,18 @@ Vue.component('marathon-section', {
 var app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
+    components: {
+        'marathon-builder': MarathonBuilder,
+        'sprint-builder': SprintBuilder
+    },
     data: {
         unused: [],
         weeks: [],
-        marathon: [],
 
         startPrompt: "",
         endPrompt: "",
+
+        tab: "sprint-build"
     },
 
     created: async function() {
@@ -470,43 +531,40 @@ var app = new Vue({
                     cur.setDate(cur.getDate() + 1);
                 }
             }
-
-            const marathonprompts = await (await fetchJson("/api/marathon/all")).json();
-
-            this.marathon = marathonprompts;
         },
 
-        async newPrompt(event) {
+        async autoPopulate() {
+            let empty_days = []
 
-            const start = await getArticleTitle(this.startPrompt);
-            if (!start) {
-                alert(`Invalid article name "${this.startPrompt}"`);
-                return;
+            this.weeks.forEach((week) => {
+                week['days'].forEach((day) => {
+                    if (day['prompts'].length == 0) {
+                        empty_days.push(day['date']);
+                    }
+                });
+            });
+
+            let unused = this.unused.map((x) => x);
+
+            while (empty_days.length > 0 && unused.length > 0) {
+                let day = empty_days.shift()
+                let p = unused.shift()
+                await this.moveToDay(p['prompt_id'], day, day, true)
             }
+            
+            await this.getPrompts();
+        },
 
-            const end = await getArticleTitle(this.endPrompt);
-            if (!end) {
-                alert(`Invalid article name "${this.endPrompt}"`);
-                return;
+        async moveToDay(prompt_id, start, end, rated) {
+            const response = await fetchJson("/api/sprints/" + prompt_id, "PATCH", {
+                "startDate": start,
+                "endDate": end,
+                "rated": rated,
+            });
+
+            if (response.status != 200) {
+                alert(await response.text());
             }
-
-            const checkRes = await articleCheck(this.endPrompt);
-            if ('warning' in checkRes) {
-                alert(checkRes["warning"]);
-                return;
-            }
-
-            try {
-                const response = await fetchJson("/api/sprints/", "POST", {
-                    "start": start,
-                    "end": end
-                })
-
-            } catch (e) {
-                console.log(e);
-            }
-
-            this.getPrompts();
         }
 
     } // End methods

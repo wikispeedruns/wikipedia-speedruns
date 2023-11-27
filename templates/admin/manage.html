@@ -6,98 +6,208 @@
 
 {% block content %}
 <div id="app">
-    <form id="newPrompt" v-on:submit.prevent="newPrompt">
-        <label for="start">Start Article:</label>
-        <input type="text" id="start" name="start" v-model="startPrompt">
-        <label for="end">End Article:</label>
-        <input type="text" id="end" name="end" v-model="endPrompt">
 
-        <input type="submit" value="Submit">
-    </form>
-
-    <path-checker></path-checker>
-
-    <path-generator></path-generator>
-
-
-
-    <div class="row">
-
-        <div class="col-sm-6"> <div class="card mb-5"> <div class="card-body">
-
-            <h4> Unused: </h4>
-
-            <ul>
-                <prompt-item
-                    v-for="p in unused"
-                    v-bind:prompt="p"
-                    v-bind:key="p.prompt_id"
-                    v-on:change="getPrompts"
+    <div class="row justify-content-md-center py-4">
+        <div class="col-sm-3">
+          <div class="card my-3">
+            <div class="alert alert-info my-0" role="alert">
+                <h5 class="my-0">Sprints</h5>
+            </div>
+            <div class="card-body">
+              <div class="list-group">
+                <button
+                  type="button"
+                  class="list-group-item list-group-item-action"
+                  v-on:click="tab='sprint-build'"
                 >
-                </prompt-item>
-            </ul>
-        </div></div></div>
-
-
-    </div>
-
-    <div class="row">
-        <div class="col-sm-12">
-
-            <template v-for="(week, index) in weeks">
-
-                <div class="card mb-5"> <div class="card-body">
-                <h3>
-                    Week: [[week.start.substring(5)]] through [[week.end.substring(5)]]
-                    <template v-if="index === 0">(Current) </template>
-                </h3>
-
-                <h6>Weekly Prompts:</h6>
-                <prompt-set style="width: 50%;"
-                    v-bind:prompts="week.prompts"
-                    v-bind:start="week.start"
-                    v-bind:end="week.end"
-                    v-bind:rated="false"
-                    v-on:delete-prompt="getPrompts"
-                    v-on:move-prompt="getPrompts"
+                  Sprint Builder
+                </button>
+                <button
+                  type="button"
+                  class="list-group-item list-group-item-action"
+                  v-on:click="tab='manage-sprints'"
                 >
-                </prompt-set>
-
-                <h6>Daily Prompts: </h6>
-                <table class="table table-bordered" style="table-layout: fixed;">
-                    <thead>
-                        <th>Su</th>
-                        <th>M</th>
-                        <th>T</th>
-                        <th>W</th>
-                        <th>Th</th>
-                        <th>F</th>
-                        <th>Sa</th>
-                    </thead>
-                    <tbody style="font-size:x-small">
-                        <tr>
-                            <td v-for="day in week.days">
-                                <prompt-set
-                                    v-bind:prompts="day.prompts"
-                                    v-bind:start="day.date"
-                                    v-bind:end="day.date"
-                                    v-bind:rated="true"
-                                    v-on:delete-prompt="getPrompts"
-                                    v-on:move-prompt="getPrompts"
-                                >
-                                </prompt-set>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                </div></div>
-            </template>
-
+                    Manage POTD / Sprint prompts
+                </button>
+                <button
+                  type="button"
+                  class="list-group-item list-group-item-action"
+                  v-on:click="tab='cmty-sprints'"
+                >
+                    Community sprints
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="card my-3">
+            <div class="alert alert-info my-0" role="alert">
+                <h5 class="my-0">Marathons</h5>
+            </div>
+            <div class="card-body">
+              <div class="list-group">
+                <button
+                  type="button"
+                  class="list-group-item list-group-item-action"
+                  v-on:click="tab='marathon-build'"
+                >
+                  Marathon Builder
+                </button>
+                <button
+                  type="button"
+                  class="list-group-item list-group-item-action"
+                  v-on:click="tab='manage-marathons'"
+                >
+                    Manage Marathons
+                </button>
+                <button
+                  type="button"
+                  class="list-group-item list-group-item-action"
+                  v-on:click="tab='cmty-marathons'"
+                >
+                    Community marathons
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-    </div>
+    
+        <div class="col">
+          <div v-show="tab=='sprint-build'" class="card" v-cloak>
+            <div class="card-body">
+                <div class="card-body">
+                    <sprint-builder 
+                        v-bind:admin="true"
+                        v-on:refreshprompts="getPrompts"
+                    ></sprint-builder>
+                </div>
+                <div class="card-body">
+                    <path-checker></path-checker>
+                </div>
+                <div class="card-body">
+                    <path-generator></path-generator>
+                </div>
+            </div>
+          </div>
+
+          <div v-show="tab=='marathon-build'" class="card" v-cloak>
+            <div class="card-body">
+                <marathon-builder v-bind:admin="true"></marathon-builder>
+            </div>
+          </div>
+
+          <div v-show="tab=='manage-sprints'" class="card" v-cloak>
+            <div class="card-body">
+                <div class="row">
+
+                    <div class="col-sm-6"> <div class="card mb-5"> <div class="card-body">
+            
+                        <h4> Unused: </h4>
+
+                        <button type="button" class="btn quick-play" v-on:click="autoPopulate">Auto populate [[weeks.length]] weeks</button>
+            
+                        <ul class="my-3">
+                            <prompt-item
+                                v-for="p in unused"
+                                v-bind:prompt="p"
+                                v-bind:key="p.prompt_id"
+                                v-on:change="getPrompts"
+                                v-bind:unused="true"
+                            >
+                            </prompt-item>
+                        </ul>
+                    </div></div></div>
+                </div>
+            
+                <div class="row">
+                    <div class="col-sm-12">
+            
+                        <template v-for="(week, index) in weeks">
+            
+                            <div class="card mb-5"> <div class="card-body">
+                            <h3>
+                                Week: [[week.start.substring(5)]] through [[week.end.substring(5)]]
+                                <template v-if="index === 0">(Current) </template>
+                            </h3>
+            
+                            <h6>Weekly Prompts:</h6>
+                            <prompt-set style="width: 50%;"
+                                v-bind:prompts="week.prompts"
+                                v-bind:start="week.start"
+                                v-bind:end="week.end"
+                                v-bind:rated="false"
+                                v-on:delete-prompt="getPrompts"
+                                v-on:move-prompt="getPrompts"
+                            >
+                            </prompt-set>
+            
+                            <h6>Daily Prompts: </h6>
+                            <table class="table table-bordered" style="table-layout: fixed;">
+                                <thead>
+                                    <th>Su</th>
+                                    <th>M</th>
+                                    <th>T</th>
+                                    <th>W</th>
+                                    <th>Th</th>
+                                    <th>F</th>
+                                    <th>Sa</th>
+                                </thead>
+                                <tbody style="font-size:x-small">
+                                    <tr>
+                                        <td v-for="day in week.days">
+                                            <prompt-set
+                                                v-bind:prompts="day.prompts"
+                                                v-bind:start="day.date"
+                                                v-bind:end="day.date"
+                                                v-bind:rated="true"
+                                                v-on:delete-prompt="getPrompts"
+                                                v-on:move-prompt="getPrompts"
+                                                v-on:remove-prompt="getPrompts"
+                                            >
+                                            </prompt-set>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            </div></div>
+                        </template>
+            
+                    </div>
+                </div>
+            </div>
+          </div>
+
+          <div v-show="tab=='manage-marathons'" class="card" v-cloak>
+            <div class="card-body">
+                <marathon-list></marathon-list>
+            </div>
+          </div>
+
+          <div v-show="tab=='cmty-sprints'" class="card" v-cloak>
+            <div class="card-body">
+                <approve-pending></approve-pending>
+            </div>
+          </div>
+
+          <div v-show="tab=='cmty-marathons'" class="card" v-cloak>
+            <div class="card-body">
+                <marathon-pending-list></marathon-pending-list>
+            </div>
+          </div>
+    
+        </div>
+      </div>
+    
+    
+    
+
+    <!--
 
     <marathon-section v-bind:marathonprompts="marathon" v-on:reload-prompts="getPrompts"
     ></marathon-section>
+
+    -->
+
+    
 
 </div>
 

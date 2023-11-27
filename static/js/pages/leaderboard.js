@@ -48,7 +48,7 @@ var LeaderboardRow = {
         },
 
         generateResults: function(run) {
-            return `Wiki Speedruns ${run.prompt_id}\n${this.$parent.prompt.start}\n${run.path.length - 1} 🖱️\n${(run.play_time)} ⏱️`
+            return `WikiSpeedruns ${run.prompt_id}\n${this.$parent.prompt.start}\n${run.path.length - 1} 🖱️\n${(run.play_time)} ⏱️`
         },
 
         goToRun: function(newRunId) {
@@ -421,12 +421,19 @@ var app = new Vue({
             path += "/" + this.runId;
         }
 
-
-        let resp = await (await fetchJson(path, "POST", {
+        let resp = await fetchJson(path, "POST", {
             "limit": this.limit,
             "offset": this.offset,
             ...args
-        })).json();
+        });
+
+        if (resp.status === 401) {
+            // TODO do something better here
+            alert("Unable to fetch leaderboards");
+            window.history.back();
+            return;
+        }
+        resp = await resp.json();
 
 
         /* Fill data structures */

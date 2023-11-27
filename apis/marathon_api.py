@@ -109,7 +109,9 @@ def delete_prompt(id):
 @marathon_api.get('/all')
 def get_all_marathon_prompts():
     query = """
-    SELECT * FROM marathonprompts
+    SELECT prompt_id, start, initcheckpoints, checkpoints, seed, public, cmty_added_by, cmty_anonymous, cmty_submitted_time, username FROM marathonprompts
+    LEFT JOIN users
+    ON users.user_id = marathonprompts.cmty_added_by
     """
 
     db = get_db()
@@ -125,7 +127,12 @@ def get_all_marathon_prompts():
 @marathon_api.get('/prompt/<id>')
 def get_marathon_prompt(id):
 
-    query = "SELECT * FROM marathonprompts WHERE prompt_id=%s"
+    query = """
+    SELECT prompt_id, start, initcheckpoints, checkpoints, seed, public, cmty_added_by, cmty_anonymous, cmty_submitted_time, username FROM marathonprompts 
+    LEFT JOIN users
+    ON users.user_id = marathonprompts.cmty_added_by
+    WHERE prompt_id=%s
+    """
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:

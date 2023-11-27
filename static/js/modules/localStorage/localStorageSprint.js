@@ -2,9 +2,9 @@ import {startRun, submitRun, updateAnonymousRun} from "../game/runs.js"
 import { getLocalStorageRuns, addRunToLocalStorage, setLocalStorageRuns } from "./localStorage.js"
 import {startLocalQuickRun, submitLocalQuickRun } from "./localStorageQuickRun.js"
 
-function startLocalRun(promptId, promptStart, promptEnd, runId) {
+function startLocalRun(promptId, promptStart, promptEnd, runId, language) {
     if(promptId == null){
-        startLocalQuickRun(promptStart, promptEnd, runId);
+        startLocalQuickRun(promptStart, promptEnd, runId, language);
         return;
     }
 
@@ -18,9 +18,9 @@ function startLocalRun(promptId, promptStart, promptEnd, runId) {
     addRunToLocalStorage(key, data);
 }
 
-function submitLocalRun(promptId, promptStart, promptEnd, runId, startTime, endTime, finished, path) {
+function submitLocalRun(promptId, promptStart, promptEnd, runId, startTime, endTime, finished, path, language) {
     if(promptId == null){
-        submitLocalQuickRun(promptStart, promptEnd, runId, startTime, endTime, finished, path);
+        submitLocalQuickRun(promptStart, promptEnd, runId, startTime, endTime, finished, path, language);
         return;
     }
 

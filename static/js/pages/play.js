@@ -30,10 +30,13 @@ const LOBBY_ID = serverData["lobby_id"] || null;
 // Get if auto scroll is on
 const IS_SCROLL_ON = serverData["scroll"] || null;
 
+// Get language
+const LANGUAGE = serverData["lang"];
+
 async function getPrompt(promptId, lobbyId=null) {
 
     if(promptId == null){
-        return {start: PROMPT_START, end: PROMPT_END};
+        return {start: PROMPT_START, end: PROMPT_END, language: LANGUAGE};
     }
 
     const url = (lobbyId === null) ? `/api/sprints/${promptId}` : `/api/lobbys/${lobbyId}/prompts/${promptId}`;
@@ -64,6 +67,7 @@ let app = new Vue({
         startArticle: "",    // For all game modes, this is the first article to load
         endArticle: "",      // For sprint games. Reaching this article will trigger game finishing sequence
         currentArticle: "",
+        language: "",
         path: [],             // List of objects to store granular run data, submitted on exit/finish
         /* path object format:
         {
@@ -73,13 +77,8 @@ let app = new Vue({
         }
         */
 
-        promptId: null,        //Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
-        promptRated: false,
-        promptPlayed: false,
-        promptActive: false,
-
-        promptStart: null,     // or get the actual prompt for quick run
-        promptEnd: null,
+        promptId: null,        // Unique prompt id to load, this should be identical to 'const PROMPT_ID', but is mostly used for display
+        revisionDate: null,
 
         lobbyId: null,
         runId: -1,          //unique ID for the current run. This gets populated upon start of run
@@ -104,7 +103,10 @@ let app = new Vue({
         expandedTimebox: true,
         isMobile: false,
 
-        isScroll: null
+        isScroll: null,
+
+        anonymous: null,
+        created_username: null
     },
 
     mounted: async function() {
@@ -123,24 +125,38 @@ let app = new Vue({
 
         this.startArticle = prompt["start"];
         this.endArticle = prompt["end"];
+        this.language = prompt["language"];
 
         // !! forces bool if played is not a field
         this.promptPlayed = !!prompt["played"];
         this.promptActive = !!prompt["active"];
         this.promptRated = !!prompt["rated"];
 
+        // Use the release date of teh prompt (if it exists) to determine the article revision
+        this.revisionDate = prompt?.["active_start"];
+
+        this.anonymous = prompt["cmty_anonymous"]
+        this.created_username = prompt["username"]
+
         this.currentArticle = this.startArticle;
 
-        this.runId = await startRun(PROMPT_ID, LOBBY_ID, PROMPT_START, PROMPT_END);
+        this.runId = await startRun(PROMPT_ID, LOBBY_ID, PROMPT_START, PROMPT_END, LANGUAGE);
         if (!this.loggedIn && this.lobbyId == null) {
-            startLocalRun(PROMPT_ID, PROMPT_START, PROMPT_END, this.runId);
+            startLocalRun(PROMPT_ID, PROMPT_START, PROMPT_END, this.runId, LANGUAGE);
             console.log("Not logged in, uploading start of run to local storage")
         }
 
 
         this.offset = this.startTime;
 
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.isScroll ? null : this.showPreview, this.isScroll ? null : this.hidePreview || null, this.loadCallback);
+        this.renderer = new ArticleRenderer(
+            document.getElementById("wikipedia-frame"),
+            this.pageCallback,
+            !this.isScroll && this.showPreview,
+            !this.isScroll && this.hidePreview,
+            this.loadCallback,
+            this.language,
+            this.revisionDate);
         await this.renderer.loadPage(this.startArticle);
 
 
@@ -255,7 +271,7 @@ let app = new Vue({
 
             this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
             if (!this.loggedIn && this.lobbyId == null) {
-                submitLocalRun(PROMPT_ID, PROMPT_START, PROMPT_END, this.runId, this.startTime, this.endTime, this.finished, this.path);
+                submitLocalRun(PROMPT_ID, PROMPT_START, PROMPT_END, this.runId, this.startTime, this.endTime, this.finished, this.path, LANGUAGE);
                 console.log("Not logged in, submitting run to local storage");
                 //console.log(this.runId)
             }
@@ -305,7 +321,7 @@ let app = new Vue({
 // Disable find hotkeys, players will be given a warning
 window.addEventListener("keydown", function(e) {
     //disable find
-    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && e.keyCode == 70)) {
+    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && (e.keyCode == 70 || e.keyCode == 71))) {
         e.preventDefault();
         this.alert("WARNING: Attempt to Find in page. This will be recorded.");
     }

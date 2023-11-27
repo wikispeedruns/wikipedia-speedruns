@@ -1,4 +1,6 @@
 import Vue from "vue/dist/vue.esm.js";
+import { fetchJson } from "../../modules/fetch.js";
+
 const Chart = require('chart.js');
 
 
@@ -22,6 +24,13 @@ function update_totals(totals) {
     app.totals.lobby_runs = totals['lobby_runs_total'];
     app.totals.finished_lobby_runs = totals['lobby_runs_finished'];
     app.totals.created_lobbies = totals['lobbies_created'];
+
+    app.totals.daily_active_users = totals['daily_active_users'];
+    app.totals.weekly_active_users = totals['weekly_active_users'];
+    app.totals.monthly_active_users = totals['monthly_active_users'];
+    app.totals.daily_active_users_finished = totals['daily_active_users_finished'];
+    app.totals.weekly_active_users_finished = totals['weekly_active_users_finished'];
+    app.totals.monthly_active_users_finished = totals['monthly_active_users_finished'];
 
     let user_runs = totals['user_runs'];
     let user_finished_runs = totals['user_finished_runs'];
@@ -56,15 +65,15 @@ function update_daily(daily_totals) {
     app.daily.active_lobby_users = daily_totals['active_lobby_users'];
 }
 
-async function get_data() {
-    let response = await fetch("/api/stats/totals");
-    const totals = await response.json();
-    update_totals(totals);
+async function get_data(res=null) {
+    let response = res ?? await fetch("/api/stats/all");
+    let res_json = await response.json();
+    const all_stats = JSON.parse(res_json['stats_json'])['stats'];
 
-    response = await fetch("/api/stats/daily");
-    const daily_totals = await response.json();
-    update_daily(daily_totals);
+    update_totals(all_stats);
+    update_daily(all_stats);
 
+    app.last_updated = new Date(res_json['timestamp']);
     calculate_weekly_change();
 }
 
@@ -412,6 +421,12 @@ var app = new Vue({
             pct_user_finished_runs: 0.0,
             pct_user_marathons: 0.0,
             pct_user_finished_marathons: 0.0,
+            daily_active_users: 0,
+            weekly_active_users: 0,
+            monthly_active_users: 0,
+            daily_active_users_finished: 0,
+            weekly_active_users_finished: 0,
+            monthly_active_users_finished: 0,
         },
         weekly: {
             user_change: 0.0,
@@ -433,7 +448,11 @@ var app = new Vue({
             finished_lobby_runs_per_user: [],
             active_lobby_users: []
         },
-        active_tab: 'users'
+        active_tab: 'users',
+        loading: false,
+        load_time_sec: 0,
+        last_updated: '',
+        last_request_time: ''
     },
     methods: {
         is_active(tab_name) {
@@ -441,6 +460,48 @@ var app = new Vue({
         },
         set_active(tab_name) {
             this.active_tab = tab_name
+        },
+        async poll_stats() {
+            let response = await fetch("/api/stats/all");
+            let res_json = await response.json();
+            let last_updated = new Date(res_json['timestamp']);
+
+            // Check if the most recently updated time is past the request time
+            // Otherwise check again in 5 seconds
+            if (last_updated >= this.last_request_time) {
+                this.loading = false;
+                window.location.reload();
+                return;
+            }
+
+            setTimeout(this.poll_stats, 5 * 1000);
+        },
+        async refresh_stats(event) {
+            try {
+                const response = await fetchJson("/api/stats/calculate", 'GET');
+                if (response.status === 200) {
+                    alert("New stat calculation underway.");
+                    this.last_request_time = new Date();
+                    this.loading = true;
+                    this.load_time_sec = 0;
+                    this.countLoadTimer();
+                } else if (response.status === 503) {
+                    alert("Server currently processing stats! Check back in a bit.");
+                }
+
+                // Check in 30s to see if stats are done calculating
+                setTimeout(this.poll_stats, 30 * 1000);
+            } catch (e) {
+                alert(e);
+            }
+        },
+        countLoadTimer() {
+            if (this.loading) {
+                setTimeout(() => {
+                    this.load_time_sec += 1
+                    this.countLoadTimer()
+                }, 1000)
+            }
         }
     },
 

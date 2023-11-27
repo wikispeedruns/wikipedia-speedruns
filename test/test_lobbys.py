@@ -97,6 +97,7 @@ def test_permissions_user(client, session2, lobby):
 
     resp = client.post(f"api/lobbys/{lobby_id}/prompts", json={
         "start": "test",
-        "end": "test"
+        "end": "test",
+        "language": "en"
     })
     assert resp.status_code == 401

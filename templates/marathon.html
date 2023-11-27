@@ -180,7 +180,6 @@
     <countdown-timer v-on:start-game="start">
         <p>Starting Article: <strong>[[startArticle]]</strong></p>
         <p>Starting Checkpoints: <strong>[[activeCheckpoints]]</strong></p>
-
     </countdown-timer>
 
     <finish-page
@@ -197,6 +196,8 @@
         v-bind:checkpoint-limit="numCheckpointsToStop"
         v-bind:username="username"
         v-bind:logged-in="loggedIn"
+        v-bind:anonymous="anonymous"
+        v-bind:created-username="created_username"
 
         v-show="finished"
     ></finish-page>

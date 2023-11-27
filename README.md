@@ -76,8 +76,9 @@ Set the environment variable `FLASK_ENV` in whaterver command prompt you use pla
 for running the flask server. This will allow the local instance to reload automatically
 when files are changed.
 
-For example, in Linux
+For example, in Linux/Mac
 ```
+export FLASK_DEBUG=1
 export FLASK_ENV="development"
 ```
 
@@ -132,7 +133,7 @@ of which can be seen [here](https://github.com/wikispeedruns/wikipedia-speedruns
 Unfortunately, neither celery nor redis are supported on windows. So if you have
 a windows development machine, you will have to run the server through WSL. Note
 that if you want to keep your windows MySQL instance, you need to figure out
-which port the host windows machine is exposed on in WSL. See [this Stack Overflow
+which port the host windows machine is exposed on in WSL. See [this Super User
 post](https://superuser.com/questions/1536619/connect-to-mysql-from-wsl2). Note
 that this changes everytime WSL is restarted.
 
