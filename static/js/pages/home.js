@@ -56,7 +56,7 @@ var app = new Vue({
         streakText: '',
 
         lobbies: [],
-
+        hiddenLobbies: 0,
         isMobile: false,
     },
     methods: {
@@ -98,6 +98,12 @@ var app = new Vue({
         this.activePrompts = prompts.filter(p => !p.rated);
 
         this.lobbies = await getUserLobby(this.loggedIn);
+        for(let lobby of this.lobbies){
+            if(lobby.isHidden){
+                this.hiddenLobbies++;
+            }
+        }
+        console.log(this.hiddenLobbies);
 
         if (this.activePrompts.length === 0) {
             this.activePrompts = await getBackupPrompts();

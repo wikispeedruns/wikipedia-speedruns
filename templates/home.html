@@ -215,7 +215,7 @@
                 </template>
             </div>
             <div class="card-body table-responsive" v-if="loggedIn === true">
-                <template v-if="lobbies.length > 0">
+                <template v-if="lobbies.length > hiddenLobbies">
                     <table class="table table-hover">
                         <thead>
                             <tr>
@@ -249,7 +249,6 @@
                         </tbody>
                     </table>
                 </template>
-                <!-- TODO: this does not show up if all lobbies are hidden -->
                 <template v-else>
                     You don’t have any existing lobbies.
                 </template>
