@@ -81,22 +81,10 @@ var app = new Vue({
             this.username = serverData["username"];
             this.isAdmin = serverData["admin"];
         }
-        setTheme(getTheme());
-    },
 
-    mounted: function() {
-        // console.log('called1')
-        // setTheme(getTheme());
-        // // Current hack of waiting half second and reapplying theme
-        // // TODO: replace with play/marathon code calling setTheme again after wiki page loads
-        // let delayInMilliseconds = 1000;
-        // setTimeout(
-        //     ()=> {
-        //         console.log('called2')
-        //         setTheme(getTheme());
-        //     },
-        //     delayInMilliseconds,
-        // );
+        const theme = getTheme();
+        setTheme(theme);
+        this.theme = theme;
     },
 
     methods: {
@@ -104,7 +92,7 @@ var app = new Vue({
         {
             window.location.href = "/account"
         },
-        switchTheme: () => {
+        switchTheme() {
             let currentTheme = getTheme();
             let newTheme = "";
             if (currentTheme != "dark") {
@@ -116,7 +104,6 @@ var app = new Vue({
             saveTheme(newTheme);
 
             this.theme = newTheme;
-            console.log(this.theme);
         },
         getTheme:() => {
             let currentTheme = localStorage.getItem("user-theme");

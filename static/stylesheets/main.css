@@ -66,7 +66,7 @@ a:hover, a:hover * {
 }
 
 .HUDwrapper-fade {
-    background-image: linear-gradient(#ffffff00, #ffffffbb, #ffffffbb, #ffffff);
+    background-image: linear-gradient(#ffffff00, rgba(var(--bs-body-bg), 0.8), var(--bs-body-bg));
 }
 
 .HUD {

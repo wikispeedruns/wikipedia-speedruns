@@ -56,7 +56,7 @@
                             <a class="nav-link" v-bind:class="loggedIn ? '': 'text-center'" v-bind:href="'/contribute'">Contribute</a>
                         </li>
                         <button class="btn" v-on:click="switchTheme()">
-                            SwitchTheme
+                            [[(theme === "dark") ? "Light Mode" : "Dark Mode"]]
                         </button>
                         <template v-if="loggedIn">
 
