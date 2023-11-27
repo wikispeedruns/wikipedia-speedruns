@@ -245,3 +245,16 @@ def change_lobby_host(lobby_id):
     lobbys.change_lobby_host(lobby_id, target_user_id)
 
     return "Lobby host changed successfully", 200
+
+
+@lobby_api.delete("/<int:lobby_id>")
+@check_user
+def hide_lobby(lobby_id):
+    user_id = session.get("user_id")
+    user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
+
+    if user_info is None or not user_info["owner"]:
+        return "Only the owner can delete the lobby", 401
+
+    lobbys.hide_lobby(lobby_id)
+    return "Lobby Deleted!", 200
