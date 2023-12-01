@@ -1,0 +1,41 @@
+/* 
+  Override imported wikipedia mobile css by importing this file after the other mobile wikipedia files.
+
+  Used to override the default wikipedia mobile css colors with the bootstrap background colors and font colors. 
+
+  Note this file will have to be periodically updated whenever wikipedia updates their mobile css/site to catch any changes.
+  
+  Examples: https://stackoverflow.com/questions/7641082/how-do-i-get-my-import-stylesheet-to-override-the-main-stylesheet 
+*/
+
+.content .infobox {
+  /* Originally #f8f9fa */
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
+.infobox {
+  /* Originally #f8f9fa */
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
+
+.wikitable>*>tr>th,.wikitable>tr>th {
+  background-color: var(--bs-body-bg);
+  text-align: center
+}
+
+.dablink,.hatnote,.rellink {
+  background-color: var(--bs-body-bg);
+}
+
+/* 
+  Make a link's brighter
+
+  default wikipedia link dark blue, is too dark against grey background in dark mode.
+  Override with bootstrap link colors.
+*/
+a {
+  color: rgba(var(--bs-link-color-rgb));
+}

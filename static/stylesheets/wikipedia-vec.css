@@ -1341,7 +1341,11 @@ figure[typeof~="mw:Audio/Frame"] > figcaption {
    * The rules here should only define the layout, not color or typography.
    */
    .wiki-insert body {
-    background-color: #f8f9fa;
+    /* 
+      Overrode original with bootstrap variable
+      background-color: #f8f9fa; 
+    */
+    background-color: var(--bs-body-bg);
     color: #202122;
     overflow-y: scroll;
   }
@@ -2286,7 +2290,8 @@ figure[typeof~="mw:Audio/Frame"] > figcaption {
   /* Thumbnails */
   .wiki-insert div.thumbinner {
     border: 1px solid #c8ccd1;
-    background-color: #f8f9fa;
+    /*  override */
+    background-color: var(--bs-body-bg);
     font-size: 94%;
   }
   .thumbimage {
@@ -2640,7 +2645,11 @@ figure[typeof~="mw:Audio/Frame"] > figcaption {
   }
   .wikitable > tr > th,
   .wikitable > * > tr > th {
-    background-color: #eaecf0;
+    /*
+      Overriden originally: with bootstrap variables 
+      background-color: #eaecf0; 
+    */
+    background-color: var(--bs-body-bg);
     text-align: center;
   }
   .wikitable > caption {
@@ -2808,7 +2817,10 @@ figure[typeof~="mw:Audio/Frame"] > figcaption {
   /* Links */
   .wiki-insert a {
     text-decoration: none;
+    /* 
+    Commented out for dark mode
     color: #0645ad;
+    */
     background: none;
   }
   .wiki-insert a:not([href]) {
@@ -2851,7 +2863,8 @@ figure[typeof~="mw:Audio/Frame"] > figcaption {
   .wiki-insert h4,
   .wiki-insert h5,
   .wiki-insert h6 {
-    color: #000;
+    /* Replaced #000 with Bootstrap body color*/
+    color: var(--bs-body-color);
     margin: 0;
     padding-top: 0.5em;
     padding-bottom: 0.17em;

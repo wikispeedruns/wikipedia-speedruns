@@ -66,14 +66,14 @@ a:hover, a:hover * {
 }
 
 .HUDwrapper-fade {
-    background-image: linear-gradient(#ffffff00, #ffffffbb, #ffffffbb, #ffffff);
+    background-image: linear-gradient(#ffffff00, rgba(var(--bs-body-bg), 0.8), var(--bs-body-bg));
 }
 
 .HUD {
     display: inline-block;
     min-width: 40%;
     width:auto;
-    background-color: #F8F8F8;
+    background-color: var(--bs-body-bg);
     border: 2px solid #000000 !important;
 
     height: auto;
@@ -89,7 +89,7 @@ a:hover, a:hover * {
     width: 100vw;
     bottom: 0;
     left:0;
-    background-color: #F8F8F8;
+    background-color: var(--bs-body-bg);
     border-top: 3px solid #000000 !important;
 
     padding: 5px 10px;
