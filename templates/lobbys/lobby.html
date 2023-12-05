@@ -203,12 +203,12 @@
         </div>
     </div>
 
-    <!-- Button trigger modal -->
-<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLobbyModal">
-    Delete Lobby
-  </button>
-  
-  <!-- Modal -->
+    <template v-if="lobbyInfo.user.owner">
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLobbyModal">
+            Delete Lobby
+        </button>
+    </template>
+
   <div class="modal fade" id="deleteLobbyModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
