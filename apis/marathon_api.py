@@ -7,6 +7,7 @@ from pymysql.cursors import DictCursor
 
 
 from wikispeedruns.marathon import genPrompts
+from wikispeedruns import prompts
 
 marathon_api = Blueprint('marathon', __name__, url_prefix='/api/marathon')
 
@@ -122,6 +123,27 @@ def get_all_marathon_prompts():
         return jsonify(results)
 
 
+@marathon_api.get('/get_prompts')
+def get_marathon_prompts():
+
+    limit = int(request.args.get('limit', 5))
+
+    args = {'p_limit': limit}
+
+    query = """
+    SELECT prompt_id, start, initcheckpoints, checkpoints, cmty_added_by, cmty_anonymous, cmty_submitted_time, username FROM marathonprompts
+    LEFT JOIN users
+    ON users.user_id = marathonprompts.cmty_added_by
+    ORDER BY prompt_id DESC
+    LIMIT %(p_limit)s
+    """
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, args)
+        results = cursor.fetchall()
+
+        return jsonify(results)
 
 
 @marathon_api.get('/prompt/<id>')
@@ -222,3 +244,23 @@ def get_marathon_personal_leaderboard(username):
             return jsonify(results)
 
     abort(404)
+
+
+@marathon_api.get('/archive')
+def get_archive_prompts():
+    try:
+        limit = int(request.args.get('limit', 20))
+        offset = int(request.args.get('offset', 0))
+        marathons, num_prompts = prompts.get_archive_prompts("marathon",
+            offset=offset,
+            limit=limit,
+            user_id=session.get("user_id")
+        )
+
+        return jsonify({
+            "prompts": marathons,
+            "numPrompts": num_prompts
+        })
+
+    except ValueError:
+        return "Invalid limit or offset", 400

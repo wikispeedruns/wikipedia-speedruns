@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script defer type='module' src="{{url_for('static', filename='js-build/marathon_archive.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+{% endblock %}
+
+{% block content %}
+
+<div id="app">
+
+    <h3>Marathon Archive</h3>
+    <div class="row justify-content-md-center">
+
+    <div class="col-md-12">
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+
+                    <p v-if="username">Check your marathon run history <a v-bind:href="'/marathonruns/' + username">here</a>.</p>
+
+                    <table class="table table-hover">
+                        <thead>
+                            <th scope="col"><a v-on:click="toggleSort('prompt')">Prompt # </a></th>
+                            <th scope="col">Starting Article</th>
+                            <th scope="col">Initial Checkpoints</th>
+                            <th scope="col">Created By</th>
+                            <th class="text-center" scope="col">Played</th>
+                            <th></th>
+                        </thead>
+                        <tbody>
+                            <tr v-for="prompt in prompts" v-cloak>
+                                <td>[[prompt.prompt_id]] </td>
+                                <td>[[prompt.start]]</td>
+                                <td>[[prompt.initcheckpoints]]</td>
+                                <td>
+                                    <template v-if="prompt.username && prompt.cmty_anonymous">
+                                        <small>Anon User</small>
+                                    </template>
+                                    <template v-else-if="prompt.username">
+                                        <small>[[prompt.username]]</small>
+                                    </template>
+                                    <template v-else>
+                                        <small>WS Team</small>
+                                    </template>
+                                </td>
+                                <td class="text-center">
+                                    <span v-if="prompt.played"><i class="bi bi-check-lg"></i></span>
+                                    <span v-else><i class="bi bi-dash-lg"></i></span>
+                                </td>
+                                <td>
+                                    <a v-bind:href="'/play/marathon/' + prompt.prompt_id" v-if="!prompt.savedGamePresent">Play</a>
+                                    <a v-bind:href="'/play/marathon/' + prompt.prompt_id + '?load_save=1'" v-else>Continue</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div v-cloak class="card-footer text-center">
+                <a class="btn btn-outline-secondary" role="button"
+                    v-bind:href="'?limit=' + (limit) + '&offset=0'"
+                    v-bind:class="{invisible: page === 1}">
+
+                    <i class="bi bi-chevron-double-left"></i>
+                </a>
+
+                <a class="btn btn-outline-secondary" role="button"
+                    v-bind:href="'?limit=' + limit + '&offset=' + (offset - limit)"
+                    v-bind:class="{invisible: page === 1}">
+
+                    <i class="bi bi-chevron-left" id="prev-page"></i>
+                </a>
+
+                <span>Page <strong>[[page]]</strong> of [[numPages]] </span>
+
+                <a class="btn btn-outline-secondary" role="button"
+                    v-bind:href="'?limit=' + limit + '&offset=' + (offset + limit)"
+                    v-bind:class="{invisible: page === numPages}">
+
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+
+                <a class="btn btn-outline-secondary" role="button"
+                    v-bind:href="'?limit=' + (limit) + '&offset=' + ((numPages - 1) * limit)"
+                    v-bind:class="{invisible: page === numPages}">
+
+                    <i class="bi bi-chevron-double-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
