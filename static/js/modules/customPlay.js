@@ -99,7 +99,7 @@ var CustomPlay = {
                                 </button>
                             </div>
                         </div>
-                        <div class="col-auto px-0">
+                        <div class="col-auto px-0 d-none d-md-block">
                             <button type="button" class="btn border quick-play mx-2" style="width:auto; height:100%" @click="swapPrompts">
                                 <i class="bi bi-arrow-left-right"></i>
                             </button>

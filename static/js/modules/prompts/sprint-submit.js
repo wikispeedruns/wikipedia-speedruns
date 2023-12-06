@@ -91,7 +91,7 @@ var SprintBuilder = {
                         </button>
                     </div>
                 </div>
-                <div class="col-auto px-0 mb-2">
+                <div class="col-auto px-0 mb-2 d-none d-md-block">
                     <button type="button" class="btn border quick-play mx-2" style="height:100%" @click="swapPrompts">
                         <i class="bi bi-arrow-left-right"></i>
                     </button>
