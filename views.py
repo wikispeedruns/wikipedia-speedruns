@@ -42,15 +42,6 @@ def get_archive_page():
         return render_with_data('archive.html', limit=limit, offset=offset)
     except ValueError:
         return "Page Not Found", 404
-    
-@views.route('/marathon_archive', methods=['GET'])
-def get_marathon_archive_page():
-    try:
-        limit = int(request.args.get('limit', 10))
-        offset = int(request.args.get('offset', 0))
-        return render_with_data('marathon_archive.html', limit=limit, offset=offset)
-    except ValueError:
-        return "Page Not Found", 404
 
 @views.route('/random', methods=['GET'])
 def get_random_prompt():

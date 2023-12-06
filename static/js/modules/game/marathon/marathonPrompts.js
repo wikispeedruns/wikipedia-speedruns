@@ -88,7 +88,7 @@ var MarathonPrompts = {
                 </template>
             </div>
             <div class="card-footer text-muted">
-                Save your runs to continue later. Want more? Check out our <b><a href="/marathon_archive" class="no-color">archive</a></b>.
+                Save your runs to continue later.
             </div>
         </div>
     `)

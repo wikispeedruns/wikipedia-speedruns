@@ -27,7 +27,7 @@ async function getBackupPrompts()
 
 async function getMarathonPrompts()
 {
-    const response = await fetch("/api/marathon/get_prompts?limit=5");
+    const response = await fetch("/api/marathon/all");
     return await response.json();
 }
 
