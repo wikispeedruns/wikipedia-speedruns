@@ -31,11 +31,8 @@
 
                 <div class="navbar-brand d-flex align-items-end">
                     <a href="/" class="d-flex align-items-center text-center">
-                        <img src="/static/assets/wslogo.svg" alt="" height="45">
-                        <div class="d-flex flex-column">
-                            <img src="/static/assets/wikipedia.svg" alt="" height="25">
-                            <strong class="localized-slogan">Speedruns</strong>
-                        </div>
+                        <img v-if="theme === 'dark'" src="/static/assets/logodark.svg" alt="" height="45">
+                        <img v-else src="/static/assets/logolight.svg" alt="" height="45">
                     </a>
                     <a href="/devblog" class="version-link">V. 0.1</a>
                 </div>
