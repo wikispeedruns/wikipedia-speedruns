@@ -98,7 +98,8 @@
                 </div>
             </div>
         </div>
-        <div v-show="showStop && !finished && !saved" id="stop-box" class="centered" v-cloak>
+         <!-- Use of centered_speedrun instead of centered because of clash in german wikipedia css-->
+        <div v-show="showStop && !finished && !saved" id="stop-box" class="centered_speedrun" v-cloak>
             <div class="px-4 py-2">
                 <div><h4>Congrats! You reached [[numCheckpointsToStop]] checkpoints</h4></div>
                 <div><p>You can now consider this prompt complete, but you can continue this run to see how far you can go.</p></div>
