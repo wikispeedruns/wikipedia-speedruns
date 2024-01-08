@@ -145,8 +145,8 @@
     font-size: 14px;
     margin-bottom: 0;
 }
-
-.centered {
+/* Use of centered_speedrun instead of centered because of clash in german wikipedia css */
+.centered_speedrun {
 	width:auto;
 	max-width: 1000px !important;
 	z-index: 10000;
