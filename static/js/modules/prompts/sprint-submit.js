@@ -58,6 +58,12 @@ var SprintBuilder = {
             }
         },
 
+        swapPrompts() {
+            var temp = this.start;
+            this.start = this.end;
+            this.end = temp;
+        },
+
         async submitAsAdmin(start, end) {
             const response = await fetchJson("/api/sprints/", "POST", {
                 "start": start,
@@ -77,7 +83,7 @@ var SprintBuilder = {
     template: (`
         <div>
             <div class="row">
-                <div class="col-md mb-2">
+                <div class="col-md-5 mb-2">
                     <div class="input-group flex-nowrap">
                         <ac-input :text.sync="start" :lang="language" placeholder="Start Article"></ac-input>
                         <button type="button" class="btn border quick-play" @click="generateRndPrompt('start')">
@@ -85,7 +91,12 @@ var SprintBuilder = {
                         </button>
                     </div>
                 </div>
-                <div class="col-md mb-2">
+                <div class="col-auto px-0 mb-2 d-none d-md-block">
+                    <button type="button" class="btn border quick-play mx-2" style="height:100%" @click="swapPrompts">
+                        <i class="bi bi-arrow-left-right"></i>
+                    </button>
+                </div>
+                <div class="col mb-2">
                     <div class="input-group flex-nowrap">
                         <ac-input :text.sync="end" :lang="language" placeholder="End Article"></ac-input>
                         <button type="button" class="btn border quick-play" @click="generateRndPrompt('end')">

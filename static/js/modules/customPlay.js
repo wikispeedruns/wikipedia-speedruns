@@ -40,6 +40,12 @@ var CustomPlay = {
             }
         },
 
+        swapPrompts() {
+            var temp = this.start;
+            this.start = this.end;
+            this.end = temp;
+        },
+
         play(start, end, lang) {
             window.location.assign(`/play/quick_play?prompt_start=${start}&prompt_end=${end}&lang=${lang}${this.scroll ? '&scroll=1' : ''}`);
         },
@@ -83,21 +89,30 @@ var CustomPlay = {
                         <option v-for="lang in languages" v-bind:value="lang.code">{{ lang.name }} ({{lang.code}})</option>
                     </select>
                 </div>
-                <div class="col-md mb-2">
-                    <div class="input-group flex-nowrap">
-                        <ac-input :text.sync="start" :lang="language" placeholder="Start Article"></ac-input>
-                        <button type="button" class="btn border quick-play" @click="generateRndPrompt('start')">
-                            <i class="bi bi-shuffle"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="col-md mb-2">
-                    <div class="input-group flex-nowrap">
-                        <ac-input :text.sync="end" :lang="language" placeholder="End Article"></ac-input>
-                        <button type="button" class="btn border quick-play" @click="generateRndPrompt('end')">
-                            <i class="bi bi-shuffle"></i>
-                        </button>
-                    </div>
+                <div class="col-md mb-2"> 
+                    <div class="row">             
+                        <div class="col-md-5 px-2">
+                            <div class="input-group flex-nowrap">
+                                <ac-input :text.sync="start" :lang="language" placeholder="Start Article"></ac-input>
+                                <button type="button" class="btn border quick-play" @click="generateRndPrompt('start')">
+                                    <i class="bi bi-shuffle"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-auto px-0 d-none d-md-block">
+                            <button type="button" class="btn border quick-play mx-2" style="width:auto; height:100%" @click="swapPrompts">
+                                <i class="bi bi-arrow-left-right"></i>
+                            </button>
+                        </div>
+                        <div class="col px-2">
+                            <div class="input-group flex-nowrap">
+                                <ac-input :text.sync="end" :lang="language" placeholder="End Article"></ac-input>
+                                <button type="button" class="btn border quick-play" @click="generateRndPrompt('end')">
+                                    <i class="bi bi-shuffle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>  
                 </div>
                 <p v-if="articleCheckMessage" class="text-danger mb-0">{{articleCheckMessage}}</p>
             </div>
