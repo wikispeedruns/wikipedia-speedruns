@@ -44,7 +44,7 @@ npm install
 There are a number of scripts to help setup the web app in [scripts](scripts).
 
 Once the MySQL server is running, you will need to create an account. By
-default we assume an account `user` with no password (see
+default, we assume an account `user` with no password (see
 [`default.json`](config/default.json)). If you wish to use a different MySQL
 setup, you can create `prod.json` with the relevant MySQL fields in
 [`config`](config) which will override `default.json`.
@@ -55,7 +55,7 @@ cd scripts
 python create_db.py
 ```
 
-There is also an interactive script (with instructions in the scripts) which
+There is also an interactive script (with instructions in the scripts) that
 can be used to set up a local admin account. Through the admin account,
 prompts can be managed through `/manage`.
 ```
@@ -72,7 +72,7 @@ python populate_db.py
 ## 4. Running
 
 #### (Optional) Set environment variables for development
-Set the environment variable `FLASK_ENV` in whaterver command prompt you use plan to use
+Set the environment variable `FLASK_ENV` in whatever command prompt you plan to use
 for running the flask server. This will allow the local instance to reload automatically
 when files are changed.
 
@@ -88,13 +88,13 @@ $env:FLASK_ENV="development"
 ```
 
 #### Start the frontend build
-From the top level directory
+From the top-level directory
 ```
 npm run start
 ```
 
 #### Start the server
-In a separate shell, from the top level directory
+In a separate shell, from the top-level directory
 ```
 flask run
 ```
@@ -112,12 +112,12 @@ pytest
 ```
 
 Note that these tests are also run in Docker upon making a PR using Github workflows.
-In the future we may setup docker to run tests as well.
+In the future, we may setup docker to run tests as well.
 
 
 ## (Optional) Scraper Setup
 
-The asynchronous task queue for scraper tasks are supported by 2 extra tools, celery
+The asynchronous task queue for scraper tasks is supported by 2 extra tools, celery
 and redis. Celery is installed as a python requirement, but redis (https://redis.io/)
 needs to be installed and run separately (similar to the SQL server, see website
 for instructions). The scraper task_queue also requires the `scraper_graph`,
@@ -135,5 +135,5 @@ a windows development machine, you will have to run the server through WSL. Note
 that if you want to keep your windows MySQL instance, you need to figure out
 which port the host windows machine is exposed on in WSL. See [this Super User
 post](https://superuser.com/questions/1536619/connect-to-mysql-from-wsl2). Note
-that this changes everytime WSL is restarted.
+that this changes every time WSL is restarted.
 
