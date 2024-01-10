@@ -124,26 +124,16 @@ def get_all_marathon_prompts():
 
 
 @marathon_api.get('/get_prompts')
-def get_marathon_prompts():
+def get_marathon_prompts():    
+    try:
+        limit = int(request.args.get('limit', 5))
+        marathons, _ = prompts.get_archive_prompts("marathon",
+            limit=limit)
 
-    limit = int(request.args.get('limit', 5))
+        return jsonify(marathons)
 
-    args = {'p_limit': limit}
-
-    query = """
-    SELECT prompt_id, start, initcheckpoints, checkpoints, cmty_added_by, cmty_anonymous, cmty_submitted_time, username FROM marathonprompts
-    LEFT JOIN users
-    ON users.user_id = marathonprompts.cmty_added_by
-    ORDER BY prompt_id DESC
-    LIMIT %(p_limit)s
-    """
-
-    db = get_db()
-    with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query, args)
-        results = cursor.fetchall()
-
-        return jsonify(results)
+    except ValueError:
+        return "Invalid limit", 400
 
 
 @marathon_api.get('/prompt/<id>')

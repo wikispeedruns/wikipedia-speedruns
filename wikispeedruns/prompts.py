@@ -198,7 +198,7 @@ def _construct_prompt_user_query(prompt_type: PromptType, user_id: Optional[int]
         prompt_type = "sprint_"
         fields = ['p.prompt_id', 'start', 'end', 'rated', 'active_start', 'active_end', 'username']
     elif prompt_type == "marathon":
-        fields = ['p.prompt_id', 'start', 'initcheckpoints', 'checkpoints']
+        fields = ['p.prompt_id', 'start', 'initcheckpoints', 'checkpoints', 'username']
 
     fields += ['cmty_added_by', 'cmty_anonymous', 'cmty_submitted_time']
 
@@ -256,9 +256,6 @@ def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, of
     '''
     Get all prompts for archive, including currently active
     '''
-    #if (prompt_type == "sprint"):
-    #    query = "SELECT prompt_id, start, end, rated, active_start, active_end, cmty_added_by, cmty_anonymous, cmty_submitted_time, username FROM sprint_prompts"
-    # elif (prompt_type == "marathon")
 
     query, args = _construct_prompt_user_query(prompt_type, user_id)
     if (prompt_type == "sprint"):
