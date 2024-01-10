@@ -197,20 +197,21 @@ def get_most_recent_quick_run_prompts():
     num = int(request.args.get('num'))
 
     query = '''
-    SELECT prompt_start, prompt_end From quick_runs
-    WHERE finished=1 AND end_time BETWEEN 
-        DATE_SUB(DATE(NOW()), INTERVAL 5 DAY)
-        AND NOW()
-	group by prompt_start, prompt_end
-    ''' 
+    SELECT * FROM (
+        SELECT DISTINCT prompt_start, prompt_end, user_id, run_id FROM quick_runs
+        WHERE finished=1
+        ORDER BY run_id DESC
+        LIMIT 300
+    ) AS top_runs
+    ORDER BY RAND()
+    LIMIT %s;
+    '''
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
-        cursor.execute(query)
+        cursor.execute(query, (num))
         result = cursor.fetchall()
         db.commit()
-        
-        result = random.choices(result, k=min(num, len(result)))
         
         return jsonify(result)
 
