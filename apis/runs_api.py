@@ -9,6 +9,8 @@ import json
 from datetime import datetime
 from wikispeedruns import prompts, lobbys, runs
 
+import random
+
 # Does not have its own prefix, instead part of the lobbys and sprints apis
 run_api = Blueprint('runs', __name__, url_prefix='/api')
 
@@ -186,3 +188,30 @@ def get_quick_run(id):
         return jsonify(result)
 
     return f'Error fetching run {id}', 500
+
+
+
+@run_api.get('/quick_run/suggested')
+def get_most_recent_quick_run_prompts():
+    
+    num = int(request.args.get('num'))
+
+    query = '''
+    SELECT * FROM (
+        SELECT DISTINCT prompt_start, prompt_end, user_id, run_id FROM quick_runs
+        WHERE finished=1
+        ORDER BY run_id DESC
+        LIMIT 300
+    ) AS top_runs
+    ORDER BY RAND()
+    LIMIT %s;
+    '''
+
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (num))
+        result = cursor.fetchall()
+        db.commit()
+        
+        return jsonify(result)
+
