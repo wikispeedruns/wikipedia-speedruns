@@ -7,6 +7,7 @@ from pymysql.cursors import DictCursor
 
 
 from wikispeedruns.marathon import genPrompts
+from wikispeedruns import prompts
 
 marathon_api = Blueprint('marathon', __name__, url_prefix='/api/marathon')
 
@@ -122,6 +123,17 @@ def get_all_marathon_prompts():
         return jsonify(results)
 
 
+@marathon_api.get('/get_prompts')
+def get_marathon_prompts():    
+    try:
+        limit = int(request.args.get('limit', 5))
+        marathons, _ = prompts.get_archive_prompts("marathon",
+            limit=limit)
+
+        return jsonify(marathons)
+
+    except ValueError:
+        return "Invalid limit", 400
 
 
 @marathon_api.get('/prompt/<id>')
@@ -222,3 +234,23 @@ def get_marathon_personal_leaderboard(username):
             return jsonify(results)
 
     abort(404)
+
+
+@marathon_api.get('/archive')
+def get_archive_prompts():
+    try:
+        limit = int(request.args.get('limit', 20))
+        offset = int(request.args.get('offset', 0))
+        marathons, num_prompts = prompts.get_archive_prompts("marathon",
+            offset=offset,
+            limit=limit,
+            user_id=session.get("user_id")
+        )
+
+        return jsonify({
+            "prompts": marathons,
+            "numPrompts": num_prompts
+        })
+
+    except ValueError:
+        return "Invalid limit or offset", 400

@@ -191,14 +191,21 @@ def _construct_prompt_user_query(prompt_type: PromptType, user_id: Optional[int]
 
     # 1. Determine which fields are needed
     # if prompt_type == marathon probably change these fields
-    fields = ['p.prompt_id', 'start', 'end', 'rated', 'active_start', 'active_end',
-              'cmty_added_by', 'cmty_anonymous', 'cmty_submitted_time', 'username']
+    
     args = {}
+
+    if prompt_type == "sprint": 
+        prompt_type = "sprint_"
+        fields = ['p.prompt_id', 'start', 'end', 'rated', 'active_start', 'active_end', 'username']
+    elif prompt_type == "marathon":
+        fields = ['p.prompt_id', 'start', 'initcheckpoints', 'checkpoints', 'username']
+
+    fields += ['cmty_added_by', 'cmty_anonymous', 'cmty_submitted_time']
 
     if user_id:
         fields.append('played')
 
-    query = f"SELECT {','.join(fields)} FROM {prompt_type}_prompts AS p"
+    query = f"SELECT {','.join(fields)} FROM {prompt_type}prompts AS p"
     
     query += f"""
     LEFT JOIN users
@@ -208,10 +215,10 @@ def _construct_prompt_user_query(prompt_type: PromptType, user_id: Optional[int]
     # 2. Add neccesary join/args for user info (TODO could in the future get best run?)
     if user_id:
         # TODO returns null on no plays?
-        query += '''
+        query += f'''
         LEFT JOIN  (
             SELECT prompt_id, COUNT(*) AS played
-            FROM sprint_runs AS runs
+            FROM {prompt_type}runs AS runs
             WHERE user_id=%(user_id)s
             GROUP BY prompt_id
         ) user_runs
@@ -249,12 +256,14 @@ def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, of
     '''
     Get all prompts for archive, including currently active
     '''
-    if (prompt_type == "sprint"):
-        query = "SELECT prompt_id, start, end, rated, active_start, active_end, cmty_added_by, cmty_anonymous, cmty_submitted_time, username FROM sprint_prompts"
-    # elif (prompt_type == "marathon")
 
     query, args = _construct_prompt_user_query(prompt_type, user_id)
-    query += f" WHERE used = 1 AND active_start <= NOW() ORDER BY active_start DESC, prompt_id DESC LIMIT %(offset)s, %(limit)s"
+    if (prompt_type == "sprint"):
+        query += f" WHERE used = 1 AND active_start <= NOW() ORDER BY active_start DESC, prompt_id DESC LIMIT %(offset)s, %(limit)s"
+        count_query = "SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW()"
+    elif (prompt_type == "marathon"):
+        query += f" ORDER BY prompt_id DESC LIMIT %(offset)s, %(limit)s"
+        count_query = "SELECT COUNT(*) AS n FROM marathonprompts"
 
     args["offset"] = offset
     args["limit"] = limit
@@ -266,12 +275,13 @@ def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, of
         prompts = cur.fetchall()
 
         # remove end prompt from currently active prompts
-        for p in prompts:
-            compute_visibility(p)
-            if (p['active']): p['end'] = None
+        if (prompt_type == "sprint"):
+            for p in prompts:
+                compute_visibility(p)
+                if (p['active']): p['end'] = None
 
         # get the total number of prompts
-        cur.execute("SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW()")
+        cur.execute(count_query)
         n = cur.fetchone()['n']
 
         return prompts, n
