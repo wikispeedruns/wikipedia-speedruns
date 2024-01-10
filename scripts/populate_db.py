@@ -324,6 +324,60 @@ def populate_lobby_runs(cursor):
     cursor.executemany(runs_query, runs)
 
 
+def populate_quick_runs(cursor):
+    # Add quick runs. Each user has 10 runs, 8 of which are completed. 
+
+    users_query = "SELECT user_id, join_date FROM users"
+    cursor.execute(users_query)
+    users = cursor.fetchall()
+
+    num_per_user = 10
+    runs = []
+
+    for u, user in enumerate(users):
+        user_id = user["user_id"]
+        join_date = user["join_date"]
+        for i in range(num_per_user):
+            start_article = f"{u*num_per_user + i} (number)"
+            end_article = f"{u*num_per_user + i + 1} (number)"
+            start_time = join_date + datetime.timedelta(minutes=i)
+            end_time = start_time + datetime.timedelta(minutes=10)
+            play_time = (end_time - start_time).total_seconds()
+            path = json.dumps({
+                "version": "2.1",
+                "path": [
+                    {
+                        "article": start_article,
+                        "loadTime": 0,
+                        "timeReached": 0
+                    },
+                    {
+                        "article": end_article,
+                        "loadTime": 0,
+                        "timeReached": 0
+                    }
+                ]
+            })
+            
+            runs.append({
+                "user_id": user_id,
+                "prompt_start": start_article,
+                "prompt_end": end_article,
+                "finished": i < 8,
+                "language": 'en',
+                "start_time": start_time,
+                "end_time": end_time,
+                "path": path,
+                'play_time': play_time,
+            })
+
+    prompt_query = """
+        INSERT INTO `quick_runs` (`user_id`, `prompt_start`, `prompt_end`, `finished`, `language`, `start_time`, `end_time`, `path`, `play_time`)
+        VALUES (%(user_id)s, %(prompt_start)s, %(prompt_end)s, %(finished)s, %(language)s, %(start_time)s, %(end_time)s, %(path)s, %(play_time)s);
+    """
+    cursor.executemany(prompt_query, runs)
+
+
 def populate_database(db_name, recreate=False):
     # Load database settings from
     config = json.load(open("../config/default.json"))
@@ -341,6 +395,7 @@ def populate_database(db_name, recreate=False):
 
 
     with conn.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
+        populate_quick_runs(cursor)
         populate_sprints(cursor)
         populate_users(cursor)
         populate_runs(cursor)
@@ -349,6 +404,7 @@ def populate_database(db_name, recreate=False):
         populate_lobbies(cursor)
         populate_lobby_prompts(cursor)
         populate_lobby_runs(cursor)
+        
 
         conn.commit()
         conn.close()
