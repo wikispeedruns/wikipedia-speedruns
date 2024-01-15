@@ -138,7 +138,7 @@ var CustomPlay = {
 
             <details>
                 <summary>Recommended Prompts</summary>
-                <quick-play-suggestions ref="pg"></quick-play-suggestions>
+                <quick-play-suggestions ref="qps"></quick-play-suggestions>
             </details>
         </div>
     `)
