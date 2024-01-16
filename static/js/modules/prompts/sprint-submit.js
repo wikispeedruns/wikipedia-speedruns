@@ -41,6 +41,15 @@ var SprintBuilder = {
             let end_title = resp.body.end
 
             try {
+                const check_res = await this.checkDuplicates(start_title, end_title);
+                if (check_res[0] != 'none') {
+                    var b = "This prompt is already an active prompt, in the prompt queue, or waiting for approval. "
+                    if (!this.admin || (this.admin && !confirm(b + " Do you want to submit it anyway?"))) {
+                        this.articleCheckMessage = b + " Please try a different prompt."
+                        return;
+                    } 
+                } 
+
                 if (this.admin) {
                     await this.submitAsAdmin(start_title, end_title);
                     this.articleCheckMessage = "Prompt submit success. "
@@ -62,6 +71,14 @@ var SprintBuilder = {
             var temp = this.start;
             this.start = this.end;
             this.end = temp;
+        },
+
+        async checkDuplicates(start, end) {
+            const response = await fetchJson("/api/sprints/check_duplicate", "POST", {
+                "start": start,
+                "end": end
+            })
+            return await response.json()
         },
 
         async submitAsAdmin(start, end) {
