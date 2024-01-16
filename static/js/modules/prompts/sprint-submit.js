@@ -44,6 +44,7 @@ var SprintBuilder = {
                 const check_res = await this.checkDuplicates(start_title, end_title);
                 if (check_res[0] != 'none') {
                     var b = "This prompt is already an active prompt, in the prompt queue, or waiting for approval. "
+                    b += this.admin ? ` ${check_res[0]} ${check_res[1]}` : ""
                     if (!this.admin || (this.admin && !confirm(b + " Do you want to submit it anyway?"))) {
                         this.articleCheckMessage = b + " Please try a different prompt."
                         return;
