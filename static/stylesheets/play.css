@@ -198,3 +198,13 @@ canvas,
 svg {
   max-width: 100%;
 }
+
+li.gallerybox {
+    vertical-align: top;
+    display: inline-block;
+}
+
+li.gallerybox div.thumb {
+    text-align: center;
+    margin: 2px;
+}
