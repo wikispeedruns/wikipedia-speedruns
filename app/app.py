@@ -18,12 +18,12 @@ def create_app(test_config=None):
 
     app.json_encoder = CustomJSONEncoder
 
-    app.config.from_file('config/default.json', json.load)
+    app.config.from_file('../config/default.json', json.load)
 
     if test_config is None:
         # load prod settings if not testing and if they exist
         try:
-            app.config.from_file('config/prod.json', json.load)
+            app.config.from_file('../config/prod.json', json.load)
         except FileNotFoundError:
             pass
     else:

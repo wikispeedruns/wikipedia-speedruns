@@ -9,7 +9,7 @@ from flask_mail import Message
 
 from app.db import get_db
 from app.mail import mail
-from tokens import (
+from app.tokens import (
     create_reset_token,
     verify_reset_token,
     create_confirm_token,

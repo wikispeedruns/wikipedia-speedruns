@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, session
 
 from util.decorators import check_admin, check_user
 
-import db
+from . import db
 import random
 
 import wikispeedruns

@@ -5,7 +5,7 @@ from util.async_result import register_async_endpoint
 from wikispeedruns.scraper.paths import findPaths
 from wikispeedruns.scraper.util import convertToID
 
-from tasks import celery
+from app.tasks import celery
 
 scraper_api = Blueprint("scraper", __name__, url_prefix="/api/scraper")
 
