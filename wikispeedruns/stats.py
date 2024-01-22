@@ -3,7 +3,7 @@ import json
 from multiprocessing import Lock
 from enum import Enum
 from datetime import datetime, timezone
-from db import get_db, get_db_version
+from app.db import get_db, get_db_version
 from pymysql.cursors import DictCursor
 from util.flaskjson import CustomJSONEncoder
 

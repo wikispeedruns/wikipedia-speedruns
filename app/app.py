@@ -2,10 +2,10 @@ from flask import Flask
 
 import json
 
-import db
-import mail
-import tokens
-import tasks
+from . import db
+from . import mail
+from . import tokens
+from . import tasks
 from util.flaskjson import CustomJSONEncoder
 
 import sentry_sdk
@@ -58,7 +58,7 @@ def create_app(test_config=None):
     from apis.generator_api import generator_api, load_page_rank
     from apis.achievements_api import achievements_api
     from apis.community_prompts_api import community_prompts_api
-    from views import views
+    from .views import views
 
     app.register_blueprint(sprint_api)
     app.register_blueprint(run_api)

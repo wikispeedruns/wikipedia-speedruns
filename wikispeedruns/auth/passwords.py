@@ -2,7 +2,7 @@ import bcrypt
 import hashlib
 import base64
 
-from db import get_db
+from app.db import get_db
 
 
 def valid_password(password: str) -> bool:

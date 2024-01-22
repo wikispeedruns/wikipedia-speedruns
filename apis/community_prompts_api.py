@@ -1,8 +1,7 @@
 from flask import request, Blueprint, session, jsonify
 from util.decorators import check_user, check_request_json, check_admin
 
-import db
-from db import get_db
+from app.db import get_db
 from pymysql.cursors import DictCursor
 from datetime import datetime
 

@@ -7,8 +7,8 @@ from flask import session, request, render_template, Blueprint, current_app, jso
 import flask_dance.contrib.google as oauth_google
 from flask_mail import Message
 
-from db import get_db
-from mail import mail
+from app.db import get_db
+from app.mail import mail
 from tokens import (
     create_reset_token,
     verify_reset_token,

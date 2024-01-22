@@ -3,7 +3,7 @@ from datetime import datetime
 import json
 from typing import List, Literal, Tuple, TypedDict, Optional
 
-from db import get_db, get_db_version
+from app.db import get_db, get_db_version
 from pymysql.cursors import DictCursor
 
 from wikispeedruns import lobbys

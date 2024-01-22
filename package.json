@@ -10,9 +10,9 @@
     "vue": "^2.7.10"
   },
   "scripts": {
-    "start": "node ./build.mjs -d",
-    "build": "node ./build.mjs",
-    "lint": "eslint ./static/js"
+    "start": "node ./frontend/build.mjs -d",
+    "build": "node ./frontend/build.mjs",
+    "lint": "eslint ./frontend/static/js"
   },
   "repository": {
     "type": "git",

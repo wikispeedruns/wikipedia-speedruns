@@ -7,7 +7,7 @@ from unittest import result
 
 import pymysql
 
-from db import get_db, get_db_version
+from app.db import get_db, get_db_version
 from pymysql.cursors import DictCursor
 
 from wikispeedruns import runs

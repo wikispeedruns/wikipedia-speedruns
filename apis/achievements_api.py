@@ -1,8 +1,7 @@
 from flask import request, Blueprint, session
 from util.decorators import check_user
 
-import db
-from db import get_db
+from app.db import get_db
 from pymysql.cursors import DictCursor
 
 from wikispeedruns import achievements

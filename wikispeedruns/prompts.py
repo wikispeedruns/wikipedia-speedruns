@@ -1,7 +1,7 @@
 
 from typing import List, Literal, Tuple, TypedDict, Optional
 
-from db import get_db
+from app.db import get_db
 
 import pymysql
 from pymysql.cursors import DictCursor

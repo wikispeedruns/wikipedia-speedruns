@@ -2,7 +2,7 @@ import random
 
 from typing import List, Any
 
-from db import get_db
+from app.db import get_db
 
 from .util import ARTICLE_TABLE
 from .util import getLinks, convertToArticleName

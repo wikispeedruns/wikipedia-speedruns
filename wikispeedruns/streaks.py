@@ -1,4 +1,4 @@
-from db import get_db
+from app.db import get_db
 from pymysql.cursors import DictCursor
 import json
 
