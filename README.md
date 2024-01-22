@@ -96,7 +96,7 @@ npm run start
 #### Start the server
 In a separate shell, from the top-level directory
 ```
-flask run
+flask --app app run 
 ```
 
 ## 5. Testing Locally
@@ -126,7 +126,7 @@ which can be downloaded locally (contact one of the maintainers)
 Rather than computing the path as part of the request, which freezes up the server,
 flask passes off the scraper tasks to another process managed by celery (and
 communicates through redis). These tasks are defined using python decorators, examples
-of which can be seen [here](https://github.com/wikispeedruns/wikipedia-speedruns/blob/scraper_task_queue/apis/scraper_api.py).
+of which can be seen [here](https://github.com/wikispeedruns/wikipedia-speedruns/blob/main/apis/scraper_api.py).
 
 #### Windows setup
 
