@@ -159,3 +159,12 @@ def clear_runs(id):
     prompts.clear_runs_for_prompt(id, "sprint")
     return "Cleared prompts", 200
 
+@sprint_api.post('/check_duplicate')
+@check_request_json({"start": str, "end": str})
+def check_duplicate_prompt():
+    start = request.json.get('start')
+    end = request.json.get('end')
+
+    res = prompts.check_for_sprint_duplicates(start, end)
+    return jsonify(res)
+

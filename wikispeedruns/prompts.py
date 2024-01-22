@@ -340,3 +340,28 @@ def clear_runs_for_prompt(prompt_id: int, prompt_type: PromptType):
     with db.cursor(cursor=DictCursor) as cur:
         cur.execute(query, args)
         db.commit()
+
+
+def check_for_sprint_duplicates(start: str, end: str) -> Tuple[str, int]:
+
+    potd_query = "SELECT prompt_id FROM sprint_prompts WHERE start=%(start)s AND end=%(end)s"
+    cmty_query = "SELECT pending_prompt_id FROM cmty_pending_prompts_sprints WHERE start=%(start)s AND end=%(end)s"
+    args = {
+            'start': start,
+            'end': end,
+        }
+    
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cur:
+        cur.execute(potd_query, args)
+        res_potd = cur.fetchone()
+        if res_potd:
+            return ('potd', res_potd['prompt_id'])
+    
+        cur.execute(cmty_query, args)
+        res_cmty = cur.fetchone()
+        if res_cmty:
+            return ('cmty', res_cmty['pending_prompt_id'])
+
+        return ('none', -1)
+
