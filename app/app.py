@@ -11,7 +11,6 @@ from util.flaskjson import CustomJSONEncoder
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 import os
-from wikispeedruns import lobbys
 
 def create_app(test_config=None):
 
