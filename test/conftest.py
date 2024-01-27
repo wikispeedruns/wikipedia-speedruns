@@ -4,11 +4,11 @@ import sys
 from pymysql.cursors import DictCursor
 
 sys.path.append('..')
-from app import create_app
+from app.app import create_app
 from scripts.create_db import create_database
 
-from db import get_db
-from mail import mail
+from app.db import get_db
+from app.mail import mail
 
 
 TEST_DB_NAME="test"

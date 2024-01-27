@@ -4,7 +4,7 @@ from util.decorators import check_user
 
 from wikispeedruns import streaks
 
-from db import get_db
+from app.db import get_db
 
 # TODO figure out a better name for this
 profile_api = Blueprint("profiles", __name__, url_prefix="/api/profiles")

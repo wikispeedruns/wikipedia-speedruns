@@ -1,11 +1,7 @@
-from glob import glob
 from flask import jsonify, request, Blueprint
 
 import math
 import random
-
-from itsdangerous import json
-
 generator_api = Blueprint("generator", __name__, url_prefix="/api/generator")
 
 OFFSET = 100

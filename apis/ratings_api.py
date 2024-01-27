@@ -1,7 +1,7 @@
 from flask import session, request, render_template, Blueprint, current_app, jsonify
 from pymysql.cursors import DictCursor
 
-from db import get_db
+from app.db import get_db
 
 ratings_api = Blueprint("ratings", __name__, url_prefix="/api/ratings")
 

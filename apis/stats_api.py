@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from db import get_db
+from app.db import get_db
 from pymysql.cursors import DictCursor
 
 from wikispeedruns import stats

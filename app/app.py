@@ -2,28 +2,31 @@ from flask import Flask
 
 import json
 
-import db
-import mail
-import tokens
-import tasks
+from . import db
+from . import mail
+from . import tokens
+from . import tasks
 from util.flaskjson import CustomJSONEncoder
 
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
+import os
 
-from wikispeedruns import lobbys
 def create_app(test_config=None):
 
-    app = Flask(__name__)
+    app = Flask(__name__,
+            static_url_path='/static', 
+            static_folder='../frontend/static',
+            template_folder='../frontend/templates')
 
     app.json_encoder = CustomJSONEncoder
 
-    app.config.from_file('config/default.json', json.load)
+    app.config.from_file('../config/default.json', json.load)
 
     if test_config is None:
         # load prod settings if not testing and if they exist
         try:
-            app.config.from_file('config/prod.json', json.load)
+            app.config.from_file('../config/prod.json', json.load)
         except FileNotFoundError:
             pass
     else:
@@ -58,7 +61,7 @@ def create_app(test_config=None):
     from apis.generator_api import generator_api, load_page_rank
     from apis.achievements_api import achievements_api
     from apis.community_prompts_api import community_prompts_api
-    from views import views
+    from .views import views
 
     app.register_blueprint(sprint_api)
     app.register_blueprint(run_api)

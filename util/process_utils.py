@@ -1,5 +1,5 @@
-import db
-from app import create_app
+import app.db
+from app.app import create_app
 from multiprocessing import Process
 
 def run_with_app_context(func, args=()):
@@ -9,7 +9,7 @@ def run_with_app_context(func, args=()):
         func(*args)
 
 def run_with_db(func, conn, args=()):
-    with db.use_instance_db(conn):
+    with app.db.use_instance_db(conn):
         func(*args)
 
 

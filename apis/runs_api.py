@@ -1,7 +1,7 @@
 from flask import jsonify, request, Blueprint, session
 from util.decorators import check_user, check_request_json
 
-from db import get_db
+from app.db import get_db
 from pymysql.cursors import DictCursor
 
 import json

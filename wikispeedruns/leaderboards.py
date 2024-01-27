@@ -6,7 +6,7 @@ import json
 
 # For local testing you can comment out this get_db import and use the below code to manually connect to the db
 # and run the file directly. Preferably, you should use unit tests (which I have yet to write)
-from db import get_db
+from app.db import get_db
 '''
 def get_db():
     config = json.load(open("../config/default.json"))

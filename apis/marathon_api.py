@@ -2,7 +2,7 @@ from util.decorators import check_admin, check_user, check_request_json
 from flask import Flask, jsonify, request, Blueprint, session, abort
 import json
 
-from db import get_db
+from app.db import get_db
 from pymysql.cursors import DictCursor
 
 
