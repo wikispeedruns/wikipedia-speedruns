@@ -15,7 +15,7 @@ import os
 def create_app(test_config=None):
 
     app = Flask(__name__,
-            static_url_path='', 
+            static_url_path='/static', 
             static_folder='../frontend/static',
             template_folder='../frontend/templates')
 
