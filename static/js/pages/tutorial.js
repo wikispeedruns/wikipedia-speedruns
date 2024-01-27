@@ -386,7 +386,15 @@ let app = new Vue({
         // used to only render one version of tutorial
         this.isMobile = window.screen.width < 768;
 
-        this.renderer = new ArticleRenderer(document.getElementById("wikipedia-frame"), this.pageCallback, this.showPreview, this.hidePreview);
+        this.renderer = new ArticleRenderer(
+            document.getElementById("wikipedia-frame"), 
+            this.pageCallback, 
+            this.showPreview, 
+            this.hidePreview,
+            null,
+            "en",
+            "2023-01-01T00:00:00" // Date when this tutorial was made approx.
+        );
 
         this.renderer.loadPage("Walt Whitman");
 
