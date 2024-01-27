@@ -115,6 +115,22 @@ Note that these tests are also run in Docker upon making a PR using Github workf
 In the future, we may setup docker to run tests as well.
 
 
+## Achievements Setup
+
+Achievements are added the database via python scripts. Run this python scripts with your
+virtual environment enabled to populate achievement tables:
+```
+scripts\achievement\add_achievements_to_database.py
+```
+
+Any future runs will be checked against achievements in the database. We can also apply these
+check rules to previous runs. 
+
+Run this python script to retroactively check historical runs against all current achievements.
+```
+scripts\achievement\historical_achievements.py
+```
+
 ## (Optional) Scraper Setup
 
 The asynchronous task queue for scraper tasks is supported by 2 extra tools, celery
