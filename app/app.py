@@ -10,11 +10,15 @@ from util.flaskjson import CustomJSONEncoder
 
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
-
+import os
 from wikispeedruns import lobbys
+
 def create_app(test_config=None):
 
-    app = Flask(__name__)
+    app = Flask(__name__,
+            static_url_path='', 
+            static_folder='../frontend/static',
+            template_folder='../frontend/templates')
 
     app.json_encoder = CustomJSONEncoder
 
