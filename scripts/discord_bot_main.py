@@ -1,11 +1,12 @@
+import json
+import pymysql
+import datetime
+import os
+
 import discord
 from discord.ext import commands, tasks
 
-import json
-import pymysql
 from pymysql.cursors import DictCursor
-import datetime
-import os
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -64,7 +65,10 @@ def daily_summary_stats(conn):
     
 def potd_status_check(conn):
     prompts_left = _count_consecutive_future_prompts(conn)
-    return f"We currently have {prompts_left} consecutive future prompts left."
+    output = f"We currently have {prompts_left} consecutive future prompts left."
+    if prompts_left < 7:
+        output += "\nWARNING - add more prompts!"
+    return output
 
 
 bot_reports = [
@@ -93,7 +97,6 @@ async def on_ready():
             channel = bot.get_channel(report['target_channel'])
             if channel:
                 report_str = f"\n{report['name']}\n-------------------\n{report['func'](conn)}"
-                # print(report_str)
                 await channel.send(report_str)
         func.before_loop(bot.wait_until_ready)
         async_tasks.append(func)
@@ -104,7 +107,6 @@ async def on_ready():
 
 DEFAULT_DB_NAME='wikipedia_speedruns'
 def get_database(db_name=DEFAULT_DB_NAME):
-    # Load database settings from
     config = json.load(open("../config/default.json"))
     try:
         config.update(json.load(open("../config/prod.json")))
