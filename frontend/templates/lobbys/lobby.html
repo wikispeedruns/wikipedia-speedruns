@@ -43,8 +43,11 @@
         <p> Passcode: [[lobbyInfo.passcode]]    </p>
     </details>
 
-    <div class="button-tooltip-container">
-        <button @click="copyInviteLink" class="btn btn-light">Copy Invite</button>
+    <div class="button-tooltip-container gap-2">
+        <button @click="copyInviteText" class="btn btn-primary">Copy Invite Text</button>
+        <button @click="copyInviteLinkWithPasscode" class="btn btn-info">
+            <i class="bi bi-link-45deg" height="16"></i> Link
+        </button>
         <span id="custom-tooltip" ref="shareTooltip">Copied invite to clipboard!</span>
     </div>
 
