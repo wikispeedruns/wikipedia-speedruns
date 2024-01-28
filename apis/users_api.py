@@ -145,6 +145,9 @@ def create_user():
     # Validate username
     if (not _valid_username(username)):
         return "Invalid username", 400
+    # profanity check
+    if profanity_check_func(username):
+        return ("Please use Clean language in username", 406)
 
     # Use SHA256 to allow for arbitrary length passwords
     hash = passwords.hash_password(password)
