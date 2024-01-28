@@ -372,7 +372,6 @@ var app = new Vue({
         fillLeaderboard: async function() {
             let url = new URL(window.location.href);
 
-
             // TODO find this by user if not provided in urlParams
             this.runId = Number(url.searchParams.get("run_id")) || -1;
     
@@ -473,15 +472,35 @@ var app = new Vue({
             this.stats.avgTime = parseFloat(statJson['avg_play_time']).toFixed(2);
     
             this.genGraph();
-    
-    
         }
     },
 
     created: async function() {
         /* Parse url params */
+        this.fillLeaderboard();
 
         // Setup websockets to refresh when other people finish (for lobbies)
+        
+
+        if (this.lobbyId !== null) {
+            const exampleSocket = new WebSocket(
+                "ws://localhost:9000",
+            );
+    
+            exampleSocket.onopen = (event) => {
+                exampleSocket.send(JSON.stringify({
+                    lobby_id: this.lobbyId,
+                    prompt_id: this.promptId
+                }));
+            }
+    
+            exampleSocket.onmessage = (event) => {
+                if (event.data === "refresh") {
+                    this.fillLeaderboard();
+                }
+            };
+        }
+
 
     },
 })
