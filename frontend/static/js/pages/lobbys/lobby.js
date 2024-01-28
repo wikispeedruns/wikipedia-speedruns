@@ -60,8 +60,17 @@ var app = new Vue({
 
     methods: {
 
-        copyInviteLink() {
+        copyInviteText() {
             const link = `Join my WikiSpeedruns lobby\n${window.location.href}\nPasscode: ${this.lobbyInfo.passcode}`
+            document.getElementById("custom-tooltip").style.display = "inline";
+            navigator.clipboard.writeText(link);
+            setTimeout(function() {
+                document.getElementById("custom-tooltip").style.display = "none";
+            }, 1500);
+        },
+
+        copyInviteLinkWithPasscode() {
+            const link = `${window.location.href}\?passcode=${this.lobbyInfo.passcode}`
             document.getElementById("custom-tooltip").style.display = "inline";
             navigator.clipboard.writeText(link);
             setTimeout(function() {
