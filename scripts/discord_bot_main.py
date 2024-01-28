@@ -19,7 +19,6 @@ def _get_new_user_count(conn):
     query = """
     SELECT COUNT(*) AS count FROM users WHERE join_date >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
     """
-
     with conn.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query)
         count = cursor.fetchone()['count']
@@ -61,7 +60,7 @@ def daily_summary_stats(conn):
     new_user_count = _get_new_user_count(conn)
     new_run_count = _get_new_run_count(conn)
     return f"""New users in the last 24 hours: {new_user_count}
-    New runs in the last 24 hours: {new_run_count}"""
+New runs in the last 24 hours: {new_run_count}"""
     
 def potd_status_check(conn):
     prompts_left = _count_consecutive_future_prompts(conn)
@@ -69,6 +68,28 @@ def potd_status_check(conn):
     if prompts_left < 7:
         output += "\nWARNING - add more prompts!"
     return output
+
+def _get_num_cmty_submissions(conn, daily=False, sprints=True):
+    query = f"""
+    SELECT COUNT(*) AS count FROM cmty_pending_prompts_{'sprints' if sprints else 'marathon'}
+    """
+    if daily:
+        query += " WHERE submitted_time >= DATE_SUB(NOW(), INTERVAL 24 HOUR)"
+    with conn.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query)
+        count = cursor.fetchone()['count']
+        conn.commit()
+        return count
+
+def cmty_submission_stats(conn):
+    sprint_total = _get_num_cmty_submissions(conn)
+    marathon_total = _get_num_cmty_submissions(conn, sprints=False)
+    sprint_daily = _get_num_cmty_submissions(conn, daily=True)
+    marathon_daily = _get_num_cmty_submissions(conn, daily=True, sprints=False)
+    return f"""Cmty sprints submitted in the last 24 hours: {sprint_daily}
+Cmty marathons submitted in the last 24 hours: {marathon_daily}
+Total pending cmty sprints: {sprint_total}
+Total pending cmty marathons: {marathon_total}"""    
 
 
 bot_reports = [
@@ -83,6 +104,12 @@ bot_reports = [
         'target_channel': channel_id,
         'interval': {'hours': 24},
         'func': potd_status_check
+    },
+    {
+        'name': 'daily_cmty_submission_stats',
+        'target_channel': channel_id,
+        'interval': {'hours': 24},
+        'func': cmty_submission_stats
     },
 ]
 
