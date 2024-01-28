@@ -96,7 +96,7 @@ npm run start
 #### Start the server
 In a separate shell, from the top-level directory
 ```
-flask --app app run 
+flask run --debug
 ```
 
 ## 5. Testing Locally
