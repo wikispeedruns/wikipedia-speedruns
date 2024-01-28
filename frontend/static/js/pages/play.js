@@ -231,6 +231,40 @@ let app = new Vue({
 
         },
 
+        async getHint(start, end) {
+            document.getElementById('hint').innerText = "Getting hint..."
+            const searchParams = new URLSearchParams({
+                start: start,
+                end: end
+            })
+            console.log("HI")
+            console.log("/api/sprints/hint?" + searchParams)
+
+            let hint
+            try{
+                const response = await fetch("/api/sprints/hint?" + searchParams)
+                let tmpData = await response.json()
+                hint = tmpData[1]
+                if(!hint){
+                    throw err;
+                }
+            }
+            catch(err){
+                document.getElementById('hint').innerText = "Sorry, couldn't find a hint!"
+            }
+
+            // const response = await fetch("/api/sprints/hint?" + searchParams)
+            // let tmpData = await response.json()
+            // hint = tmpData[1]
+            // console.log(hint)
+            if(!hint){
+                document.getElementById('hint').innerText = "Sorry, couldn't find a hint!"
+            }else{
+                document.getElementById('hint').innerText = hint
+            }
+            return hint
+        },
+
         async start() {
             this.countdownTime = (Date.now() - this.startTime) / 1000;
 

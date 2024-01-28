@@ -57,6 +57,12 @@
                             Current Article<br><strong>[[currentArticle]]</strong>
                         </div>
                     </div>
+                    <div style="float: right;" >
+                        <button class="col text-nowrap px-1 pt-1" @click="getHint([[currentArticle]], [[endArticle]])">
+                            Need a hint?
+                        </button>
+                        <div id="hint"></div>
+                    </div>
                 </div>
             </div>
             <div v-else class="HUDwrapper HUDwrapper-fade container-xxl">
