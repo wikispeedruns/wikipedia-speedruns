@@ -82,6 +82,9 @@ var app = new Vue({
                 if (response.status === 200) {
                     window.location.reload();
                 }
+                else if (response.status === 406) {
+                    alert(await response.text());
+                }
                 this.feedbackMsg = await response.text()
             } catch (e) {
                 console.log(e);
