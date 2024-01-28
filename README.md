@@ -25,7 +25,7 @@ For Windows Powershell:
 ./env/Scripts/Activate.ps1
 ```
 
-For Linux/unix based mac
+For Linux / Unix-based (Mac)
 
 ```
 source env/bin/activate
