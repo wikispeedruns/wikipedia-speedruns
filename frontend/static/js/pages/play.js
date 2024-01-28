@@ -33,6 +33,23 @@ const IS_SCROLL_ON = serverData["scroll"] || null;
 // Get language
 const LANGUAGE = serverData["lang"];
 
+async function getLobby(lobbyId) {
+    const url = `/api/lobbys/${lobbyId}`;
+    const response = await fetch(url);
+
+    if (response.status != 200) {
+        const error = await response.text();
+        alert(error);
+
+        // Prevent are you sure you want to leave prompt
+        window.onbeforeunload = null;
+        window.location.replace("/");   // TODO error page
+        return;
+    }
+
+    return await response.json();
+}
+
 async function getPrompt(promptId, lobbyId=null) {
 
     if(promptId == null){
@@ -106,7 +123,8 @@ let app = new Vue({
         isScroll: null,
 
         anonymous: null,
-        created_username: null
+        created_username: null,
+	    isPenaltyMode: false
     },
 
     mounted: async function() {
@@ -122,6 +140,7 @@ let app = new Vue({
         this.isScroll = IS_SCROLL_ON;
 
         const prompt = await getPrompt(PROMPT_ID, LOBBY_ID);
+	    const lobby = await getLobby(LOBBY_ID);
 
         this.startArticle = prompt["start"];
         this.endArticle = prompt["end"];
@@ -131,6 +150,8 @@ let app = new Vue({
         this.promptPlayed = !!prompt["played"];
         this.promptActive = !!prompt["active"];
         this.promptRated = !!prompt["rated"];
+	
+	    this.isPenaltyMode = !!lobby["rules"]["is_penalty_mode"];
 
         // Use the release date of teh prompt (if it exists) to determine the article revision
         this.revisionDate = prompt?.["active_start"];
@@ -209,11 +230,17 @@ let app = new Vue({
             if (this.path.length == 0 || this.path[this.path.length - 1]["article"] != page) {
                 // Update path
                 let timeElapsed = (Date.now() - this.startTime) / 1000;
-                this.path.push({
-                    "article": page,
-                    "timeReached": timeElapsed,
-                    "loadTime": loadTimeSeconds
-                });
+		
+		    if (this.isPenaltyMode) {
+		        timeElapsed += this.path.length * 20;
+		        loadTimeSeconds -= 20;
+		    }
+		
+            this.path.push({
+                "article": page,
+                "timeReached": timeElapsed,
+                "loadTime": loadTimeSeconds
+            });
 
                 // Set first page timeReached if first page loaded after start() is called
                 if (this.path.length == 1 && this.started) {
@@ -246,7 +273,17 @@ let app = new Vue({
                 if (!this.isRunning) return;
 
                 this.milliseconds = Date.now() - this.offset;
+	    	    if (this.isPenaltyMode) {
+		            this.milliseconds += 20000;
+                    if(this.path.length == 1){
+                        this.milliseconds -= 20000;
+                    }
+                    
+	    	    }
+
                 this.elapsed = (this.milliseconds + this.savedMilliseconds) / 1000;
+
+
             }, 10);
 
             if (this.isScroll) {

@@ -12,6 +12,7 @@ var app = new Vue({
 
         competitiveMode: false,
         requireAccount: false,
+        penaltyMode: false,
     },
 
     methods: {
@@ -26,6 +27,8 @@ var app = new Vue({
             requestBody.rules["restrict_leaderboard_access"] = this.competitiveMode;
 
             requestBody.rules["require_account"] = this.requireAccount;
+
+	    requestBody.rules["is_penalty_mode"] = this.penaltyMode;
 
             // Only add these fields if not empty
             if (this.name) requestBody["name"] = this.name;
