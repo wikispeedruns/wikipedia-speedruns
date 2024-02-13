@@ -97,6 +97,7 @@
                         <strong v-if="preset === 'personal'">Personal History)</strong>
                         <strong v-if="preset === 'ffa'">Fastest First Attempt)</strong>
                         <strong v-if="preset === 'shortest'">Shortest Path)</strong>
+                        <strong v-if="preset === 'pen'">Penalty Mode)</strong>
                     </summary>
 
                     <div class="form-check form-check-inline">
@@ -112,6 +113,11 @@
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" id="shortest" value="shortest" v-model="preset" />
                         <label class="form-check-label" for="shortest">Shortest Path (Global) </label>
+                    </div>
+
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="pen" value="pen" v-model="preset" />
+                        <label class="form-check-label" for="pen">Penalty Mode </label>
                     </div>
 
 
@@ -131,6 +137,9 @@
                         </p>
                         <p v-if="preset === 'shortest'">
                             Leaderboards of the shortest paths, where a user's shortest path found is shown.
+                        </p>
+                        <p v-if="preset === 'pen'">
+                            Leaderboards of the fastest times, for the penalty game mode
                         </p>
                     </details>
 
