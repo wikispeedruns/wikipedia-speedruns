@@ -124,7 +124,8 @@ let app = new Vue({
 
         anonymous: null,
         created_username: null,
-	    isPenaltyMode: false
+        isPenaltyMode: false,
+        penaltyTime: 0         // Additional penalty time for penalty game mode
     },
 
     mounted: async function() {
@@ -209,7 +210,7 @@ let app = new Vue({
                 this.endTime = Date.now();
             }
 
-            submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
+            submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path, this.penaltyTime);
         },
 
         loadCallback: function() {
@@ -231,16 +232,17 @@ let app = new Vue({
                 // Update path
                 let timeElapsed = (Date.now() - this.startTime) / 1000;
 		
-		    if (this.isPenaltyMode) {
-		        timeElapsed += this.path.length * 20;
-		        loadTimeSeconds -= 20;
-		    }
+		        if (this.isPenaltyMode) {
+		            timeElapsed += this.path.length * 20;
+		            loadTimeSeconds -= 20;
+                    this.penaltyTime += 20;
+		        }
 		
-            this.path.push({
-                "article": page,
-                "timeReached": timeElapsed,
-                "loadTime": loadTimeSeconds
-            });
+                this.path.push({
+                    "article": page,
+                    "timeReached": timeElapsed,
+                    "loadTime": loadTimeSeconds
+                });
 
                 // Set first page timeReached if first page loaded after start() is called
                 if (this.path.length == 1 && this.started) {
@@ -306,7 +308,7 @@ let app = new Vue({
 
             this.endTime = Date.now();
 
-            this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
+            this.runId = await submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path, this.penaltyTime);
             if (!this.loggedIn && this.lobbyId == null) {
                 submitLocalRun(PROMPT_ID, PROMPT_START, PROMPT_END, this.runId, this.startTime, this.endTime, this.finished, this.path, LANGUAGE);
                 console.log("Not logged in, submitting run to local storage");
