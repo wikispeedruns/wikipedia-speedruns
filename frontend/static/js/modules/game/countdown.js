@@ -68,7 +68,7 @@ var CountdownTimer = {
         await Promise.any([promise1, promise2, promise3]);
         this.started = true;
         this.$emit('start-game');
-    },
+     },
 
     template: (`
     <div v-show="!started">
