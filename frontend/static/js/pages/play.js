@@ -264,7 +264,7 @@ let app = new Vue({
             // 100ms is human reaction time, so I think this should be fine lol
             setTimeout(() => {
                 window.scrollTo(0, 0)
-            }, 100);
+            }, 200);
         },
 
         async finish() {
