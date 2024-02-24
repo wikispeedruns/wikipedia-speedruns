@@ -19,6 +19,7 @@ from app.tokens import (
 from pymysql.cursors import DictCursor
 
 from wikispeedruns.auth import passwords
+from wikispeedruns.profanity_check import profanity_check_func
 
 user_api = Blueprint("users", __name__, url_prefix="/api/users")
 
@@ -144,6 +145,9 @@ def create_user():
     # Validate username
     if (not _valid_username(username)):
         return "Invalid username", 400
+    # profanity check
+    if profanity_check_func(username):
+        return ("Please use clean language in username", 406)
 
     # Use SHA256 to allow for arbitrary length passwords
     hash = passwords.hash_password(password)
@@ -306,6 +310,9 @@ def change_username():
 
     id = session["user_id"]
     new_username = request.json["new_username"]
+    # profanity check
+    if profanity_check_func(new_username):
+        return ("Please use clean language in username", 406)
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
