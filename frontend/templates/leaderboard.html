@@ -7,7 +7,7 @@
 <script src="{{url_for('static', filename='js/springy-master/springy.js') }}"></script>
 <script src="{{url_for('static', filename='js/springy-master/springyui.js') }}"></script>
 
-<link rel="stylesheet" type= "text/css" href="{{url_for('static', filename='stylesheets/leaderboard.css')}}">
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='stylesheets/leaderboard.css')}}">
 
 <script defer type="module" src="{{url_for('static', filename='js-build/leaderboard.js') }}"></script>
 {% endblock %}
@@ -33,10 +33,11 @@
                         </span>
 
                         <h6 v-if="available">
-                            <strong>[[prompt.start]]</strong> to <strong v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>
+                            <strong>[[prompt.start]]</strong> to <strong
+                                v-if="runs.length > 0">[[prompt.end]]</strong><strong v-else>...</strong>
                         </h6>
-                        
-                        <small v-if="!lobbyId"> Prompt created by: 
+
+                        <small v-if="!lobbyId"> Prompt created by:
                             <template v-if="prompt.username && prompt.cmty_anonymous">
                                 <strong>Anonymous User</strong>
                             </template>
@@ -56,31 +57,33 @@
                     <div class="card-header pt-3" style="height: 9rem;">
                         <div class="row">
                             <div class="col">
-                            <p class="text-muted small progress-label desktop">Completion Rate:</p>
+                                <p class="text-muted small progress-label desktop">Completion Rate:</p>
 
-                            <!-- TODO: Add hover -->
-                            <!-- TODO: Properly fetch data after navigation  -->
-                            <div class="progress">
-                                <div class="progress-bar success" role="progressbar" :style="{ width: stats.finishPct + '%' }" :aria-valuenow="stats.finishPct" aria-valuemin="0" aria-valuemax="100">
-                                    [[stats.finishPct]]%
+                                <!-- TODO: Add hover -->
+                                <!-- TODO: Properly fetch data after navigation  -->
+                                <div class="progress">
+                                    <div class="progress-bar success" role="progressbar"
+                                        :style="{ width: stats.finishPct + '%' }" :aria-valuenow="stats.finishPct"
+                                        aria-valuemin="0" aria-valuemax="100">
+                                        [[stats.finishPct]]%
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <p class="text-muted small progress-label desktop">Avg. # Clicks: </p>
+                                <p class="progress-label mobile">🖱️ </p>
+                                <p class="stat text-dark">[[stats.avgClicks]]</p>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col">
-                            <p class="text-muted small progress-label desktop">Avg. # Clicks: </p>
-                            <p class="progress-label mobile">🖱️ </p>
-                            <p class="stat text-dark">[[stats.avgClicks]]</p>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col">
-                            <p class="text-muted small progress-label desktop">Avg. Completion Time:</p>
-                            <p class="progress-label mobile">⏱️ </p>
-                            <p class="stat text-dark">[[stats.avgTime]]s</p>
+                                <p class="text-muted small progress-label desktop">Avg. Completion Time:</p>
+                                <p class="progress-label mobile">⏱️ </p>
+                                <p class="stat text-dark">[[stats.avgTime]]s</p>
                             </div>
                         </div>
                     </div>
@@ -92,55 +95,59 @@
 
                     <details :open="preset" v-cloak>
 
-                    <summary>
-                        Leaderboard Options (Current:
-                        <strong v-if="preset === 'personal'">Personal History)</strong>
-                        <strong v-if="preset === 'ffa'">Fastest First Attempt)</strong>
-                        <strong v-if="preset === 'shortest'">Shortest Path)</strong>
-                        <strong v-if="preset === 'pen'">Penalty Mode)</strong>
-                    </summary>
+                        <summary>
+                            Leaderboard Options (Current:
+                            <strong v-if="preset === 'personal'">Personal History)</strong>
+                            <strong v-if="preset === 'ffa'">Fastest First Attempt)</strong>
+                            <strong v-if="preset === 'shortest'">Shortest Path)</strong>
+                            <strong v-if="preset === 'pen'">Penalty Mode)</strong>
+                        </summary>
 
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" id="personal" value="personal" v-model="preset" />
-                        <label class="form-check-label" for="personal">Personal History (default) </label>
-                    </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="personal" value="personal"
+                                v-model="preset" />
+                            <label class="form-check-label" for="personal">Personal History (default) </label>
+                        </div>
 
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" id="ffa" value="ffa" v-model="preset" />
-                        <label class="form-check-label" for="ffa">Fastest First Attempt (Global) </label>
-                    </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="ffa" value="ffa" v-model="preset" />
+                            <label class="form-check-label" for="ffa">Fastest First Attempt (Global) </label>
+                        </div>
 
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" id="shortest" value="shortest" v-model="preset" />
-                        <label class="form-check-label" for="shortest">Shortest Path (Global) </label>
-                    </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="shortest" value="shortest"
+                                v-model="preset" />
+                            <label class="form-check-label" for="shortest">Shortest Path (Global) </label>
+                        </div>
 
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" id="pen" value="pen" v-model="preset" />
-                        <label class="form-check-label" for="pen">Penalty Mode </label>
-                    </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="pen" value="pen" v-model="preset" />
+                            <label class="form-check-label" for="pen">Penalty Mode </label>
+                        </div>
 
 
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" disabled type="radio" id="custom" value="custom" v-model="preset" />
-                        <label class="form-check-label" for="custom"> Custom (Coming soon) </label>
-                    </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" disabled type="radio" id="custom" value="custom"
+                                v-model="preset" />
+                            <label class="form-check-label" for="custom"> Custom (Coming soon) </label>
+                        </div>
 
-                    <!--Description of leaderboard -->
+                        <!--Description of leaderboard -->
 
-                    <div class="my-2">
-                        <p v-if="preset === 'personal'">
-                            A list of all your runs, including unfinished ones, sorted by recency.
-                        </p>
-                        <p v-if="preset === 'ffa'">
-                            Leaderboards of the fastest times, where only a user's first attempt is counted. This is the original leaderboard from previous versions of the site!
-                        </p>
-                        <p v-if="preset === 'shortest'">
-                            Leaderboards of the shortest paths, where a user's shortest path found is shown.
-                        </p>
-                        <p v-if="preset === 'pen'">
-                            Leaderboards of the fastest times, for the penalty game mode
-                        </p>
+                        <div class="my-2">
+                            <p v-if="preset === 'personal'">
+                                A list of all your runs, including unfinished ones, sorted by recency.
+                            </p>
+                            <p v-if="preset === 'ffa'">
+                                Leaderboards of the fastest times, where only a user's first attempt is counted. This is
+                                the original leaderboard from previous versions of the site!
+                            </p>
+                            <p v-if="preset === 'shortest'">
+                                Leaderboards of the shortest paths, where a user's shortest path found is shown.
+                            </p>
+                            <p v-if="preset === 'pen'">
+                                Leaderboards of the fastest times, for the penalty game mode
+                            </p>
                     </details>
 
                 </div>
@@ -151,36 +158,32 @@
                             <th scope="col">Rank</th>
                             <th scope="col">Name</th>
                             <th class="l-col" scope="col">Time</th>
+                            <th class="l-col" scope="col">Penalized time</th>
                             <th class="l-col" scope="col">Links</th>
                             <th scope="col">Path</th>
+
                         </thead>
                         <tbody>
                             <!-- See this https://v2.vuejs.org/v2/guide/components.html?redirect=true#DOM-Template-Parsing-Caveats -->
-                            <tr is="leaderboard-row"
-                                v-if="currentRunPosition === -1"
-                                v-bind:run="currentRun"
+                            <tr is="leaderboard-row" v-if="currentRunPosition === -1" v-bind:run="currentRun"
                                 v-bind:current-run-id="runId"
                                 v-bind:page-to-link="Math.floor((currentRun.rank - 1)/ limit)"
-                                v-on:go-to-page="goToPage"
-                            ></tr>
+                                v-on:go-to-page="goToPage"></tr>
 
-                            <tr v-if="currentRunPosition === -1"><td colspan="6">...</td></tr>
+                            <tr v-if="currentRunPosition === -1">
+                                <td colspan="6">...</td>
+                            </tr>
 
-                            <tr is="leaderboard-row"
-                                v-for="run in runs"
-                                v-bind:key="run.run_id"
-                                v-bind:run="run"
-                                v-bind:current-run-id="runId"
-                            ></tr>
+                            <tr is="leaderboard-row" v-for="run in runs" v-bind:key="run.run_id" v-bind:run="run"
+                                v-bind:current-run-id="runId"></tr>
 
-                            <tr v-if="currentRunPosition === 1"><td colspan="6">...</td></tr>
-                            <tr is="leaderboard-row"
-                                v-if="currentRunPosition === 1"
-                                v-bind:run="currentRun"
+                            <tr v-if="currentRunPosition === 1">
+                                <td colspan="6">...</td>
+                            </tr>
+                            <tr is="leaderboard-row" v-if="currentRunPosition === 1" v-bind:run="currentRun"
                                 v-bind:current-run-id="runId"
                                 v-bind:page-to-link="Math.floor((currentRun.rank - 1)/ limit)"
-                                v-on:go-to-page="goToPage"
-                            ></tr>
+                                v-on:go-to-page="goToPage"></tr>
                         </tbody>
                     </table>
 
@@ -193,15 +196,13 @@
             </div>
 
             <div v-cloak class="card-footer text-center">
-                <a class="btn btn-outline-secondary" role="button"
-                    v-on:click="goToPage(0)"
+                <a class="btn btn-outline-secondary" role="button" v-on:click="goToPage(0)"
                     v-bind:class="{invisible: page === 0}">
 
                     <i class="bi bi-chevron-double-left"></i>
                 </a>
 
-                <a class="btn btn-outline-secondary" role="button"
-                    v-on:click="goToPage(page - 1)"
+                <a class="btn btn-outline-secondary" role="button" v-on:click="goToPage(page - 1)"
                     v-bind:class="{invisible: page === 0}">
 
                     <i class="bi bi-chevron-left" id="prev-page"></i>
@@ -209,15 +210,13 @@
 
                 <span class="mx-2">Page <strong>[[page + 1]]</strong> of [[numPages]] </span>
 
-                <a class="btn btn-outline-secondary" role="button"
-                    v-on:click="goToPage(page + 1)"
+                <a class="btn btn-outline-secondary" role="button" v-on:click="goToPage(page + 1)"
                     v-bind:class="{invisible: page === numPages - 1}">
 
                     <i class="bi bi-chevron-right"></i>
                 </a>
 
-                <a class="btn btn-outline-secondary" role="button"
-                    v-on:click="goToPage(numPages - 1)"
+                <a class="btn btn-outline-secondary" role="button" v-on:click="goToPage(numPages - 1)"
                     v-bind:class="{invisible: page === numPages - 1}">
 
                     <i class="bi bi-chevron-double-right"></i>
@@ -229,4 +228,4 @@
 </div>
 
 <canvas id="springydemo" class="mx-auto d-block mt-5" style="font-size: 10px;" width="1200" height="900">
-{% endblock %}
+    {% endblock %}

@@ -90,7 +90,8 @@ let app = new Vue({
         {
             "article": string,
             "timeReached": number,
-            "loadTime": number
+            "loadTime": number,
+            "penaltyTime": number
         }
         */
 
@@ -210,7 +211,7 @@ let app = new Vue({
                 this.endTime = Date.now();
             }
 
-            submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path, this.penaltyTime);
+            submitRun(PROMPT_ID, LOBBY_ID, this.runId, this.startTime, this.endTime, this.finished, this.path);
         },
 
         loadCallback: function() {
@@ -233,15 +234,14 @@ let app = new Vue({
                 let timeElapsed = (Date.now() - this.startTime) / 1000;
 		
 		        if (this.isPenaltyMode) {
-		            timeElapsed += this.path.length * 20;
-		            loadTimeSeconds -= 20;
-                    this.penaltyTime += 20;
+                    this.penaltyTime = (this.path.length) * 20;
 		        }
 		
                 this.path.push({
                     "article": page,
                     "timeReached": timeElapsed,
-                    "loadTime": loadTimeSeconds
+                    "loadTime": loadTimeSeconds,
+                    "penaltyTime": this.penaltyTime
                 });
 
                 // Set first page timeReached if first page loaded after start() is called

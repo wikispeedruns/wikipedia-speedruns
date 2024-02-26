@@ -98,6 +98,7 @@ var LeaderboardRow = {
             </td>
 
             <td class="l-col">{{(run.play_time).toFixed(3)}} s</td>
+            <td>{{run.path[run.path.length-1].penaltyTime}}</td>
             <td>{{run.path.length}}</td>
 
             <td class="col-lg">
@@ -391,9 +392,11 @@ var app = new Vue({
             this.preset = this.lobbyId === null ? "personal" : "ffa";
         }
 
-        if (this.preset === "ffa") {
+        if (this.preset === "ffa" || this.preset === "pen") {
             // default in api
-        } else if (this.preset === "shortest") {
+        } 
+
+        else if (this.preset === "shortest") {
             args = {
                 "sort_mode": "length",
                 "user_run_mode": "shortest"
