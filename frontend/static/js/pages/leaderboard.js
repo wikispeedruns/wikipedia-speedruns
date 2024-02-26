@@ -98,7 +98,8 @@ var LeaderboardRow = {
             </td>
 
             <td class="l-col">{{(run.play_time).toFixed(3)}} s</td>
-            <td>{{run.path[run.path.length-1].penaltyTime}}</td>
+            <td>{{run.play_time + run.path[run.path.length-1].penaltyTime}} s 
+                {{'(' + run.play_time + ' + ' + run.path[run.path.length-1].penaltyTime + ')'}}</td>
             <td>{{run.path.length}}</td>
 
             <td class="col-lg">
