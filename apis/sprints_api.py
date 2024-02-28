@@ -3,14 +3,22 @@ from flask import Flask, jsonify, request, Blueprint, session
 
 import json
 import datetime
+import wsbot
 
 from app.db import get_db
 from pymysql.cursors import DictCursor
 
 from util.decorators import check_admin, check_request_json
 from wikispeedruns import prompts
+from wsbot.search import GreedySearch, BeamSearch
+from wsbot.embeddings import LocalEmbeddings
+from wsbot.graph import APIGraph, SQLGraph
 
 sprint_api = Blueprint('sprints', __name__, url_prefix='/api/sprints')
+    # this script doesn't work
+    # !./get_embeddings.sh
+embeddings_provider = LocalEmbeddings("data/wiki2vec.txt")
+graph_provider = APIGraph()
 
 
 ### Prompt Management Endpoints
@@ -168,3 +176,23 @@ def check_duplicate_prompt():
     res = prompts.check_for_sprint_duplicates(start, end)
     return jsonify(res)
 
+# get the next hint
+@sprint_api.get('/hint')
+# @check_request_json({"start": str, "end": str})
+def get_hint():
+    start = request.args.get('start')
+    end = request.args.get('end')
+
+    print(start)
+    print(end)
+
+    if (start is None or end is None): return "Invalid Request", 400
+
+    # which algorithm to use?
+    # greedy = GreedySearch(embeddings_provider, graph_provider)
+    # path = greedy.search(start, end)
+
+    beam = BeamSearch(embeddings_provider, graph_provider)
+    path = beam.search(start, end)
+
+    return path
