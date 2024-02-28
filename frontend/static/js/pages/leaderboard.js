@@ -393,9 +393,15 @@ var app = new Vue({
             this.preset = this.lobbyId === null ? "personal" : "ffa";
         }
 
-        if (this.preset === "ffa" || this.preset === "pen") {
+        if (this.preset === "ffa") {
             // default in api
         } 
+        else if(this.preset === "pen"){
+            args = {
+                "sort_mode": "penalty",
+                "user_run_mode": "all"
+            };
+        }
 
         else if (this.preset === "shortest") {
             args = {
