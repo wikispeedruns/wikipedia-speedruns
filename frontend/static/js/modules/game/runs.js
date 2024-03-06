@@ -20,7 +20,7 @@ async function submitRun(promptId, lobbyId,  runId, startTime, endTime, finished
         "start_time": startTime,
         "end_time": endTime,
         "finished": finished,
-        "path": path,
+        "path": path
     }
 
     let endpoint = null;
