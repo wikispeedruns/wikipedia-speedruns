@@ -30,6 +30,10 @@ var profileStatsTable = {
                     field: "User Since",
                     val: "--"
                 },
+                friends: {
+                    field: "Friends",
+                    val:"--"
+                },
             }
         }
 	},
