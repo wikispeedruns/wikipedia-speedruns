@@ -142,15 +142,15 @@ function hideElements(frame) {
         }
     }
 
-    // hide Disambig
+    // hide Disambig - Disabled hide by community request
 
-    let elements = document.getElementsByClassName("hatnote");
-    for (let i=0; i < elements.length; i++) {
-        let a = elements[i].getElementsByClassName("mw-disambig");
-        if (a.length !== 0) {
-            elements[i].style.display = "none";
-        }
-    }
+    // let elements = document.getElementsByClassName("hatnote");
+    // for (let i=0; i < elements.length; i++) {
+    //     let a = elements[i].getElementsByClassName("mw-disambig");
+    //     if (a.length !== 0) {
+    //         elements[i].style.display = "none";
+    //     }
+    // }
 
     let all = frame.querySelectorAll("h2, div, ul, p, h3");
     let flip = false

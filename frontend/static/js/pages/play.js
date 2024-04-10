@@ -200,7 +200,6 @@ let app = new Vue({
             document.addEventListener("beforeunload", this.updateRun, {capture: true});
         }
 
-        console.log(serverData)
 
     },
 
@@ -299,6 +298,12 @@ let app = new Vue({
             }
 
             this.started = true;
+
+            // This is not ideal, we want to scroll users to top upon start
+            // 100ms is human reaction time, so I think this should be fine lol
+            setTimeout(() => {
+                window.scrollTo(0, 0)
+            }, 100);
         },
 
         async finish() {
