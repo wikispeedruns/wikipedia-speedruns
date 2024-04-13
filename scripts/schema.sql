@@ -293,3 +293,8 @@ CREATE TABLE IF NOT EXISTS `cmty_pending_prompts_marathon` (
     PRIMARY KEY (`pending_prompt_id`),
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
 );
+
+CREATE TABLE IF NOT EXISTS `friends` (
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`),
+    FOREIGN KEY (`friend_id`) REFERENCES `users`(`user_id`)
+);
