@@ -60,6 +60,16 @@ var profileStatsTable = {
                     window.location.href = "/";
                 }
                 const user = await response.json();
+                
+                response = await fetch("/api/profiles/" + this.username + "/friends");
+                if(response.status != 200){
+                    alert(await response.text());
+                    window.location.href = "/";
+                }
+                
+                const friends= await response.json();
+                
+                console.log(friends);
 
                 this.basicStats.username.val = this.username;
                 this.basicStats.totalratedruns.val = runs['total_runs'];
@@ -68,10 +78,11 @@ var profileStatsTable = {
                 this.basicStats.winratio.val = String((parseInt(runs['total_completed_runs'])*100.0 / parseInt(runs['total_runs'])).toFixed(2)) + "%"
                 let date = new Date(user['join_date']);
                 this.basicStats.profileage.val = date.toLocaleDateString();
-
+                // this.basicStats.friends.val = 
             } catch (error) {
                 console.error(error);
             }
+            
         },
 	},
 
