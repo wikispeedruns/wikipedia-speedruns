@@ -11,6 +11,7 @@
 
 <div id="app" class="row" v-cloak>
     <h3 class="my-4">[[profileName]]'s Profile</h3>
+    <button @click = "addFriend"> Add friend</button>
     <profile-stats-table class="col-sm-10"
         v-bind:username="profileName"
     ></profile-stats-table>
