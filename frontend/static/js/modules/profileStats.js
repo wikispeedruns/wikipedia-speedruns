@@ -78,7 +78,7 @@ var profileStatsTable = {
                 this.basicStats.winratio.val = String((parseInt(runs['total_completed_runs'])*100.0 / parseInt(runs['total_runs'])).toFixed(2)) + "%"
                 let date = new Date(user['join_date']);
                 this.basicStats.profileage.val = date.toLocaleDateString();
-                // this.basicStats.friends.val = 
+                this.basicStats.friends.val = friends;
             } catch (error) {
                 console.error(error);
             }
