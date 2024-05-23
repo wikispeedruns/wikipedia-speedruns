@@ -49,7 +49,8 @@ var CustomPlay = {
         },
 
         play(start, end, lang) {
-            window.location.assign(`/play/quick_play?prompt_start=${start}&prompt_end=${end}&lang=${lang}${this.scroll ? '&scroll=1' : ''}`);
+            let quickPlayUrl = `/play/quick_play?prompt_start=${encodeURIComponent(start)}&prompt_end=${encodeURIComponent(end)}&lang=${lang}${this.scroll ? '&scroll=1' : ''}`;
+            window.location.assign(quickPlayUrl);
         },
 
         async playCustom() {
