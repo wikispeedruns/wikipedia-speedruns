@@ -16,9 +16,47 @@ class GreedySearch:
         self.graph = graph_provider
         self.max_iterations = max_iterations
 
+    # Returns the next link to go to based on a greedy approach
+    def get_next_greedy_link(self, start: str, end: str):
+        min_dist = 2
+        next_article = ""
+        end_v = self.embeddings.get_embedding(end)
+
+        for link in self.graph.get_links(start):    
+            if (link == end): 
+                return link
+            try: 
+                cur_v = self.embeddings.get_embedding(link)
+            except KeyError:    
+                continue
+            dist = distance.cosine(cur_v, end_v)
+            print(dist)
+            if dist <= min_dist:
+                next_article = link
+                min_dist = dist
+
+        if next_article == "":
+            raise PathNotFoundException(f"GreedySearch: could not find path, current: {ret}")
+        return next_article
+    
 
     def search(self, start: str, end: str):
         # Greedily searches the wikipedia graph
+
+        # Replace with this code to use the get_next_greedy_link helper function. 
+        # Currently the original implementation is uncommented.
+        # cur = start
+        # ret = [start, ]
+
+        # for i in range(self.max_iterations):
+        #     next_article = get_next_greedy_link(cur, end)       
+        #     ret.append(next_article)
+        #     if(next_article == end):
+        #         return ret
+        #     cur = next_article
+
+        # raise MaxIterationsException(f"GreedySearch: Max iterations {self.max_iterations} reached, current path: {ret}")
+
         cur = start
         end_v = self.embeddings.get_embedding(end)
 
@@ -50,7 +88,7 @@ class GreedySearch:
 
             if next_article == "":
                 raise PathNotFoundException(f"GreedySearch: could not find path, current: {ret}")
-                        
+
             ret.append(next_article)
             cur = next_article
 

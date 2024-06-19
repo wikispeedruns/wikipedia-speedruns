@@ -183,16 +183,9 @@ def get_hint():
     start = request.args.get('start')
     end = request.args.get('end')
 
-    print(start)
-    print(end)
-
     if (start is None or end is None): return "Invalid Request", 400
 
-    # which algorithm to use?
-    # greedy = GreedySearch(embeddings_provider, graph_provider)
-    # path = greedy.search(start, end)
+    greedy_search = GreedySearch(embeddings_provider, graph_provider)
+    hint = greedy_search.get_next_greedy_link(start, end)
 
-    beam = BeamSearch(embeddings_provider, graph_provider)
-    path = beam.search(start, end)
-
-    return path
+    return [hint]
