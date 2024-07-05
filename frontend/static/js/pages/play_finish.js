@@ -198,7 +198,6 @@ let app = new Vue({
 
         playAgain() {
             let quickPlayUrl = `/play/quick_play?prompt_start=${encodeURIComponent(this.startArticle)}&prompt_end=${encodeURIComponent(this.endArticle)}&lang=${this.language}${this.scroll ? '&scroll=1' : ''}`;
-            console.log(quickPlayUrl);
             window.location.assign(quickPlayUrl);
         },
     }
