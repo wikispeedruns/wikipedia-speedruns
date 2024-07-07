@@ -25,7 +25,7 @@ var quickPlaySuggestions = {
         <div>
             <div class="container" style="width: 100%;">
                 <div>Here's what other players have been playing recently: 
-                    <button @click="getSuggestions" class="btn btn-outline-secondary mx-2">
+                    <button @click="getSuggestions(5)" class="btn btn-outline-secondary mx-2">
                         <i class="bi bi-arrow-clockwise"></i>
                     </button>
                 </div>
