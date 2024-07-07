@@ -24,11 +24,11 @@ var quickPlaySuggestions = {
 	template: (`
         <div>
             <div class="container" style="width: 100%;">
-                <div>Here's what other players have been playing recently: <button @click=""
-                class="btn btn-outline-secondary mx-2"
-                style="padding: 8px 8px">
-                <i class="bi bi-arrow-clockwise"></i>
-        </button></div>
+                <div>Here's what other players have been playing recently: 
+                    <button @click="getSuggestions" class="btn btn-outline-secondary mx-2">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
                 <div class="row" v-for='p in suggested'>
                     <div class="col">
                         {{p.prompt_start}} <span><i class="bi bi-arrow-right-short"></i></span> {{p.prompt_end}}
