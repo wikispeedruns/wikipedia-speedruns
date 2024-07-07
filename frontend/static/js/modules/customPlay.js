@@ -21,22 +21,14 @@ var CustomPlay = {
 
             language: "en",
             languages: [],
-
-            theme: ""
         }
 	},
 
     mounted() {
         this.getLanguages();
-        this.getTheme();
     },
 
     methods: {
-
-        getTheme() {
-            var htmlElement = document.querySelector('html');
-            this.theme = htmlElement.getAttribute("data-bs-theme");
-        },
 
         async getLanguages() {
             this.languages = await getSupportedLanguages();
