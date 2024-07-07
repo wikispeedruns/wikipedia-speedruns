@@ -318,7 +318,11 @@ let app = new Vue({
             this.milliseconds = 0;
             this.savedMilliseconds = 0;
             this.offset = Date.now();
-        }
+        },
+
+        home: function (event) {
+            window.location.replace("/");
+        },
     }
 })
 
