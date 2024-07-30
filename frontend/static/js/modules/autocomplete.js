@@ -130,7 +130,7 @@ var AutocompleteInput = {
                         @mousedown.prevent
                         @mouseover="setHighlightIndex(index)"
                         @click="selectArticle(article)"
-                        :style="{ 'cursor':'pointer', 'background-color': index===highlightIndex ? 'lightgray':'transparent', 'padding':'0' }"
+                        :style="{ 'cursor':'pointer', 'background-color': index===highlightIndex ? 'lightgray':'transparent', 'padding':'0', color: 'black' }"
                     >
                         <h6 style="margin-left: 12px">{{ article }}</h6>
                     </li>
