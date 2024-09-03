@@ -43,7 +43,9 @@
                         <div class="col text-nowrap px-2 pt-2">
                             Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
                         </div>
-
+                        <div class="col-sm-auto  text-nowrap py-2 mr-auto">
+                            <button @click="home" class="btn btn-outline-secondary mx-2" style="padding: 4px 8px">Give Up</button>
+                        </div>
 
                         <div class="col-sm-auto  text-nowrap py-2 mr-auto">
                             <button @click="expandedTimebox = !expandedTimebox"
@@ -52,10 +54,12 @@
                                 <i class="bi bi-chevron-down"></i>
                             </button>
                         </div>
+                        
                         <div class="w-100"></div>
                         <div class="col-lg-auto text-nowrap px-4 py-2">
                             Current Article<br><strong>[[currentArticle]]</strong>
                         </div>
+                        
                     </div>
                     <div style="float: right;" >
                         <button class="col text-nowrap px-1 pt-1" @click="getHint([[currentArticle]], [[endArticle]])">
@@ -76,6 +80,9 @@
                         </div>
                         <div class="col text-nowrap px-4 pt-2">
                             Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
+                        </div>
+                        <div class="col-sm-auto  text-nowrap py-2 mr-auto">
+                            <button @click="home" class="btn btn-outline-secondary mx-2" style="padding: 4px 8px" >Give Up</button>
                         </div>
 
                         <div class="col-sm-auto text-nowrap py-2 mr-auto">
@@ -101,6 +108,10 @@
                         <br>
                         Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
                     </div>
+                    <div class="col-sm-auto  text-nowrap py-2 mr-auto">
+                        <button @click="home" class="btn btn-outline-secondary"
+                        style="font-size: 0.75rem; padding: 2.5px 5px" >Give Up</button>
+                    </div>
 
                     <div class="col-auto px-2">
                         <button @click="expandedTimebox = !expandedTimebox"
@@ -118,6 +129,10 @@
                         <small style="cursor: help;" :href="`/wiki/${endArticle}`" @click="showPreview">
                             ⓘ
                         </small>
+                    </div>
+                    <div class="col-sm-auto  text-nowrap py-2 mr-auto">
+                        <button @click="home" class="btn btn-outline-secondary"
+                        style="font-size: 0.75rem; padding: 2.5px 5px" >Give Up</button>
                     </div>
                     <div class="col-auto px-2">
                         <button @click="expandedTimebox = !expandedTimebox"
@@ -142,9 +157,31 @@
         </p>
     </countdown-timer>
 
+
     <div v-show="started && !finished" id="main">
         <div id="wikipedia-frame" class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output content article-end-marker" :class="{ 'hide-scroll': isScroll }"></div>
     </div>
 </template>
+
+<!-- Ads -->
+<div class="justify-content-center" style="margin-top: 5vh; display: flex;">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7979604395342950"
+    crossorigin="anonymous"></script>
+    <!-- Countdown Ad -->
+    <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-client="ca-pub-7979604395342950"
+            data-ad-slot="9528706319"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+    <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+
+</div>
+<div class="text-center" style="margin-bottom: 20vh;">
+    <small><a href="/about#ads">Viewing these ads supports us and the Wikimedia Foundation!</a></small>
+</div>
+
 </div>
 {% endblock %}

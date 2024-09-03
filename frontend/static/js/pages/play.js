@@ -33,6 +33,23 @@ const IS_SCROLL_ON = serverData["scroll"] || null;
 // Get language
 const LANGUAGE = serverData["lang"];
 
+async function getLobby(lobbyId) {
+    const url = `/api/lobbys/${lobbyId}`;
+    const response = await fetch(url);
+
+    if (response.status != 200) {
+        const error = await response.text();
+        alert(error);
+
+        // Prevent are you sure you want to leave prompt
+        window.onbeforeunload = null;
+        window.location.replace("/");   // TODO error page
+        return;
+    }
+
+    return await response.json();
+}
+
 async function getPrompt(promptId, lobbyId=null) {
 
     if(promptId == null){
@@ -73,7 +90,8 @@ let app = new Vue({
         {
             "article": string,
             "timeReached": number,
-            "loadTime": number
+            "loadTime": number,
+            "penaltyTime": number
         }
         */
 
@@ -106,7 +124,9 @@ let app = new Vue({
         isScroll: null,
 
         anonymous: null,
-        created_username: null
+        created_username: null,
+        isPenaltyMode: false,
+        penaltyTime: 0         // Additional penalty time for penalty game mode
     },
 
     mounted: async function() {
@@ -122,6 +142,12 @@ let app = new Vue({
         this.isScroll = IS_SCROLL_ON;
 
         const prompt = await getPrompt(PROMPT_ID, LOBBY_ID);
+
+        this.isPenaltyMode = false;
+        if (LOBBY_ID != null) {
+            const lobby = await getLobby(LOBBY_ID);
+            this.isPenaltyMode = !!lobby["rules"]["is_penalty_mode"];
+        }
 
         this.startArticle = prompt["start"];
         this.endArticle = prompt["end"];
@@ -177,7 +203,6 @@ let app = new Vue({
             document.addEventListener("beforeunload", this.updateRun, {capture: true});
         }
 
-        console.log(serverData)
 
     },
 
@@ -211,10 +236,16 @@ let app = new Vue({
             if (this.path.length == 0 || this.path[this.path.length - 1]["article"] != page) {
                 // Update path
                 let timeElapsed = (Date.now() - this.startTime) / 1000;
+		
+		        if (this.isPenaltyMode) {
+                    this.penaltyTime = (this.path.length) * 20;
+		        }
+		
                 this.path.push({
                     "article": page,
                     "timeReached": timeElapsed,
-                    "loadTime": loadTimeSeconds
+                    "loadTime": loadTimeSeconds,
+                    "penaltyTime": this.penaltyTime
                 });
 
                 // Set first page timeReached if first page loaded after start() is called
@@ -283,7 +314,17 @@ let app = new Vue({
                 if (!this.isRunning) return;
 
                 this.milliseconds = Date.now() - this.offset;
+	    	    if (this.isPenaltyMode) {
+		            this.milliseconds += 20000;
+                    if(this.path.length == 1){
+                        this.milliseconds -= 20000;
+                    }
+                    
+	    	    }
+
                 this.elapsed = (this.milliseconds + this.savedMilliseconds) / 1000;
+
+
             }, 10);
 
             if (this.isScroll) {
@@ -297,6 +338,12 @@ let app = new Vue({
             }
 
             this.started = true;
+
+            // This is not ideal, we want to scroll users to top upon start
+            // 100ms is human reaction time, so I think this should be fine lol
+            setTimeout(() => {
+                window.scrollTo(0, 0)
+            }, 100);
         },
 
         async finish() {
@@ -350,7 +397,11 @@ let app = new Vue({
             this.milliseconds = 0;
             this.savedMilliseconds = 0;
             this.offset = Date.now();
-        }
+        },
+
+        home: function (event) {
+            window.location.replace("/");
+        },
     }
 })
 

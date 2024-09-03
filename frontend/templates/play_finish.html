@@ -61,6 +61,7 @@
                 <div v-if="lobbyId"><button @click="goToLobby" class="btn btn-outline-secondary">Return to lobby</button></div>
                 <div v-else class="py-3"><button @click="home" class="btn btn-outline-secondary">Return to home page</button></div>
 
+                <div v-if="isQuickRun" class="py-2"><button @click="playAgain" class="btn btn-outline-secondary">Play again</button></div>
                 <div v-if="isQuickRun"><button @click="quickPlay" class="btn btn-outline-secondary">Play another round</button></div>
             </div>
         </div>

@@ -31,7 +31,17 @@
                         players can't see end prompt, and can only see leaderboard after playing
                     </span>
                 </label>
-            </div>
+	    </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="pen-mode-checkbox" v-model="penaltyMode">
+                <label class="form-check-label" for="pen-mode-checkbox">
+                    <b>Penalty mode</b>
+                    <span class="text-muted fw-light">
+                        Add 20 seconds to time on click
+                    </span>
+                </label>
+	    </div>
 
             <!--
             <div class="form-check">
