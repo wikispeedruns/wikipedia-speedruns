@@ -17,6 +17,9 @@ import { PagePreview } from "../modules/game/pagePreview.js";
 
 import { startLocalRun, submitLocalRun } from "../modules/localStorage/localStorageSprint.js";
 
+import { triggerLeaderboardUpdate } from "../modules/live/liveLeaderboard.js";
+
+
 // retrieve the unique prompt_id of the prompt to load
 const PROMPT_ID = serverData["prompt_id"] || null;
 
@@ -275,6 +278,8 @@ let app = new Vue({
                 console.log("Not logged in, submitting run to local storage");
                 //console.log(this.runId)
             }
+
+            triggerLeaderboardUpdate(this.lobbyId, this.promptId);
 
             //fireworks();
             if (this.promptId == null){

@@ -2,6 +2,7 @@ import esbuild from "esbuild"
 import glob from "tiny-glob"
 
 const isDev = process.argv.includes("-d");
+const isProd = process.argv.includes("-p")
 
 // Note that this is not "watched", new files will not be built unless node is restarted
 // Also note that we only include top level files
@@ -20,6 +21,10 @@ try{
         watch: isDev,
         logLevel: "info",
         outdir: './frontend/static/js-build',
+        define: (isProd 
+            ? {'process.env.LIVE_WS_SERVER': 'wss://live.wikispeedruns.com'}
+            : {}
+        ),
     })
 } catch(err) {
     process.exit(1)

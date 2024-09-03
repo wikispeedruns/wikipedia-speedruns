@@ -4,6 +4,7 @@ import moment from "moment/moment.js";
 import { fetchJson } from "../modules/fetch.js"
 import { UserDisplay } from "../modules/userDisplay.js";
 import { pathArrowFilter } from "../modules/game/filters.js";
+import { LiveLeaderboardHelper } from "../modules/live/liveLeaderboard.js";
 
 const URL_PROMPT_ID = serverData["prompt_id"];
 const URL_LOBBY_ID = serverData["lobby_id"] || null;
@@ -480,27 +481,8 @@ var app = new Vue({
         this.fillLeaderboard();
 
         // Setup websockets to refresh when other people finish (for lobbies)
-        
-
         if (this.lobbyId !== null) {
-            const exampleSocket = new WebSocket(
-                "ws://localhost:9000",
-            );
-    
-            exampleSocket.onopen = (event) => {
-                exampleSocket.send(JSON.stringify({
-                    lobby_id: this.lobbyId,
-                    prompt_id: this.promptId
-                }));
-            }
-    
-            exampleSocket.onmessage = (event) => {
-                if (event.data === "refresh") {
-                    this.fillLeaderboard();
-                }
-            };
+            this.liveLeaderboard = new LiveLeaderboardHelper(this.lobbyId, this.promptId, this.fillLeaderboard);
         }
-
-
     },
-})
+});

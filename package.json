@@ -11,7 +11,7 @@
   },
   "scripts": {
     "start": "node ./frontend/build.mjs -d",
-    "build": "node ./frontend/build.mjs",
+    "build": "node ./frontend/build.mjs -p",
     "lint": "eslint ./frontend/static/js"
   },
   "repository": {
