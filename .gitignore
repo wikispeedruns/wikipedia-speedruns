@@ -7,7 +7,6 @@ config/prod.json
 
 node_modules
 frontend/static/js-build
-data/
 static/js-build
 
 .DS_Store
