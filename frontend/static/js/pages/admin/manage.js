@@ -486,6 +486,12 @@ var app = new Vue({
             let nextDailys = {};
             let nextWeeklys = {};
 
+            prompts.forEach((p) => {
+                if (p["active_start"] === null) {return;}
+                let d = new Date(Date.parse(p["active_start"]));
+                p["active_start"] = d.toISOString();
+            });
+
             daily.forEach((p) => {
                 // Get iso date (yyyy-mm-dd)
                 const key = p["active_start"].substring(0, 10);

@@ -106,7 +106,7 @@ var app = new Vue({
 
         if (this.dailyPrompts.length > 0) {
             // Add Z to indicate UTC format
-            const endTime = new Date(this.dailyPrompts[0]["active_end"] + "Z");
+            const endTime = new Date(Date.parse(this.dailyPrompts[0]["active_end"]));
 
             const timerInterval = setInterval(() => {
                 const now = new Date();
