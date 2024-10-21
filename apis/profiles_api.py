@@ -88,3 +88,46 @@ def get_current_streak():
 
     user_id = session['user_id']
     return jsonify(streaks.get_current_streak(user_id))
+
+@profile_api.get("/<username>/friends")
+def get_user_friends(username):
+    '''
+    Get the user's friends
+    '''
+
+    query_friends = """
+    SELECT
+        users2.username
+    FROM
+        users users1
+    JOIN
+        friends f ON users1.user_id = f.user_id
+    JOIN
+        users users2 ON f.friend_id = users2.user_id
+    WHERE
+        users1.username=%s
+    """
+
+    with get_db().cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query_friends, (username, ))
+        result = cursor.fetchall()
+          
+    return jsonify(result), 200
+
+
+@profile_api.post("/<username>")
+def add_friend(user_id,friend_id):
+    '''
+    Adds the current user as a friend
+    '''
+    query_add = """
+    INSERT INTO 
+    friends
+    VALUES
+    (user_id, friend_id)
+    """
+    with get_db().cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query_add, (user_id,friend_id))
+        result = cursor.fetchall()
+          
+    return jsonify(result), 200

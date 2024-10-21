@@ -142,6 +142,7 @@ let app = new Vue({
         this.isScroll = IS_SCROLL_ON;
 
         const prompt = await getPrompt(PROMPT_ID, LOBBY_ID);
+	    const lobby = await getLobby(LOBBY_ID);
 
         this.isPenaltyMode = false;
         if (LOBBY_ID != null) {
@@ -157,6 +158,8 @@ let app = new Vue({
         this.promptPlayed = !!prompt["played"];
         this.promptActive = !!prompt["active"];
         this.promptRated = !!prompt["rated"];
+	
+	    this.isPenaltyMode = !!lobby["rules"]["is_penalty_mode"];
 
         // Use the release date of teh prompt (if it exists) to determine the article revision
         this.revisionDate = prompt?.["active_start"];
