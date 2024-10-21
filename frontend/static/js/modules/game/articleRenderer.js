@@ -24,7 +24,7 @@ export class ArticleRenderer {
         this.revisionDate = revisionDate;
     }
 
-    async loadPage(page) {
+    async loadPage(page, anchorTag=null) {
 
         const isMobile = window.screen.width < 768;
         const startTime = Date.now();
@@ -83,6 +83,10 @@ export class ArticleRenderer {
             });
 
             this.pageCallback(body["title"], Date.now() - startTime);
+
+            if (redirectTag) {
+                document.getElementById(anchorTag).scrollIntoView();
+            }
         }
 
     }
@@ -109,7 +113,14 @@ export class ArticleRenderer {
             });
 
             // Remove "/wiki/" from string
-            this.loadPage(href.substring(6))
+            let pageName = href.substring(6)
+            let anchorTag = null;
+            if (pageName.includes("#")) {
+                let b = pageName.split("#");
+                pageName = b[0];
+                anchorTag = b[1];
+            }
+            this.loadPage(pageName, anchorTag);
         }
     }
 }
