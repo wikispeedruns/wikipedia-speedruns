@@ -113,3 +113,21 @@ def get_user_friends(username):
         result = cursor.fetchall()
           
     return jsonify(result), 200
+
+
+@profile_api.post("/<username>")
+def add_friend(user_id,friend_id):
+    '''
+    Adds the current user as a friend
+    '''
+    query_add = """
+    INSERT INTO 
+    friends
+    VALUES
+    (user_id, friend_id)
+    """
+    with get_db().cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query_add, (user_id,friend_id))
+        result = cursor.fetchall()
+          
+    return jsonify(result), 200
