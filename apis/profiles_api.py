@@ -97,12 +97,15 @@ def get_user_friends(username):
 
     query_friends = """
     SELECT
-        friends.friend_id
+        users2.username
     FROM
-        friends
-    LEFT JOIN users ON friends.user_id = users.user_id
+        users users1
+    JOIN
+        friends f ON users1.user_id = f.user_id
+    JOIN
+        users users2 ON f.friend_id = users2.user_id
     WHERE
-        users.username=%s
+        users1.username=%s
     """
 
     with get_db().cursor(cursor=DictCursor) as cursor:

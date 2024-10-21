@@ -20,4 +20,10 @@ var app = new Vue({
             this.profileName = serverData["profile_name"];
         }
     },
+
+    methods: {
+        addFriend(){
+            console.log("ADD FRIEND");
+        }
+    }
 });
