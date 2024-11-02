@@ -1,5 +1,6 @@
 import Vue from "vue/dist/vue.esm.js";
 
+import QRCode from 'qrcode';
 import { fetchJson } from "../../modules/fetch.js";
 import { checkArticles, getSupportedLanguages, getRandomArticle } from "../../modules/wikipediaAPI/util.js";
 import { PromptGenerator } from "../../modules/generator.js"
@@ -225,7 +226,15 @@ var app = new Vue({
 
         async hideLobby(){
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}`, "DELETE");
-        }
+        },
+        async generateQRCode() {
+            const qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = "";
+            const url = window.location.href;
+            const canvas = document.createElement("canvas");
+            await QRCode.toCanvas(canvas, url);
+            qrContainer.appendChild(canvas);
+        },
     }
 
 })
