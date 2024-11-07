@@ -263,6 +263,7 @@ let app = new Vue({
                 }
             }
 
+            triggerLeaderboardUpdate(this.lobbyId, this.promptId);
         },
 
         async start() {

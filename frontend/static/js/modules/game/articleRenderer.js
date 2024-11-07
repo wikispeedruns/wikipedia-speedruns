@@ -84,9 +84,9 @@ export class ArticleRenderer {
 
             this.pageCallback(body["title"], Date.now() - startTime);
 
-            if (redirectTag) {
-                document.getElementById(anchorTag).scrollIntoView();
-            }
+            // if (redirectTag) {
+            //     document.getElementById(anchorTag).scrollIntoView();
+            // }
         }
 
     }
