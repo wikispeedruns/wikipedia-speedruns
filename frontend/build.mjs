@@ -22,7 +22,7 @@ try{
         logLevel: "info",
         outdir: './frontend/static/js-build',
         define: (isProd 
-            ? {'process.env.LIVE_WS_SERVER': 'wss://live.wikispeedruns.com'}
+            ? {'process.env.LIVE_WS_SERVER': '"wss://live.wikispeedruns.com"'}
             : {}
         ),
     })
