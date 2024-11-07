@@ -21,14 +21,15 @@ var LeaderboardRow = {
     props: [
         "run",
         "currentRunId",
-        "pageToLink"
+        "pageToLink",
+        "penaltyModeEnabled"
     ],
 
     components: {
         'user': UserDisplay
     },
 
-    data: function() {
+    data: function () {
         return {
             lobbyId: URL_LOBBY_ID,
             momentString: moment.utc(this.run.start_time).fromNow(),
@@ -36,23 +37,23 @@ var LeaderboardRow = {
     },
 
     methods: {
-        copyResults: function(run) {
+        copyResults: function (run) {
             console.log(run);
             let results = this.generateResults(run);
             document.getElementById("custom-tooltip").style.display = "inline";
             document.getElementById("share-btn").style.display = "none";
             navigator.clipboard.writeText(results);
-            setTimeout(function() {
+            setTimeout(function () {
                 document.getElementById("custom-tooltip").style.display = "none";
                 document.getElementById("share-btn").style.display = "inline-block";
             }, 2000);
         },
 
-        generateResults: function(run) {
+        generateResults: function (run) {
             return `WikiSpeedruns ${run.prompt_id}\n${this.$parent.prompt.start}\n${run.path.length - 1} 🖱️\n${(run.play_time)} ⏱️`
         },
 
-        goToRun: function(newRunId) {
+        goToRun: function (newRunId) {
             if (newRunId === this.$props.currentRunId) return;
 
             let url = new URL(window.location.href);
@@ -61,11 +62,12 @@ var LeaderboardRow = {
         }
     },
 
-    mounted: async function() {
+    mounted: async function () {
         if (this.$props.run.run_id === this.$props.currentRunId) {
-            this.$el.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
+            this.$el.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
         }
     },
+
 
     template: (`
         <tr :class="[run.finished ? '' : 'text-danger', 'clickable']" @click="goToRun(run.run_id)">
@@ -99,7 +101,9 @@ var LeaderboardRow = {
             </td>
 
             <td class="l-col">{{(run.play_time).toFixed(3)}} s</td>
-            <td>{{run.play_time + run.path[run.path.length-1].penaltyTime}} s 
+
+
+            <td v-if="penaltyModeEnabled">{{run.play_time + run.path[run.path.length-1].penaltyTime}} s 
                 {{'(' + run.play_time + ' + ' + run.path[run.path.length-1].penaltyTime + ')'}}</td>
             <td>{{run.path.length}}</td>
 
@@ -144,7 +148,7 @@ function populateGraph(runs, runId) {
     var nodes = [];
     var edges = [];
 
-    var checkIncludeLabels = function(label, array) {
+    var checkIncludeLabels = function (label, array) {
         for (let i = 0; i < array.length; i++) {
             if (array[i].label === label) {
                 return i;
@@ -153,7 +157,7 @@ function populateGraph(runs, runId) {
         return -1;
     }
 
-    var checkIncludeEdgeLabels = function(src, dest, array) {
+    var checkIncludeEdgeLabels = function (src, dest, array) {
         for (let i = 0; i < array.length; i++) {
             if (array[i].src === src && array[i].dest === dest) {
                 return i;
@@ -175,7 +179,7 @@ function populateGraph(runs, runId) {
 
             var index = checkIncludeLabels(article, nodes);
             if (index === -1) {
-                let node = {type: 0, label: article, count: 1, current: cur};
+                let node = { type: 0, label: article, count: 1, current: cur };
                 if (j === 0) {
                     node.type = 1;
                     startNode = node;
@@ -184,7 +188,7 @@ function populateGraph(runs, runId) {
                     node.type = 2;
                     endNode = node;
                 }
-                else if (node.label !== startNode.label){
+                else if (node.label !== startNode.label) {
                     node.type = 0;
                     nodes.push(node);
                 }
@@ -218,7 +222,7 @@ function populateGraph(runs, runId) {
             let index = checkIncludeEdgeLabels(u, v, edges);
 
             if (index === -1) {
-                let edge = {src: u, dest: v, count: 1, current: cur};
+                let edge = { src: u, dest: v, count: 1, current: cur };
                 edges.push(edge);
             } else {
                 if (cur) {
@@ -234,27 +238,27 @@ function populateGraph(runs, runId) {
     var nodeObj = [];
     var nodeLabels = [];
 
-    nodes.forEach(function(node) {
+    nodes.forEach(function (node) {
         if (node.count > nodeCountMax) {
             nodeCountMax = node.count;
         }
     })
-    nodes.forEach(function(node) {
+    nodes.forEach(function (node) {
         var color;
         var font;
         var textheight;
 
         if (node.type === 1) {
             color = "#008000";
-            font= "bold 15px Verdana, sans-serif";
+            font = "bold 15px Verdana, sans-serif";
             textheight = 18;
         } else if (node.type === 2) {
             color = "#FF5733";
-            font= "bold 15px Verdana, sans-serif";
+            font = "bold 15px Verdana, sans-serif";
             textheight = 18;
         } else {
             color = "#000000";
-            font= "10px Verdana, sans-serif";
+            font = "10px Verdana, sans-serif";
             textheight = 10;
         }
 
@@ -266,19 +270,19 @@ function populateGraph(runs, runId) {
             weightScale = 12 / (nodeCountMax - 1) * (node.count - 1) + 6; //map from 6 to 18
         }
 
-        var n = graph.newNode({label: node.label, color: color, font: font, textheight: textheight, type: node.type, weightScale: weightScale, count: node.count});
+        var n = graph.newNode({ label: node.label, color: color, font: font, textheight: textheight, type: node.type, weightScale: weightScale, count: node.count });
         nodeObj.push(n);
         nodeLabels.push(node.label);
 
     })
 
-    edges.forEach(function(edge) {
+    edges.forEach(function (edge) {
         if (edge.count > edgeCountMax) {
             edgeCountMax = edge.count;
         }
     })
 
-    edges.forEach(function(edge) {
+    edges.forEach(function (edge) {
         var srcIndex = nodeLabels.indexOf(edge.src);
         var destIndex = nodeLabels.indexOf(edge.dest);
         var colorScale;
@@ -293,7 +297,7 @@ function populateGraph(runs, runId) {
         }
 
         var color = edge.current ? "#ff9700" : rgbToHex(255 - colorScale, 0, colorScale);
-        graph.newEdge(nodeObj[srcIndex], nodeObj[destIndex], {color: color, label: edge.count, weight: weightScale});
+        graph.newEdge(nodeObj[srcIndex], nodeObj[destIndex], { color: color, label: edge.count, weight: weightScale });
 
 
     })
@@ -328,6 +332,7 @@ var app = new Vue({
         offset: 0,
 
         preset: "",
+        penaltyModeEnabled: false,
 
         // Leaderboard Stats
         stats: {
@@ -338,12 +343,12 @@ var app = new Vue({
     },
 
     computed: {
-        page: function() { return Math.floor(this.offset / this.limit); },
-        numPages: function() { return Math.max(1, Math.ceil(this.numRuns / this.limit)); }
+        page: function () { return Math.floor(this.offset / this.limit); },
+        numPages: function () { return Math.max(1, Math.ceil(this.numRuns / this.limit)); }
     },
 
     watch: {
-        preset: function(newValue, oldValue) {
+        preset: function (newValue, oldValue) {
             if (oldValue === "") return; // Startup
 
             let url = new URL(window.location.href);
@@ -358,43 +363,47 @@ var app = new Vue({
     },
 
 
-    methods : {
+    methods: {
         genGraph: function () {
             var graph = populateGraph(this.runs, this.runId);
             $('#springydemo').springy({ graph: graph });
         },
 
 
-        goToPage: function(newPage) {
+        goToPage: function (newPage) {
             let url = new URL(window.location.href);
             url.searchParams.set('offset', newPage * this.limit);
             url.searchParams.set('limit', this.limit);
             window.location.replace(url);
         },
 
-        fillLeaderboard: async function() {
+        fillLeaderboard: async function () {
             let url = new URL(window.location.href);
 
             // TODO find this by user if not provided in urlParams
             this.runId = Number(url.searchParams.get("run_id")) || -1;
-    
+
             this.offset = Number(url.searchParams.get('offset') || 0);
             this.limit = Number(url.searchParams.get('limit') || DEFAULT_PAGE_SIZE);
-    
+
             this.preset = url.searchParams.get('preset') || this.preset;
             let args = {};
-    
-    
+
+            if (this.preset === "") {
+                // Default to personal for non lobby, ffa for lobbys
+                this.preset = this.lobbyId === null ? "personal" : "ffa";
+            }
+
             if (this.preset === "ffa") {
                 // default in api
-            } 
-            else if(this.preset === "pen"){
+            }
+            else if (this.preset === "pen") {
                 args = {
                     "sort_mode": "penalty",
                     "user_run_mode": "all"
                 };
             }
-    
+
             else if (this.preset === "shortest") {
                 args = {
                     "sort_mode": "length",
@@ -412,23 +421,23 @@ var app = new Vue({
                     "user_id": USER_ID,
                 };
             }
-    
-    
+
+
             /* Make query */
             let path = this.lobbyId === null
                 ? `/api/sprints/${this.promptId}/leaderboard`
                 : `/api/lobbys/${this.lobbyId}/prompts/${this.promptId}/leaderboard`;
-    
+
             if (this.runId !== -1) {
                 path += "/" + this.runId;
             }
-    
+
             let resp = await fetchJson(path, "POST", {
                 "limit": this.limit,
                 "offset": this.offset,
                 ...args
             });
-    
+
             if (resp.status === 401) {
                 // TODO do something better here
                 alert("Unable to fetch leaderboards");
@@ -436,57 +445,57 @@ var app = new Vue({
                 return;
             }
             resp = await resp.json();
-    
-    
+
+
             /* Fill data structures */
             this.available = !('available' in resp['prompt']) || resp["prompt"]["available"];
             this.prompt = resp["prompt"];
             this.runs = resp["runs"];
             this.numRuns = resp["numRuns"];
-    
+
             // Find current run
             const currRunIndex = this.runs.findIndex((run) => run["run_id"] === this.runId)
             if (currRunIndex !== -1) {
                 this.currentRun = this.runs[currRunIndex];
-    
+
                 // check if current run does not fall within range, remove and set position if so
                 if (this.currentRun['rank'] - 1 < this.offset) {
-                    this.currentRunPosition = -1 ;
+                    this.currentRunPosition = -1;
                     this.runs.splice(currRunIndex, 1);
                 } else if (this.currentRun['rank'] - 1 >= this.offset + this.limit) {
                     this.currentRunPosition = 1;
                     this.runs.splice(currRunIndex, 1);
                 }
             }
-    
+
             /* Prompt Stats */
             let statsEndpoint = this.lobbyId === null
-            ? `/api/sprints/${this.promptId}/stats`
-            : `/api/lobbys/${this.lobbyId}/prompts/${this.promptId}/stats`;
-    
+                ? `/api/sprints/${this.promptId}/stats`
+                : `/api/lobbys/${this.lobbyId}/prompts/${this.promptId}/stats`;
+
             var response = await fetchJson(statsEndpoint, "POST", {
                 ...args,
                 "show_unfinished": true,
                 "user_run_mode": this.preset === "ffa" ? "first" : "all"
             });
             let statJson = await response.json();
-    
+
             // TODO: Properly set data after navigation
             this.stats.finishPct = parseFloat(statJson['finish_pct']).toFixed(2);
             this.stats.avgClicks = parseFloat(statJson['avg_path_len']).toFixed(2);
             this.stats.avgTime = parseFloat(statJson['avg_play_time']).toFixed(2);
-    
-            this.genGraph();        
-        }
-    },
 
-    created: async function() {
-        /* Parse url params */
-        this.fillLeaderboard();
+            this.genGraph();
+        },
 
-        // Setup websockets to refresh when other people finish (for lobbies)
-        if (this.lobbyId !== null) {
-            this.liveLeaderboard = new LiveLeaderboardHelper(this.lobbyId, this.promptId, this.fillLeaderboard);
-        }
-    },
+        created: async function () {
+            /* Parse url params */
+            this.fillLeaderboard();
+
+            // Setup websockets to refresh when other people finish (for lobbies)
+            if (this.lobbyId !== null) {
+                this.liveLeaderboard = new LiveLeaderboardHelper(this.lobbyId, this.promptId, this.fillLeaderboard);
+            }
+        },
+    }
 });
