@@ -195,6 +195,11 @@ let app = new Vue({
         goToLeaderboard: function (event) {
             window.location.replace(`/leaderboard/${this.promptId}?run_id=${this.runId}`);
         },
+
+        playAgain() {
+            let quickPlayUrl = `/play/quick_play?prompt_start=${encodeURIComponent(this.startArticle)}&prompt_end=${encodeURIComponent(this.endArticle)}&lang=${this.language}${this.scroll ? '&scroll=1' : ''}`;
+            window.location.assign(quickPlayUrl);
+        },
     }
 })
 

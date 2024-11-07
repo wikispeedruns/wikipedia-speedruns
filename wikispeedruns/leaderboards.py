@@ -64,7 +64,7 @@ def _query_sort_expr(table, sort_mode, sort_asc):
     sort_exp = ''
     if (sort_mode == 'time'):
         sort_exp = 'play_time'
-    elif (sort_mode == 'length'):
+    elif (sort_mode == 'length' or sort_mode == 'penalty'):
         sort_exp = f"JSON_LENGTH({table}.`path`, '$.path'), play_time"
     elif (sort_mode == 'start'):
         sort_exp = 'start_time'
@@ -114,7 +114,8 @@ def get_leaderboard_runs(
     #   'time': play_time
     #   'length': path length
     #   'start': start_time
-    sort_mode: Literal['time', 'length', 'start'] = 'time',
+    #   'penalty': penalty_time
+    sort_mode: Literal['time', 'length', 'start', 'penalty'] = 'time',
     sort_asc: bool = True,
 
     ########### pagination ###########

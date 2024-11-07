@@ -99,6 +99,8 @@ var LeaderboardRow = {
             </td>
 
             <td class="l-col">{{(run.play_time).toFixed(3)}} s</td>
+            <td>{{run.play_time + run.path[run.path.length-1].penaltyTime}} s 
+                {{'(' + run.play_time + ' + ' + run.path[run.path.length-1].penaltyTime + ')'}}</td>
             <td>{{run.path.length}}</td>
 
             <td class="col-lg">
@@ -484,5 +486,98 @@ var app = new Vue({
         if (this.lobbyId !== null) {
             this.liveLeaderboard = new LiveLeaderboardHelper(this.lobbyId, this.promptId, this.fillLeaderboard);
         }
+
+        if (this.preset === "ffa") {
+            // default in api
+        } 
+        else if(this.preset === "pen"){
+            args = {
+                "sort_mode": "penalty",
+                "user_run_mode": "all"
+            };
+        }
+
+        else if (this.preset === "shortest") {
+            args = {
+                "sort_mode": "length",
+                "user_run_mode": "shortest"
+            };
+        } else {
+            if (this.preset !== "personal") {
+                alert("Invalid preset, defaulting to 'Personal'");
+            }
+            args = {
+                "sort_mode": "start",
+                "sort_asc": false,
+                "user_run_mode": "all",
+                "show_unfinished": true,
+                "user_id": USER_ID,
+            };
+        }
+
+
+        /* Make query */
+        let path = this.lobbyId === null
+            ? `/api/sprints/${this.promptId}/leaderboard`
+            : `/api/lobbys/${this.lobbyId}/prompts/${this.promptId}/leaderboard`;
+
+        if (this.runId !== -1) {
+            path += "/" + this.runId;
+        }
+
+        let resp = await fetchJson(path, "POST", {
+            "limit": this.limit,
+            "offset": this.offset,
+            ...args
+        });
+
+        if (resp.status === 401) {
+            // TODO do something better here
+            alert("Unable to fetch leaderboards");
+            window.history.back();
+            return;
+        }
+        resp = await resp.json();
+
+
+        /* Fill data structures */
+        this.available = !('available' in resp['prompt']) || resp["prompt"]["available"];
+        this.prompt = resp["prompt"];
+        this.runs = resp["runs"];
+        this.numRuns = resp["numRuns"];
+
+        // Find current run
+        const currRunIndex = this.runs.findIndex((run) => run["run_id"] === this.runId)
+        if (currRunIndex !== -1) {
+            this.currentRun = this.runs[currRunIndex];
+
+            // check if current run does not fall within range, remove and set position if so
+            if (this.currentRun['rank'] - 1 < this.offset) {
+                this.currentRunPosition = -1 ;
+                this.runs.splice(currRunIndex, 1);
+            } else if (this.currentRun['rank'] - 1 >= this.offset + this.limit) {
+                this.currentRunPosition = 1;
+                this.runs.splice(currRunIndex, 1);
+            }
+        }
+
+        /* Prompt Stats */
+        let statsEndpoint = this.lobbyId === null
+        ? `/api/sprints/${this.promptId}/stats`
+        : `/api/lobbys/${this.lobbyId}/prompts/${this.promptId}/stats`;
+
+        var response = await fetchJson(statsEndpoint, "POST", {
+            ...args,
+            "show_unfinished": true,
+            "user_run_mode": this.preset === "ffa" ? "first" : "all"
+        });
+        let statJson = await response.json();
+
+        // TODO: Properly set data after navigation
+        this.stats.finishPct = parseFloat(statJson['finish_pct']).toFixed(2);
+        this.stats.avgClicks = parseFloat(statJson['avg_path_len']).toFixed(2);
+        this.stats.avgTime = parseFloat(statJson['avg_play_time']).toFixed(2);
+
+        this.genGraph();
     },
 });
