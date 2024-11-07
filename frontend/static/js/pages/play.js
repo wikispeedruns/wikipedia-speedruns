@@ -225,8 +225,6 @@ let app = new Vue({
 
         pageCallback: function(page, loadTime) {
             window.scrollTo(0, 0);
-            // makes sure hint box is reset after each link is clicked
-            document.getElementById('hint').innerText = ""
             this.hidePreview();
             if (this.isScroll) {
                 document.getElementById("wikipedia-frame").scrollTo(0, 0);
@@ -265,41 +263,6 @@ let app = new Vue({
                 }
             }
 
-        },
-
-        async getHint(start, end) {
-            document.getElementById('hint').innerText = "Getting hint..."
-            const searchParams = new URLSearchParams({
-                start: start,
-                end: end
-            })
-            console.log("/api/sprints/hint?" + searchParams)
-
-            let hint
-            try{
-                const response = await fetch("/api/sprints/hint?" + searchParams)
-                let tmpData;
-                try {
-                    tmpData = await response.json()
-                }
-                catch (err){
-                    console.log(err)
-                }
-                hint = tmpData
-                if(!hint){
-                    throw err;
-                }
-            }
-            catch(err){
-                document.getElementById('hint').innerText = "Sorry, couldn't find a hint!"
-            }
-
-            if(!hint){
-                document.getElementById('hint').innerText = "Sorry, couldn't find a hint!"
-            }else{
-                document.getElementById('hint').innerText = hint
-            }
-            return hint
         },
 
         async start() {
