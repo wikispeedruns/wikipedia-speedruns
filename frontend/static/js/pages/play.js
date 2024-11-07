@@ -367,8 +367,16 @@ let app = new Vue({
             this.offset = Date.now();
         },
 
-        home: function (event) {
-            window.location.replace("/");
+        giveUp: function (event) {
+            window.onbeforeunload = null;
+            if (this.promptId == null){
+                window.location.replace(`/`)
+            }
+            else if (this.lobbyId == null) {
+                window.location.replace(`/leaderboard/${this.promptId}?run_id=${this.runId}`);
+            } else {
+                window.location.replace(`/lobby/${this.lobbyId}/leaderboard/${this.promptId}?run_id=${this.runId}`);
+            }        
         },
     }
 })

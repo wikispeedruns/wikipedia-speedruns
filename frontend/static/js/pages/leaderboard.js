@@ -70,7 +70,7 @@ var LeaderboardRow = {
 
 
     template: (`
-        <tr :class="[run.finished ? '' : 'text-danger', 'clickable']" @click="goToRun(run.run_id)">
+        <tr :class="[run.finished ? '' : 'table-danger', 'clickable']" @click="goToRun(run.run_id)">
             <td >
                 {{run.rank}}
                 <button
@@ -422,7 +422,6 @@ var app = new Vue({
                 };
             }
 
-
             /* Make query */
             let path = this.lobbyId === null
                 ? `/api/sprints/${this.promptId}/leaderboard`
@@ -487,15 +486,16 @@ var app = new Vue({
 
             this.genGraph();
         },
+    },
 
-        created: async function () {
-            /* Parse url params */
-            this.fillLeaderboard();
+    created: async function () {
+        /* Parse url params */
 
-            // Setup websockets to refresh when other people finish (for lobbies)
-            if (this.lobbyId !== null) {
-                this.liveLeaderboard = new LiveLeaderboardHelper(this.lobbyId, this.promptId, this.fillLeaderboard);
-            }
-        },
-    }
+        this.fillLeaderboard();
+
+        // Setup websockets to refresh when other people finish (for lobbies)
+        if (this.lobbyId !== null) {
+            this.liveLeaderboard = new LiveLeaderboardHelper(this.lobbyId, this.promptId, this.fillLeaderboard);
+        }
+    },
 });
