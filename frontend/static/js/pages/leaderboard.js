@@ -333,6 +333,7 @@ var app = new Vue({
 
         preset: "",
         penaltyModeEnabled: false,
+        live: false,
 
         // Leaderboard Stats
         stats: {
@@ -422,6 +423,10 @@ var app = new Vue({
                 };
             }
 
+            if (this.live) {
+                args["show_unfinished"] = true
+            }
+
             /* Make query */
             let path = this.lobbyId === null
                 ? `/api/sprints/${this.promptId}/leaderboard`
@@ -488,14 +493,39 @@ var app = new Vue({
         },
     },
 
+
+
     created: async function () {
-        /* Parse url params */
+        async function getLobby(lobbyId) {
+            const url = `/api/lobbys/${lobbyId}`;
+            const response = await fetch(url);
+
+            if (response.status != 200) {
+                const error = await response.text();
+                alert(error);
+
+                // Prevent are you sure you want to leave prompt
+                window.onbeforeunload = null;
+                window.location.replace("/");   // TODO error page
+                return;
+            }
+
+            return await response.json();
+        }
+
+
+        if (this.lobbyId !== null) {
+            const lobby = await getLobby(this.lobbyId);
+            this.live = !!lobby["rules"]["live_mode"];
+            this.penaltyModeEnabled = !!lobby["rules"]["is_penalty_mode"];
+
+            // Setup websockets to refresh when other people finish (for lobbies)
+            if (this.live) {
+                this.liveLeaderboard = new LiveLeaderboardHelper(this.lobbyId, this.promptId, this.fillLeaderboard);
+            }
+        }
 
         this.fillLeaderboard();
 
-        // Setup websockets to refresh when other people finish (for lobbies)
-        if (this.lobbyId !== null) {
-            this.liveLeaderboard = new LiveLeaderboardHelper(this.lobbyId, this.promptId, this.fillLeaderboard);
-        }
     },
 });
