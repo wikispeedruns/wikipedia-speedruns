@@ -54,7 +54,11 @@ async function handleLogin(event)
         document.getElementById("loginForm").reset();
         validationAlert("Successfully logged in!", false);
 
-        window.location.href = document.referrer || "/";
+        if (!document.referrer || document.referrer.endsWith("/register"))            
+            window.location.href = "/";
+        else
+            window.location.href = document.referrer;
+
     } else if (response.status == 401) {
         validationAlert("Invalid username or password");
     } else {

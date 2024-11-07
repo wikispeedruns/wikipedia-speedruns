@@ -52,8 +52,8 @@ async function handleRegister(event)
         document.getElementById("registerForm").reset();
         validationAlert("Successfully Registered!", false);
         setTimeout(() => {
-            window.location.href = "/login"; 
-        }, 2000);       
+            window.location.replace("/login"); 
+        }, 500);       
     } else if (response.status == 409) {
         validationAlert("User already exists");
     } else {
