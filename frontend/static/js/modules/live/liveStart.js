@@ -5,12 +5,13 @@ const wsServer = process.env.LIVE_WS_SERVER;
 
 class LiveStartHelper {
     constructor(lobbyId, promptId, user, startCallback, updateUsersCallback) {
-    
         this.ws = new WebSocket(wsServer);
+        this.lobbyId = lobbyId;
+        this.promptId = promptId;
 
         this.ws.onopen = (event) => {
             this.ws.send(JSON.stringify({
-                type: "start",
+                type: "wait_start",
                 lobby_id: lobbyId,
                 prompt_id: promptId,
                 user: user,
@@ -25,12 +26,20 @@ class LiveStartHelper {
                 } else if (msg["type"] === "update") {
                     updateUsersCallback(msg["users"])
                 }
-    
+
             } catch (error) {
                 console.error("Invalid JSON from websocket server:", error);
             }
         };
     }
+
+    triggerStart() {
+        this.ws.send(JSON.stringify({
+            type: "start",
+            lobby_id: this.lobbyId,
+            prompt_id: this.promptId,
+        }));
+    }
 }
 
-export {LiveStartHelper};
+export { LiveStartHelper };

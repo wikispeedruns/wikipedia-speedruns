@@ -2,11 +2,12 @@
 
 import { LiveStartHelper } from "../live/liveStart.js";
 
-var CountdownTimer = {
+var WaitForHost = {
     props: [
         "lobbyId",
         "promptId",
         "user",
+        "isHost",
     ],
 
     data: function () {
@@ -17,38 +18,46 @@ var CountdownTimer = {
     },
 
     mounted: async function () {
-        setPlayers = (ps) => {
+        let setPlayers = (ps) => {
             console.log(ps);
-            players = ps
+            this.players = ps
         };
 
 
         // Condition 1: signal from host
         const promise1 = new Promise(resolve => {
-            this.liveStartHelper = LiveStartHelper(this.$props.lobbyId, this.$props.promptId, this.$props.user, resolve, setPlayers);
-        }); 
+            this.liveStartHelper = new LiveStartHelper(this.$props.lobbyId, this.$props.promptId, this.$props.user, resolve, setPlayers);
+        });
+
 
         // Condition 2: "immediate start" button click
         const promise2 = new Promise(resolve =>
-            document.getElementById("start-btn").addEventListener("click", resolve, {once: true})
+            document.getElementById("start-btn").addEventListener("click", resolve, { once: true })
         );
 
         // Condition 3: "immediate start" spacebar press
-        const promise3 = new Promise(resolve => document.body.addEventListener("keydown", 
+        const promise3 = new Promise(resolve => document.body.addEventListener("keydown",
             (event) => {
-                if(event.code === 'Space') {
+                if (event.code === 'Space') {
                     // prevent automatic scrolling when spacebar is pressed
                     event.preventDefault();
                     resolve();
                 }
-            }, 
-            {once: true})
+            },
+            { once: true })
         );
 
 
         await Promise.any([promise1, promise2, promise3]);
+        this.started = true;
         this.$emit('start-game');
-     },
+    },
+
+    methods: {
+        triggerStart() {
+            this.liveStartHelper.triggerStart();
+        }
+    },
 
     template: (`
     <div v-show="!started">
@@ -57,10 +66,13 @@ var CountdownTimer = {
 
             <div><button id="start-btn" class="btn btn-outline-secondary">Click here or press spacebar to start immediately!</button></div>
 
-            <div>Waiting for host to start</div>
+            <div><button id="start-btn" class="btn btn-outline-secondary" @click="triggerStart">Start Game</button></div>
 
-            <div>
-                <p v-for="p in players"> {{p}} </p>
+
+            <div>Waiting for host to start</div>
+        
+            <div v-for="p in players">
+                {{p}}
             </div>
         </div>
 
@@ -69,4 +81,4 @@ var CountdownTimer = {
 
 };
 
-export { CountdownTimer };
+export { WaitForHost };

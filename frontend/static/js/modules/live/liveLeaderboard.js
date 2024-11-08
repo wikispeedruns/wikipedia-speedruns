@@ -7,8 +7,6 @@ function triggerLeaderboardUpdate(lobbyId, promptId) {
     let ws = new WebSocket(wsServer);
 
     ws.onopen = (event) => {
-        console.log("Test");
-
         ws.send(JSON.stringify({
             type: "update",
             lobby_id: lobbyId,

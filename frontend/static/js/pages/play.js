@@ -11,6 +11,9 @@ import Vue from "vue/dist/vue.esm.js";
 
 import { startRun, submitRun } from "../modules/game/runs.js";
 
+
+import { WaitForHost } from "../modules/game/waitForHost.js";
+
 import { CountdownTimer } from "../modules/game/countdown.js";
 import { ArticleRenderer } from "../modules/game/articleRenderer.js";
 import { PagePreview } from "../modules/game/pagePreview.js";
@@ -29,6 +32,9 @@ const PROMPT_END = serverData["prompt_end"] || null;
 
 // Get lobby if a lobby_prompt
 const LOBBY_ID = serverData["lobby_id"] || null;
+
+const USERNAME = serverData["username"] || null;
+const LOBBY_NAME = serverData["lobby_name"] || null;
 
 // Get if auto scroll is on
 const IS_SCROLL_ON = serverData["scroll"] || null;
@@ -81,6 +87,7 @@ let app = new Vue({
     el: '#app',
     components: {
         'countdown-timer': CountdownTimer,
+        'wait-for-host': WaitForHost,
         'page-preview': PagePreview
     },
     data: {
@@ -102,7 +109,7 @@ let app = new Vue({
         revisionDate: null,
 
         lobbyId: null,
-        runId: -1,          //unique ID for the current run. This gets populated upon start of run
+        runId: -1,          //unique ID for the current run. This gets populated upon start of ru
 
         startTime: Date.now(),     // The start time of run (ms elapsed since January 1, 1970)
         endTime: null,       // The end time of run (ms elapsed since January 1, 1970)
@@ -126,10 +133,13 @@ let app = new Vue({
 
         isScroll: null,
 
-        anonymous: null,
-        created_username: null,
         isPenaltyMode: false,
-        penaltyTime: 0         // Additional penalty time for penalty game mode
+        penaltyTime: 0,         // Additional penalty time for penalty game mode
+
+        // State for live games. We need to access the username/lobby name 
+        live: false,
+        username: USERNAME,
+        lobbyName: LOBBY_NAME
     },
 
     mounted: async function() {
@@ -150,6 +160,7 @@ let app = new Vue({
         if (LOBBY_ID != null) {
             const lobby = await getLobby(LOBBY_ID);
             this.isPenaltyMode = !!lobby["rules"]["is_penalty_mode"];
+            this.live = !!lobby["rules"]["live_mode"];
         }
 
         this.startArticle = prompt["start"];
@@ -163,10 +174,6 @@ let app = new Vue({
 
         // Use the release date of teh prompt (if it exists) to determine the article revision
         this.revisionDate = prompt?.["active_start"];
-
-        this.anonymous = prompt["cmty_anonymous"]
-        this.created_username = prompt["username"]
-
         this.currentArticle = this.startArticle;
 
         this.runId = await startRun(PROMPT_ID, LOBBY_ID, PROMPT_START, PROMPT_END, LANGUAGE);
