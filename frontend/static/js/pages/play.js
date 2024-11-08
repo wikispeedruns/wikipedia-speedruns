@@ -329,7 +329,6 @@ let app = new Vue({
 
             triggerLeaderboardUpdate(this.lobbyId, this.promptId);
 
-            //fireworks();
             if (this.promptId == null){
                 window.location.replace(`/quick_run/finish?run_id=${this.runId}&played=true`)
             }

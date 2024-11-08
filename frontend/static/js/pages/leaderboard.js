@@ -521,6 +521,7 @@ var app = new Vue({
 
             // Setup websockets to refresh when other people finish (for lobbies)
             if (this.live) {
+                console.log("Starting live leaderboard!")
                 this.liveLeaderboard = new LiveLeaderboardHelper(this.lobbyId, this.promptId, this.fillLeaderboard);
             }
         }

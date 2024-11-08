@@ -1,7 +1,7 @@
 // A very simple websocker client to signal people finishing a prompt
 // and to tell the leaderboard to update
 
-const wsServer = "ws://localhost:8000";
+const wsServer = process.env.LIVE_WS_SERVER;
 
 function triggerLeaderboardUpdate(lobbyId, promptId) {
     let ws = new WebSocket(wsServer);
