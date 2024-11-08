@@ -4,14 +4,6 @@ import { getRandTip } from "./tips.js";
 
 // Maybe make this a higher order component?
 var CountdownTimer = {
-
-    props: [
-        "startArticle",
-        "endArticle",
-        "ratedPrompt",
-        "ratedRun",
-    ],
-
     data: function () {
         return {
             countdownDuration: 8000, // milliseconds to countdown from

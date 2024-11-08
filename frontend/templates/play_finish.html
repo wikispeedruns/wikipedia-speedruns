@@ -20,7 +20,7 @@
     <div v-cloak class="text-left">
         <div v-if="played">
             <p><h4>You found it!</h4></p>
-            <template v-if="!isQuickRun">
+            <template v-if="!isQuickRun && !lobbyId">
                 <p v-if="loggedIn">Your run was submitted to the leaderboard.</p>
                 <p v-else>You are not logged in, but your run has been saved locally. Log in to upload your runs to the leaderboard!</p>
             </template>

@@ -19,8 +19,20 @@
         </div>
 
 
-        <details class="mb-3">
+        <details class="mb-3" open>
             <summary>Custom Rules</summary>
+
+            <div class="form-check">
+
+                <input class="form-check-input" type="checkbox" id="comp-mode-checkbox" v-model="liveMode">
+                <label class="form-check-label" for="comp-mode-checkbox">
+                    <b>Live mode</b>
+                    <span class="text-muted fw-light">
+                        (experiment) As host, you can make all players start at the same time, and leaderboards refresh as players finish
+                    </span>
+                </label>
+            </div>
+
 
             <div class="form-check">
 
@@ -28,10 +40,10 @@
                 <label class="form-check-label" for="comp-mode-checkbox">
                     <b>Competitive mode</b>
                     <span class="text-muted fw-light">
-                        players can't see end prompt, and can only see leaderboard after playing
+                        Players can't see end prompt, and can only see leaderboard after playing
                     </span>
                 </label>
-	    </div>
+            </div>
 
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="pen-mode-checkbox" v-model="penaltyMode">

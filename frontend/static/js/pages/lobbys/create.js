@@ -10,6 +10,7 @@ var app = new Vue({
         name: "",
         desc: "",
 
+        liveMode: false,
         competitiveMode: false,
         requireAccount: false,
         penaltyMode: false,
@@ -25,10 +26,9 @@ var app = new Vue({
             // See schema for rules
             requestBody.rules["hide_prompt_end"] = this.competitiveMode;
             requestBody.rules["restrict_leaderboard_access"] = this.competitiveMode;
-
             requestBody.rules["require_account"] = this.requireAccount;
-
-	    requestBody.rules["is_penalty_mode"] = this.penaltyMode;
+            requestBody.rules["is_penalty_mode"] = this.penaltyMode;
+            requestBody.rules["live_mode"] = this.liveMode;
 
             // Only add these fields if not empty
             if (this.name) requestBody["name"] = this.name;

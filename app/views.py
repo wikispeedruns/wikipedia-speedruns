@@ -109,7 +109,9 @@ def get_sprint_play_page(id):
 
 @views.route('/lobby/<int:lobby_id>/play/<int:prompt_id>', methods=['GET'])
 def get_lobby_play_page(lobby_id, prompt_id):
-    return render_with_data('play.html', lobby_id=lobby_id, prompt_id=prompt_id)
+    lobby_name = session.get("lobbys", {}).get(str(lobby_id))
+
+    return render_with_data('play.html', lobby_id=lobby_id, prompt_id=prompt_id, lobby_name=lobby_name)
 
 @views.route('/play/quick_play', methods=['GET'])
 def get_quick_run_page():
