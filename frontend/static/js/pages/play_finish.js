@@ -1,7 +1,7 @@
 //JS module imports
 import Vue from 'vue/dist/vue.esm.js';
 
-import { getRun, getLobbyRun, getQuickRun } from "../modules/game/finish.js";
+import { getRun, getLobbyRun, getQuickRun, getLobby } from "../modules/game/finish.js";
 import { getLocalRun } from "../modules/localStorage/localStorageSprint.js"
 import { getLocalQuickRun } from "../modules/localStorage/localStorageQuickRun.js";
 import { achievements } from "../modules/achievements.js";
@@ -83,6 +83,7 @@ let app = new Vue({
 
     mounted: async function () {
 
+        
         this.runType = TYPE;
 
         this.loggedIn = "username" in serverData;
@@ -106,7 +107,7 @@ let app = new Vue({
                     triggerLeaderboardUpdate(this.lobbyId, run?.["prompt_id"]);
                 }
             });
-            
+
         } else if (this.loggedIn) {
             run = this.isSprint ? await getRun(RUN_ID) : await getQuickRun(RUN_ID);
         } else if (!this.loggedIn) {
