@@ -138,6 +138,7 @@ let app = new Vue({
 
         // State for live games. We need to access the username/lobby name 
         live: false,
+        isHost: false,
         username: USERNAME,
         lobbyName: LOBBY_NAME
     },
@@ -160,7 +161,8 @@ let app = new Vue({
         if (LOBBY_ID != null) {
             const lobby = await getLobby(LOBBY_ID);
             this.isPenaltyMode = !!lobby["rules"]["is_penalty_mode"];
-            this.live = !!lobby["rules"]["live_mode"];
+            this.live = !!lobby?.["rules"]?.["live_mode"];
+            this.isHost = lobby?.["user"]?.["owner"];
         }
 
         this.startArticle = prompt["start"];

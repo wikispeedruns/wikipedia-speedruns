@@ -40,7 +40,7 @@
                         <div class="col-sm-auto text-nowrap px-4 pt-2">
                             Links clicked<br><strong>[[path.length - 1]]</strong>
                         </div>
-                        <div class="col text-nowrap px-2 pt-2">
+                        <div class="col text-nowrap px-4 pt-2">
                             Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
                         </div>
                         <div class="col-sm-auto  text-nowrap py-2 mr-auto">
@@ -149,6 +149,7 @@
             v-bind:lobby-id="lobbyId"
             v-bind:prompt-id="promptId"
             v-bind:user="username || lobbyName"
+            v-bind:is-host="isHost"
         >
             <p>Starting Article: <strong>[[startArticle]]</strong></p>
             <p>Goal Article: <strong>[[endArticle]] </strong>
@@ -158,7 +159,7 @@
             </p>
         </wait-for-host>
     </template>
-    <template v-else>
+    <template v-if="live===false"> <!-- v-else causes this to flash while lobby info loads-->
         <countdown-timer id="countdown-box" v-on:start-game="start">
             <p>Starting Article: <strong>[[startArticle]]</strong></p>
             <p>Goal Article: <strong>[[endArticle]] </strong>

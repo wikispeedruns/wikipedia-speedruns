@@ -64,16 +64,26 @@ var WaitForHost = {
         <div class="text-center text-size-1">
             <slot></slot>
 
-            <div><button id="start-btn" class="btn btn-outline-secondary">Click here or press spacebar to start immediately!</button></div>
 
-            <div><button id="start-btn" class="btn btn-outline-secondary" @click="triggerStart">Start Game</button></div>
+            <template v-if="!isHost">
+                <div><em>Waiting for host to start</em></div>
+
+                <div class="mt-3"><button id="start-btn" class="btn btn-outline-secondary">Click here or press spacebar to start without waiting!</button></div>
+                <div class="text-muted"><small>(Your time will still be counted from when you start)</small></div>
+            </template>
+
+            <template v-else>
+                <div><button id="start-btn" class="btn btn-outline-secondary" @click="triggerStart">Start Game</button></div>
 
 
-            <div>Waiting for host to start</div>
-        
-            <div v-for="p in players">
-                {{p}}
-            </div>
+                <div class="mt-3">Waiting players:</div>
+            
+                <div v-for="p in players" class="text-muted">
+                    <small>{{p}}</small>
+                </div>
+            </template>
+
+            <hr>
         </div>
 
     </div>
