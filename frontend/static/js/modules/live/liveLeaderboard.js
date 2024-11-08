@@ -8,7 +8,7 @@ function triggerLeaderboardUpdate(lobbyId, promptId) {
 
     ws.onopen = (event) => {
         ws.send(JSON.stringify({
-            type: "update",
+            type: "leaderboard_update",
             lobby_id: lobbyId,
             prompt_id: promptId
         }));
