@@ -243,6 +243,10 @@ let app = new Vue({
             let loadTimeSeconds = loadTime / 1000;
             this.currentArticle = page;
 
+            if (this.live) {
+                triggerLeaderboardUpdate(this.lobbyId, this.promptId);
+            }
+
             if (this.path.length == 0 || this.path[this.path.length - 1]["article"] != page) {
                 // Update path
                 let timeElapsed = (Date.now() - this.startTime) / 1000;
@@ -272,7 +276,6 @@ let app = new Vue({
                 }
             }
 
-            triggerLeaderboardUpdate(this.lobbyId, this.promptId);
         },
 
         async start() {
