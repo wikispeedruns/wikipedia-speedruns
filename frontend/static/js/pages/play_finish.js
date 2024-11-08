@@ -99,6 +99,14 @@ let app = new Vue({
         let run = null;
         if (this.isLobbyRun) {
             run = await getLobbyRun(this.lobbyId, RUN_ID);
+            
+            getLobby(LOBBY_ID).then((lobby) => {
+                const live = !!lobby?.["rules"]?.["live_mode"];
+                if (live) {
+                    triggerLeaderboardUpdate(this.lobbyId, run?.["prompt_id"]);
+                }
+            });
+            
         } else if (this.loggedIn) {
             run = this.isSprint ? await getRun(RUN_ID) : await getQuickRun(RUN_ID);
         } else if (!this.loggedIn) {
@@ -120,6 +128,8 @@ let app = new Vue({
 
             this.anonymous = prompt["cmty_anonymous"]
             this.created_username = prompt["username"]
+
+            
         }
 
         this.playTime = run["play_time"];
