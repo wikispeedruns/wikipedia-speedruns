@@ -10,7 +10,8 @@ def init_app(app):
 def get_conn_info():
     return {
         'user' : current_app.config["MYSQL_USER"],
-        'host' : current_app.config["MYSQL_HOST"],
+        # 'host' : current_app.config["MYSQL_HOST"],
+        'host' : "mysql",
         'password' : current_app.config["MYSQL_PASSWORD"],
         'database' : current_app.config['DATABASE'] 
     }

@@ -14,19 +14,24 @@ import os
 
 def create_app(test_config=None):
 
+    # app = Flask(__name__,
+    #         static_url_path='/static', 
+    #         static_folder='../frontend/static',
+    #         template_folder='../frontend/templates')
+
     app = Flask(__name__,
-            static_url_path='/static', 
-            static_folder='../frontend/static',
-            template_folder='../frontend/templates')
+        static_url_path='/static', 
+        static_folder='/app/frontend/static',
+        template_folder='/app/frontend/templates')
 
     app.json_encoder = CustomJSONEncoder
 
-    app.config.from_file('../config/default.json', json.load)
+    app.config.from_file('/app/config/default.json', json.load)
 
     if test_config is None:
         # load prod settings if not testing and if they exist
         try:
-            app.config.from_file('../config/prod.json', json.load)
+            app.config.from_file('/app/config/default.json', json.load)
         except FileNotFoundError:
             pass
     else:
