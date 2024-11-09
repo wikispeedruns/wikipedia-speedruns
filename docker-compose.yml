@@ -8,7 +8,7 @@ services:
       MYSQL_PASSWORD: testpassword
       MYSQL_DATABASE: wikipedia_speedruns
     command:
-      - --mysql-native-password=ON 
+      - --mysql-native-password=ON
     volumes:
       - mysql-data:/var/lib/mysql
     ports:
@@ -24,15 +24,5 @@ services:
       - "5000:5000"
     depends_on:
       - mysql
-
-  # Frontend service (React or whatever JS framework)
-  frontend:
-    build: ./frontend
-    ports:
-      - "80:80"   # Expose port 80 for web traffic
-    depends_on:
-      - backend
-
 volumes:
   mysql-data:
-
