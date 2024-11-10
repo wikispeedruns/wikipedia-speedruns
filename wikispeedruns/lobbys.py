@@ -461,9 +461,7 @@ def get_lobby_anon_users(lobby_id: int):
 def hide_lobby(lobby_id) -> bool:
 
     query = """
-    UPDATE lobbys
-    SET isHidden = 1
-    WHERE lobby_id = %s
+    UPDATE lobbys SET isHidden=1 WHERE lobby_id=%s
     """
 
     db = get_db()
