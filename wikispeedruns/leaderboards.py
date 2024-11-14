@@ -61,18 +61,15 @@ def _query_current_run_clause(table, run_id=None):
     return f'({table}.run_id = %(run_id)s AND {table}.prompt_id = %(prompt_id)s)'
 
 def _query_sort_expr(table, sort_mode, sort_asc):
-    sort_exp = ''
+    dir = "ASC" if sort_asc else "DESC"    
     if (sort_mode == 'time'):
-        sort_exp = 'play_time'
+        sort_exp = f'finished DESC, play_time {dir}'
     elif (sort_mode == 'length' or sort_mode == 'penalty'):
-        sort_exp = f"JSON_LENGTH({table}.`path`, '$.path'), play_time"
+        sort_exp = f"finished DESC, JSON_LENGTH({table}.`path`, '$.path') {dir}, play_time {dir}"
     elif (sort_mode == 'start'):
-        sort_exp = 'start_time'
+        sort_exp = f'start_time {dir}'
     else:
         raise ValueError(f"Invalid sort mode '{sort_mode}'")
-
-    if not sort_asc:
-        sort_exp += ' DESC'
 
     return sort_exp
 
@@ -276,8 +273,8 @@ def get_leaderboard_runs(
 
     db = get_db()
     with db.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
-        cursor.execute(query, query_args)
         # print(cursor.mogrify(query, query_args)) #debug
+        cursor.execute(query, query_args)
 
         results = cursor.fetchall()
         numRuns = 0

@@ -30,4 +30,21 @@ async function getQuickRun(runId) {
     }
 }
 
-export { getRun, getLobbyRun, getQuickRun};
+async function getLobby(lobbyId) {
+    const url = `/api/lobbys/${lobbyId}`;
+    const response = await fetch(url);
+
+    if (response.status != 200) {
+        const error = await response.text();
+        alert(error);
+
+        // Prevent are you sure you want to leave prompt
+        window.onbeforeunload = null;
+        window.location.replace("/");   // TODO error page
+        return;
+    }
+
+    return await response.json();
+}
+
+export { getRun, getLobbyRun, getQuickRun, getLobby};

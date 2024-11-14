@@ -248,6 +248,7 @@ def get_lobby_prompts(lobby_id: int, prompt_id: Optional[int]=None, session: Opt
         ) r
         ON r.prompt_id = p.prompt_id AND r.lobby_id = p.lobby_id
         WHERE p.lobby_id=%(lobby_id)s {"AND p.prompt_id=%(prompt_id)s" if prompt_id else ""}
+        ORDER BY p.prompt_id DESC;
         """
 
         query_args["player_value"] = player[1]
@@ -460,9 +461,7 @@ def get_lobby_anon_users(lobby_id: int):
 def hide_lobby(lobby_id) -> bool:
 
     query = """
-    UPDATE lobbys
-    SET isHidden = 1
-    WHERE lobby_id = %s
+    UPDATE lobbys SET isHidden=1 WHERE lobby_id=%s
     """
 
     db = get_db()

@@ -40,11 +40,11 @@
                         <div class="col-sm-auto text-nowrap px-4 pt-2">
                             Links clicked<br><strong>[[path.length - 1]]</strong>
                         </div>
-                        <div class="col text-nowrap px-2 pt-2">
+                        <div class="col text-nowrap px-4 pt-2">
                             Time Elapsed<br><strong>[[elapsed.toFixed(3)]] s</strong>
                         </div>
                         <div class="col-sm-auto  text-nowrap py-2 mr-auto">
-                            <button @click="home" class="btn btn-outline-secondary mx-2" style="padding: 4px 8px">Give Up</button>
+                            <button @click="giveUp" class="btn btn-outline-secondary mx-2" style="padding: 4px 8px">Give Up</button>
                         </div>
 
                         <div class="col-sm-auto  text-nowrap py-2 mr-auto">
@@ -76,7 +76,7 @@
                             Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
                         </div>
                         <div class="col-sm-auto  text-nowrap py-2 mr-auto">
-                            <button @click="home" class="btn btn-outline-secondary mx-2" style="padding: 4px 8px" >Give Up</button>
+                            <button @click="giveUp" class="btn btn-outline-secondary mx-2" style="padding: 4px 8px" >Give Up</button>
                         </div>
 
                         <div class="col-sm-auto text-nowrap py-2 mr-auto">
@@ -103,7 +103,7 @@
                         Time Elapsed: <strong>[[elapsed.toFixed(3)]] s</strong>
                     </div>
                     <div class="col-sm-auto  text-nowrap py-2 mr-auto">
-                        <button @click="home" class="btn btn-outline-secondary"
+                        <button @click="giveUp" class="btn btn-outline-secondary"
                         style="font-size: 0.75rem; padding: 2.5px 5px" >Give Up</button>
                     </div>
 
@@ -125,7 +125,7 @@
                         </small>
                     </div>
                     <div class="col-sm-auto  text-nowrap py-2 mr-auto">
-                        <button @click="home" class="btn btn-outline-secondary"
+                        <button @click="giveUp" class="btn btn-outline-secondary"
                         style="font-size: 0.75rem; padding: 2.5px 5px" >Give Up</button>
                     </div>
                     <div class="col-auto px-2">
@@ -142,15 +142,33 @@
 
     <page-preview ref="pagePreview" :lang="language"></page-preview>
 
-    <countdown-timer id="countdown-box" v-on:start-game="start">
-        <p>Starting Article: <strong>[[startArticle]]</strong></p>
-        <p>Goal Article: <strong>[[endArticle]] </strong>
-            <small style="cursor: pointer;" :href="`/wiki/${endArticle}`" @click="showPreview">
-                ⓘ
-            </small>
-        </p>
-    </countdown-timer>
-
+    <template v-if="live">
+        <wait-for-host 
+            id="countdown-box" 
+            v-on:start-game="start" 
+            v-bind:lobby-id="lobbyId"
+            v-bind:prompt-id="promptId"
+            v-bind:user="username || lobbyName"
+            v-bind:is-host="isHost"
+        >
+            <p>Starting Article: <strong>[[startArticle]]</strong></p>
+            <p>Goal Article: <strong>[[endArticle]] </strong>
+                <small style="cursor: pointer;" :href="`/wiki/${endArticle}`" @click="showPreview">
+                    ⓘ
+                </small>
+            </p>
+        </wait-for-host>
+    </template>
+    <template v-if="live===false"> <!-- v-else causes this to flash while lobby info loads-->
+        <countdown-timer id="countdown-box" v-on:start-game="start">
+            <p>Starting Article: <strong>[[startArticle]]</strong></p>
+            <p>Goal Article: <strong>[[endArticle]] </strong>
+                <small style="cursor: pointer;" :href="`/wiki/${endArticle}`" @click="showPreview">
+                    ⓘ
+                </small>
+            </p>
+        </countdown-timer>
+    </template>
 
     <div v-show="started && !finished" id="main">
         <div id="wikipedia-frame" class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output content article-end-marker" :class="{ 'hide-scroll': isScroll }"></div>

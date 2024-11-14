@@ -1,11 +1,12 @@
 //JS module imports
 import Vue from 'vue/dist/vue.esm.js';
 
-import { getRun, getLobbyRun, getQuickRun } from "../modules/game/finish.js";
+import { getRun, getLobbyRun, getQuickRun, getLobby } from "../modules/game/finish.js";
 import { getLocalRun } from "../modules/localStorage/localStorageSprint.js"
 import { getLocalQuickRun } from "../modules/localStorage/localStorageQuickRun.js";
 import { achievements } from "../modules/achievements.js";
 import { uploadLocalSprints } from "../modules/localStorage/localStorageSprint.js";
+import { triggerLeaderboardUpdate } from "../modules/live/liveLeaderboard.js";
 
 import { basicCannon, fireworks, side } from "../modules/confetti.js";
 
@@ -15,7 +16,7 @@ const PLAYED = serverData["played"] || false;
 const RUN_ID = serverData["run_id"] || null;
 const TYPE = serverData["type"];
 
-async function getPrompt(promptId, lobbyId=null) {
+async function getPrompt(promptId, lobbyId = null) {
     const url = (lobbyId === null) ? `/api/sprints/${promptId}` : `/api/lobbys/${lobbyId}/prompts/${promptId}`;
     const response = await fetch(url);
 
@@ -80,8 +81,9 @@ let app = new Vue({
         }
     },
 
-    mounted: async function() {
+    mounted: async function () {
 
+        
         this.runType = TYPE;
 
         this.loggedIn = "username" in serverData;
@@ -94,21 +96,30 @@ let app = new Vue({
         this.lobbyId = LOBBY_ID;
         this.runId = RUN_ID;
 
+
         let run = null;
         if (this.isLobbyRun) {
             run = await getLobbyRun(this.lobbyId, RUN_ID);
+            
+            getLobby(LOBBY_ID).then((lobby) => {
+                const live = !!lobby?.["rules"]?.["live_mode"];
+                if (live) {
+                    triggerLeaderboardUpdate(this.lobbyId, run?.["prompt_id"]);
+                }
+            });
+
         } else if (this.loggedIn) {
             run = this.isSprint ? await getRun(RUN_ID) : await getQuickRun(RUN_ID);
         } else if (!this.loggedIn) {
             run = this.isSprint ? getLocalRun(RUN_ID) : getLocalQuickRun(RUN_ID);
         }
 
-        if(this.isQuickRun){
+        if (this.isQuickRun) {
             this.startArticle = run["prompt_start"];
             this.endArticle = run["prompt_end"];
             this.language = run['language'];
         }
-        else{
+        else {
             this.promptId = run['prompt_id'];
             const prompt = await getPrompt(this.promptId, LOBBY_ID);
 
@@ -118,6 +129,8 @@ let app = new Vue({
 
             this.anonymous = prompt["cmty_anonymous"]
             this.created_username = prompt["username"]
+
+            
         }
 
         this.playTime = run["play_time"];
@@ -132,23 +145,23 @@ let app = new Vue({
 
     methods: {
         //copy sharable result
-        copyResults: function(event) {
+        copyResults: function (event) {
             let results = this.generateResults();
             document.getElementById("custom-tooltip").style.display = "inline";
             document.getElementById("custom-tooltip-path").style.display = "none";
             navigator.clipboard.writeText(results);
-            setTimeout(function() {
+            setTimeout(function () {
                 document.getElementById("custom-tooltip").style.display = "none";
             }, 1500);
         },
 
         //copy sharable result
-        copyPath: function(event) {
+        copyPath: function (event) {
             let results = this.generatePath();
             document.getElementById("custom-tooltip-path").style.display = "inline";
             document.getElementById("custom-tooltip").style.display = "none";
             navigator.clipboard.writeText(results);
-            setTimeout(function() {
+            setTimeout(function () {
                 document.getElementById("custom-tooltip-path").style.display = "none";
             }, 1500);
         },
@@ -167,14 +180,14 @@ let app = new Vue({
         },
 
 
-        generateResults: function(event) {
+        generateResults: function (event) {
             let resultText = `WikiSpeedruns\n${this.startArticle} ${this.isQuickRun ? (" -> " + this.endArticle) : ""}\n${this.path.length - 1} 🖱️\n${(this.playTime)} ⏱️`;
-            if(this.isQuickRun){
+            if (this.isQuickRun) {
                 let link = `https://wikispeedruns.com/play/quick_play`;
                 link += `?prompt_start=${articleToUrl(this.startArticle)}`;
                 link += `&prompt_end=${articleToUrl(this.endArticle)}`;
                 link += `${this.language ? '&lang=' + this.language : ''}`;
-                
+
                 resultText += `\n${link}`;
             } else if (this.isSprint) {
                 const link = `https://wikispeedruns.com/play/${this.promptId}`;
@@ -183,7 +196,7 @@ let app = new Vue({
             return resultText;
         },
 
-        generatePath: function(event) {
+        generatePath: function (event) {
             return String(this.path);
         },
 

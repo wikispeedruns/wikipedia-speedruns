@@ -97,10 +97,10 @@
 
                         <summary>
                             Leaderboard Options (Current:
-                            <strong v-if="preset === 'personal'">Personal History)</strong>
-                            <strong v-if="preset === 'ffa'">Fastest First Attempt)</strong>
-                            <strong v-if="preset === 'shortest'">Shortest Path)</strong>
-                            <strong v-if="preset === 'pen'">Penalty Mode)</strong>
+                            <span v-if="preset === 'personal'"><strong>Personal History</strong>)</span>
+                            <span v-if="preset === 'ffa'"><strong>Fastest First Attempt</strong>)</span>
+                            <span v-if="preset === 'shortest'"><strong>Shortest Path</strong>)</span>
+                            <span v-if="preset === 'pen'"><strong>Penalty Mode</strong>)</span>
                         </summary>
 
                         <div class="form-check form-check-inline">
@@ -120,10 +120,16 @@
                             <label class="form-check-label" for="shortest">Shortest Path (Global) </label>
                         </div>
 
-                        <div class="form-check form-check-inline">
+                        <div v-if="penaltyModeEnabled" class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" id="pen" value="pen" v-model="preset" />
                             <label class="form-check-label" for="pen">Penalty Mode </label>
                         </div>
+
+                        <!-- <div v-if="liveLeaderboard" class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="live" value="live" v-model="preset" />
+                            <label class="form-check-label" for="live">Live </label>
+                        </div> -->
+
 
 
                         <div class="form-check form-check-inline">
@@ -158,10 +164,10 @@
                             <th scope="col">Rank</th>
                             <th scope="col">Name</th>
                             <th class="l-col" scope="col">Time</th>
-                            <th class="l-col" scope="col">Penalized time</th>
+                            <th v-if="penaltyModeEnabled" class="l-col" scope="col">Penalized time</th>
                             <th class="l-col" scope="col">Links</th>
                             <th scope="col">Path</th>
-
+                            <th scope="col"></th> <!-- Share button-->
                         </thead>
                         <tbody>
                             <!-- See this https://v2.vuejs.org/v2/guide/components.html?redirect=true#DOM-Template-Parsing-Caveats -->
@@ -175,7 +181,8 @@
                             </tr>
 
                             <tr is="leaderboard-row" v-for="run in runs" v-bind:key="run.run_id" v-bind:run="run"
-                                v-bind:current-run-id="runId"></tr>
+                                v-bind:current-run-id="runId"
+                                v-bind:penalty-mode-enabled="penaltyModeEnabled"></tr>
 
                             <tr v-if="currentRunPosition === 1">
                                 <td colspan="6">...</td>

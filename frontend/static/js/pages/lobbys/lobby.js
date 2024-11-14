@@ -6,6 +6,7 @@ import { checkArticles, getSupportedLanguages, getRandomArticle } from "../../mo
 import { PromptGenerator } from "../../modules/generator.js"
 import { AutocompleteInput } from "../../modules/autocomplete.js"
 import { UserDisplay } from "../../modules/userDisplay.js"
+import { LiveLobbyPromptsHelper } from "../../modules/live/livePrompts.js";
 
 const LOBBY_ID = serverData["lobby_id"];
 const successMessage = "Added prompt to lobby!";
@@ -51,7 +52,12 @@ var app = new Vue({
 
     created: async function() {
         this.getPrompts();
-        this.getLobbyInfo();
+        await this.getLobbyInfo();
+
+        this.live = this.lobbyInfo?.["rules"]?.["live_mode"];
+        if (this.live) {
+            this.livePromptsHelper = new LiveLobbyPromptsHelper(LOBBY_ID, this.getPrompts);
+        }
     },
 
     mounted: function() {
@@ -144,8 +150,6 @@ var app = new Vue({
                 return;
             }
 
-            console.log(res);
-
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}/prompts`, "POST", {
                 "start": res.body.start,
                 "end": res.body.end,
@@ -165,7 +169,12 @@ var app = new Vue({
             const messageType = this.addPromptMessage == successMessage ? 'success' : 'danger';
             this.setMessage(messageType);
 
-            this.getPrompts();
+            
+            if (this.livePromptsHelper) {
+                this.livePromptsHelper.triggerUpdate();
+            } else {
+                this.getPrompts();
+            }
         },
 
         async deletePrompts() {
@@ -223,9 +232,12 @@ var app = new Vue({
         toggleDropdown(id) {
             document.getElementById(id).classList.toggle("active-dropdown")
         },
-
-        async hideLobby(){
+        async hideLobby(event) {
+            event.preventDefault();
+            
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}`, "DELETE");
+                        
+            window.location.href = '/';
         },
         async generateQRCode() {
             const qrContainer = document.getElementById("qrcode");
@@ -235,6 +247,8 @@ var app = new Vue({
             await QRCode.toCanvas(canvas, url);
             qrContainer.appendChild(canvas);
         },
+
+
     }
 
 })
