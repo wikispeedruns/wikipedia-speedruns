@@ -22,18 +22,10 @@ def create_database(db_name, recreate=False, test_config=None):
     if test_config:
         config.update(test_config)
 
-    """
     conn = pymysql.connect(
         user=config["MYSQL_USER"],
         host=config["MYSQL_HOST"],
         password=config["MYSQL_PASSWORD"],
-    )
-    """
-
-    conn = pymysql.connect(
-    user=config["MYSQL_USER"],
-    host="mysql",  # Use the MySQL service name here
-    password=config["MYSQL_PASSWORD"],
     )
 
 
