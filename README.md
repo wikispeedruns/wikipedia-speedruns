@@ -12,7 +12,7 @@ This repository holds the code for [wikispeedruns.com](https://wikispeedruns.com
 - Run `sudo docker-compose build && sudo docker-compose up`
   - This will build and host the website, however the MySQL database as not been set up yet.
 - Enter the docker MySQL with `sudo docker-compose exec mysql mysql -u root -p` and login with password `rootpassword`.
-- Copy and run the commands from `init.sql` into the MySQL command line. You can also just copy paste them from here:
+- Copy and run the commands from `./scripts/init.sql` into the MySQL command line. You can also just copy paste them from here:
 
 ```sql
 CREATE USER 'user'@'%';
