@@ -19,10 +19,19 @@ def create_app(test_config=None):
     #         static_folder='../frontend/static',
     #         template_folder='../frontend/templates')
 
+
+    # get absolute path of current file
+    base_dir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
+
+    # construct new paths relative to where the current file is
+    static_folder = os.path.join(base_dir, 'frontend', 'static')
+    template_folder = os.path.join(base_dir, 'frontend', 'templates')
+
+
     app = Flask(__name__,
         static_url_path='/static', 
-        static_folder='/app/frontend/static',
-        template_folder='/app/frontend/templates')
+        static_folder=static_folder,
+        template_folder=template_folder)
 
     app.json_encoder = CustomJSONEncoder
 
