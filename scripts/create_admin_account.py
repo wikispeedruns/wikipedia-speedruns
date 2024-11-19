@@ -42,7 +42,7 @@ def create_admin_account():
 
     db = pymysql.connect(
     user=config["MYSQL_USER"],
-    host="mysql",  # Use the MySQL service name here
+    host=config["MYSQL_HOST"],
     password=config["MYSQL_PASSWORD"],
     database=config['DATABASE']
     )
