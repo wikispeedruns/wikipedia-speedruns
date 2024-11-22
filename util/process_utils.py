@@ -17,5 +17,5 @@ def start_process(_target, _args=()):
     Process(target=run_with_app_context, args=(_target, _args)).start()
 
 def start_process_with_db(_target, _args=()):
-    Process(target=run_with_db, args=(_target, db.get_conn_info() , _args)).start()
+    Process(target=run_with_db, args=(_target, app.db.get_conn_info() , _args)).start()
 

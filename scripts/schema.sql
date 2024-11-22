@@ -65,7 +65,10 @@ CREATE TABLE IF NOT EXISTS `sprint_runs` (
     `counted_for_am` BOOLEAN DEFAULT 0,
     PRIMARY KEY (`run_id`),
     FOREIGN KEY (`prompt_id`) REFERENCES `sprint_prompts`(`prompt_id`),
-    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`),
+
+    /* For stats */
+    INDEX (start_time, user_id, finished)
 );
 
 
@@ -169,7 +172,10 @@ CREATE TABLE IF NOT EXISTS `lobby_runs` (
 
     PRIMARY KEY (`run_id`),
     FOREIGN KEY (`lobby_id`, `prompt_id`) REFERENCES `lobby_prompts`(`lobby_id`, `prompt_id`),
-    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`),
+
+    /* For stats */
+    INDEX (start_time, user_id, finished)
 );
 
 
@@ -239,7 +245,10 @@ CREATE TABLE IF NOT EXISTS `quick_runs` (
     `language` VARCHAR(31) NOT NULL,
     `user_id` INT,
     PRIMARY KEY (`run_id`),
-    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`)
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`),
+    
+    /* For stats */
+    INDEX (start_time, user_id, finished)
 );
 
 -- Stats
