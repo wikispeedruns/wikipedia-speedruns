@@ -6,7 +6,6 @@ import { checkArticles, getSupportedLanguages, getRandomArticle } from "../../mo
 import { PromptGenerator } from "../../modules/generator.js"
 import { AutocompleteInput } from "../../modules/autocomplete.js"
 import { UserDisplay } from "../../modules/userDisplay.js"
-import { LiveLobbyPromptsHelper } from "../../modules/live/livePrompts.js";
 
 const LOBBY_ID = serverData["lobby_id"];
 const successMessage = "Added prompt to lobby!";
@@ -52,17 +51,13 @@ var app = new Vue({
 
     created: async function() {
         this.getPrompts();
-        await this.getLobbyInfo();
-
-        this.live = this.lobbyInfo?.["rules"]?.["live_mode"];
-        if (this.live) {
-            this.livePromptsHelper = new LiveLobbyPromptsHelper(LOBBY_ID, this.getPrompts);
-        }
+        this.getLobbyInfo();
     },
 
     mounted: function() {
         this.link = window.location.href;
         this.getLanguages();
+        this.generateQRCode();
     },
 
     methods: {
@@ -150,6 +145,8 @@ var app = new Vue({
                 return;
             }
 
+            console.log(res);
+
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}/prompts`, "POST", {
                 "start": res.body.start,
                 "end": res.body.end,
@@ -169,12 +166,7 @@ var app = new Vue({
             const messageType = this.addPromptMessage == successMessage ? 'success' : 'danger';
             this.setMessage(messageType);
 
-            
-            if (this.livePromptsHelper) {
-                this.livePromptsHelper.triggerUpdate();
-            } else {
-                this.getPrompts();
-            }
+            this.getPrompts();
         },
 
         async deletePrompts() {
@@ -232,23 +224,38 @@ var app = new Vue({
         toggleDropdown(id) {
             document.getElementById(id).classList.toggle("active-dropdown")
         },
-        async hideLobby(event) {
-            event.preventDefault();
-            
+
+        async hideLobby(){
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}`, "DELETE");
-                        
-            window.location.href = '/';
         },
         async generateQRCode() {
             const qrContainer = document.getElementById("qrcode");
             qrContainer.innerHTML = "";
-            const url = window.location.href;
+        
+            const url = `${window.location.href}?passcode=${this.lobbyInfo.passcode}`;
             const canvas = document.createElement("canvas");
-            await QRCode.toCanvas(canvas, url);
+        
+            await QRCode.toCanvas(canvas, url, { width: 600 });
             qrContainer.appendChild(canvas);
         },
+        
+        async showQRCode() {
+            const qrContainer = document.getElementById("qrcode");
+            const canvasExists = qrContainer.querySelector("canvas");
+        
+            const dropdown = document.getElementById("qrCodeDropdown");
+            const isDropdownOpen = dropdown.getAttribute("aria-expanded") === "true";
+        
+        },       
+        saveQRCode() {
+            const qrContainer = document.getElementById("qrcode");
+            const canvas = qrContainer.querySelector("canvas");
 
-
+            const link = document.createElement("a");
+            link.download = `lobby${LOBBY_ID}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        },
     }
 
 })
