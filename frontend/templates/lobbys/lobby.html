@@ -23,6 +23,12 @@
 .active-dropdown {
     display: block !important;
 }
+
+.dropdown-menu {
+    padding: 0.5rem;
+    min-width: 200px;
+    text-align: center;
+}
 </style>
 
 <script type="module" src="{{url_for('static', filename='js-build/lobbys/lobby.js')}}"></script>
@@ -48,9 +54,20 @@
         <button @click="copyInviteLinkWithPasscode" class="btn btn-info">
             <i class="bi bi-link-45deg" height="16"></i> Link
         </button>
-        <span id="custom-tooltip" ref="shareTooltip">Copied invite to clipboard!</span>
+        <button @click="saveQRCode" class="btn btn-primary">
+            <i class="bi bi-qr-code" height="16"></i> Save QR Code
+        </button>
+        <div class="dropdown">
+            <button class="btn btn-success dropdown-toggle" type="button" id="qrCodeDropdown" data-bs-toggle="dropdown" aria-expanded="false" @click="showQRCode">
+                <i class="bi bi-qr-code" height="16"></i> Show QR Code
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="qrCodeDropdown">
+                <li>
+                    <div id="qrcode" class="mt-2"></div>
+                </li>
+            </ul>
+        </div>
     </div>
-
 
 
     <template v-if="lobbyInfo.user.owner">

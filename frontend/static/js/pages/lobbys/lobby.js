@@ -1,5 +1,6 @@
 import Vue from "vue/dist/vue.esm.js";
 
+import QRCode from 'qrcode';
 import { fetchJson } from "../../modules/fetch.js";
 import { checkArticles, getSupportedLanguages, getRandomArticle } from "../../modules/wikipediaAPI/util.js";
 import { PromptGenerator } from "../../modules/generator.js"
@@ -62,6 +63,7 @@ var app = new Vue({
     mounted: function() {
         this.link = window.location.href;
         this.getLanguages();
+        this.generateQRCode();
     },
 
     methods: {
@@ -235,10 +237,37 @@ var app = new Vue({
             event.preventDefault();
             
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}`, "DELETE");
-            
+                        
             window.location.href = '/';
-        }
+        },
+        async generateQRCode() {
+            const qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = "";
+        
+            const url = `${window.location.href}?passcode=${this.lobbyInfo.passcode}`;
+            const canvas = document.createElement("canvas");
+        
+            await QRCode.toCanvas(canvas, url, { width: 600 });
+            qrContainer.appendChild(canvas);
+        },
+        
+        async showQRCode() {
+            const qrContainer = document.getElementById("qrcode");
+            const canvasExists = qrContainer.querySelector("canvas");
+        
+            const dropdown = document.getElementById("qrCodeDropdown");
+            const isDropdownOpen = dropdown.getAttribute("aria-expanded") === "true";
+        
+        },       
+        saveQRCode() {
+            const qrContainer = document.getElementById("qrcode");
+            const canvas = qrContainer.querySelector("canvas");
 
+            const link = document.createElement("a");
+            link.download = `lobby${LOBBY_ID}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        },
     }
 
 })
