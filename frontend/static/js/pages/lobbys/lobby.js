@@ -49,20 +49,15 @@ var app = new Vue({
         messageTimer: null
     },
 
-
-    created: async function() {
-        this.getPrompts();
-        await this.getLobbyInfo();
+    mounted: async function() {
+        this.link = window.location.href;
+        await Promise.all([this.getLobbyInfo(), this.getPrompts(), this.getLanguages()]);
 
         this.live = this.lobbyInfo?.["rules"]?.["live_mode"];
         if (this.live) {
             this.livePromptsHelper = new LiveLobbyPromptsHelper(LOBBY_ID, this.getPrompts);
         }
-    },
 
-    mounted: function() {
-        this.link = window.location.href;
-        this.getLanguages();
         this.generateQRCode();
     },
 
