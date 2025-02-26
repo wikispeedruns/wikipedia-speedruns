@@ -134,6 +134,7 @@ let app = new Vue({
         isScroll: null,
 
         isPenaltyMode: false,
+        isFindHotkeyMode: false,
         penaltyTime: 0,         // Additional penalty time for penalty game mode
 
         // State for live games. We need to access the username/lobby name 
@@ -158,10 +159,12 @@ let app = new Vue({
         const prompt = await getPrompt(PROMPT_ID, LOBBY_ID);
 
         this.isPenaltyMode = false;
+        this.isFindHotkeyMode = false;
         if (LOBBY_ID != null) {
             const lobby = await getLobby(LOBBY_ID);
             this.isPenaltyMode = !!lobby["rules"]["is_penalty_mode"];
             this.live = !!lobby?.["rules"]?.["live_mode"];
+            this.isFindHotkeyMode = !!lobby?.["rules"]?.["find_hotkey_mode"];
             this.isHost = lobby?.["user"]?.["owner"];
         }
 
@@ -215,9 +218,13 @@ let app = new Vue({
             document.addEventListener("beforeunload", this.updateRun, {capture: true});
         }
 
-
+        // Start listening for hotkeys (to check for find in page hotkeys)
+        window.addEventListener("keydown", this.keydownHandler);
     },
 
+    beforeUnmount: function() {
+        window.removeEventListener("keydown", this.keydownHandler);
+    },
 
     methods : {
         updateRun: function() {
@@ -390,15 +397,15 @@ let app = new Vue({
                 window.location.replace(`/lobby/${this.lobbyId}/leaderboard/${this.promptId}?run_id=${this.runId}`);
             }        
         },
+
+        // Prevent find hotkeys unless allowed by the rules
+        keydownHandler: function(e) {
+            if (this.isFindHotkeyMode) return;
+            
+            if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && (e.keyCode == 70 || e.keyCode == 71))) {
+                e.preventDefault();
+                alert("WARNING: Attempt to Find in page. This will be recorded.");
+            }
+        },
     }
 })
-
-
-// Disable find hotkeys, players will be given a warning
-window.addEventListener("keydown", function(e) {
-    //disable find
-    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && (e.keyCode == 70 || e.keyCode == 71))) {
-        e.preventDefault();
-        this.alert("WARNING: Attempt to Find in page. This will be recorded.");
-    }
-});
