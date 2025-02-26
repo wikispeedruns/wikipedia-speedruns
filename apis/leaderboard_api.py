@@ -1,4 +1,3 @@
-from lib2to3.pgen2.token import OP
 from flask import Flask, jsonify, request, Blueprint, session
 
 from util.decorators import check_request_json, OptionalArg
