@@ -102,7 +102,7 @@
 .tooltip-container {
     width: 360px;
     font-size: 14px;
-    background: white;
+    background: var(--bs-body-bg);
     box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.3), 0 0 1px 1px rgba(0, 0, 0, 0.05);
     position: fixed;
     z-index: 10000000;
@@ -136,7 +136,7 @@
     height: 1.5em;
     margin-bottom: 1rem;
     margin-right: 1rem;
-    background-image: linear-gradient(to right, rgba(255, 255, 255, 0), #ffffff 50%);
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0), var(--bs-body-bg) 50%);
     pointer-events: none;
 }
 
