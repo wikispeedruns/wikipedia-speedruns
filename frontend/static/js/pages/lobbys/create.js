@@ -14,6 +14,7 @@ var app = new Vue({
         competitiveMode: false,
         requireAccount: false,
         penaltyMode: false,
+        findHotkeyMode: false,
     },
 
     methods: {
@@ -29,6 +30,7 @@ var app = new Vue({
             requestBody.rules["require_account"] = this.requireAccount;
             requestBody.rules["is_penalty_mode"] = this.penaltyMode;
             requestBody.rules["live_mode"] = this.liveMode;
+            requestBody.rules["find_hotkey_mode"] = this.findHotkeyMode;
 
             // Only add these fields if not empty
             if (this.name) requestBody["name"] = this.name;
