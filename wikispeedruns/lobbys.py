@@ -470,3 +470,16 @@ def hide_lobby(lobby_id) -> bool:
             db.commit()
 
             return True
+    
+def leave_lobby(user_id: int, lobby_id: int) -> bool:
+
+    query = """
+    DELETE FROM user_lobbys WHERE user_id=%s AND lobby_id=%s
+    """
+
+    db = get_db()
+    with db.cursor() as cursor:
+            cursor.execute(query, (user_id, lobby_id))
+            db.commit()
+
+            return True
