@@ -267,8 +267,9 @@ def leave_lobby(lobby_id):
     user_id = session.get("user_id")
     user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
 
-    if user_info is None or not user_info["owner"]:
-        lobbys.leave_lobby(user_id, lobby_id)
-        return "Left Lobby!", 200
-    else:
+    # Check for lobby ownership - owners can't leave their own lobbies
+    if user_info and user_info["owner"]:
         return "The owner cannot leave the lobby", 400
+    
+    lobbys.leave_lobby(user_id, lobby_id)
+        return "Left Lobby!", 200
