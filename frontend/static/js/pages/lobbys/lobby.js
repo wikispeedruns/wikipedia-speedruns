@@ -267,10 +267,11 @@ var app = new Vue({
         async leaveLobby() {
             event.preventDefault();
             const resp = await fetchJson(`/api/lobbys/leave/${LOBBY_ID}`, "DELETE");
-            if (resp.status > 399) {
-                alert("Unable to leave lobby. Check that you are not the Owner")
-            }                
-            else {
+            if (resp.status == 400) {
+                alert("Unable to leave lobby. Check that you are not the owner")
+            } else if (resp.status > 400) {
+                alert("Unable to leave lobby. Please try again or let us know if there is something broken.")
+            } else {
                 window.location.href = '/';
             }
         }
