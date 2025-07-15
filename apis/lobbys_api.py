@@ -272,4 +272,4 @@ def leave_lobby(lobby_id):
         return "The owner cannot leave the lobby", 400
     
     lobbys.leave_lobby(user_id, lobby_id)
-        return "Left Lobby!", 200
+    return "Left Lobby!", 200
