@@ -258,3 +258,18 @@ def hide_lobby(lobby_id):
 
     lobbys.hide_lobby(lobby_id)
     return "Lobby Deleted!", 200
+
+@lobby_api.delete("/leave/<int:lobby_id>/")
+def leave_lobby(lobby_id):
+    if not lobbys.check_membership(lobby_id, session):
+        return "You do not have access to this lobby", 401
+    
+    user_id = session.get("user_id")
+    user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
+
+    # Check for lobby ownership - owners can't leave their own lobbies
+    if user_info and user_info["owner"]:
+        return "The owner cannot leave the lobby", 400
+    
+    lobbys.leave_lobby(user_id, lobby_id)
+    return "Left Lobby!", 200
