@@ -54,7 +54,7 @@ async function handleLogin(event)
         document.getElementById("loginForm").reset();
         validationAlert("Successfully logged in!", false);
 
-        if (!document.referrer || document.referrer.endsWith("/register"))            
+        if (!document.referrer || document.referrer.endsWith("/register") || document.referrer.includes("/reset"))            
             window.location.href = "/";
         else
             window.location.href = document.referrer;
