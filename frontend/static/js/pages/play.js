@@ -172,9 +172,9 @@ let app = new Vue({
 
         this.startArticle = prompt["start"];
         this.endArticle = prompt["end"];
-        this.language = prompt["language"];
+        this.language = prompt["language"] || LANGUAGE || "en";
         this.resolveArticleTitle(this.endArticle).then((resolvedTitle) => {
-            this.endArticleResolved = resolvedTitle;
+            this.endArticleResolved = resolvedTitle || "";
         });
 
         // !! forces bool if played is not a field
@@ -233,9 +233,10 @@ let app = new Vue({
 
     methods : {
         resolveArticleTitle: async function(title) {
-            if (!title || !this.language) return null;
+            if (!title) return null;
+            const lang = this.language || LANGUAGE || "en";
             try {
-                return await getArticleTitle(title, this.language);
+                return await getArticleTitle(title, lang);
             } catch (error) {
                 console.warn("Failed to resolve article title:", title, error);
                 return null;
@@ -289,9 +290,7 @@ let app = new Vue({
                     this.path[0]['timeReached'] = this.countdownTime;
                 }
 
-                // First check if page's title matches the resolved end article, if not then try the original
-                // If the title matches, finish the game and submit the run
-                // Otherwise update partial run information
+                // Finish if we match the resolved goal (backup is original end), otherwise update partial run info
                 const goalArticle = this.endArticleResolved || this.endArticle;
                 if (page === goalArticle) {
                     this.finish();
