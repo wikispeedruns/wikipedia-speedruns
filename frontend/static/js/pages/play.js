@@ -234,9 +234,8 @@ let app = new Vue({
     methods : {
         resolveArticleTitle: async function(title) {
             if (!title) return null;
-            const lang = this.language || LANGUAGE || "en";
             try {
-                return await getArticleTitle(title, lang);
+                return await getArticleTitle(title, this.language);
             } catch (error) {
                 console.warn("Failed to resolve article title:", title, error);
                 return null;
