@@ -31,6 +31,12 @@ export class ArticleRenderer {
         const body = await getArticle(page, isMobile, this.language, this.revisionDate);
 
         try {
+            // Render error message if article failed to load
+            if (!body || !body["text"] || !body["title"]) {
+                console.warn("Failed to load article:", page);
+                this.frame.innerHTML = "<p>Failed to load article.</p>";
+                return;
+            }
             // This is all in a try because something was throwing errors here, most likely because
             // we don't handle the wikipedia HTML correctly in some edge cases. This is a blanket solution
             // that just makes sure the essential functions work. Really, we should try and find the root cause
@@ -65,6 +71,11 @@ export class ArticleRenderer {
             console.error(error)
 
         } finally {
+            // Exit early instead of crashing if the article failed to load
+            if (!body || !body["text"] || !body["title"]) {
+                return;
+            }
+
             this.frame.querySelectorAll("a, area").forEach((el) => {
                 // Load href here so inspect element can't change link destination
                 const href = el.getAttribute("href");
@@ -119,6 +130,12 @@ export class ArticleRenderer {
                 let b = pageName.split("#");
                 pageName = b[0];
                 anchorTag = b[1];
+            }
+            
+            try {
+                pageName = decodeURIComponent(pageName);
+            } catch (error) {
+                console.warn("Failed to decode page name:", pageName, error);
             }
             this.loadPage(pageName, anchorTag);
         }

@@ -1,5 +1,5 @@
 async function getArticle(page, isMobile = false, lang = 'en', revisionDate=null) {
-
+    // Encode to safely handle spaces/quotes in titles for API requests.
     const encodedPage = encodeURIComponent(page);
     let url = `https://${lang}.wikipedia.org/w/api.php?redirects=1&disableeditsection=true&format=json&origin=*&action=parse&prop=text&useskin=vector`;
 
@@ -11,6 +11,7 @@ async function getArticle(page, isMobile = false, lang = 'en', revisionDate=null
     // If given a reivision date (string), use that to query the last revision before the given date.
     if (revisionDate) {
 
+        // Encode revision date for query params; fall back to current page if lookup fails.
         const encodedRevisionDate = encodeURIComponent(revisionDate);
         let revisionurl = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=revisions&redirects=1&titles=${encodedPage}`
             + `&formatversion=2&rvdir=older&rvprop=timestamp|ids&rvlimit=1&rvstart=${encodedRevisionDate}`;
@@ -22,9 +23,14 @@ async function getArticle(page, isMobile = false, lang = 'en', revisionDate=null
             return null;
         }
 
-        // eww
-        const rev_id = body["query"]["pages"][0]["revisions"][0]["revid"];
-        url += `&oldid=${rev_id}`;
+        const page = body?.query?.pages?.[0];
+        const revision = page?.revisions?.[0];
+
+        if (!revision || !revision.revid) {
+            url += `&page=${encodedPage}`;
+        } else {
+            url += `&oldid=${revision.revid}`;
+        }
     } else {
         url += `&page=${encodedPage}`;
     }
@@ -42,6 +48,7 @@ async function getArticle(page, isMobile = false, lang = 'en', revisionDate=null
 }
 
 async function getArticleTitle(title, lang = 'en') {
+    // Use query+redirects for a canonical title without fetching full HTML.
     const encodedTitle = encodeURIComponent(title);
     const resp = await fetch(
         `https://${lang}.wikipedia.org/w/api.php?action=query&redirects=1&origin=*&format=json&formatversion=2&titles=${encodedTitle}`, {
@@ -50,12 +57,12 @@ async function getArticleTitle(title, lang = 'en') {
     )
     const body = await resp.json()
 
-    if ("error" in body) return null;
-
-    const page = body?.query?.pages?.[0];
-    if (!page || page?.missing) return null;
-
-    return page.title;
+    // Guard against missing/invalid responses from the API.
+    if (!body.query || !body.query.pages || !body.query.pages[0]) {
+        return null;
+    }
+    if (body.query.pages[0].missing) return null;
+    return body.query.pages[0].title;
 }
 
 async function articleCheck(title, lang = 'en') {
