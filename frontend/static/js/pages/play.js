@@ -21,6 +21,7 @@ import { PagePreview } from "../modules/game/pagePreview.js";
 import { startLocalRun, submitLocalRun } from "../modules/localStorage/localStorageSprint.js";
 
 import { triggerLeaderboardUpdate } from "../modules/live/liveLeaderboard.js";
+import { getArticleTitle } from "../modules/wikipediaAPI/util.js";
 
 
 // retrieve the unique prompt_id of the prompt to load
@@ -93,6 +94,7 @@ let app = new Vue({
     data: {
         startArticle: "",    // For all game modes, this is the first article to load
         endArticle: "",      // For sprint games. Reaching this article will trigger game finishing sequence
+        endArticleResolved: "", // End article title after redirect resolution
         currentArticle: "",
         language: "",
         path: [],             // List of objects to store granular run data, submitted on exit/finish
@@ -170,7 +172,10 @@ let app = new Vue({
 
         this.startArticle = prompt["start"];
         this.endArticle = prompt["end"];
-        this.language = prompt["language"];
+        this.language = prompt["language"] || LANGUAGE || "en";
+        this.resolveArticleTitle(this.endArticle).then((resolvedTitle) => {
+            this.endArticleResolved = resolvedTitle || "";
+        });
 
         // !! forces bool if played is not a field
         this.promptPlayed = !!prompt["played"];
@@ -227,6 +232,16 @@ let app = new Vue({
     },
 
     methods : {
+        resolveArticleTitle: async function(title) {
+            if (!title) return null;
+            try {
+                return await getArticleTitle(title, this.language);
+            } catch (error) {
+                console.warn("Failed to resolve article title:", title, error);
+                return null;
+            }
+        },
+
         updateRun: function() {
             if (!this.finished) {
                 this.endTime = Date.now();
@@ -274,9 +289,9 @@ let app = new Vue({
                     this.path[0]['timeReached'] = this.countdownTime;
                 }
 
-                // If the page's title matches that of the end article, finish the game, and submit the run
-                // Otherwise update partial run information
-                if (page === this.endArticle) {
+                // Finish if we match the resolved goal (backup is original end), otherwise update partial run info
+                const goalArticle = this.endArticleResolved || this.endArticle;
+                if (page === goalArticle) {
                     this.finish();
                 } else {
                     this.updateRun();
