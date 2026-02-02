@@ -31,7 +31,7 @@ var MarathonPrompts = {
             </div>
             <div class="card-body table-responsive">
 
-                <p v-if="username">Check your marathon run history <a v-bind:href="'/marathonruns/' + username">here</a>.</p>
+                <p v-if="username">Check your marathon run history <a v-bind:href="'/marathonruns/' + encodeURIComponent(username)">here</a>.</p>
 
                 <table class="table table-hover">
                     <thead>

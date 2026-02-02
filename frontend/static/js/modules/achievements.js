@@ -220,7 +220,7 @@ var achievements = {
             let data = null;
 
             if(this.isProfile){ // This is getting all achievements for data
-                const response = await fetch('/api/achievements/user/' + this.username);
+                const response = await fetch('/api/achievements/user/' + encodeURIComponent(this.username));
                 if(response.status != 200){
                     console.log("error fetching achievements for user");
                     return;

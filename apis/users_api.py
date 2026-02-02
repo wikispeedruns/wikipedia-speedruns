@@ -307,6 +307,14 @@ def change_username():
     id = session["user_id"]
     new_username = request.json["new_username"]
 
+    # Keep username rules consistent with account creation.
+    if not isinstance(new_username, str) or not new_username:
+        return "Invalid username", 400
+    if len(new_username) > 20:
+        return "Invalid username", 400
+    if not _valid_username(new_username):
+        return "Invalid username", 400
+
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
 
@@ -546,4 +554,3 @@ def delete_account():
         db.commit()
 
     return "User account deleted", 200
-

@@ -43,14 +43,16 @@ var profileStatsTable = {
         async get_data() {
 
             try {
-                let response = await fetch("/api/profiles/" + this.username + "/stats");
+                const encodedUsername = encodeURIComponent(this.username);
+
+                let response = await fetch("/api/profiles/" + encodedUsername + "/stats");
                 if (response.status != 200) {
                     alert(await response.text());
                     window.location.href = "/";
                 }
                 const runs = await response.json();
 
-                response = await fetch("/api/profiles/" + this.username);
+                response = await fetch("/api/profiles/" + encodedUsername);
                 if (response.status != 200) {
                     alert(await response.text());
                     window.location.href = "/";

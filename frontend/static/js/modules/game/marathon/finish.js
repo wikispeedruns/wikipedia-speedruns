@@ -33,7 +33,7 @@ var FinishPage = {
 
         //redirect to the corresponding prompt page
         finishPrompt: function(event) {
-            window.location.replace("/marathonruns/" + this.username);
+            window.location.replace("/marathonruns/" + encodeURIComponent(this.username));
         },
 
         //go back to home page

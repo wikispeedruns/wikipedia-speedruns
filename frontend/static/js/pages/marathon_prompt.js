@@ -23,7 +23,7 @@ var app = new Vue({
     methods: {
 
         getRuns: async function(username) {
-            var response = await fetch("/api/marathon/" + username);
+            var response = await fetch("/api/marathon/" + encodeURIComponent(username));
 
             if (response.status == 401) {
                 alert(await response.text());
@@ -50,7 +50,7 @@ var app = new Vue({
         },
 
         buildNewLink: function (page) {
-            let base = "/marathonruns/" + this.username + "?page=" + String(page)
+            let base = "/marathonruns/" + encodeURIComponent(this.username) + "?page=" + String(page)
             if (this.sortMode === 'path') {
                 base += "&sort=path"
             } else if (this.sortMode === 'time') {

@@ -151,6 +151,14 @@ def test_change_password(client, user, session):
     }).status_code == 200
 
 
+def test_change_username_rejects_invalid(client, cursor, user, session):
+    resp = client.post("/api/users/change_username", json={"new_username": "%"})
+    assert resp.status_code == 400
+
+    cursor.execute("SELECT username FROM users WHERE user_id=%s", (user["user_id"],))
+    assert cursor.fetchone()["username"] == user["username"]
+
+
 
 def test_reset_password(client, mail, cursor, user, session):
     new_password = user["password"] + "2"
@@ -197,7 +205,6 @@ def test_reset_password(client, mail, cursor, user, session):
             "email": user["email"],
             "password": new_password
         }).status_code == 200
-
 
 
 
