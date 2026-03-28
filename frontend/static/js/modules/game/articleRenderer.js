@@ -75,16 +75,17 @@ export class ArticleRenderer {
             }
 
             this.frame.querySelectorAll("a, area").forEach((el) => {
-                // Replace namespace links with plain <span> text.
-                if (!isNormalWikipediaArticleLink(linkEl.getAttribute("href"))) {
-                    let newEl = document.createElement("span");
-                    newEl.innerHTML = linkEl.innerHTML;
-                    linkEl.parentNode.replaceChild(newEl, linkEl);
-                    return;
-                }
-                
                 // Load href here so inspect element can't change link destination
                 const href = el.getAttribute("href");
+
+                // Replace namespace links with plain <span> text.
+                // Be sure to leave "#" links (same-page) alone.
+                if (href && (href.substring(0, 1) !== "#") && !isNormalWikipediaArticleLink(href)) {
+                    let newEl = document.createElement("span");
+                    newEl.innerHTML = el.innerHTML;
+                    el.parentNode.replaceChild(newEl, el);
+                    return;
+                }
 
                 // Arrow function to prevent 'this' from being overwritten
                 el.onclick = (e) => {
