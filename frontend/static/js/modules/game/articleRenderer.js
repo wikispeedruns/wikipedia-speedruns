@@ -41,7 +41,7 @@ export class ArticleRenderer {
             // we don't handle the wikipedia HTML correctly in some edge cases. This is a blanket solution
             // that just makes sure the essential functions work. Really, we should try and find the root cause
             // and fix that. However, we have not been able to reproduce it.
-            // TODO add some sort of frontend eror montiroing so we can figure it out
+            // TODO add some sort of frontend error monitoring so we can figure it out
 
             if (this.loadCallback) {
                 this.loadCallback();
@@ -64,8 +64,6 @@ export class ArticleRenderer {
             }
             hideElements(this.frame);
             // disableFindableLinks(this.frame);
-            stripNamespaceLinks(this.frame);
-
         } catch (error) {
             console.error("Error rendering in page somewhere:", error)
             console.error(error)
@@ -77,6 +75,14 @@ export class ArticleRenderer {
             }
 
             this.frame.querySelectorAll("a, area").forEach((el) => {
+                // Replace namespace links with plain <span> text.
+                if (!isNormalWikipediaArticleLink(linkEl.getAttribute("href"))) {
+                    let newEl = document.createElement("span");
+                    newEl.innerHTML = linkEl.innerHTML;
+                    linkEl.parentNode.replaceChild(newEl, linkEl);
+                    return;
+                }
+                
                 // Load href here so inspect element can't change link destination
                 const href = el.getAttribute("href");
 
@@ -109,17 +115,19 @@ export class ArticleRenderer {
             document.getElementById(a).scrollIntoView();
 
         } else {
-            // Ignore external links and internal file links
-            // TODO merge this with stripNamespaceLinks
-            if (!href.startsWith("/wiki/") || href.startsWith("/wiki/File:")) {
+            // Ignore external links and internal file/category/special links.
+            // These are nominally stripped out by "Replace namespace links with plain <span> text"
+            // section when loading the page, but we still check here.
+            if (!isNormalWikipediaArticleLink(href)) {
+                console.log("Ignoring non-article link: " + href + ".");
                 return;
             }
 
-            // Disable the other linksto prevent multiple clicks
+            // Disable the other links to prevent multiple clicks
             this.frame.querySelectorAll("a, area").forEach((el) =>{
                 el.onclick = (e) => {
                     e.preventDefault();
-                    console.log("prevent multiple click");
+                    console.log("All links disabled to prevent multiple clicks.");
                 };
             });
 
@@ -138,6 +146,8 @@ export class ArticleRenderer {
                 console.warn("Failed to decode page name:", pageName, error);
             }
             this.loadPage(pageName, anchorTag);
+
+            // TODO: If loadPage finishes unsuccessfully, then we should re-enable the links to let the user try again!
         }
     }
 }
@@ -205,22 +215,21 @@ function hideElements(frame) {
 
 }
 
-function stripNamespaceLinks(frame) {
 
-    frame.querySelectorAll("a").forEach((linkEl) => {
-
-        if (linkEl.hasAttribute("href")) {
-            if (linkEl.getAttribute("href").startsWith("/wiki/File:") ||
-                linkEl.getAttribute("href").startsWith("/wiki/Wikipedia:") ||
-                linkEl.getAttribute("href").startsWith("/wiki/Category:") ||
-                linkEl.getAttribute("href").startsWith("/wiki/Help:") ||
-                linkEl.getAttribute("href").endsWith("&redlink=1")) {
-                let newEl = document.createElement("span");
-                newEl.innerHTML = linkEl.innerHTML
-                linkEl.parentNode.replaceChild(newEl, linkEl)
-            }
-        }
-    });
+function isNormalWikipediaArticleLink(href) {
+    return href.startsWith("/wiki/") &&
+        !href.startsWith("/wiki/File:") &&
+        !href.startsWith("/wiki/Wikipedia:") &&
+        !href.startsWith("/wiki/Category:") &&
+        !href.startsWith("/wiki/Special:") &&
+        !href.startsWith("/wiki/Help:") &&
+        !href.startsWith("/wiki/Portal:") &&
+        !href.startsWith("/wiki/Template:") &&
+        !href.startsWith("/wiki/Module:") &&
+        !href.startsWith("/wiki/MediaWiki:") &&
+        !href.startsWith("/wiki/Template_talk:") &&
+        !href.startsWith("/wiki/Portal_talk:") &&
+        !href.endsWith("&redlink=1");
 }
 
 function disableFindableLinks(frame) {
