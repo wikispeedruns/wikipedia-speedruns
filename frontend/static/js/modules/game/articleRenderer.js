@@ -22,20 +22,29 @@ export class ArticleRenderer {
         this.language = language;
 
         this.revisionDate = revisionDate;
+        this.isLoadingPage = false;
     }
 
-    async loadPage(page, anchorTag=null) {
+    async loadPage(page) {
 
         const isMobile = window.screen.width < 768;
         const startTime = Date.now();
-        const body = await getArticle(page, isMobile, this.language, this.revisionDate);
+        let body = null;
+
+        try {
+            body = await getArticle(page, isMobile, this.language, this.revisionDate);
+        } catch (error) {
+            console.error("Failed to fetch article:", page, error);
+            renderLoadFailure(this.frame);
+            return false;
+        }
 
         try {
             // Render error message if article failed to load
             if (!body || !body["text"] || !body["title"]) {
                 console.warn("Failed to load article:", page);
-                this.frame.innerHTML = "<p>Failed to load article.</p>";
-                return;
+                renderLoadFailure(this.frame);
+                return false;
             }
             // This is all in a try because something was throwing errors here, most likely because
             // we don't handle the wikipedia HTML correctly in some edge cases. This is a blanket solution
@@ -63,73 +72,55 @@ export class ArticleRenderer {
                 disableLazyLoading(this.frame);
             }
             hideElements(this.frame);
-            // disableFindableLinks(this.frame);
-            stripNamespaceLinks(this.frame);
+            stripNonArticleLinks(this.frame);
 
         } catch (error) {
             console.error("Error rendering in page somewhere:", error)
             console.error(error)
-
-        } finally {
-            // Exit early instead of crashing if the article failed to load
-            if (!body || !body["text"] || !body["title"]) {
-                return;
-            }
-
-            this.frame.querySelectorAll("a, area").forEach((el) => {
-                // Load href here so inspect element can't change link destination
-                const href = el.getAttribute("href");
-
-                // Arrow function to prevent 'this' from being overwritten
-                el.onclick = (e) => {
-                    e.preventDefault();
-                    this.handleWikipediaLink(href);
-                }
-                el.removeAttribute("title");
-
-                if (this.mouseEnter && this.mouseLeave && !isMobile && el.hasAttribute("href") && el.getAttribute("href").startsWith("/wiki/")) {
-                    el.onmouseenter = this.mouseEnter;
-                    el.onmouseleave = this.mouseLeave;
-                }
-            });
-
-            this.pageCallback(body["title"], Date.now() - startTime);
-
-            // if (redirectTag) {
-            //     document.getElementById(anchorTag).scrollIntoView();
-            // }
         }
+
+        this.frame.querySelectorAll("a, area").forEach((el) => {
+            // Load href here so inspect element can't change link destination
+            const href = el.getAttribute("href");
+
+            // Arrow function to prevent 'this' from being overwritten
+            el.onclick = (e) => {
+                e.preventDefault();
+                void this.handleWikipediaLink(href);
+            }
+            el.removeAttribute("title");
+
+            if (this.mouseEnter && this.mouseLeave && !isMobile && isNormalWikipediaArticleLink(href)) {
+                el.onmouseenter = this.mouseEnter;
+                el.onmouseleave = this.mouseLeave;
+            }
+        });
+
+        this.pageCallback(body["title"], Date.now() - startTime);
+
+        return true;
 
     }
 
 
-    handleWikipediaLink(href) {
+    async handleWikipediaLink(href) {
+        if (!href) {
+            return;
+        }
+
         if (href.substring(0, 1) === "#") {
             let a = href.substring(1);
-            document.getElementById(a).scrollIntoView();
+            document.getElementById(a)?.scrollIntoView();
 
         } else {
-            // Ignore external links and internal file links
-            // TODO merge this with stripNamespaceLinks
-            if (!href.startsWith("/wiki/") || href.startsWith("/wiki/File:")) {
+            if (!isNormalWikipediaArticleLink(href) || this.isLoadingPage) {
                 return;
             }
 
-            // Disable the other linksto prevent multiple clicks
-            this.frame.querySelectorAll("a, area").forEach((el) =>{
-                el.onclick = (e) => {
-                    e.preventDefault();
-                    console.log("prevent multiple click");
-                };
-            });
-
             // Remove "/wiki/" from string
             let pageName = href.substring(6)
-            let anchorTag = null;
             if (pageName.includes("#")) {
-                let b = pageName.split("#");
-                pageName = b[0];
-                anchorTag = b[1];
+                pageName = pageName.split("#")[0];
             }
             
             try {
@@ -137,7 +128,13 @@ export class ArticleRenderer {
             } catch (error) {
                 console.warn("Failed to decode page name:", pageName, error);
             }
-            this.loadPage(pageName, anchorTag);
+
+            this.isLoadingPage = true;
+            try {
+                await this.loadPage(pageName);
+            } finally {
+                this.isLoadingPage = false;
+            }
         }
     }
 }
@@ -205,38 +202,37 @@ function hideElements(frame) {
 
 }
 
-function stripNamespaceLinks(frame) {
+function stripNonArticleLinks(frame) {
 
     frame.querySelectorAll("a").forEach((linkEl) => {
-
-        if (linkEl.hasAttribute("href")) {
-            if (linkEl.getAttribute("href").startsWith("/wiki/File:") ||
-                linkEl.getAttribute("href").startsWith("/wiki/Wikipedia:") ||
-                linkEl.getAttribute("href").startsWith("/wiki/Category:") ||
-                linkEl.getAttribute("href").startsWith("/wiki/Help:") ||
-                linkEl.getAttribute("href").endsWith("&redlink=1")) {
-                let newEl = document.createElement("span");
-                newEl.innerHTML = linkEl.innerHTML
-                linkEl.parentNode.replaceChild(newEl, linkEl)
-            }
+        const href = linkEl.getAttribute("href");
+        if (href && href.substring(0, 1) !== "#" && !isNormalWikipediaArticleLink(href)) {
+            let newEl = document.createElement("span");
+            newEl.innerHTML = linkEl.innerHTML
+            linkEl.parentNode.replaceChild(newEl, linkEl)
         }
     });
 }
 
-function disableFindableLinks(frame) {
+function renderLoadFailure(frame) {
+    if (!frame.innerHTML.trim()) {
+        frame.innerHTML = "<p>Failed to load article.</p>";
+    }
+}
 
-    // Disable CTRL + F by splitting up link text into different div
-    frame.querySelectorAll("a").forEach(function(a) {
-        let iter = document.createNodeIterator(a, NodeFilter.SHOW_TEXT);
-        let textNode;
-
-        while (textNode = iter.nextNode()) {
-            let replacementNode = document.createElement('div');
-            replacementNode.innerHTML = '<div style="display:inline-block">' + textNode.textContent.split('').map(function(character) {
-                return '<div style="display:inline-block">' + character.replace(/\s/g, '&nbsp;') + '</div>'
-            }).join('') + '</div>'
-            textNode.parentNode.insertBefore(replacementNode.firstChild, textNode);
-            textNode.parentNode.removeChild(textNode);
-        }
-    });
+function isNormalWikipediaArticleLink(href) {
+    return !!href &&
+        href.startsWith("/wiki/") &&
+        !href.startsWith("/wiki/File:") &&
+        !href.startsWith("/wiki/Wikipedia:") &&
+        !href.startsWith("/wiki/Category:") &&
+        !href.startsWith("/wiki/Special:") &&
+        !href.startsWith("/wiki/Help:") &&
+        !href.startsWith("/wiki/Portal:") &&
+        !href.startsWith("/wiki/Template:") &&
+        !href.startsWith("/wiki/Module:") &&
+        !href.startsWith("/wiki/MediaWiki:") &&
+        !href.startsWith("/wiki/Template_talk:") &&
+        !href.startsWith("/wiki/Portal_talk:") &&
+        !href.endsWith("&redlink=1");
 }
