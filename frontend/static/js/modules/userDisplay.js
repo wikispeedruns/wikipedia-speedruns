@@ -13,10 +13,10 @@ var UserDisplay = {
         return {
             link: ''
         }
-	},
+    },
 
     mounted: function() {
-        this.link = `/profile/${this.username}`;
+        this.link = `/profile/${encodeURIComponent(this.username)}`;
     },
 
     template: (`
