@@ -123,7 +123,14 @@ var app = new Vue({
             if (this.language === 'en') {
                 [this[prompt]] = await this.$refs.pg.generatePrompt();
             } else {
-                this[prompt] = await getRandomArticle(this.language);
+                const article = await getRandomArticle(this.language);
+                if (!article) {
+                    this.addPromptMessage = "Unable to fetch a random article right now. Please try again.";
+                    return;
+                }
+
+                this.addPromptMessage = "";
+                this[prompt] = article;
             }
         },
 
