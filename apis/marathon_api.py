@@ -10,6 +10,7 @@ from wikispeedruns.marathon import genPrompts
 from wikispeedruns import prompts
 
 marathon_api = Blueprint('marathon', __name__, url_prefix='/api/marathon')
+MAX_ARCHIVE_LIMIT = 50
 
 
 @marathon_api.post('/runs/')
@@ -239,7 +240,7 @@ def get_marathon_personal_leaderboard(username):
 @marathon_api.get('/archive')
 def get_archive_prompts():
     try:
-        limit = int(request.args.get('limit', 20))
+        limit = max(1, min(int(request.args.get('limit', 20)), MAX_ARCHIVE_LIMIT))
         offset = int(request.args.get('offset', 0))
         marathons, num_prompts = prompts.get_archive_prompts("marathon",
             offset=offset,

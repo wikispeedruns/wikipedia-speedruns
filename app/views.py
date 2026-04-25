@@ -8,6 +8,7 @@ import random
 import wikispeedruns
 
 views = Blueprint("views", __name__)
+MAX_ARCHIVE_LIMIT = 50
 
 # Passes session args to function if needed
 def render_with_data(template, **kwargs):
@@ -37,7 +38,7 @@ def get_about_page():
 @views.route('/archive', methods=['GET'])
 def get_archive_page():
     try:
-        limit = int(request.args.get('limit', 20))
+        limit = max(1, min(int(request.args.get('limit', 20)), MAX_ARCHIVE_LIMIT))
         offset = int(request.args.get('offset', 0))
         return render_with_data('archive.html', limit=limit, offset=offset)
     except ValueError:
@@ -46,7 +47,7 @@ def get_archive_page():
 @views.route('/marathon_archive', methods=['GET'])
 def get_marathon_archive_page():
     try:
-        limit = int(request.args.get('limit', 10))
+        limit = max(1, min(int(request.args.get('limit', 10)), MAX_ARCHIVE_LIMIT))
         offset = int(request.args.get('offset', 0))
         return render_with_data('marathon_archive.html', limit=limit, offset=offset)
     except ValueError:
