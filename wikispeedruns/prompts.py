@@ -252,14 +252,30 @@ def get_active_prompts(prompt_type: PromptType, user_id: Optional[int]=None,) ->
 
     return prompts
 
-def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, offset: int=0, limit: int=20) -> Tuple[List[Prompt], int]:
+def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, offset: int=0, limit: int=20, search: Optional[str]=None) -> Tuple[List[Prompt], int]:
     '''
     Get all prompts for archive, including currently active
     '''
 
     query, args = _construct_prompt_user_query(prompt_type, user_id)
     if (prompt_type == "sprint"):
-        query += f" WHERE used = 1 AND active_start <= NOW() ORDER BY active_start DESC, prompt_id DESC LIMIT %(offset)s, %(limit)s"
+        query += " WHERE used = 1 AND active_start <= NOW()"
+
+        if (search is not None and search.strip()):
+            args["search"] = f"%{search.strip().lower()}%"
+            query += """
+            ORDER BY
+                CASE
+                    WHEN LOWER(start) LIKE %(search)s OR LOWER(end) LIKE %(search)s THEN 0
+                    ELSE 1
+                END,
+                active_start DESC,
+                prompt_id DESC
+            """
+        else:
+            query += " ORDER BY active_start DESC, prompt_id DESC"
+
+        query += " LIMIT %(offset)s, %(limit)s"
         count_query = "SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW()"
     elif (prompt_type == "marathon"):
         query += f" ORDER BY prompt_id DESC LIMIT %(offset)s, %(limit)s"
@@ -364,4 +380,3 @@ def check_for_sprint_duplicates(start: str, end: str) -> Tuple[str, int]:
             return ('cmty', res_cmty['pending_prompt_id'])
 
         return ('none', -1)
-
