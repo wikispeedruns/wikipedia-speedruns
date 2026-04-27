@@ -5,7 +5,7 @@ import { CustomPlay } from "../modules/customPlay.js";
 
 import { uploadLocalSprints, getLocalSprints } from "../modules/localStorage/localStorageSprint.js";
 import { uploadLocalMarathons, getLocalMarathons } from "../modules/localStorage/localStorageMarathon.js";
-import { uploadLocalQuickRuns } from "../modules/localStorage/localStorageQuickRun.js";
+import { uploadLocalQuickRuns, getLocalQuickRuns } from "../modules/localStorage/localStorageQuickRun.js";
 import { generateStreakText } from "../modules/streaks.js";
 import { getUserLobby } from "../modules/lobby/utils.js";
 
@@ -77,6 +77,49 @@ var app = new Vue({
         getDate: function (string) {
             let date = new Date(string);
             return date.toLocaleDateString();
+        },
+
+        updateTocSolvedState: function () {
+            const solvedByHash = {
+                "#quick-play": Object.keys(getLocalQuickRuns()).length > 0,
+                "#prompt-of-the-day": this.dailyPrompts.some(p => p.played),
+                "#training-mode": this.activePrompts.some(p => p.played),
+                "#marathon-mode": Object.keys(getLocalMarathons()).length > 0,
+                "#party-mode": this.lobbies.length > this.hiddenLobbies
+            };
+
+            const links = document.querySelectorAll('nav[data-toggle="toc"] a.nav-link');
+            links.forEach(link => {
+                const hash = link.getAttribute("href");
+                link.classList.toggle("toc-solved", Boolean(solvedByHash[hash]));
+            });
+        },
+
+        setActiveTocLink: function (targetLink) {
+            const tocLinks = document.querySelectorAll('nav[data-toggle="toc"] a.nav-link');
+
+            tocLinks.forEach(link => {
+                link.classList.remove("active");
+                const parentItem = link.parentElement;
+                if (parentItem) {
+                    parentItem.classList.remove("active");
+                }
+            });
+
+            targetLink.classList.add("active");
+            const targetParent = targetLink.parentElement;
+            if (targetParent) {
+                targetParent.classList.add("active");
+            }
+        },
+
+        syncActiveTocLinkFromHash: function (hash) {
+            const targetHash = hash || window.location.hash || "#quick-play";
+            const targetLink = document.querySelector(`nav[data-toggle="toc"] a.nav-link[href="${targetHash}"]`);
+
+            if (targetLink) {
+                this.setActiveTocLink(targetLink);
+            }
         },
     },
 
@@ -154,5 +197,21 @@ var app = new Vue({
             const resp = await getStreak();
             this.streakText = generateStreakText(resp);
         }
+
+        this.$nextTick(() => {
+            const toc = document.querySelector('nav[data-toggle="toc"]');
+            if (toc) {
+                toc.querySelectorAll('a.nav-link').forEach(link => {
+                    link.addEventListener('click', () => {
+                        window.setTimeout(() => this.syncActiveTocLinkFromHash(link.getAttribute("href")), 0);
+                    });
+                });
+
+                window.addEventListener("hashchange", () => this.syncActiveTocLinkFromHash());
+            }
+
+            this.syncActiveTocLinkFromHash();
+            requestAnimationFrame(() => this.updateTocSolvedState());
+        });
     }
 })

@@ -81,9 +81,10 @@
     <!-- main content area -->
     <div class="col-sm-9">
 
-        <div id="quick-play" class="card">
+        <!-- Quick Play section -->
+        <div class="card">
             <div class="alert alert-info my-0" role="alert">
-                <h5 class="my-0">Quick Play</h5>
+                <h5 id="quick-play" class="my-0">Quick Play</h5>
                 Wondering what could possibly link Philosophy to Chuck Norris? Stop wondering and find out yourself!
             </div>
             <div class="card-body">
@@ -91,11 +92,11 @@
             </div>
         </div>
 
+        <!-- Prompt of the Day section -->
         <hr class="my-4">
-
         <div class="card">
             <div class="alert alert-info my-0" role="alert">
-                <h5 class="my-0">Prompt of the Day</h5>
+                <h5 id="prompt-of-the-day" class="my-0">Prompt of the Day</h5>
                 <template v-if="loggedIn === true">
                     Play today’s prompt to build your streak! 🔥
                 </template>
@@ -149,11 +150,11 @@
 
         </div>
 
+        <!-- Training Mode section -->
         <hr class="my-4">
-
         <div class="card">
             <div class="alert alert-info my-0" role="alert">
-                <h5 class="my-0">Training Mode</h5>
+                <h5 id="training-mode" class="my-0">Training Mode</h5>
                 Can’t wait until tomorrow? Have a go at some of our classics.
             </div>
             <div class="card-body table-responsive">
@@ -203,9 +204,10 @@
 
         <hr class="my-4">
 
+        <!-- Party Mode section -->
         <div class="card" id="user-lobbies">
             <div class="alert alert-info my-0" role="alert">
-                <h5 class="my-0">Party Mode</h5>
+                <h5 id="party-mode" class="my-0">Party Mode</h5>
                 Play with friends—anytime, anywhere!
                 <template v-if="loggedIn === false">
                     <b><a href="/login" class="no-color">Log in</a></b> to create a new private lobby.
