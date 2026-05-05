@@ -4,10 +4,12 @@ PyMySQL>=1.0.2
 bcrypt>=3.2.0
 Flask-Dance==7.0.1
 itsdangerous==2.1.2
-pytest==6.2.5
 importlib-metadata==4.13.0
 
 celery[redis]
 
 cryptography
 sentry-sdk[flask]
+
+# Dev Dependencies:
+pytest==9.0.2
