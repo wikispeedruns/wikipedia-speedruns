@@ -6,6 +6,17 @@ from wikispeedruns import leaderboards, lobbys, prompts
 
 leaderboard_api = Blueprint('leaderboards', __name__, url_prefix='/api')
 
+MAX_LEADERBOARD_LIMIT = 100
+
+
+def _clamp_leaderboard_limit(payload):
+    # Cap caller-supplied limit to bound the row count returned by /leaderboard.
+    # /stats receives this too but discards it — stats aggregate over the full filtered set.
+    if "limit" in payload and payload["limit"] is not None:
+        payload["limit"] = max(1, min(int(payload["limit"]), MAX_LEADERBOARD_LIMIT))
+    return payload
+
+
 LEADERBOARD_JSON = {
     field: OptionalArg(basetype)
     for field, basetype in {
@@ -34,7 +45,7 @@ def get_sprint_leaderboard(prompt_id, run_id):
     resp = leaderboards.get_leaderboard_runs(
         prompt_id=prompt_id,
         run_id=run_id,
-        **request.json
+        **_clamp_leaderboard_limit(request.json)
     )
 
     resp["prompt"] = prompts.get_prompt(prompt_id=prompt_id, prompt_type="sprint")
@@ -53,7 +64,7 @@ def get_lobby_leaderboard(lobby_id, prompt_id, run_id):
         lobby_id=lobby_id,
         prompt_id=prompt_id,
         run_id=run_id,
-        **request.json
+        **_clamp_leaderboard_limit(request.json)
     )
 
     prompts = lobbys.get_lobby_prompts(lobby_id=lobby_id, prompt_id=prompt_id)
@@ -70,7 +81,7 @@ def get_sprint_leaderboard_stats(prompt_id, run_id):
     resp = leaderboards.get_leaderboard_stats(
         prompt_id=prompt_id,
         run_id=run_id,
-        **request.json
+        **_clamp_leaderboard_limit(request.json)
     )
 
     return jsonify(resp), 200
@@ -83,7 +94,7 @@ def get_lobby_leaderboard_stats(lobby_id, prompt_id, run_id):
         lobby_id=lobby_id,
         prompt_id=prompt_id,
         run_id=run_id,
-        **request.json
+        **_clamp_leaderboard_limit(request.json)
     )
 
     return jsonify(resp), 200

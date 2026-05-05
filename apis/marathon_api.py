@@ -125,9 +125,9 @@ def get_all_marathon_prompts():
 
 
 @marathon_api.get('/get_prompts')
-def get_marathon_prompts():    
+def get_marathon_prompts():
     try:
-        limit = int(request.args.get('limit', 5))
+        limit = max(1, min(int(request.args.get('limit', 5)), MAX_ARCHIVE_LIMIT))
         marathons, _ = prompts.get_archive_prompts("marathon",
             limit=limit)
 
