@@ -55,9 +55,9 @@
             
         <p>Remember, luck is king, so put on your lucky hat, grab your lucky socks, and let the games begin!</p>
 
-        <p>First time? Play the <a href="/play/tutorial">tutorial</a></p>
+        <p>First time? Play the <a href="/play/tutorial">tutorial</a>.</p>
 
-        <p>Try our new prompt generator <a href="/generator">here</a></p>
+        <p>Try our new prompt generator <a href="/generator">here</a>.</p>
 
         <template v-cloak>
             <p v-if="loggedIn === true && lobbies.length > 0">
@@ -193,7 +193,7 @@
                 </table>
             </div>
             <div class="card-footer text-muted">
-                Feeling lucky? Try a <b><a href="/random" class="no-color">random prompt</a></b>. Or check out our <b><a href="/archive" class="no-color">archive</a></b>.
+                Feeling lucky? Try a <b><a href="/random" class="no-color">random prompt</a></b> or check out our <b><a href="/archive" class="no-color">archive</a></b>.
             </div>
         </div>
 
@@ -211,7 +211,7 @@
                     <b><a href="/login" class="no-color">Log in</a></b> to create a new private lobby.
                 </template>
                 <template v-else>
-                    Create a <b><a href="/lobby/create" class="no-color">new private lobby</a></b>. Or join an existing one.
+                    Create a <b><a href="/lobby/create" class="no-color">new private lobby</a></b> or join an existing one.
                 </template>
             </div>
             <div class="card-body table-responsive" v-if="loggedIn === true">
