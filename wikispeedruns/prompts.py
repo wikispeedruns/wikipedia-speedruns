@@ -7,6 +7,7 @@ import pymysql
 from pymysql.cursors import DictCursor
 
 import datetime
+import re
 
 # TODO account for marathon prompts here
 
@@ -262,21 +263,16 @@ def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, of
         query += " WHERE used = 1 AND active_start <= NOW()"
 
         if (search is not None and search.strip()):
-            args["search"] = f"%{search.strip().lower()}%"
-            query += """
-            ORDER BY
-                CASE
-                    WHEN LOWER(start) LIKE %(search)s OR LOWER(end) LIKE %(search)s THEN 0
-                    ELSE 1
-                END,
-                active_start DESC,
-                prompt_id DESC
-            """
+            escaped = re.sub(r'([%_\\])', r'\\\1', search.strip().lower())
+            args["search"] = f"%{escaped}%"
+            query += " AND (LOWER(start) LIKE %(search)s OR LOWER(end) LIKE %(search)s)"
+            query += " ORDER BY active_start DESC, prompt_id DESC"
+            count_query = "SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW() AND (LOWER(start) LIKE %(search)s OR LOWER(end) LIKE %(search)s)"
         else:
             query += " ORDER BY active_start DESC, prompt_id DESC"
+            count_query = "SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW()"
 
         query += " LIMIT %(offset)s, %(limit)s"
-        count_query = "SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW()"
     elif (prompt_type == "marathon"):
         query += f" ORDER BY prompt_id DESC LIMIT %(offset)s, %(limit)s"
         count_query = "SELECT COUNT(*) AS n FROM marathonprompts"
@@ -297,7 +293,7 @@ def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, of
                 if (p['active']): p['end'] = None
 
         # get the total number of prompts
-        cur.execute(count_query)
+        cur.execute(count_query, args)
         n = cur.fetchone()['n']
 
         return prompts, n
