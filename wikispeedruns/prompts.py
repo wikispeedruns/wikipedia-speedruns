@@ -265,9 +265,10 @@ def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, of
         if (search is not None and search.strip()):
             escaped = re.sub(r'([%_\\])', r'\\\1', search.strip().lower())
             args["search"] = f"%{escaped}%"
-            query += " AND (LOWER(start) LIKE %(search)s OR LOWER(end) LIKE %(search)s)"
+            archive_search_filter = "LOWER(start) LIKE %(search)s ESCAPE '\\\\' OR (active_end < NOW() AND LOWER(end) LIKE %(search)s ESCAPE '\\\\')"
+            query += f" AND ({archive_search_filter})"
             query += " ORDER BY active_start DESC, prompt_id DESC"
-            count_query = "SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW() AND (LOWER(start) LIKE %(search)s OR LOWER(end) LIKE %(search)s)"
+            count_query = f"SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW() AND ({archive_search_filter})"
         else:
             query += " ORDER BY active_start DESC, prompt_id DESC"
             count_query = "SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW()"
