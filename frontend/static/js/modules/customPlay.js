@@ -38,7 +38,14 @@ var CustomPlay = {
             if (this.language === 'en') {
                 [this[prompt]] = await this.$refs.pg.generatePrompt();
             } else {
-                this[prompt] = await getRandomArticle(this.language);
+                const article = await getRandomArticle(this.language);
+                if (!article) {
+                    this.articleCheckMessage = "Unable to fetch a random article right now. Please try again.";
+                    return;
+                }
+
+                this.articleCheckMessage = "";
+                this[prompt] = article;
             }
         },
 
@@ -73,6 +80,10 @@ var CustomPlay = {
                 } else {
                     start = await getRandomArticle(this.language);
                     end = await getRandomArticle(this.language);
+                    if (!start || !end) {
+                        this.articleCheckMessage = "Unable to fetch random articles right now. Please try again.";
+                        return;
+                    }
                 }
 
                 console.log("start: " + start + " end: " + end);
