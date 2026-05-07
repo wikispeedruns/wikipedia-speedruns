@@ -31,6 +31,10 @@ export class ArticleRenderer {
         const startTime = Date.now();
         let body = null;
 
+        if (this.loadCallback) {
+            this.loadCallback();
+        }
+
         try {
             body = await getArticle(page, isMobile, this.language, this.revisionDate);
         } catch (error) {
@@ -51,10 +55,6 @@ export class ArticleRenderer {
             // that just makes sure the essential functions work. Really, we should try and find the root cause
             // and fix that. However, we have not been able to reproduce it.
             // TODO add some sort of frontend eror montiroing so we can figure it out
-
-            if (this.loadCallback) {
-                this.loadCallback();
-            }
 
             this.frame.innerHTML = body["text"]["*"];
 
