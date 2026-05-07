@@ -11,3 +11,6 @@ static/js-build
 
 .DS_Store
 .vscode
+.claude
+CLAUDE.md
+.playwright-mcp
