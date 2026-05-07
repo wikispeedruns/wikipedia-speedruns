@@ -11,6 +11,7 @@ from util.decorators import check_admin, check_request_json
 from wikispeedruns import prompts
 
 sprint_api = Blueprint('sprints', __name__, url_prefix='/api/sprints')
+MAX_ARCHIVE_LIMIT = 50
 
 
 ### Prompt Management Endpoints
@@ -108,7 +109,7 @@ def get_active_prompts():
 @sprint_api.get('/archive')
 def get_archive_prompts():
     try:
-        limit = int(request.args.get('limit', 20))
+        limit = max(1, min(int(request.args.get('limit', 20)), MAX_ARCHIVE_LIMIT))
         offset = int(request.args.get('offset', 0))
         sprints, num_prompts = prompts.get_archive_prompts("sprint",
             offset=offset,

@@ -6,6 +6,7 @@ generator_api = Blueprint("generator", __name__, url_prefix="/api/generator")
 
 OFFSET = 100
 LIMIT = 300000
+MAX_NUM_ARTICLES = 50
 
 # Load in file when imported
 articles = []
@@ -37,8 +38,11 @@ def get_random_prompt():
     if (count == 0):
         return "Prompt generation not setup", 500
 
-    num = int(request.args.get('num_articles', 1))
-    difficulty = int(request.args.get('difficulty', 10000))
+    try:
+        num = max(1, min(int(request.args.get('num_articles', 1)), MAX_NUM_ARTICLES))
+        difficulty = int(request.args.get('difficulty', 10000))
+    except ValueError:
+        return "Invalid num_articles or difficulty", 400
 
     if (difficulty >= LIMIT or difficulty < 10):
         return f"Invalid difficulty, should be between 10 and {LIMIT}", 400

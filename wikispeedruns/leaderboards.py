@@ -304,6 +304,10 @@ def get_leaderboard_stats(
     run_id: Optional[int] = None,
     **kwargs
 ):
+    # Stats aggregate over the whole filtered set, not a page. Drop any caller-
+    # supplied pagination so it doesn't collide with the explicit limit=None below.
+    kwargs.pop("limit", None)
+    kwargs.pop("offset", None)
     lb_query = get_leaderboard_runs(prompt_id, lobby_id, run_id, limit=None, offset=0, query_only=True, **kwargs)
 
     query = f'''

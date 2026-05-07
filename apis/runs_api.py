@@ -13,6 +13,7 @@ import random
 
 # Does not have its own prefix, instead part of the lobbys and sprints apis
 run_api = Blueprint('runs', __name__, url_prefix='/api')
+MAX_SUGGESTED_NUM = 50
 
 
 @run_api.post('/sprints/<int:prompt_id>/runs')
@@ -193,8 +194,10 @@ def get_quick_run(id):
 
 @run_api.get('/quick_run/suggested')
 def get_most_recent_quick_run_prompts():
-    
-    num = int(request.args.get('num'))
+    try:
+        num = max(1, min(int(request.args.get('num', 5)), MAX_SUGGESTED_NUM))
+    except (TypeError, ValueError):
+        return "Invalid num", 400
 
     query = '''
     SELECT * FROM (
