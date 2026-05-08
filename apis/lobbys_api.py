@@ -115,7 +115,10 @@ def add_lobby_prompt(lobby_id):
     user_id = session.get("user_id")
     user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
 
-    if user_info is None or not user_info["owner"]:
+    lobby = lobbys.get_lobby(lobby_id)
+    allow_anyone = lobby and lobby.get("rules", {}).get("allow_anyone_add_prompts", False)
+
+    if user_info is None or (not user_info["owner"] and not allow_anyone):
         return "Only the owner can add prompts to this lobby", 401
 
     start = request.json["start"]

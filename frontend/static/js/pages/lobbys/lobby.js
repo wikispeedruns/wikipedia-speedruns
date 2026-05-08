@@ -49,6 +49,13 @@ var app = new Vue({
         messageTimer: null
     },
 
+    computed: {
+        canAddPrompts() {
+            return this.lobbyInfo.user.owner ||
+                !!this.lobbyInfo?.rules?.allow_anyone_add_prompts;
+        }
+    },
+
     mounted: async function() {
         this.link = window.location.href;
         await Promise.all([this.getLobbyInfo(), this.getPrompts(), this.getLanguages()]);

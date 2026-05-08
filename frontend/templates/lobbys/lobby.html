@@ -122,6 +122,10 @@
 
         <hr>
 
+    </template>
+
+    <template v-if="canAddPrompts">
+
         <h3>Add a Prompt:</h3>
 
         <form id="newPrompt" v-on:submit.prevent="addPrompt">
