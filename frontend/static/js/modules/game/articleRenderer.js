@@ -131,7 +131,10 @@ export class ArticleRenderer {
 
             this.isLoadingPage = true;
             try {
-                await this.loadPage(pageName);
+                const success = await this.loadPage(pageName);
+                if (!success) {
+                    showLoadError(this.frame);
+                }
             } finally {
                 this.isLoadingPage = false;
             }
@@ -212,6 +215,14 @@ function stripNonArticleLinks(frame) {
             linkEl.parentNode.replaceChild(newEl, linkEl)
         }
     });
+}
+
+function showLoadError(frame) {
+    const el = document.createElement("div");
+    el.textContent = "That link didn\u2019t work. Try another link.";
+    el.style.cssText = "position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#f8d7da;color:#721c24;padding:8px 16px;border-radius:4px;z-index:9999;font-size:14px;max-width:90vw;text-align:center;box-sizing:border-box;";
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
 }
 
 function renderLoadFailure(frame) {
