@@ -15,18 +15,31 @@ var app = new Vue({
         currentPathIndex: 0,
         path: [],
         renderer: null,
+        isLoadingPage: false,
     },
 
     methods: {
         previous: async function () {
+            if (this.isLoadingPage) return;
             console.log(this.currentPathIndex);
             document.getElementById(div_name).innerHTML = "";
-            await this.renderer.loadPage(this.path[--this.currentPathIndex]);
+            this.isLoadingPage = true;
+            try {
+                await this.renderer.loadPage(this.path[--this.currentPathIndex]);
+            } finally {
+                this.isLoadingPage = false;
+            }
         },
         next: async function() {
+            if (this.isLoadingPage) return;
             console.log(this.currentPathIndex);
             document.getElementById(div_name).innerHTML = "";
-            await this.renderer.loadPage(this.path[++this.currentPathIndex]);
+            this.isLoadingPage = true;
+            try {
+                await this.renderer.loadPage(this.path[++this.currentPathIndex]);
+            } finally {
+                this.isLoadingPage = false;
+            }
         },
     },
 

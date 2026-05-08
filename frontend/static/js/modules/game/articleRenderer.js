@@ -31,6 +31,10 @@ export class ArticleRenderer {
         const startTime = Date.now();
         let body = null;
 
+        if (this.loadCallback) {
+            this.loadCallback();
+        }
+
         try {
             body = await getArticle(page, isMobile, this.language, this.revisionDate);
         } catch (error) {
@@ -51,10 +55,6 @@ export class ArticleRenderer {
             // that just makes sure the essential functions work. Really, we should try and find the root cause
             // and fix that. However, we have not been able to reproduce it.
             // TODO add some sort of frontend eror montiroing so we can figure it out
-
-            if (this.loadCallback) {
-                this.loadCallback();
-            }
 
             this.frame.innerHTML = body["text"]["*"];
 
@@ -131,7 +131,10 @@ export class ArticleRenderer {
 
             this.isLoadingPage = true;
             try {
-                await this.loadPage(pageName);
+                const success = await this.loadPage(pageName);
+                if (!success) {
+                    showLoadError(this.frame);
+                }
             } finally {
                 this.isLoadingPage = false;
             }
@@ -214,6 +217,14 @@ function stripNonArticleLinks(frame) {
     });
 }
 
+function showLoadError(frame) {
+    const el = document.createElement("div");
+    el.textContent = "That link didn\u2019t work. Try another link.";
+    el.style.cssText = "position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#f8d7da;color:#721c24;padding:8px 16px;border-radius:4px;z-index:9999;font-size:14px;max-width:90vw;text-align:center;box-sizing:border-box;";
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+}
+
 function renderLoadFailure(frame) {
     if (!frame.innerHTML.trim()) {
         frame.innerHTML = "<p>Failed to load article.</p>";
@@ -234,5 +245,5 @@ function isNormalWikipediaArticleLink(href) {
         !href.startsWith("/wiki/MediaWiki:") &&
         !href.startsWith("/wiki/Template_talk:") &&
         !href.startsWith("/wiki/Portal_talk:") &&
-        !href.endsWith("&redlink=1");
+        !new URLSearchParams(href.split("?")[1] || "").has("redlink");
 }
