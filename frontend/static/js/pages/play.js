@@ -170,6 +170,8 @@ let app = new Vue({
             this.isFindHotkeyMode = !!lobby?.["rules"]?.["find_hotkey_mode"];
             this.allowNamespaceLinks = !!lobby?.["rules"]?.["allow_namespace_links"];
             this.isHost = lobby?.["user"]?.["owner"];
+        } else {
+            this.allowNamespaceLinks = !!serverData["allow_namespace_links"];
         }
 
         this.startArticle = prompt["start"];

@@ -120,10 +120,11 @@ def get_quick_run_page():
         prompt_start = request.args.get('prompt_start', None)
         prompt_end = request.args.get('prompt_end', None)
         scroll = request.args.get('scroll', None)
+        allow_namespace_links = request.args.get('allow_namespace_links', None)
         lang = request.args.get('lang', 'en')
         if prompt_start is None or prompt_end is None or not lang.strip():
             return "Invalid request", 400
-        return render_with_data('play.html', prompt_start=prompt_start, prompt_end=prompt_end, scroll=scroll, lang=lang)
+        return render_with_data('play.html', prompt_start=prompt_start, prompt_end=prompt_end, scroll=scroll, lang=lang, allow_namespace_links=allow_namespace_links)
     except ValueError:
         return "Page Not Found", 404
 

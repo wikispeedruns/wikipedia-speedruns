@@ -82,8 +82,8 @@
                     <span class="text-muted fw-light">
                         Enable all namespace links (e.g. Wikipedia:, Category:, Portal:)
                     </span>
-                    <br>
-                    <span class="text-danger fw-light">
+                    <br v-if="allowNamespaceLinks">
+                    <span v-if="allowNamespaceLinks" class="text-danger fw-light">
                         Warning: Navigating into namespaces may leave you stuck with no way back to regular articles
                     </span>
                 </label>
