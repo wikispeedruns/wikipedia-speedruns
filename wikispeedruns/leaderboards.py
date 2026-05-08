@@ -64,8 +64,11 @@ def _query_sort_expr(table, sort_mode, sort_asc):
     dir = "ASC" if sort_asc else "DESC"    
     if (sort_mode == 'time'):
         sort_exp = f'finished DESC, play_time {dir}'
-    elif (sort_mode == 'length' or sort_mode == 'penalty'):
+    elif (sort_mode == 'length'):
         sort_exp = f"finished DESC, JSON_LENGTH({table}.`path`, '$.path') {dir}, play_time {dir}"
+    elif (sort_mode == 'penalty'):
+        penalty_expr = f"COALESCE(JSON_EXTRACT({table}.`path`, CONCAT('$.path[', JSON_LENGTH({table}.`path`, '$.path') - 1, '].penaltyTime')), 0)"
+        sort_exp = f"finished DESC, (play_time + {penalty_expr}) {dir}"
     elif (sort_mode == 'start'):
         sort_exp = f'start_time {dir}'
     else:
