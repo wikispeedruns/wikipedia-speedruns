@@ -234,5 +234,5 @@ function isNormalWikipediaArticleLink(href) {
         !href.startsWith("/wiki/MediaWiki:") &&
         !href.startsWith("/wiki/Template_talk:") &&
         !href.startsWith("/wiki/Portal_talk:") &&
-        !href.endsWith("&redlink=1");
+        !new URLSearchParams(href.split("?")[1] || "").has("redlink");
 }
