@@ -432,7 +432,7 @@ window.addEventListener("beforeunload", beforeUnloadListener);
 // Disable find hotkeys, players will be given a warning
 window.addEventListener("keydown", function(e) {
     //disable find
-    if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && (e.keyCode == 70 || e.keyCode == 71))) {
+    if (["F3", "/", "'"].includes(e.key) || ((e.ctrlKey || e.metaKey) && (e.key == "f" || e.key == "g"))) {
         e.preventDefault();
         this.alert("WARNING: Attempt to Find in page. This will be recorded.");
     }

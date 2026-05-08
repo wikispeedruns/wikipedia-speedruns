@@ -65,6 +65,20 @@
                 </label>
 	        </div>
 
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="namespace-links-checkbox" v-model="allowNamespaceLinks">
+                <label class="form-check-label" for="namespace-links-checkbox">
+                    <b>Allow namespace links</b>
+                    <span class="text-muted fw-light">
+                        Enable all namespace links (e.g. Wikipedia:, Category:, Portal:)
+                    </span>
+                    <br>
+                    <span class="text-danger fw-light">
+                        Warning: Navigating into namespaces may leave you stuck with no way back to regular articles
+                    </span>
+                </label>
+	        </div>
+
             <!--
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="req-acc-checkbox" v-model="requireAccount">

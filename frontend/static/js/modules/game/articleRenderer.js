@@ -11,7 +11,7 @@ export class ArticleRenderer {
      *
      * revisionDate: date for article revisions are tied to.
      */
-    constructor(frame, pageCallback, mouseEnter, mouseLeave, loadCallback, language, revisionDate) {
+    constructor(frame, pageCallback, mouseEnter, mouseLeave, loadCallback, language, revisionDate, allowNamespaceLinks = false) {
         this.frame = frame;
         this.frame.classList.add("wiki-insert");
 
@@ -23,6 +23,7 @@ export class ArticleRenderer {
 
         this.revisionDate = revisionDate;
         this.isLoadingPage = false;
+        this.allowNamespaceLinks = allowNamespaceLinks;
     }
 
     async loadPage(page) {
@@ -72,7 +73,7 @@ export class ArticleRenderer {
                 disableLazyLoading(this.frame);
             }
             hideElements(this.frame);
-            stripNonArticleLinks(this.frame);
+            stripNonArticleLinks(this.frame, this.allowNamespaceLinks);
 
         } catch (error) {
             console.error("Error rendering in page somewhere:", error)
@@ -90,7 +91,7 @@ export class ArticleRenderer {
             }
             el.removeAttribute("title");
 
-            if (this.mouseEnter && this.mouseLeave && !isMobile && isNormalWikipediaArticleLink(href)) {
+            if (this.mouseEnter && this.mouseLeave && !isMobile && isNormalWikipediaArticleLink(href, this.allowNamespaceLinks)) {
                 el.onmouseenter = this.mouseEnter;
                 el.onmouseleave = this.mouseLeave;
             }
@@ -113,7 +114,7 @@ export class ArticleRenderer {
             document.getElementById(a)?.scrollIntoView();
 
         } else {
-            if (!isNormalWikipediaArticleLink(href) || this.isLoadingPage) {
+            if (!isNormalWikipediaArticleLink(href, this.allowNamespaceLinks) || this.isLoadingPage) {
                 return;
             }
 
@@ -202,11 +203,11 @@ function hideElements(frame) {
 
 }
 
-function stripNonArticleLinks(frame) {
+function stripNonArticleLinks(frame, allowNamespaceLinks = false) {
 
     frame.querySelectorAll("a").forEach((linkEl) => {
         const href = linkEl.getAttribute("href");
-        if (href && href.substring(0, 1) !== "#" && !isNormalWikipediaArticleLink(href)) {
+        if (href && href.substring(0, 1) !== "#" && !isNormalWikipediaArticleLink(href, allowNamespaceLinks)) {
             let newEl = document.createElement("span");
             newEl.innerHTML = linkEl.innerHTML
             linkEl.parentNode.replaceChild(newEl, linkEl)
@@ -220,10 +221,16 @@ function renderLoadFailure(frame) {
     }
 }
 
-function isNormalWikipediaArticleLink(href) {
-    return !!href &&
-        href.startsWith("/wiki/") &&
-        !href.startsWith("/wiki/File:") &&
+function isNormalWikipediaArticleLink(href, allowNamespaceLinks = false) {
+    if (!href || !href.startsWith("/wiki/") || href.endsWith("&redlink=1")) {
+        return false;
+    }
+
+    if (allowNamespaceLinks) {
+        return true;
+    }
+
+    return !href.startsWith("/wiki/File:") &&
         !href.startsWith("/wiki/Wikipedia:") &&
         !href.startsWith("/wiki/Category:") &&
         !href.startsWith("/wiki/Special:") &&
@@ -233,6 +240,5 @@ function isNormalWikipediaArticleLink(href) {
         !href.startsWith("/wiki/Module:") &&
         !href.startsWith("/wiki/MediaWiki:") &&
         !href.startsWith("/wiki/Template_talk:") &&
-        !href.startsWith("/wiki/Portal_talk:") &&
-        !href.endsWith("&redlink=1");
+        !href.startsWith("/wiki/Portal_talk:");
 }

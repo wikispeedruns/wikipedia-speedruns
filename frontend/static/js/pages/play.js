@@ -137,6 +137,7 @@ let app = new Vue({
 
         isPenaltyMode: false,
         isFindHotkeyMode: false,
+        allowNamespaceLinks: false,
         penaltyTime: 0,         // Additional penalty time for penalty game mode
 
         // State for live games. We need to access the username/lobby name 
@@ -167,6 +168,7 @@ let app = new Vue({
             this.isPenaltyMode = !!lobby["rules"]["is_penalty_mode"];
             this.live = !!lobby?.["rules"]?.["live_mode"];
             this.isFindHotkeyMode = !!lobby?.["rules"]?.["find_hotkey_mode"];
+            this.allowNamespaceLinks = !!lobby?.["rules"]?.["allow_namespace_links"];
             this.isHost = lobby?.["user"]?.["owner"];
         }
 
@@ -202,7 +204,8 @@ let app = new Vue({
             !this.isScroll && this.hidePreview,
             this.loadCallback,
             this.language,
-            this.revisionDate);
+            this.revisionDate,
+            this.allowNamespaceLinks);
         await this.renderer.loadPage(this.startArticle);
 
 
@@ -417,7 +420,7 @@ let app = new Vue({
         keydownHandler: function(e) {
             if (this.isFindHotkeyMode) return;
             
-            if ([114, 191, 222].includes(e.keyCode) || ((e.ctrlKey || e.metaKey) && (e.keyCode == 70 || e.keyCode == 71))) {
+            if (["F3", "/", "'"].includes(e.key) || ((e.ctrlKey || e.metaKey) && (e.key == "f" || e.key == "g"))) {
                 e.preventDefault();
                 alert("WARNING: Attempt to Find in page. This will be recorded.");
             }

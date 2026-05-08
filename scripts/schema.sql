@@ -115,6 +115,7 @@ CREATE TABLE IF NOT EXISTS `lobbys` (
         hide_prompt_end: (false)
         restrict_leaderboard_access: (false)
         require_account: (false)
+        allow_namespace_links: (false)
     }
     */
 
