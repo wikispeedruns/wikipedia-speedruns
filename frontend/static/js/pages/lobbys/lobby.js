@@ -9,6 +9,7 @@ import { UserDisplay } from "../../modules/userDisplay.js"
 import { LiveLobbyPromptsHelper } from "../../modules/live/livePrompts.js";
 
 const LOBBY_ID = serverData["lobby_id"];
+const USER_ID = serverData["user_id"] || null;
 const successMessage = "Added prompt to lobby!";
 
 var app = new Vue({
@@ -42,6 +43,7 @@ var app = new Vue({
         editPrompts: false,
         selectedPrompts: [],
 
+        currentUserId: USER_ID,
         users: null,
         anon_users: null,
 
@@ -215,7 +217,7 @@ var app = new Vue({
         },
 
         async makeHost(user_id, username) {
-            if (!confirm(`Are you sure you want to make ${username} the lobby host?`)) {
+            if (!confirm(`Make ${username} a co-host?`)) {
                 return;
             }
 
@@ -224,8 +226,36 @@ var app = new Vue({
                     "target_user_id": user_id,
                 });
 
-                alert(`${username} is now host!`);
-                window.location.reload();
+                if (resp.status !== 200) {
+                    alert(await resp.text());
+                    return;
+                }
+
+                alert(`${username} is now a co-host!`);
+                this.getLobbyUsers();
+            } catch (e) {
+                console.log(e)
+                alert(e);
+            }
+        },
+
+        async removeHost(user_id, username) {
+            if (!confirm(`Remove ${username} as co-host?`)) {
+                return;
+            }
+
+            try {
+                const resp = await fetchJson(`/api/lobbys/remove_host/${LOBBY_ID}`, "PATCH", {
+                    "target_user_id": user_id,
+                });
+
+                if (resp.status !== 200) {
+                    alert(await resp.text());
+                    return;
+                }
+
+                alert(`${username} is no longer a co-host.`);
+                this.getLobbyUsers();
             } catch (e) {
                 console.log(e)
                 alert(e);

@@ -397,14 +397,16 @@ def get_user_lobbys(user_id: int):
         return results
 
 
-def change_lobby_host(lobby_id: int, target_user_id: int):
-    remove_host_query = """
-    UPDATE user_lobbys
-    SET owner=0
-    WHERE owner=1 AND lobby_id=%(lobby_id)s
-    """
+def count_lobby_hosts(lobby_id: int) -> int:
+    query = "SELECT COUNT(*) as cnt FROM user_lobbys WHERE lobby_id=%s AND owner=1"
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (lobby_id,))
+        return cursor.fetchone()["cnt"]
 
-    set_host_query = """
+
+def add_lobby_host(lobby_id: int, target_user_id: int):
+    query = """
     UPDATE user_lobbys
     SET owner=1
     WHERE user_id=%(target_user_id)s AND lobby_id=%(lobby_id)s
@@ -412,16 +414,28 @@ def change_lobby_host(lobby_id: int, target_user_id: int):
 
     db = get_db()
     with db.cursor() as cursor:
-        cursor.execute(remove_host_query, {
-            "lobby_id": lobby_id,
-        })
-
-        cursor.execute(set_host_query, {
+        cursor.execute(query, {
             "target_user_id": target_user_id,
             "lobby_id": lobby_id
         })
         db.commit()
+        return True
 
+
+def remove_lobby_host(lobby_id: int, target_user_id: int):
+    query = """
+    UPDATE user_lobbys
+    SET owner=0
+    WHERE user_id=%(target_user_id)s AND lobby_id=%(lobby_id)s
+    """
+
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute(query, {
+            "target_user_id": target_user_id,
+            "lobby_id": lobby_id
+        })
+        db.commit()
         return True
 
 

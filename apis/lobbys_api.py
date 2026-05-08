@@ -238,16 +238,42 @@ def change_lobby_host(lobby_id):
 
     user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
     if user_info is None or not user_info["owner"]:
-        return "Only the host can change host to another user", 401
+        return "Only a host can promote another user", 401
 
-    if user_id == target_user_id:
-        return "User is already lobby host!", 400
     if not lobbys.check_user_membership(lobby_id, target_user_id):
         return "Target user is not a member of this lobby", 400
 
-    lobbys.change_lobby_host(lobby_id, target_user_id)
+    target_info = lobbys.get_lobby_user_info(lobby_id, target_user_id)
+    if target_info and target_info["owner"]:
+        return "User is already a host!", 400
 
-    return "Lobby host changed successfully", 200
+    lobbys.add_lobby_host(lobby_id, target_user_id)
+
+    return "User promoted to host", 200
+
+
+@lobby_api.patch("/remove_host/<int:lobby_id>")
+@check_user
+@check_request_json({"target_user_id": int})
+def remove_lobby_host(lobby_id):
+
+    user_id = session.get("user_id")
+    target_user_id = request.json["target_user_id"]
+
+    user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
+    if user_info is None or not user_info["owner"]:
+        return "Only a host can demote another host", 401
+
+    if user_id == target_user_id:
+        return "Cannot demote yourself, use leave lobby instead", 400
+
+    target_info = lobbys.get_lobby_user_info(lobby_id, target_user_id)
+    if target_info is None or not target_info["owner"]:
+        return "Target user is not a host", 400
+
+    lobbys.remove_lobby_host(lobby_id, target_user_id)
+
+    return "Host removed", 200
 
 
 @lobby_api.delete("/<int:lobby_id>")
@@ -270,9 +296,10 @@ def leave_lobby(lobby_id):
     user_id = session.get("user_id")
     user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
 
-    # Check for lobby ownership - owners can't leave their own lobbies
+    # Hosts can only leave if there is at least one other host
     if user_info and user_info["owner"]:
-        return "The owner cannot leave the lobby", 400
-    
+        if lobbys.count_lobby_hosts(lobby_id) <= 1:
+            return "The last host cannot leave the lobby", 400
+
     lobbys.leave_lobby(user_id, lobby_id)
     return "Left Lobby!", 200

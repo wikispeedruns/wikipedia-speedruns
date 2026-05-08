@@ -90,7 +90,7 @@
                         <tbody>
                             <tr v-for="user in users" v-cloak>
                                 <td><user :username="user.username" /></td>
-                                <td>Registered User</td>
+                                <td>[[user.owner ? 'Host' : 'Member']]</td>
                                 <td>
                                     <div class="dropdown">
                                         <button class="btn btn-secondary dropdown-toggle"
@@ -103,8 +103,9 @@
                                         </button>
                                         <div class="dropdown-menu"
                                             v-bind:id="String(user.user_id)+'dropdown'">
-                                            <button v-if="!user.owner" class="btn btn-sm" @click="makeHost(user.user_id, user.username)">Transfer Ownership</button>
-                                            <button class="btn btn-sm disabled" v-else>Currently host</button>
+                                            <button v-if="!user.owner" class="btn btn-sm" @click="makeHost(user.user_id, user.username)">Make Co-host</button>
+                                            <button v-else-if="user.owner && user.user_id !== currentUserId" class="btn btn-sm" @click="removeHost(user.user_id, user.username)">Remove Co-host</button>
+                                            <button class="btn btn-sm disabled" v-else>You (host)</button>
                                         </div>
                                     </div>
                                 </td>
