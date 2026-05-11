@@ -422,7 +422,7 @@ let app = new Vue({
         keydownHandler: function(e) {
             if (this.isFindHotkeyMode) return;
             
-            if (["F3", "/", "'"].includes(e.key) || ((e.ctrlKey || e.metaKey) && (e.key == "f" || e.key == "g"))) {
+            if (["f3", "/", "'"].includes(e.key.toLowerCase()) || ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() == "f" || e.key.toLowerCase() == "g"))) {
                 e.preventDefault();
                 alert("WARNING: Attempt to Find in page. This will be recorded.");
             }

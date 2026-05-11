@@ -307,7 +307,7 @@ window.onbeforeunload = function() {
 // Disable find hotkeys, players will be given a warning
 window.addEventListener("keydown", function(e) {
     //disable find
-    if (["F3", "/", "'"].includes(e.key) || ((e.ctrlKey || e.metaKey) && (e.key == "f" || e.key == "g"))) {
+    if (["f3", "/", "'"].includes(e.key.toLowerCase()) || ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() == "f" || e.key.toLowerCase() == "g"))) {
         e.preventDefault();
         this.alert("WARNING: Attempt to Find in page. This will be recorded.");
     }
