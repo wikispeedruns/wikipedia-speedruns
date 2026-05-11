@@ -502,9 +502,25 @@ def delete_account():
     delete from users where user_id = %(user_id)s
     """
 
-    get_hosted_lobbies_query = """
+    # Find lobbies this user admins. Pre-2.7 the query was `owner=1` which,
+    # after the multi-host commit, would cascade-delete co-hosted lobbies the
+    # user did not create. Now `owner=1` strictly means admin.
+    get_admin_lobbies_query = """
     select lobby_id from user_lobbys
     WHERE user_id=%(user_id)s AND owner = 1
+    """
+
+    # For each admin'd lobby, find another host (host=1) to hand off to.
+    # MIN(user_id) gives a deterministic pick.
+    find_handoff_query = """
+    SELECT MIN(user_id) AS new_admin
+    FROM user_lobbys
+    WHERE lobby_id=%s AND host=1 AND user_id != %s
+    """
+
+    promote_handoff_query = """
+    UPDATE user_lobbys SET owner=1, host=0
+    WHERE lobby_id=%s AND user_id=%s
     """
 
     delete_lobbies_query1 = """
@@ -530,16 +546,26 @@ def delete_account():
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
 
-        count = cursor.execute(get_hosted_lobbies_query, args)
+        cursor.execute(get_admin_lobbies_query, args)
+        admin_lobbies = [x["lobby_id"] for x in cursor.fetchall()]
 
-        lobbies = cursor.fetchall()
-        lobby_ids = [str(x['lobby_id']) for x in lobbies]
+        # For each admin'd lobby, try to hand off to another host before
+        # falling back to delete.
+        lobbies_to_delete = []
+        for lobby_id in admin_lobbies:
+            cursor.execute(find_handoff_query, (lobby_id, id))
+            row = cursor.fetchone()
+            new_admin = row["new_admin"] if row else None
+            if new_admin is not None:
+                cursor.execute(promote_handoff_query, (lobby_id, new_admin))
+            else:
+                lobbies_to_delete.append(str(lobby_id))
 
-        if (count > 0):
-            cursor.executemany(delete_lobbies_query1, lobby_ids)
-            cursor.executemany(delete_lobbies_query2, lobby_ids)
-            cursor.executemany(delete_lobbies_query3, lobby_ids)
-            cursor.executemany(delete_lobbies_query4, lobby_ids)
+        if lobbies_to_delete:
+            cursor.executemany(delete_lobbies_query1, lobbies_to_delete)
+            cursor.executemany(delete_lobbies_query2, lobbies_to_delete)
+            cursor.executemany(delete_lobbies_query3, lobbies_to_delete)
+            cursor.executemany(delete_lobbies_query4, lobbies_to_delete)
 
         cursor.execute(user_query1, args)
         cursor.execute(user_query2, args)

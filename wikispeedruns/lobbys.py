@@ -308,14 +308,31 @@ def join_lobby_as_user(lobby_id: int, user_id: int) -> bool:
 
 
 def get_lobby_user_info(lobby_id: int, user_id: Optional[int]) -> Optional[dict]:
-    query = "SELECT owner FROM user_lobbys WHERE lobby_id=%s AND user_id=%s"
+    # owner=1 -> admin. host=1 -> co-host. Admin implies host privileges.
+    # Returned dict carries both raw columns and derived `is_host` for
+    # convenience at call sites.
+    query = "SELECT owner, host FROM user_lobbys WHERE lobby_id=%s AND user_id=%s"
 
     if (user_id == None): return None
 
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (lobby_id, user_id))
-        return cursor.fetchone()
+        row = cursor.fetchone()
+        if row is None:
+            return None
+        row["is_host"] = bool(row["owner"]) or bool(row["host"])
+        return row
+
+
+def is_lobby_admin(lobby_id: int, user_id: Optional[int]) -> bool:
+    info = get_lobby_user_info(lobby_id, user_id)
+    return bool(info and info["owner"])
+
+
+def is_lobby_host(lobby_id: int, user_id: Optional[int]) -> bool:
+    info = get_lobby_user_info(lobby_id, user_id)
+    return bool(info and info["is_host"])
 
 
 # Lobby Runs
@@ -405,7 +422,8 @@ def get_user_lobbys(user_id: int):
 
 
 def count_lobby_hosts(lobby_id: int) -> int:
-    query = "SELECT COUNT(*) as cnt FROM user_lobbys WHERE lobby_id=%s AND owner=1"
+    # Counts anyone with elevated privileges: admin (owner=1) or co-host (host=1).
+    query = "SELECT COUNT(*) as cnt FROM user_lobbys WHERE lobby_id=%s AND (owner=1 OR host=1)"
     db = get_db()
     with db.cursor(cursor=DictCursor) as cursor:
         cursor.execute(query, (lobby_id,))
@@ -415,7 +433,7 @@ def count_lobby_hosts(lobby_id: int) -> int:
 def add_lobby_host(lobby_id: int, target_user_id: int):
     query = """
     UPDATE user_lobbys
-    SET owner=1
+    SET host=1
     WHERE user_id=%(target_user_id)s AND lobby_id=%(lobby_id)s
     """
 
@@ -432,7 +450,7 @@ def add_lobby_host(lobby_id: int, target_user_id: int):
 def remove_lobby_host(lobby_id: int, target_user_id: int):
     query = """
     UPDATE user_lobbys
-    SET owner=0
+    SET host=0
     WHERE user_id=%(target_user_id)s AND lobby_id=%(lobby_id)s
     """
 
@@ -446,10 +464,58 @@ def remove_lobby_host(lobby_id: int, target_user_id: int):
         return True
 
 
+def transfer_admin(lobby_id: int, target_user_id: int) -> bool:
+    """Move admin status from the current admin to target_user_id.
+
+    Target must already be a member of the lobby. The previous admin is
+    demoted to host=1 so they retain elevated privileges (but no longer the
+    admin-only ones).
+
+    Returns False (without committing any change) if target has no
+    user_lobbys row — protects against a TOCTOU between the API's
+    membership check and the SQL, which could otherwise leave the lobby
+    with zero admins.
+    """
+    db = get_db()
+    with db.cursor() as cursor:
+        # Promote target first so we know we have a new admin before
+        # demoting the old one. Excludes target from the demote step so a
+        # self-transfer (no-op) doesn't accidentally clear owner.
+        cursor.execute(
+            "UPDATE user_lobbys SET owner=1, host=0 WHERE lobby_id=%s AND user_id=%s",
+            (lobby_id, target_user_id),
+        )
+        if cursor.rowcount == 0:
+            # Target isn't a member — abort. No change has been committed.
+            return False
+
+        cursor.execute(
+            "UPDATE user_lobbys SET owner=0, host=1 WHERE lobby_id=%s AND owner=1 AND user_id != %s",
+            (lobby_id, target_user_id),
+        )
+        db.commit()
+    return True
+
+
+def find_handoff_target(lobby_id: int, exclude_user_id: int) -> Optional[int]:
+    """Pick a deterministic host to receive admin on handoff. Returns None
+    if no other host exists for the lobby."""
+    query = """
+    SELECT MIN(user_id) AS user_id
+    FROM user_lobbys
+    WHERE lobby_id=%s AND host=1 AND user_id != %s
+    """
+    db = get_db()
+    with db.cursor(cursor=DictCursor) as cursor:
+        cursor.execute(query, (lobby_id, exclude_user_id))
+        row = cursor.fetchone()
+        return row["user_id"] if row and row["user_id"] is not None else None
+
+
 
 def get_lobby_users(lobby_id: int):
     query = """
-    SELECT DISTINCT users.username, users.user_id, owner FROM user_lobbys
+    SELECT DISTINCT users.username, users.user_id, owner, host FROM user_lobbys
     LEFT JOIN users ON user_lobbys.user_id = users.user_id
     WHERE lobby_id=%s
     """

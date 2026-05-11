@@ -269,3 +269,319 @@ def test_add_prompt_just_below_cap_succeeds(client, cursor, session, lobby_allow
     resp = client.post(f"/api/lobbys/{lobby_id}/prompts", json=PROMPT_PAYLOAD)
     assert resp.status_code == 200
     assert _count_prompts(cursor, lobby_id) == ANON_LOBBY_PROMPT_CAP
+
+
+# Admin / host role split (2.7) ---------------------------------------------
+# `owner=1` means admin (one per lobby), `host=1` means co-host (many per
+# lobby). Admin implicitly has host privileges.
+
+def _login(client, user):
+    resp = client.post("/api/users/login", json={
+        "username": user["username"], "password": user["password"],
+    })
+    assert resp.status_code == 200
+
+
+def _logout(client):
+    client.post("/api/users/logout")
+
+
+def _join_user(client, lobby):
+    """Caller is responsible for being logged in. Joins as a registered user."""
+    resp = client.post(f"/api/lobbys/{lobby['lobby_id']}/join", json={
+        "passcode": lobby["passcode"],
+    })
+    assert resp.status_code == 200
+
+
+def _user_role(cursor, lobby_id, user_id):
+    """Returns ('admin' | 'host' | 'member' | None) for a given user in a lobby."""
+    cursor.execute(
+        "SELECT owner, host FROM user_lobbys WHERE lobby_id=%s AND user_id=%s",
+        (lobby_id, user_id),
+    )
+    row = cursor.fetchone()
+    if row is None:
+        return None
+    if row["owner"]:
+        return "admin"
+    if row["host"]:
+        return "host"
+    return "member"
+
+
+def test_promote_host_admin_only(client, cursor, user, user2, lobby):
+    lobby_id = lobby["lobby_id"]
+
+    # user2 joins as member
+    _login(client, user2)
+    _join_user(client, lobby)
+
+    # user2 cannot promote themselves (they aren't admin)
+    resp = client.patch(f"/api/lobbys/change_host/{lobby_id}", json={
+        "target_user_id": user2["user_id"],
+    })
+    assert resp.status_code == 401
+    assert _user_role(cursor, lobby_id, user2["user_id"]) == "member"
+
+    # Admin (user) promotes user2 successfully
+    _logout(client)
+    _login(client, user)
+    resp = client.patch(f"/api/lobbys/change_host/{lobby_id}", json={
+        "target_user_id": user2["user_id"],
+    })
+    assert resp.status_code == 200
+    assert _user_role(cursor, lobby_id, user2["user_id"]) == "host"
+
+
+def test_host_cannot_promote_others(client, cursor, user, user2, lobby):
+    # Promote user2 to host first.
+    lobby_id = lobby["lobby_id"]
+    _login(client, user2)
+    _join_user(client, lobby)
+    _logout(client)
+    _login(client, user)
+    client.patch(f"/api/lobbys/change_host/{lobby_id}", json={"target_user_id": user2["user_id"]})
+
+    # Now user2 (host, not admin) tries to promote someone — must 401.
+    # We don't have a 3rd user; instead, just call the endpoint and confirm
+    # the auth gate trips before the membership check.
+    _logout(client)
+    _login(client, user2)
+    resp = client.patch(f"/api/lobbys/change_host/{lobby_id}", json={
+        "target_user_id": 99999,
+    })
+    assert resp.status_code == 401
+
+
+def test_demote_host_admin_only(client, cursor, user, user2, lobby):
+    lobby_id = lobby["lobby_id"]
+    _login(client, user2)
+    _join_user(client, lobby)
+    _logout(client)
+    _login(client, user)
+    client.patch(f"/api/lobbys/change_host/{lobby_id}", json={"target_user_id": user2["user_id"]})
+
+    # Admin demotes successfully
+    resp = client.patch(f"/api/lobbys/remove_host/{lobby_id}", json={
+        "target_user_id": user2["user_id"],
+    })
+    assert resp.status_code == 200
+    assert _user_role(cursor, lobby_id, user2["user_id"]) == "member"
+
+
+def test_admin_cannot_self_demote_via_remove_host(client, cursor, user, lobby):
+    lobby_id = lobby["lobby_id"]
+    _login(client, user)
+    resp = client.patch(f"/api/lobbys/remove_host/{lobby_id}", json={
+        "target_user_id": user["user_id"],
+    })
+    assert resp.status_code == 400
+    assert _user_role(cursor, lobby_id, user["user_id"]) == "admin"
+
+
+def test_transfer_admin_swaps_roles(client, cursor, user, user2, lobby):
+    lobby_id = lobby["lobby_id"]
+    _login(client, user2)
+    _join_user(client, lobby)
+    _logout(client)
+    _login(client, user)
+    # Promote user2 to host first (target must be a member of the lobby).
+    client.patch(f"/api/lobbys/change_host/{lobby_id}", json={"target_user_id": user2["user_id"]})
+
+    # Admin transfers
+    resp = client.patch(f"/api/lobbys/transfer_admin/{lobby_id}", json={
+        "target_user_id": user2["user_id"],
+    })
+    assert resp.status_code == 200
+    assert _user_role(cursor, lobby_id, user["user_id"]) == "host"
+    assert _user_role(cursor, lobby_id, user2["user_id"]) == "admin"
+
+
+def test_transfer_admin_host_blocked(client, cursor, user, user2, lobby):
+    # Host (non-admin) attempting transfer must 401.
+    lobby_id = lobby["lobby_id"]
+    _login(client, user2)
+    _join_user(client, lobby)
+    _logout(client)
+    _login(client, user)
+    client.patch(f"/api/lobbys/change_host/{lobby_id}", json={"target_user_id": user2["user_id"]})
+
+    _logout(client)
+    _login(client, user2)
+    resp = client.patch(f"/api/lobbys/transfer_admin/{lobby_id}", json={
+        "target_user_id": user2["user_id"],
+    })
+    assert resp.status_code == 401
+
+
+def test_transfer_admin_to_plain_member_rejected(client, cursor, user, user2, lobby):
+    # API requires target to already be a host (matches UI semantics — the
+    # Transfer Admin button only appears on host rows).
+    lobby_id = lobby["lobby_id"]
+    _login(client, user2)
+    _join_user(client, lobby)  # user2 joins as plain member, not host
+    _logout(client)
+    _login(client, user)
+
+    resp = client.patch(f"/api/lobbys/transfer_admin/{lobby_id}", json={
+        "target_user_id": user2["user_id"],
+    })
+    assert resp.status_code == 400
+    assert _user_role(cursor, lobby_id, user["user_id"]) == "admin"
+    assert _user_role(cursor, lobby_id, user2["user_id"]) == "member"
+
+
+def test_transfer_admin_to_non_member_preserves_admin(cursor, db, user, lobby):
+    # Regression for the zero-admin race: if transfer_admin is invoked on a
+    # target with no user_lobbys row (simulating a TOCTOU between membership
+    # check and SQL), the helper must NOT demote the existing admin.
+    import wikispeedruns
+    lobby_id = lobby["lobby_id"]
+
+    # Caller is not a member of this lobby — simulates the racing scenario
+    # where the row was deleted between API check and SQL.
+    fake_user_id = 999999
+
+    result = wikispeedruns.lobbys.transfer_admin(lobby_id, fake_user_id)
+    assert result is False
+
+    # Refresh from DB. user_lobbys row state must still have user as admin.
+    db.commit()
+    assert _user_role(cursor, lobby_id, user["user_id"]) == "admin"
+    cursor.execute("SELECT COUNT(*) AS c FROM user_lobbys WHERE lobby_id=%s AND owner=1", (lobby_id,))
+    assert cursor.fetchone()["c"] == 1
+
+
+def test_delete_lobby_admin_only(client, cursor, user, user2, lobby):
+    lobby_id = lobby["lobby_id"]
+    _login(client, user2)
+    _join_user(client, lobby)
+    _logout(client)
+    _login(client, user)
+    client.patch(f"/api/lobbys/change_host/{lobby_id}", json={"target_user_id": user2["user_id"]})
+
+    # Host cannot delete
+    _logout(client)
+    _login(client, user2)
+    resp = client.delete(f"/api/lobbys/{lobby_id}")
+    assert resp.status_code == 401
+
+    # Admin can delete (this only hides; row still exists)
+    _logout(client)
+    _login(client, user)
+    resp = client.delete(f"/api/lobbys/{lobby_id}")
+    assert resp.status_code == 200
+
+
+def test_host_can_add_prompts(client, cursor, user, user2, lobby):
+    # Verify hosts retain prompt-add privilege (admin-or-host gate).
+    lobby_id = lobby["lobby_id"]
+    _login(client, user2)
+    _join_user(client, lobby)
+    _logout(client)
+    _login(client, user)
+    client.patch(f"/api/lobbys/change_host/{lobby_id}", json={"target_user_id": user2["user_id"]})
+
+    _logout(client)
+    _login(client, user2)
+    resp = client.post(f"/api/lobbys/{lobby_id}/prompts", json=PROMPT_PAYLOAD)
+    assert resp.status_code == 200
+    assert _count_prompts(cursor, lobby_id) == 1
+
+
+def test_host_can_delete_prompts(client, cursor, user, user2, lobby):
+    # Hosts retain prompt-delete privilege (admin-or-host gate).
+    lobby_id = lobby["lobby_id"]
+    _login(client, user2)
+    _join_user(client, lobby)
+    _logout(client)
+    _login(client, user)
+    client.patch(f"/api/lobbys/change_host/{lobby_id}", json={"target_user_id": user2["user_id"]})
+
+    # Seed one prompt as admin.
+    _seed_prompts(lobby_id, 1)
+    cursor.execute("SELECT prompt_id FROM lobby_prompts WHERE lobby_id=%s", (lobby_id,))
+    prompt_id = cursor.fetchone()["prompt_id"]
+
+    _logout(client)
+    _login(client, user2)
+    resp = client.delete(f"/api/lobbys/{lobby_id}/prompts", json={"prompts": [prompt_id]})
+    assert resp.status_code == 200
+    assert _count_prompts(cursor, lobby_id) == 0
+
+
+def test_admin_cannot_leave(client, cursor, user, lobby):
+    lobby_id = lobby["lobby_id"]
+    _login(client, user)
+    resp = client.delete(f"/api/lobbys/leave/{lobby_id}/")
+    assert resp.status_code == 400
+    assert _user_role(cursor, lobby_id, user["user_id"]) == "admin"
+
+
+def test_host_can_leave(client, cursor, user, user2, lobby):
+    lobby_id = lobby["lobby_id"]
+    _login(client, user2)
+    _join_user(client, lobby)
+    _logout(client)
+    _login(client, user)
+    client.patch(f"/api/lobbys/change_host/{lobby_id}", json={"target_user_id": user2["user_id"]})
+
+    _logout(client)
+    _login(client, user2)
+    resp = client.delete(f"/api/lobbys/leave/{lobby_id}/")
+    assert resp.status_code == 200
+    assert _user_role(cursor, lobby_id, user2["user_id"]) is None
+
+
+# Account-deletion handoff (2.7) --------------------------------------------
+
+def test_delete_account_host_preserves_lobby(client, cursor, user, user2, lobby):
+    # Co-host deleting their account must NOT delete the admin's lobby.
+    # Regression for the cohost-cascade bug.
+    lobby_id = lobby["lobby_id"]
+    _login(client, user2)
+    _join_user(client, lobby)
+    _logout(client)
+    _login(client, user)
+    client.patch(f"/api/lobbys/change_host/{lobby_id}", json={"target_user_id": user2["user_id"]})
+
+    _logout(client)
+    _login(client, user2)
+    resp = client.delete("/api/users/delete_account")
+    assert resp.status_code == 200
+
+    # Lobby still exists, admin still admin.
+    cursor.execute("SELECT COUNT(*) AS c FROM lobbys WHERE lobby_id=%s", (lobby_id,))
+    assert cursor.fetchone()["c"] == 1
+    assert _user_role(cursor, lobby_id, user["user_id"]) == "admin"
+    assert _user_role(cursor, lobby_id, user2["user_id"]) is None
+
+
+def test_delete_account_admin_with_host_transfers(client, cursor, user, user2, lobby):
+    # Admin deletes account; co-host inherits admin; lobby survives.
+    lobby_id = lobby["lobby_id"]
+    _login(client, user2)
+    _join_user(client, lobby)
+    _logout(client)
+    _login(client, user)
+    client.patch(f"/api/lobbys/change_host/{lobby_id}", json={"target_user_id": user2["user_id"]})
+
+    # Now delete admin's account.
+    resp = client.delete("/api/users/delete_account")
+    assert resp.status_code == 200
+
+    cursor.execute("SELECT COUNT(*) AS c FROM lobbys WHERE lobby_id=%s", (lobby_id,))
+    assert cursor.fetchone()["c"] == 1
+    assert _user_role(cursor, lobby_id, user2["user_id"]) == "admin"
+
+
+def test_delete_account_solo_admin_deletes_lobby(client, cursor, user, lobby):
+    # Admin alone deletes account → lobby gets purged.
+    lobby_id = lobby["lobby_id"]
+    _login(client, user)
+    resp = client.delete("/api/users/delete_account")
+    assert resp.status_code == 200
+
+    cursor.execute("SELECT COUNT(*) AS c FROM lobbys WHERE lobby_id=%s", (lobby_id,))
+    assert cursor.fetchone()["c"] == 0

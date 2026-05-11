@@ -53,7 +53,7 @@ var app = new Vue({
 
     computed: {
         canAddPrompts() {
-            return this.lobbyInfo.user.owner ||
+            return !!this.lobbyInfo.user.is_host ||
                 !!this.lobbyInfo?.rules?.allow_anyone_add_prompts;
         }
     },
@@ -113,9 +113,15 @@ var app = new Vue({
             const resp = await fetchJson(`/api/lobbys/${LOBBY_ID}`);
             this.lobbyInfo = await resp.json();
 
-            if (this.lobbyInfo.user.owner) {
+            if (this.lobbyInfo.user.is_host) {
                 await this.getLobbyUsers();
             }
+        },
+
+        userRoleLabel(user) {
+            if (user.owner) return "Admin";
+            if (user.host) return "Host";
+            return "Member";
         },
 
         async getPrompts() {
@@ -256,6 +262,29 @@ var app = new Vue({
 
                 alert(`${username} is no longer a co-host.`);
                 this.getLobbyUsers();
+            } catch (e) {
+                console.log(e)
+                alert(e);
+            }
+        },
+
+        async transferAdmin(user_id, username) {
+            if (!confirm(`Transfer admin status to ${username}? You will become a host.`)) {
+                return;
+            }
+
+            try {
+                const resp = await fetchJson(`/api/lobbys/transfer_admin/${LOBBY_ID}`, "PATCH", {
+                    "target_user_id": user_id,
+                });
+
+                if (resp.status !== 200) {
+                    alert(await resp.text());
+                    return;
+                }
+
+                alert(`${username} is now the admin.`);
+                window.location.reload();
             } catch (e) {
                 console.log(e)
                 alert(e);
