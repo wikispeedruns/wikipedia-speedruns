@@ -72,6 +72,10 @@
                     <span class="text-muted fw-light">
                         Let any lobby member create prompts, not just the owner
                     </span>
+                    <br v-if="allowAnyoneAddPrompts">
+                    <span v-if="allowAnyoneAddPrompts" class="text-muted fw-light">
+                        Note: lobbies with this option are capped at 100 prompts total. Delete prompts to free up space, or open a new lobby for more prompts.
+                    </span>
                 </label>
 	        </div>
 

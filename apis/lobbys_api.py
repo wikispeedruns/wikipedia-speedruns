@@ -10,6 +10,11 @@ from wikispeedruns import lobbys
 
 lobby_api = Blueprint('lobbys', __name__, url_prefix='/api/lobbys')
 
+# Cap on total prompts in a lobby with allow_anyone_add_prompts=True, to
+# limit abuse from passcode-holding anon submitters. Owner can delete to
+# free space.
+ANON_LOBBY_PROMPT_CAP = 100
+
 
 # TODO allow anonymous users?
 @lobby_api.post("")
@@ -109,17 +114,23 @@ def update_lobby(lobby_id):
 
 # Prompts
 @lobby_api.post("/<int:lobby_id>/prompts")
-@check_user
 @check_request_json({"start": str, "end": str, "language": str})
 def add_lobby_prompt(lobby_id):
+    if not lobbys.check_membership(lobby_id, session):
+        return "You are not a member of this lobby", 401
+
     user_id = session.get("user_id")
-    user_info = lobbys.get_lobby_user_info(lobby_id, user_id)
+    user_info = lobbys.get_lobby_user_info(lobby_id, user_id) if user_id is not None else None
+    is_owner = bool(user_info and user_info["owner"])
 
     lobby = lobbys.get_lobby(lobby_id)
     allow_anyone = lobby and lobby.get("rules", {}).get("allow_anyone_add_prompts", False)
 
-    if user_info is None or (not user_info["owner"] and not allow_anyone):
+    if not is_owner and not allow_anyone:
         return "Only the owner can add prompts to this lobby", 401
+
+    if allow_anyone and lobbys.count_lobby_prompts(lobby_id) >= ANON_LOBBY_PROMPT_CAP:
+        return f"Lobby has reached its {ANON_LOBBY_PROMPT_CAP} prompt limit", 400
 
     start = request.json["start"]
     end = request.json["end"]

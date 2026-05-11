@@ -223,6 +223,13 @@ def add_lobby_prompt(lobby_id: int, start: int, end: int, language: str) -> bool
 
         return True
 
+
+def count_lobby_prompts(lobby_id: int) -> int:
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM lobby_prompts WHERE lobby_id=%s", (lobby_id,))
+        return cursor.fetchone()[0]
+
 # passing session here is a bit messy
 def get_lobby_prompts(lobby_id: int, prompt_id: Optional[int]=None, session: Optional[dict]=None) -> List[LobbyPrompt]:
     ## TODO user_id?]
