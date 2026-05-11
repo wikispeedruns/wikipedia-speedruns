@@ -585,3 +585,52 @@ def test_delete_account_solo_admin_deletes_lobby(client, cursor, user, lobby):
 
     cursor.execute("SELECT COUNT(*) AS c FROM lobbys WHERE lobby_id=%s", (lobby_id,))
     assert cursor.fetchone()["c"] == 0
+
+
+def test_delete_account_handoff_picks_min_user_id(client, cursor, db, user, user2, lobby):
+    # When multiple co-hosts exist, account-deletion handoff picks MIN(user_id)
+    # deterministically. Verifies the handoff query matches its documented
+    # behavior.
+    import wikispeedruns
+    lobby_id = lobby["lobby_id"]
+
+    # Add a third user with a higher user_id and make them a co-host too.
+    # The admin is user (user_id=N). user2 (user_id=M>N) joins and becomes
+    # host. We add a synthetic third (higher id again) directly so MIN
+    # selection is testable without a third real account fixture.
+    _login(client, user2)
+    _join_user(client, lobby)
+    _logout(client)
+    _login(client, user)
+    client.patch(f"/api/lobbys/change_host/{lobby_id}", json={"target_user_id": user2["user_id"]})
+
+    # Insert a synthetic third user-lobby row with a deliberately higher id
+    # so we can confirm MIN selection.
+    cursor.execute("SELECT MAX(user_id) AS m FROM users")
+    max_uid = cursor.fetchone()["m"]
+    high_uid = max_uid + 100
+    cursor.execute(
+        "INSERT INTO users (user_id, username, email, join_date) VALUES (%s, %s, %s, CURRENT_DATE())",
+        (high_uid, f"synth_host_{high_uid}", f"synth_{high_uid}@test.com"),
+    )
+    cursor.execute(
+        "INSERT INTO user_lobbys (user_id, lobby_id, owner, host) VALUES (%s, %s, 0, 1)",
+        (high_uid, lobby_id),
+    )
+    db.commit()
+
+    # Delete admin's account. Handoff should pick user2 (lower id), not the
+    # synthetic high-id user.
+    resp = client.delete("/api/users/delete_account")
+    assert resp.status_code == 200
+
+    # Refresh and verify role assignment.
+    db.commit()
+    assert _user_role(cursor, lobby_id, user2["user_id"]) == "admin"
+    assert _user_role(cursor, lobby_id, high_uid) == "host"
+
+    # Cleanup synthetic user (the per-test lobby teardown handles user_lobbys).
+    cursor.execute("DELETE FROM user_lobbys WHERE user_id=%s", (high_uid,))
+    cursor.execute("DELETE FROM users WHERE user_id=%s", (high_uid,))
+
+

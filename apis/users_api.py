@@ -550,15 +550,20 @@ def delete_account():
         admin_lobbies = [x["lobby_id"] for x in cursor.fetchall()]
 
         # For each admin'd lobby, try to hand off to another host before
-        # falling back to delete.
+        # falling back to delete. If the promote UPDATE affects 0 rows
+        # (chosen host's row vanished via a racing leave/delete between the
+        # find and the promote), fall through to deletion rather than
+        # leaving the lobby admin-less.
         lobbies_to_delete = []
         for lobby_id in admin_lobbies:
             cursor.execute(find_handoff_query, (lobby_id, id))
             row = cursor.fetchone()
             new_admin = row["new_admin"] if row else None
+            handed_off = False
             if new_admin is not None:
                 cursor.execute(promote_handoff_query, (lobby_id, new_admin))
-            else:
+                handed_off = cursor.rowcount > 0
+            if not handed_off:
                 lobbies_to_delete.append(str(lobby_id))
 
         if lobbies_to_delete:
