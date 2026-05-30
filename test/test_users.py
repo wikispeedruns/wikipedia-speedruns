@@ -7,6 +7,8 @@ import re
 import bcrypt
 import hashlib
 
+import apis.users_api as users_api
+
 def test_create_user(cursor, user):
     cursor.execute("SELECT * FROM users WHERE username=%s", (user["username"],))
     result = cursor.fetchone()
@@ -119,6 +121,29 @@ def test_confirm_email(client, cursor, user_with_outbox):
     assert cursor.fetchone()["email_confirmed"]
 
 
+def test_confirm_email_request_is_rate_limited(client, mail, user, session, monkeypatch):
+    monkeypatch.setattr(users_api, "_email_request_times", {})
+
+    with mail.record_messages() as outbox:
+        first = client.post("/api/users/confirm_email_request")
+        second = client.post("/api/users/confirm_email_request")
+
+    assert first.status_code == 200
+    assert second.status_code == 429
+    assert len(outbox) == 1
+
+
+def test_email_request_cooldown_blocks_repeated_requests(monkeypatch):
+    monotonic_values = iter([100, 101, 401])
+
+    monkeypatch.setattr(users_api, "_email_request_times", {})
+    monkeypatch.setattr(users_api.time, "monotonic", lambda: next(monotonic_values))
+
+    assert users_api._can_send_email_request(("confirm-email", 1))
+    assert not users_api._can_send_email_request(("confirm-email", 1))
+    assert users_api._can_send_email_request(("confirm-email", 1))
+
+
 def test_change_password_bad(client, user):
     new_password = user["password"] + "2"
 
@@ -205,7 +230,5 @@ def test_reset_password(client, mail, cursor, user, session):
             "email": user["email"],
             "password": new_password
         }).status_code == 200
-
-
 
 
