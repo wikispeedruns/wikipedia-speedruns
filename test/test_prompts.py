@@ -99,7 +99,7 @@ def test_archive_search_does_not_match_active_end(cursor, archive_search_prompt_
     archive_prompts, num_prompts = prompts.get_archive_prompts("sprint", search="Hidden End Needle")
 
     assert num_prompts == 0
-    assert archive_prompts == []
+    assert not archive_prompts
 
 
 def test_archive_search_matches_active_start_without_revealing_end(cursor, archive_search_prompt_set):
@@ -122,11 +122,11 @@ def test_archive_search_treats_like_wildcards_as_literals(cursor, archive_search
     archive_prompts, num_prompts = prompts.get_archive_prompts("sprint", search="%")
 
     assert num_prompts == 0
-    assert archive_prompts == []
+    assert not archive_prompts
 
 
 def test_archive_search_treats_sql_syntax_as_literal_text(cursor, archive_search_prompt_set):
     archive_prompts, num_prompts = prompts.get_archive_prompts("sprint", search="' OR 1=1 --")
 
     assert num_prompts == 0
-    assert archive_prompts == []
+    assert not archive_prompts
