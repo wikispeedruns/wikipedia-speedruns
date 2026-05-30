@@ -169,7 +169,7 @@ let app = new Vue({
             this.live = !!lobby?.["rules"]?.["live_mode"];
             this.isFindHotkeyMode = !!lobby?.["rules"]?.["find_hotkey_mode"];
             this.allowNamespaceLinks = !!lobby?.["rules"]?.["allow_namespace_links"];
-            this.isHost = lobby?.["user"]?.["owner"];
+            this.isHost = !!lobby?.["user"]?.["is_host"];
         } else {
             this.allowNamespaceLinks = !!serverData["allow_namespace_links"];
         }
