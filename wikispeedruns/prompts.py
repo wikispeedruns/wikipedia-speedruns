@@ -7,6 +7,7 @@ import pymysql
 from pymysql.cursors import DictCursor
 
 import datetime
+import re
 
 # TODO account for marathon prompts here
 
@@ -252,15 +253,27 @@ def get_active_prompts(prompt_type: PromptType, user_id: Optional[int]=None,) ->
 
     return prompts
 
-def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, offset: int=0, limit: int=20) -> Tuple[List[Prompt], int]:
+def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, offset: int=0, limit: int=20, search: Optional[str]=None) -> Tuple[List[Prompt], int]:
     '''
     Get all prompts for archive, including currently active
     '''
 
     query, args = _construct_prompt_user_query(prompt_type, user_id)
     if (prompt_type == "sprint"):
-        query += f" WHERE used = 1 AND active_start <= NOW() ORDER BY active_start DESC, prompt_id DESC LIMIT %(offset)s, %(limit)s"
-        count_query = "SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW()"
+        query += " WHERE used = 1 AND active_start <= NOW()"
+
+        if (search is not None and search.strip()):
+            escaped = re.sub(r'([%_\\])', r'\\\1', search.strip().lower())
+            args["search"] = f"%{escaped}%"
+            archive_search_filter = "LOWER(start) LIKE %(search)s ESCAPE '\\\\' OR (active_end < NOW() AND LOWER(end) LIKE %(search)s ESCAPE '\\\\')"
+            query += f" AND ({archive_search_filter})"
+            query += " ORDER BY active_start DESC, prompt_id DESC"
+            count_query = f"SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW() AND ({archive_search_filter})"
+        else:
+            query += " ORDER BY active_start DESC, prompt_id DESC"
+            count_query = "SELECT COUNT(*) AS n FROM sprint_prompts WHERE used = 1 AND active_start <= NOW()"
+
+        query += " LIMIT %(offset)s, %(limit)s"
     elif (prompt_type == "marathon"):
         query += f" ORDER BY prompt_id DESC LIMIT %(offset)s, %(limit)s"
         count_query = "SELECT COUNT(*) AS n FROM marathonprompts"
@@ -281,7 +294,7 @@ def get_archive_prompts(prompt_type: PromptType, user_id: Optional[int]=None, of
                 if (p['active']): p['end'] = None
 
         # get the total number of prompts
-        cur.execute(count_query)
+        cur.execute(count_query, args)
         n = cur.fetchone()['n']
 
         return prompts, n
@@ -364,4 +377,3 @@ def check_for_sprint_duplicates(start: str, end: str) -> Tuple[str, int]:
             return ('cmty', res_cmty['pending_prompt_id'])
 
         return ('none', -1)
-

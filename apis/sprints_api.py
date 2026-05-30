@@ -111,15 +111,18 @@ def get_archive_prompts():
     try:
         limit = max(1, min(int(request.args.get('limit', 20)), MAX_ARCHIVE_LIMIT))
         offset = int(request.args.get('offset', 0))
+        search = request.args.get('search', '').strip()
         sprints, num_prompts = prompts.get_archive_prompts("sprint",
             offset=offset,
             limit=limit,
-            user_id=session.get("user_id")
+            user_id=session.get("user_id"),
+            search=search
         )
 
         return jsonify({
             "prompts": sprints,
-            "numPrompts": num_prompts
+            "numPrompts": num_prompts,
+            "search": search,
         })
 
     except ValueError:
@@ -168,4 +171,3 @@ def check_duplicate_prompt():
 
     res = prompts.check_for_sprint_duplicates(start, end)
     return jsonify(res)
-

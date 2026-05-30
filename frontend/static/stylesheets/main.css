@@ -192,3 +192,25 @@ details[open] summary {
   outline: none;
   box-shadow: none;
 }
+
+html[data-bs-theme="light"] mark.archive-highlight {
+    padding: 0;
+    background-color: #fff3a3;
+    color: inherit;
+    font-weight: 700;
+}
+
+html[data-bs-theme="dark"] mark.archive-highlight {
+    padding: 0;
+    background-color: #fff3a3;
+    color: #000000;
+    font-weight: 700;
+}
+
+html[data-bs-theme="light"] .archive-match-row > * {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+html[data-bs-theme="dark"] .archive-match-row > * {
+    background-color: rgba(255, 255, 255, 0.06);
+}
