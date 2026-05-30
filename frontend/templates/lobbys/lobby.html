@@ -71,7 +71,7 @@
     </div>
 
 
-    <template v-if="lobbyInfo.user.owner">
+    <template v-if="lobbyInfo.user.is_host">
 
         <hr>
 
@@ -90,9 +90,9 @@
                         <tbody>
                             <tr v-for="user in users" v-cloak>
                                 <td><user :username="user.username" /></td>
-                                <td>Registered User</td>
+                                <td>[[userRoleLabel(user)]]</td>
                                 <td>
-                                    <div class="dropdown">
+                                    <div class="dropdown" v-if="lobbyInfo.user.is_admin">
                                         <button class="btn btn-secondary dropdown-toggle"
                                                 type="button"
                                                 data-toggle="dropdown"
@@ -103,8 +103,14 @@
                                         </button>
                                         <div class="dropdown-menu"
                                             v-bind:id="String(user.user_id)+'dropdown'">
-                                            <button v-if="!user.owner" class="btn btn-sm" @click="makeHost(user.user_id, user.username)">Transfer Ownership</button>
-                                            <button class="btn btn-sm disabled" v-else>Currently host</button>
+                                            <button v-if="user.user_id === currentUserId" class="btn btn-sm disabled">You (admin)</button>
+                                            <template v-else>
+                                                <button v-if="!user.owner && !user.host" class="btn btn-sm" @click="makeHost(user.user_id, user.username)">Make Co-host</button>
+                                                <template v-if="user.host">
+                                                    <button class="btn btn-sm" @click="removeHost(user.user_id, user.username)">Remove Co-host</button>
+                                                    <button class="btn btn-sm" @click="transferAdmin(user.user_id, user.username)">Transfer Admin</button>
+                                                </template>
+                                            </template>
                                         </div>
                                     </div>
                                 </td>
@@ -121,6 +127,10 @@
         </details>
 
         <hr>
+
+    </template>
+
+    <template v-if="canAddPrompts">
 
         <h3>Add a Prompt:</h3>
 
@@ -172,7 +182,7 @@
 
     <div class="prompt-header">
         <h3> Prompts </h3>
-        <template v-if="lobbyInfo.user.owner">
+        <template v-if="lobbyInfo.user.is_host">
             <a style="cursor:pointer" v-on:click="editPrompts = !editPrompts">(Edit)</a>
         </template>
     </div>
@@ -224,7 +234,7 @@
         </div>
     </div>
 
-    <template v-if="lobbyInfo.user.owner">
+    <template v-if="lobbyInfo.user.is_admin">
         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLobbyModal">
             Delete Lobby
         </button>

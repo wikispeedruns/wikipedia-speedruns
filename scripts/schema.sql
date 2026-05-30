@@ -2,7 +2,7 @@
     This file should have parity with the actual database.
     For any changes to the database, those changes should be reflected here.
 
-    Schema Version: 2.6
+    Schema Version: 2.7
     This version number should be incremented with any change to the schema.
     Keep this up-to-date with db.py
 */
@@ -115,6 +115,8 @@ CREATE TABLE IF NOT EXISTS `lobbys` (
         hide_prompt_end: (false)
         restrict_leaderboard_access: (false)
         require_account: (false)
+        allow_namespace_links: (false)
+        allow_anyone_add_prompts: (false)
     }
     */
 
@@ -125,7 +127,11 @@ CREATE TABLE IF NOT EXISTS `lobbys` (
 CREATE TABLE IF NOT EXISTS `user_lobbys` (
     `user_id` INT NOT NULL,
     `lobby_id` INT NOT NULL,
+    -- `owner`=1 marks the lobby admin (creator). At most one per lobby.
+    -- `host`=1 marks a co-host (admin-promoted). The admin implicitly has
+    -- host privileges and need not also set host=1.
     `owner` BOOLEAN DEFAULT 0,
+    `host` BOOLEAN DEFAULT 0,
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`),
     FOREIGN KEY (`lobby_id`) REFERENCES `lobbys`(`lobby_id`)
 );

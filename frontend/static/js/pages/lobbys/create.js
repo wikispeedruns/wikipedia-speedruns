@@ -15,6 +15,8 @@ var app = new Vue({
         requireAccount: false,
         penaltyMode: false,
         findHotkeyMode: false,
+        allowNamespaceLinks: false,
+        allowAnyoneAddPrompts: false,
     },
 
     methods: {
@@ -31,6 +33,8 @@ var app = new Vue({
             requestBody.rules["is_penalty_mode"] = this.penaltyMode;
             requestBody.rules["live_mode"] = this.liveMode;
             requestBody.rules["find_hotkey_mode"] = this.findHotkeyMode;
+            requestBody.rules["allow_namespace_links"] = this.allowNamespaceLinks;
+            requestBody.rules["allow_anyone_add_prompts"] = this.allowAnyoneAddPrompts;
 
             // Only add these fields if not empty
             if (this.name) requestBody["name"] = this.name;

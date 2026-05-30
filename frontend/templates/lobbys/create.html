@@ -65,6 +65,34 @@
                 </label>
 	        </div>
 
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="anyone-add-prompts-checkbox" v-model="allowAnyoneAddPrompts">
+                <label class="form-check-label" for="anyone-add-prompts-checkbox">
+                    <b>Allow anyone to add prompts</b>
+                    <span class="text-muted fw-light">
+                        Let any lobby member create prompts, not just the owner
+                    </span>
+                    <br v-if="allowAnyoneAddPrompts">
+                    <span v-if="allowAnyoneAddPrompts" class="text-muted fw-light">
+                        Note: lobbies with this option are capped at 100 prompts total. Delete prompts to free up space, or open a new lobby for more prompts.
+                    </span>
+                </label>
+	        </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="namespace-links-checkbox" v-model="allowNamespaceLinks">
+                <label class="form-check-label" for="namespace-links-checkbox">
+                    <b>Allow namespace links</b>
+                    <span class="text-muted fw-light">
+                        Enable all namespace links (e.g. Wikipedia:, Category:, Portal:)
+                    </span>
+                    <br v-if="allowNamespaceLinks">
+                    <span v-if="allowNamespaceLinks" class="text-danger fw-light">
+                        Warning: Navigating into namespaces may leave you stuck with no way back to regular articles
+                    </span>
+                </label>
+	        </div>
+
             <!--
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="req-acc-checkbox" v-model="requireAccount">

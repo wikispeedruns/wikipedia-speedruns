@@ -18,6 +18,7 @@ var CustomPlay = {
             articleCheckMessage: "",
 
             scroll: null,
+            allowNamespaceLinks: false,
 
             language: "en",
             languages: [],
@@ -49,7 +50,7 @@ var CustomPlay = {
         },
 
         play(start, end, lang) {
-            let quickPlayUrl = `/play/quick_play?prompt_start=${encodeURIComponent(start)}&prompt_end=${encodeURIComponent(end)}&lang=${lang}${this.scroll ? '&scroll=1' : ''}`;
+            let quickPlayUrl = `/play/quick_play?prompt_start=${encodeURIComponent(start)}&prompt_end=${encodeURIComponent(end)}&lang=${lang}${this.scroll ? '&scroll=1' : ''}${this.allowNamespaceLinks ? '&allow_namespace_links=1' : ''}`;
             window.location.assign(quickPlayUrl);
         },
 
@@ -124,6 +125,16 @@ var CustomPlay = {
                 <label class="form-check-label">
                     <input class="form-check-input" type="checkbox" v-model="scroll">
                     Enable auto-scrolling
+                </label>
+            </div>
+
+            <div class="form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="checkbox" v-model="allowNamespaceLinks">
+                    Allow namespace links
+                    <span class="text-muted fw-light">(e.g. Wikipedia:, Category:, Portal:)</span>
+                    <br v-if="allowNamespaceLinks">
+                    <span v-if="allowNamespaceLinks" class="text-danger fw-light">Warning: Navigating into namespaces may leave you stuck with no way back to regular articles</span>
                 </label>
             </div>
 
