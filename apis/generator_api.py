@@ -41,12 +41,11 @@ def get_random_prompt():
     try:
         num = max(1, min(int(request.args.get('num_articles', 1)), MAX_NUM_ARTICLES))
         difficulty = int(request.args.get('difficulty', 10000))
-    except ValueError:
+    except (TypeError, ValueError):
         return "Invalid num_articles or difficulty", 400
 
     if (difficulty >= LIMIT or difficulty < 10):
         return f"Invalid difficulty, should be between 10 and {LIMIT}", 400
-
 
     prompts = random.choices(articles[:difficulty], weights[:difficulty], k=num)
     return jsonify(prompts), 200
