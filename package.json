@@ -13,7 +13,9 @@
   "scripts": {
     "start": "node ./frontend/build.mjs -d",
     "build": "node ./frontend/build.mjs -p",
-    "lint": "eslint ./frontend/static/js"
+    "lint": "eslint ./frontend/static/js",
+    "pretest:frontend": "esbuild test/frontend/marathon.test.js --bundle --platform=node --format=cjs --outfile=.tmp/marathon-test.cjs",
+    "test:frontend": "node --test .tmp/marathon-test.cjs"
   },
   "repository": {
     "type": "git",

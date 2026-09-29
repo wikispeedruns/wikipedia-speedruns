@@ -1,6 +1,6 @@
 import Vue from 'vue/dist/vue.esm.js';
 
-import { getArticleSummary } from "../modules/wikipediaAPI/util.js";
+import { creditCheckpoint, resolveCheckpointTitles } from "../modules/game/marathon/checkpoints.js";
 import { submitRun, saveRun, loadRun, removeSave } from "../modules/game/marathon/runs.js";
 
 import { CountdownTimer } from "../modules/game/countdown.js";
@@ -31,6 +31,7 @@ let app = new Vue({
         loggedIn: false,
         username: serverData["username"],
 
+        resolvedCheckpointTitles: {},
         checkpoints: [],
         activeCheckpoints: [],
         visitedCheckpoints: [],
@@ -158,23 +159,7 @@ let app = new Vue({
 
             this.startTime += loadTime;
 
-            let hitcheckpoint = false;
-            let checkpointindex = -1;
-
-            for (let i = 0; i < this.activeCheckpoints.length; i++) {
-                if (page.replace("_", " ").toLowerCase() === this.activeCheckpoints[i].replace("_", " ").toLowerCase()) {
-                    this.clicksRemaining += this.clicksPerCheckpoint + 1;
-                    //query for new checkpoint
-                    checkpointindex = i;
-                    hitcheckpoint = true;
-                    this.visitedCheckpoints.push(page);
-                }
-            }
-
-            if (hitcheckpoint) {
-                let el = this.checkpoints.shift()
-                this.activeCheckpoints[checkpointindex] = el
-
+            if (creditCheckpoint(this, page)) {
                 conf();
 
                 if (!this.reachedstop && this.checkpointMarkReached) {
@@ -189,6 +174,8 @@ let app = new Vue({
         },
 
         async start() {
+            this.resolvedCheckpointTitles = await resolveCheckpointTitles([...this.activeCheckpoints, ...this.checkpoints]);
+
             //start timer
             this.startTime = Date.now();
 
