@@ -1,19 +1,17 @@
 """Exercise the production repair SQL against session-only MySQL tables."""
 import json
-import re
 from pathlib import Path
 
 
 def test_repair_marathon_22(cursor):
     # MySQL resolves these names to temporary tables for this connection only.
-    # Copy the real columns, omitting foreign keys unsupported on temporary tables.
+    # ponytail: copy through a distinct name; no DDL parsing or real row changes.
     def create_temporary(table):
-        cursor.execute(f"SHOW CREATE TABLE {table}")
-        ddl = cursor.fetchone()["Create Table"]
-        ddl = "\n".join(line for line in ddl.splitlines()
-                        if not line.lstrip().startswith("CONSTRAINT "))
-        ddl = re.sub(r",\n\)", "\n)", ddl)
-        cursor.execute(ddl.replace("CREATE TABLE", "CREATE TEMPORARY TABLE", 1))
+        cursor.execute(f"CREATE TEMPORARY TABLE repair_copy LIKE {table}")
+        try:
+            cursor.execute(f"CREATE TEMPORARY TABLE {table} LIKE repair_copy")
+        finally:
+            cursor.execute("DROP TEMPORARY TABLE repair_copy")
 
     create_temporary("marathonprompts")
     try:

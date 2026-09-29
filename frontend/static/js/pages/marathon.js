@@ -1,6 +1,6 @@
 import Vue from 'vue/dist/vue.esm.js';
 
-import { findCheckpoint, resolveCheckpointTitles } from "../modules/game/marathon/checkpoints.js";
+import { creditCheckpoint, resolveCheckpointTitles } from "../modules/game/marathon/checkpoints.js";
 import { submitRun, saveRun, loadRun, removeSave } from "../modules/game/marathon/runs.js";
 
 import { CountdownTimer } from "../modules/game/countdown.js";
@@ -159,18 +159,7 @@ let app = new Vue({
 
             this.startTime += loadTime;
 
-            const checkpointindex = findCheckpoint(page, this.activeCheckpoints, this.resolvedCheckpointTitles);
-
-            if (checkpointindex !== -1) {
-                this.clicksRemaining += this.clicksPerCheckpoint + 1;
-                this.visitedCheckpoints.push(page);
-                const next = this.checkpoints.shift();
-                if (next) {
-                    this.activeCheckpoints.splice(checkpointindex, 1, next);
-                } else {
-                    this.activeCheckpoints.splice(checkpointindex, 1);
-                }
-
+            if (creditCheckpoint(this, page)) {
                 conf();
 
                 if (!this.reachedstop && this.checkpointMarkReached) {

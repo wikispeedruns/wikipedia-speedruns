@@ -1,4 +1,4 @@
-import { validateCheckpoint } from "../game/marathon/checkpoints.js";
+import { validateCheckpoints } from "../game/marathon/checkpoints.js";
 import { getArticleTitle } from "../wikipediaAPI/util.js";
 import { fetchJson } from "../fetch.js";
 import { PromptGenerator } from "../generator.js"
@@ -38,10 +38,10 @@ var MarathonBuilder = {
                 if (this.startcp.length != 5) throw new Error("Need exactly 5 starting checkpoints. Add or remove starting checkpoints");
                 if (this.cp.length < 40) throw new Error("Need 40 or more reserve checkpoints. Add more reserve checkpoints");
 
-                const startcp = [];
-                const cp = [];
-                for (const title of this.startcp) startcp.push(await validateCheckpoint(title));
-                for (const title of this.cp) cp.push(await validateCheckpoint(title));
+                const initialCount = this.startcp.length;
+                const checkpoints = await validateCheckpoints([...this.startcp, ...this.cp]);
+                const startcp = checkpoints.slice(0, initialCount);
+                const cp = checkpoints.slice(initialCount);
                 const start = await getArticleTitle(this.start);
                 if (!start) throw new Error("Starting article does not exist");
                 if (new Set([start, ...startcp, ...cp]).size !== 1 + startcp.length + cp.length) {
@@ -90,7 +90,7 @@ var MarathonBuilder = {
 
             let a;
             try {
-                a = mode == 0 ? await getArticleTitle(this.placeholder) : await validateCheckpoint(this.placeholder);
+                a = mode == 0 ? await getArticleTitle(this.placeholder) : (await validateCheckpoints([this.placeholder]))[0];
                 if (!a) throw new Error("Article does not exist");
             } catch (error) {
                 this.articleCheckMessage = error.message;
