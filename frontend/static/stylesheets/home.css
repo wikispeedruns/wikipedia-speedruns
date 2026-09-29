@@ -70,6 +70,48 @@ nav[data-toggle="toc"] {
   top: 97px;
 }
 
+/* TOC left menu improvements */
+nav[data-toggle="toc"] .nav-link {
+	display: block;
+	padding: 10px 12px;
+	border-left: 3px solid transparent;
+	border-radius: 6px;
+	color: #5f6368;
+	transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+
+nav[data-toggle="toc"] .nav-link:hover,
+nav[data-toggle="toc"] .nav-link:focus-visible {
+	background: #efeaf8;
+	color: #4a3f73;
+	border-left-color: #5c3f99;
+	text-decoration: none;
+}
+
+/* currently active section (scrollspy) */
+nav[data-toggle="toc"] .active > .nav-link,
+nav[data-toggle="toc"] .nav-link.active {
+	background: #e8e1f5;
+	color: #3e2f69;
+	border-left-color: #4b3385;
+	font-weight: 600;
+}
+
+/* solved state */
+nav[data-toggle="toc"] .nav-link.toc-solved {
+	background: #eaf6ee;
+	color: #246a3a;
+	border-left-color: #2f8f46;
+	font-weight: 600;
+}
+
+nav[data-toggle="toc"] .nav-link.toc-solved::after {
+	content: "✓";
+	float: right;
+	color: #2f8f46;
+	font-weight: 700;
+}
+
 /* small screens */
 @media (max-width: 768px) {
   /* override stickyness so that the navigation does not follow scrolling */
