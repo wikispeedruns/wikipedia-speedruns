@@ -67,7 +67,7 @@ async function getArticleTitle(title, lang = 'en') {
 
 async function articleCheck(title, lang = 'en') {
     const resp = await fetch(
-        `https://${lang}.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=pageprops&ppprop=disambiguation&titles=${title}&formatversion=2`,
+        `https://${lang}.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=pageprops&ppprop=disambiguation&redirects=1&titles=${encodeURIComponent(title)}&formatversion=2`,
         {
             mode: "cors"
         }

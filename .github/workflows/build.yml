@@ -45,3 +45,12 @@ jobs:
       run: |
         cd test
         pytest
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "22"
+
+    - name: Test frontend checkpoint behavior
+      run: |
+        npm ci
+        npm run test:frontend

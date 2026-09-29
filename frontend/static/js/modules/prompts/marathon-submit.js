@@ -1,3 +1,4 @@
+import { validateCheckpoint } from "../game/marathon/checkpoints.js";
 import { getArticleTitle } from "../wikipediaAPI/util.js";
 import { fetchJson } from "../fetch.js";
 import { PromptGenerator } from "../generator.js"
@@ -37,6 +38,19 @@ var MarathonBuilder = {
                 if (this.startcp.length != 5) throw new Error("Need exactly 5 starting checkpoints. Add or remove starting checkpoints");
                 if (this.cp.length < 40) throw new Error("Need 40 or more reserve checkpoints. Add more reserve checkpoints");
 
+                const startcp = [];
+                const cp = [];
+                for (const title of this.startcp) startcp.push(await validateCheckpoint(title));
+                for (const title of this.cp) cp.push(await validateCheckpoint(title));
+                const start = await getArticleTitle(this.start);
+                if (!start) throw new Error("Starting article does not exist");
+                if (new Set([start, ...startcp, ...cp]).size !== 1 + startcp.length + cp.length) {
+                    throw new Error("Article already exists after resolving redirects");
+                }
+                this.start = start;
+                this.startcp = startcp;
+                this.cp = cp;
+
                 if (this.admin) {
                     await this.submitAsAdmin();
                 } else {
@@ -74,7 +88,15 @@ var MarathonBuilder = {
         addArticle: async function(mode) {
             if (this.placeholder.length < 1) return;
 
-            let a = await getArticleTitle(this.placeholder)
+            let a;
+            try {
+                a = mode == 0 ? await getArticleTitle(this.placeholder) : await validateCheckpoint(this.placeholder);
+                if (!a) throw new Error("Article does not exist");
+            } catch (error) {
+                this.articleCheckMessage = error.message;
+                return;
+            }
+            this.articleCheckMessage = "";
 
             if (this.cp.includes(a) || this.startcp.includes(a) || this.start == a ) {
                 this.articleCheckMessage = "Article already exists. "
@@ -128,12 +150,16 @@ var MarathonBuilder = {
 
         loadGeneric: async function() {
             while (this.cp.length < 40) {
-                this.placeholder = String(this.cp.length)
+                const previousLength = this.cp.length;
+                this.placeholder = String(previousLength)
                 await this.addArticle(3)
+                if (this.cp.length === previousLength) return;
             }
             while (this.startcp.length < 5) {
-                this.placeholder = String(this.startcp.length + 40)
+                const previousLength = this.startcp.length;
+                this.placeholder = String(previousLength + 40)
                 await this.addArticle(1)
+                if (this.startcp.length === previousLength) return;
             }
         }, 
 

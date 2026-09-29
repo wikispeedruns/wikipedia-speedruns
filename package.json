@@ -13,7 +13,8 @@
   "scripts": {
     "start": "node ./frontend/build.mjs -d",
     "build": "node ./frontend/build.mjs -p",
-    "lint": "eslint ./frontend/static/js"
+    "lint": "eslint ./frontend/static/js",
+    "test:frontend": "node --test test/frontend/*.test.cjs"
   },
   "repository": {
     "type": "git",
