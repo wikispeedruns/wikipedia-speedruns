@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 from flask.helpers import url_for
 import pymysql
 from werkzeug.utils import redirect
@@ -21,6 +22,9 @@ from pymysql.cursors import DictCursor
 from wikispeedruns.auth import passwords
 
 user_api = Blueprint("users", __name__, url_prefix="/api/users")
+
+EMAIL_REQUEST_COOLDOWN_SECONDS = 300
+_email_request_times = {}
 
 # Setup OAuth
 google_bp = oauth_google.make_google_blueprint(redirect_url="/api/users/auth/google/check",
@@ -56,6 +60,21 @@ def _send_confirmation_email(id, email, username, url_root, on_signup=False):
     msg.html = render_template('emails/confirm.html', link=link, user=username, on_signup=on_signup)
 
     mail.send(msg)
+
+
+def _can_send_email_request(key):
+    now = time.monotonic()
+
+    for request_key, timestamp in list(_email_request_times.items()):
+        if now - timestamp >= EMAIL_REQUEST_COOLDOWN_SECONDS:
+            del _email_request_times[request_key]
+
+    last_sent = _email_request_times.get(key)
+    if last_sent is not None and now - last_sent < EMAIL_REQUEST_COOLDOWN_SECONDS:
+        return False
+
+    _email_request_times[key] = now
+    return True
 
 
 def _valid_username(username):
@@ -340,6 +359,9 @@ def confirm_email_request():
         Request another email token be sent in as a logged in user, i.e. from profile page
     '''
     id = session["user_id"]
+
+    if not _can_send_email_request(("confirm-email", id)):
+        return "Please wait before requesting another confirmation email", 429
 
     check_query = "SELECT `email_confirmed` FROM `users` WHERE `user_id`=%s"
 
