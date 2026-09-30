@@ -65,6 +65,22 @@ def get_total_stats(username):
     LEFT JOIN quick_runs ON quick_runs.user_id=users.user_id
     WHERE users.username=%s
     """
+    # A "record" is a first place, finished run on a rated sprint prompt.
+    # Ties (equal play_time) all count, since RANK (not ROW_NUMBER) is used.
+    query_records = """
+    SELECT COUNT(*) AS total_records
+    FROM users
+    INNER JOIN (
+        SELECT
+            prompt_id,
+            user_id,
+            RANK() OVER (PARTITION BY prompt_id ORDER BY play_time ASC) AS place
+        FROM sprint_runs
+        INNER JOIN sprint_prompts USING (prompt_id)
+        WHERE finished = 1 AND rated = 1 AND user_id IS NOT NULL
+    ) records ON records.user_id = users.user_id AND records.place = 1
+    WHERE users.username=%s
+    """
 
     with get_db().cursor(cursor=DictCursor) as cursor:
         cursor.execute(query_sprints, (username, ))
@@ -78,6 +94,9 @@ def get_total_stats(username):
         result_quick_runs = cursor.fetchone()
         result["total_runs"] += result_quick_runs["total_runs"]
         result["total_completed_runs"] += result_quick_runs["total_completed_runs"]
+
+        cursor.execute(query_records, (username, ))
+        result['total_records'] = cursor.fetchone()['total_records']
 
     return result, 200
 
