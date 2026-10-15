@@ -73,6 +73,7 @@ export class ArticleRenderer {
                 disableLazyLoading(this.frame);
             }
             hideElements(this.frame);
+            normalizeArticleLinks(this.frame, this.language);
             stripNonArticleLinks(this.frame, this.allowNamespaceLinks);
 
         } catch (error) {
@@ -201,6 +202,32 @@ function hideElements(frame) {
         }
     }
 
+}
+
+// The parse API may return same-wiki links as absolute URLs (https://<lang>.wikipedia.org/wiki/...)
+// rather than relative /wiki/ paths. Rewrite those to relative, percent-encoded paths so the rest
+// of the link handling sees a single format. Links to other wikis/sites are left untouched.
+function normalizeArticleLinks(frame, language = 'en') {
+    const lang = (language || 'en').toLowerCase();
+    const sameWikiHosts = [`${lang}.wikipedia.org`, `${lang}.m.wikipedia.org`];
+
+    frame.querySelectorAll("a, area").forEach((el) => {
+        const href = el.getAttribute("href");
+        if (!href || href.startsWith("#") || href.startsWith("/wiki/")) {
+            return;
+        }
+
+        let url;
+        try {
+            url = new URL(href, `https://${lang}.wikipedia.org`);
+        } catch (error) {
+            return;
+        }
+
+        if (sameWikiHosts.includes(url.hostname.toLowerCase()) && url.pathname.startsWith("/wiki/")) {
+            el.setAttribute("href", url.pathname + url.search + url.hash);
+        }
+    });
 }
 
 function stripNonArticleLinks(frame, allowNamespaceLinks = false) {
